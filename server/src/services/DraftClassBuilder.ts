@@ -140,6 +140,34 @@ function jerseyFor(group: string, rand: () => number): number {
   return lo + Math.floor(rand() * (hi - lo + 1));
 }
 
+/** Madden 26 body type (Heavy / Muscular / Thin / Standard) from position group +
+ *  weight, mirroring the template's build distribution: OL & big DT are Heavy, the
+ *  back seven & specialists are Thin, RB/TE/EDGE/LB are Muscular, QB/WR are Standard.
+ *  Weight refines the borderline groups (a 300 lb DT is Heavy, a lighter one Muscular). */
+function bodyTypeFor(group: string, weight: number | null): 'Heavy' | 'Muscular' | 'Thin' | 'Standard' {
+  const w = weight ?? 0;
+  switch (group) {
+    case 'OL':
+      return w && w < 285 ? 'Muscular' : 'Heavy';
+    case 'IDL':
+      return w >= 300 ? 'Heavy' : 'Muscular';
+    case 'EDGE':
+      return w >= 275 ? 'Heavy' : 'Muscular';
+    case 'TE':
+      return w >= 262 ? 'Heavy' : 'Muscular';
+    case 'RB':
+    case 'LB':
+      return 'Muscular';
+    case 'S':
+      return w >= 212 ? 'Muscular' : 'Thin';
+    case 'CB':
+    case 'K':
+      return 'Thin';
+    default:
+      return 'Standard'; // QB, WR, P, LS
+  }
+}
+
 /** Convert a ranked player into an M26 prospect: attributes come from Madden's
  *  real per-position profile shifted to the assigned OVR (with small seeded
  *  per-player variance); bio from real data or Madden norms; plus likeness +
@@ -184,7 +212,9 @@ function toProspect(it: RankedItem, portraitPid?: number): { prospect: MdcProspe
   prospect.age = player.age ?? CalibrationService.sampleAge(rand);
   prospect.heightInches = heightInches;
   prospect.weight = weight;
-  prospect.jerseyNum = player.jersey ?? jerseyFor(PositionMapper.groupFromId(posId), rand);
+  const group = PositionMapper.groupFromId(posId);
+  prospect.jerseyNum = player.jersey ?? jerseyFor(group, rand);
+  prospect.bodyType = bodyTypeFor(group, weight); // Madden build, else inherits the donor block's
   prospect.draftable = 1;
   prospect.draftRound = player.draftRound ?? 63; // 63 = UDFA
   prospect.draftPick = withinRoundPick(player.draftPick);
