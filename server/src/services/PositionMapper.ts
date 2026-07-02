@@ -23,17 +23,18 @@ const M26: Record<string, number> = {
   C: 7, OC: 7,
   RG: 8, ORG: 8,
   RT: 9, ORT: 9,
-  // edge rushers. Madden 26 has NO off-ball OLB slot — a 3-4/edge OLB IS a LEDG/
-  // REDG (Ware, L.T., Von Miller, T.J. Watt), so OLB/LOLB/ROLB map to edge, not to
-  // the SAM/WILL off-ball spots (which only take explicit SAM/WILL labels).
-  DE: 10, LE: 10, E: 10, EDGE: 10, DEFENSIVEEND: 10, LDE: 10, OLB: 10, LOLB: 10, RUSH: 10, RUSHER: 10, OUTSIDELINEBACKER: 10,
-  RE: 11, RDE: 11, ROLB: 11,
+  // edge rushers (defensive ends + explicit rush labels). The 3-4-OLB-vs-off-ball
+  // ambiguity of the plain "OLB" label is resolved upstream by RosterPositionService
+  // (pff_position: ED->edge, LB->off-ball), which relabels edge rushers as "DE".
+  DE: 10, LE: 10, E: 10, EDGE: 10, DEFENSIVEEND: 10, LDE: 10, RUSH: 10, RUSHER: 10, EDGERUSHER: 10,
+  RE: 11, RDE: 11,
   // interior defensive line
   DT: 12, NT: 12, DL: 12, DG: 12, NG: 12, MIDDLEGUARD: 12, DEFENSIVETACKLE: 12,
-  // off-ball linebackers (SAM / Mike / WILL — Madden 26's only LB positions)
+  // off-ball linebackers (SAM / Mike / WILL — Madden 26's only LB positions). A plain
+  // "OLB" defaults here (off-ball SAM); real edge OLBs get relabeled "DE" upstream.
   LB: 14, MLB: 14, ILB: 14, LILB: 14, RILB: 14, MIKE: 14, MIDDLELINEBACKER: 14, INSIDELINEBACKER: 14,
-  SAM: 13, SLB: 13, STRONGSIDELINEBACKER: 13,
-  WILL: 15, WLB: 15, WILB: 15, WEAKSIDELINEBACKER: 15,
+  OLB: 13, LOLB: 13, SAM: 13, SLB: 13, STRONGSIDELINEBACKER: 13, OUTSIDELINEBACKER: 13,
+  ROLB: 15, WILL: 15, WLB: 15, WILB: 15, WEAKSIDELINEBACKER: 15,
   // defensive backs
   CB: 16, DB: 16, CCB: 16, CORNERBACK: 16, CORNER: 16,
   FS: 17, FREESAFETY: 17,
