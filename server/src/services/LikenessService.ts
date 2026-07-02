@@ -32,7 +32,10 @@ function load(): void {
   for (const e of arr) {
     const code = e.genericCode;
     if (!code || !/^gen_\d/i.test(code)) continue;
-    const tone = Number(e.skinTone) || toneFromCode(code);
+    // Bucket by the gen_N prefix, NOT the JSON skinTone field — M26Writer derives the
+    // exported skin tone from that prefix, and 48 entries disagree with their field, so
+    // a field-bucketed pick would write a tone that mismatches the player's race.
+    const tone = toneFromCode(code);
     if (!byTone.has(tone)) byTone.set(tone, []);
     byTone.get(tone)!.push(code);
     if (e.isTrueGeneric) {

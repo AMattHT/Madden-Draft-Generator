@@ -1,5 +1,6 @@
 import { BaselinePlayer } from '../types/player';
 import { PlayerLookupService } from './PlayerLookupService';
+import { SkinToneService } from './SkinToneService';
 import { seededRng } from '../util/rng';
 
 /**
@@ -23,12 +24,6 @@ const POSITION_WEIGHTS: Array<[string, number]> = [
   ['HB', 6], ['TE', 5], ['QB', 4], ['FB', 1], ['K', 1], ['P', 1], ['LS', 1],
 ];
 
-// Skin-tone/race weights (1=light … 7=dark), roughly matching NFL demographics
-// and the tones available in the generic-portrait set.
-const RACE_WEIGHTS: Array<[number, number]> = [
-  [7, 55], [1, 33], [3, 4], [2, 3], [4, 2], [5, 2], [6, 1],
-];
-
 function weightedPick<T>(pairs: Array<[T, number]>, roll: number): T {
   const total = pairs.reduce((s, [, w]) => s + w, 0);
   let x = roll * total;
@@ -48,7 +43,7 @@ export const GenericFillerService = {
     for (let i = 0; i < need; i++) {
       const rand = seededRng(`filler|${year}|${i}`);
       const position = weightedPick(POSITION_WEIGHTS, rand());
-      const race = weightedPick(RACE_WEIGHTS, rand());
+      const race = SkinToneService.defaultRaceFor(position, `filler|${year}|${i}|race`);
       const firstName = first[Math.floor(rand() * first.length)] || 'Draft';
       const lastName = last[Math.floor(rand() * last.length)] || 'Prospect';
       out.push({
