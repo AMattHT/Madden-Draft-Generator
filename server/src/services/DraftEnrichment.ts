@@ -6,6 +6,7 @@ import { CombineService } from './CombineService';
 import { PositionMapper } from './PositionMapper';
 import { RosterPositionService } from './RosterPositionService';
 import { SkinToneService } from './SkinToneService';
+import { DerivedSkinToneService } from './DerivedSkinToneService';
 import { BaselinePlayer } from '../types/player';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
@@ -41,12 +42,14 @@ export async function enrichedClass(
       const height = c?.heightInches ?? e?.heightInches ?? null;
       const weight = c?.weight ?? e?.weight ?? null;
       const age = e?.age ?? null; // real draft age
-      // Skin tone for generic faces. The source Race column is a near-universal 7
-      // (a Madden-export default, not real ethnicity), so 7 and null are both treated
-      // as unknown and get a position-weighted tone; a real non-7 value is trusted.
-      // Only matters for players without a real face asset.
-      const known = p.race != null && p.race !== 7 ? p.race : null;
-      const race = known ?? SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
+      // Skin tone for generic faces, best source first:
+      //  1. tone read off the player's real Madden portrait (the trustworthy source);
+      //  2. an explicit non-7 value in the CSV Race column (7 is a bogus export default);
+      //  3. a position-weighted guess for players with no portrait at all.
+      // Only matters for players without a real 3D face asset.
+      const derived = DerivedSkinToneService.toneForPid(p.photoId);
+      const trusted = p.race != null && p.race !== 7 ? p.race : null;
+      const race = derived ?? trusted ?? SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
 
       if (!label && !c && height == null && weight == null && age == null && race == null) return p;
       const out: BaselinePlayer = { ...p };
