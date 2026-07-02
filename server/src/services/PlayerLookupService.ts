@@ -74,6 +74,11 @@ function toHeightInches(s: string | undefined): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
+// The just-drafted class(es) haven't compiled a real career yet, so a stored
+// wAV of 0 is a rookie placeholder (2025 ships all-zero), NOT a bust outcome —
+// rate them from draft slot like the incoming 2026 class, not as actual-0.
+const CURRENT_YEAR = new Date().getFullYear();
+
 let rowsCache: RawRow[] | null = null;
 let byYear: Map<number, BaselinePlayer[]> | null = null;
 
@@ -123,8 +128,12 @@ function load(): void {
       // PFR computes Approximate Value from 1960 on, so use actual wAV whenever
       // it exists (1960+); pre-1960 (and any missing wAV) falls back to predicted.
       // Require a real league too: blank-league rows with a stray wAV are data junk
-      // (Kelly Toles wAV50, Todd Shanks wAV67) that otherwise rate as Star-dev.
-      wavSource: draftYear >= 1960 && wav !== null && rawLeague !== '' ? 'actual' : 'predicted',
+      // (Kelly Toles wAV50, Todd Shanks wAV67) that otherwise rate as Star-dev. And
+      // the current rookie class's wAV=0 is a placeholder, not a real 0 → slot-rate it.
+      wavSource:
+        draftYear >= 1960 && wav !== null && rawLeague !== '' && !(wav === 0 && draftYear >= CURRENT_YEAR - 1)
+          ? 'actual'
+          : 'predicted',
       source: 'local',
     };
     all.push(player);
