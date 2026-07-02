@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { DraftClassBuilder } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
-import { TemplateClassService, TEMPLATE_YEAR } from '../services/TemplateClassService';
 import { enrichedClass } from '../services/DraftEnrichment';
 
 const r = Router();
@@ -17,20 +16,9 @@ r.post('/export/mdc', async (req, res) => {
   if (Number.isNaN(year)) {
     return res.status(400).json({ error: 'year is required' });
   }
-  const edits = req.body?.edits as Record<string, Record<string, number>> | undefined;
+  const edits = req.body?.edits as Record<string, Record<string, number | string>> | undefined;
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
-  // 2026 = the real template class; it's already a valid importable .mdc.
-  if (year === TEMPLATE_YEAR) {
-    const buffer = TemplateClassService.mdcBufferWithEdits(edits);
-    const preview = TemplateClassService.preview();
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', `attachment; filename="CAREERDRAFT-2026DRAFT"`);
-    res.setHeader('X-Prospect-Count', String(preview.count));
-    res.setHeader('X-Likeness-Asset', String(preview.likeness.asset));
-    res.setHeader('X-Likeness-CustomPortrait', '0');
-    return res.send(buffer);
-  }
   const isMergeEra = year >= 1960 && year <= 1969;
   const league = String(req.body?.league ?? req.query.league ?? (isMergeEra ? 'combined' : 'NFL'));
   // Same DB-position correction + class fill as the preview so the exported file

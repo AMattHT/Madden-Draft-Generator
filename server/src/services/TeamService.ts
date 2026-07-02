@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { CACHE_DIR } from '../config/paths';
+import { CACHE_DIR, LOOKUPS_DIR } from '../config/paths';
 import { parseCsvFile } from '../util/csv';
 import { DbPositionService } from './DbPositionService';
 
@@ -190,7 +190,38 @@ async function ensureLoaded(): Promise<void> {
   return loading;
 }
 
+// Full franchise name -> current team code, for resolving the 2026 draft's team
+// names (nflverse draft_picks doesn't carry the current year yet).
+const NAME_TO_CODE = new Map<string, string>(Object.entries(CURRENT).map(([code, v]) => [v.name.toLowerCase(), code]));
+
+let teams2026Cache: Map<number, TeamInfo> | null = null;
+
 export const TeamService = {
+  /** A current franchise's TeamInfo (abbr + ESPN logo) by full name, else null. */
+  byName(fullName: string): TeamInfo | null {
+    const code = NAME_TO_CODE.get(fullName.trim().toLowerCase());
+    if (!code) return null;
+    const c = CURRENT[code];
+    return { abbr: code, name: c.name, logo: ESPN(c.espn) };
+  },
+
+  /** Pick(overall) -> drafting team for the real 2026 class (data/lookups/
+   *  draft_2026_teams.json), resolved to logos. Empty map if the file is absent. */
+  teams2026(): Map<number, TeamInfo> {
+    if (teams2026Cache) return teams2026Cache;
+    teams2026Cache = new Map();
+    try {
+      const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'draft_2026_teams.json'), 'utf8')) as Record<string, string>;
+      for (const [pick, name] of Object.entries(raw)) {
+        const info = TeamService.byName(name);
+        if (info) teams2026Cache.set(Number(pick), info);
+      }
+    } catch {
+      /* optional dataset */
+    }
+    return teams2026Cache;
+  },
+
   /**
    * Per-pick team + refined DB position for a draft year. Returns an empty map on
    * any failure (offline / source down) so enrichment degrades gracefully.

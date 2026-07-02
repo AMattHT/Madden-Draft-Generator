@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
 import { DraftClassBuilder } from '../services/DraftClassBuilder';
-import { TemplateClassService, TEMPLATE_YEAR } from '../services/TemplateClassService';
+import { TeamService } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
 import { enrichedClass } from '../services/DraftEnrichment';
 import { normalizeName } from '../util/csv';
@@ -10,21 +10,13 @@ import { DraftClassResponse } from '../types/player';
 const r = Router();
 
 r.get('/draft/years', (_req, res) => {
-  const years = PlayerLookupService.years();
-  if (!years.includes(TEMPLATE_YEAR)) years.push(TEMPLATE_YEAR); // 2026 comes from the template
-  res.json({ years });
+  res.json({ years: PlayerLookupService.years() }); // 2026 = the real draft, now in the lookup
 });
 
 /** Generated class as JSON (wAV-driven OVR, dev trait, face) for the UI. */
 r.get('/draft/:year/generated', async (req, res) => {
   const year = parseInt(req.params.year, 10);
   if (Number.isNaN(year)) return res.status(400).json({ error: 'invalid year' });
-  // 2026 = the real Madden 26 rookie class shipped in the template (no career wAV yet).
-  // Its draftPick is a within-round pick (not overall), so it can't be joined to
-  // nflverse's overall picks for team logos — served without team enrichment.
-  if (year === TEMPLATE_YEAR) {
-    return res.json({ year, league: 'NFL', ...TemplateClassService.preview() });
-  }
   const isMergeEra = year >= 1960 && year <= 1969;
   const league = (req.query.league as string) || (isMergeEra ? 'combined' : 'NFL');
   const mode: 'madden' | 'retro' = req.query.mode === 'retro' ? 'retro' : 'madden';
@@ -42,6 +34,13 @@ r.get('/draft/:year/generated', async (req, res) => {
   if (enrich.size) {
     for (const row of preview.rows) {
       const t = row.draftPick != null ? enrich.get(row.draftPick)?.team : undefined;
+      if (t) row.team = t;
+    }
+  } else if (year === 2026) {
+    // nflverse draft_picks lags a year; attach the real 2026 teams from Wikipedia.
+    const t2026 = TeamService.teams2026();
+    for (const row of preview.rows) {
+      const t = row.draftPick != null ? t2026.get(row.draftPick) : undefined;
       if (t) row.team = t;
     }
   } else if (year < 1980) {
