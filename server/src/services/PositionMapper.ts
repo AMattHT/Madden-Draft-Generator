@@ -82,6 +82,20 @@ function normName(first: string | undefined | null, last: string | undefined | n
   return `${first ?? ''}${last ?? ''}`.toLowerCase().replace(/[^a-z]/g, '');
 }
 
+/** No data source records the SIDE of a generic edge (LEDG vs REDG) or off-ball
+ *  outside LB (SAM vs WILL) — it's a formation role. Distribute deterministically
+ *  by name so both Madden slots get realistic use (stable across preview/export;
+ *  purely cosmetic — both sides share the same rating group). */
+function sideSplit(first: string | undefined | null, last: string | undefined | null, left: number, right: number): number {
+  const k = normName(first, last);
+  let h = 2166136261;
+  for (let i = 0; i < k.length; i++) {
+    h ^= k.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) % 2 === 0 ? left : right;
+}
+
 /** Canonical lookup key — strip non-letters and take the first token of a
  *  multi-position label (e.g. "CB/S" -> "CB", "WR/TE" -> "WR"). */
 function key(label: string | undefined | null): string {
@@ -103,9 +117,15 @@ export const PositionMapper = {
     return k in NAME_OVERRIDES ? NAME_OVERRIDES[k] : null;
   },
 
-  /** Best M26 id for a player: name override first, then the label mapping. */
+  /** Best M26 id for a player: name override first, then the label mapping, with a
+   *  deterministic left/right (LEDG/REDG) and SAM/WILL split for side-less labels. */
   resolve(first: string | undefined | null, last: string | undefined | null, label: string | undefined | null): number {
-    return this.overrideId(first, last) ?? this.toM26Id(label);
+    const override = this.overrideId(first, last);
+    if (override != null) return override;
+    const k = key(label);
+    if (k === 'DE' || k === 'E' || k === 'EDGE' || k === 'DEFENSIVEEND') return sideSplit(first, last, 10, 11);
+    if (k === 'OLB' || k === 'OUTSIDELINEBACKER') return sideSplit(first, last, 13, 15);
+    return this.toM26Id(label);
   },
 
   /** M26 position id -> coarse rating/dedup group. */
