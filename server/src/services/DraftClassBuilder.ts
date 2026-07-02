@@ -277,6 +277,7 @@ export interface PreviewRow {
   heightInches: number;
   weight: number;
   jersey: number;
+  bodyType: string; // Madden 26 build: Heavy / Muscular / Thin / Standard
   photoUrl: string | null;
   portrait?: string | null; // Madden menu-portrait URL (real or generic-by-skintone)
   team?: TeamInfo; // drafting team (from nflverse, 1980+), joined by overall pick
@@ -289,6 +290,9 @@ export interface PreviewResult {
   likeness: LikenessStats;
   count: number;
 }
+
+/** Valid Madden 26 body types (from the shipped template's visuals JSON). */
+export const BODY_TYPES = ['Standard', 'Thin', 'Muscular', 'Heavy'];
 
 // Per-field clamp ranges for non-rating numeric fields (everything else = 0-99).
 const EDIT_CLAMP: Record<string, [number, number]> = {
@@ -307,6 +311,10 @@ export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits): void {
     for (const [k, raw] of Object.entries(patch)) {
       if (k === 'firstName' || k === 'lastName' || k === 'homeTown') {
         if (typeof raw === 'string') p[k] = raw.slice(0, k === 'lastName' ? 20 : 16);
+        continue;
+      }
+      if (k === 'bodyType') {
+        if (BODY_TYPES.includes(String(raw))) p.bodyType = String(raw);
         continue;
       }
       const v = Number(raw);
@@ -439,6 +447,7 @@ export const DraftClassBuilder = {
         heightInches: Number(p.heightInches) || 0,
         weight: Number(p.weight) || 0,
         jersey: Number(p.jerseyNum) || 0,
+        bodyType: String(p.bodyType || 'Standard'),
         photoUrl: base.pfrImageUrl || base.wikiImageUrl || null,
         portrait: (() => {
           const plpo = PortraitService.plpoFor(Number(p.PID) || 0, base.race, `${base.firstName}|${base.lastName}|${i}`);

@@ -19,6 +19,7 @@ export interface PlayerRow {
   heightInches: number;
   weight: number;
   jersey: number;
+  bodyType: string; // Madden 26 build: Heavy / Muscular / Thin / Standard
   photoUrl: string | null;
   portrait?: string | null; // Madden menu-portrait URL (real or generic-by-skintone)
   team?: TeamInfo; // drafting team (nflverse, 1980+), joined by overall pick

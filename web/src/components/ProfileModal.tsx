@@ -316,6 +316,20 @@ export function ProfileModal({
               />
             </label>
           </div>
+          <label className="block text-xs text-neutral-400">
+            Body type <span className="text-neutral-600">(Madden 26 build)</span>
+            <select
+              value={effStr('bodyType', row.bodyType || 'Standard')}
+              onChange={(e) => onEdit('bodyType', e.target.value)}
+              className={`${field} mt-1 block w-full`}
+            >
+              {['Standard', 'Thin', 'Muscular', 'Heavy'].map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <div className="space-y-2.5 border-b border-border px-5 py-4">

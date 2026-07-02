@@ -66,6 +66,7 @@ function build() {
       heightInches: Number(p.heightInches) || 0,
       weight: Number(p.weight) || 0,
       jersey: Number(p.jerseyNum) || 0,
+      bodyType: String(p.bodyType || 'Standard'),
       photoUrl: null, // 2026 rookies aren't in the photo lookup
       ratings,
     };
