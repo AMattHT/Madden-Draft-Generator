@@ -5,7 +5,7 @@ import type { GeneratedClass, ClassEdits, GearEdits } from './types';
 // year (or reloading the page) is instant and offline-friendly.
 // Bump CACHE_VERSION whenever the backend rating/position logic changes so stale
 // cached classes are treated as a miss and re-pulled automatically.
-const CACHE_VERSION = 26; // v26: backfilled 21 missing 2025 portraits (Madden roster mangles names: "Jr X Y", "Adbul Carter" typo) → real faces
+const CACHE_VERSION = 27; // v27: generic-face skin tone matches ethnicity — position-informed race default when unknown (2026 class + all blank-race generics)
 const keyOf = (year: number, league: string, mode: string) => `class:${year}_${league}_${mode}`;
 const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;

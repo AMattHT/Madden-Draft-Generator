@@ -3,7 +3,23 @@ import { TeamService, PickEnrichment } from './TeamService';
 import { CuratedDbPositions } from './CuratedDbPositions';
 import { GenericFillerService } from './GenericFillerService';
 import { CombineService } from './CombineService';
+import { PositionMapper } from './PositionMapper';
 import { BaselinePlayer } from '../types/player';
+
+/**
+ * Generic-face skin tone (Race: 1=White, 5=Hispanic, 7=Black) inferred from
+ * position when the player has no ethnicity on record. It's ONLY a fallback so a
+ * generic-face rookie (e.g. the 2026 class, all blank) matches the overwhelming
+ * NFL positional demographics instead of a flat mid-tone — the actual value wins
+ * whenever it's known. Positions that are genuinely mixed stay neutral.
+ */
+function positionDefaultRace(label: string | null | undefined): number {
+  const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
+  if (['WR', 'RB', 'CB', 'S', 'LB', 'EDGE', 'IDL'].includes(group)) return 7; // Black-dominant
+  if (['K', 'P', 'LS'].includes(group)) return 2; // predominantly white specialists
+  if (group === 'OL') return 3; // O-line leans white
+  return 4; // QB / TE / unknown -> neutral mid-tone
+}
 
 /**
  * Baseline players for a draft year with DB positions corrected BEFORE generation
@@ -32,14 +48,17 @@ export async function enrichedClass(
       const height = c?.heightInches ?? e?.heightInches ?? null;
       const weight = c?.weight ?? e?.weight ?? null;
       const age = e?.age ?? null; // real draft age
+      // Fill a plausible skin tone for generic faces when ethnicity is unknown.
+      const race = p.race == null ? positionDefaultRace(label ?? p.position) : null;
 
-      if (!label && !c && height == null && weight == null && age == null) return p;
+      if (!label && !c && height == null && weight == null && age == null && race == null) return p;
       const out: BaselinePlayer = { ...p };
       if (label) out.position = label;
       if (c) out.combine = { forty: c.forty, bench: c.bench, vertical: c.vertical, broad: c.broad, cone: c.cone, shuttle: c.shuttle };
       if (height != null) out.heightInches = height;
       if (weight != null) out.weight = weight;
       if (age != null) out.age = age;
+      if (race != null) out.race = race;
       return out;
     })
   );
