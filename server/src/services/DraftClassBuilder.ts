@@ -336,7 +336,7 @@ export const DraftClassBuilder = {
     const portraitMap = PortraitSlotService.pidMap(capped);
 
     const items: RankedItem[] = capped.map((player, index) => {
-      const posId = PositionMapper.resolve(player.firstName, player.lastName, player.position);
+      const posId = PositionMapper.resolve(player.firstName, player.lastName, player.position, player.weight);
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
     });
 

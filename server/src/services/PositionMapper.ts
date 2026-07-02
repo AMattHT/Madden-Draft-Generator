@@ -117,14 +117,24 @@ export const PositionMapper = {
     return k in NAME_OVERRIDES ? NAME_OVERRIDES[k] : null;
   },
 
-  /** Best M26 id for a player: name override first, then the label mapping, with a
-   *  deterministic left/right (LEDG/REDG) and SAM/WILL split for side-less labels. */
-  resolve(first: string | undefined | null, last: string | undefined | null, label: string | undefined | null): number {
+  /** Best M26 id for a player: name override first, then the label mapping. Side-less
+   *  labels are split by side — LEDG/REDG has no size signal (deterministic hash),
+   *  but SAM (strongside) run heavier than WILL (weakside), so off-ball outside LBs
+   *  split on weight when known (median ~235 lb), falling back to the hash. */
+  resolve(
+    first: string | undefined | null,
+    last: string | undefined | null,
+    label: string | undefined | null,
+    weight?: number | null
+  ): number {
     const override = this.overrideId(first, last);
     if (override != null) return override;
     const k = key(label);
     if (k === 'DE' || k === 'E' || k === 'EDGE' || k === 'DEFENSIVEEND') return sideSplit(first, last, 10, 11);
-    if (k === 'OLB' || k === 'OUTSIDELINEBACKER') return sideSplit(first, last, 13, 15);
+    if (k === 'OLB' || k === 'OUTSIDELINEBACKER') {
+      if (weight != null) return weight >= 235 ? 13 : 15; // heavier -> SAM, leaner -> WILL
+      return sideSplit(first, last, 13, 15);
+    }
     return this.toM26Id(label);
   },
 
