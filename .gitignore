@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Runtime nflverse downloads (re-fetched on demand by CombineService/TeamService)
+server/cache/
+
+# Logs & debug
+*.log
+M26Writer_debug.log
+
+# Env / secrets
+.env
+.env.*
+
+# Local tooling / editor
+.claude/
+.impeccable/
+.DS_Store
+Thumbs.db

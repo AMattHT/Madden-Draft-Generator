@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.log
+M26Writer_debug.log
+cache/
+data/cache/
+.env

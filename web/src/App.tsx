@@ -1,0 +1,212 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api, type ArchetypeOption } from './api';
+import { cache } from './cache';
+import { ClassView } from './components/ClassView';
+import { TopBar } from './components/TopBar';
+import type { ClassEdits, GearEdits, GeneratedClass } from './types';
+
+const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
+const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
+export type GenMode = 'madden' | 'retro';
+
+export default function App() {
+  const [years, setYears] = useState<number[]>([]);
+  const [cachedYears, setCachedYears] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<number | null>(null);
+  const [data, setData] = useState<GeneratedClass | null>(null);
+  const [edits, setEdits] = useState<ClassEdits>({});
+  const [gearEdits, setGearEdits] = useState<GearEdits>({});
+  const [source, setSource] = useState<'cache' | 'live'>('live');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
+  const [mode, setMode] = useState<GenMode>('madden');
+  const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
+  // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
+  const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
+  const reqRef = useRef(0); // guards against a slow earlier response clobbering a newer selection
+
+  const effLeague = useCallback(
+    (y: number) => (isMergeEra(y) && leagueOverride ? leagueOverride : leagueFor(y)),
+    [leagueOverride]
+  );
+
+  const select = useCallback(
+    async (year: number, force = false, useMode: GenMode = mode, useLeague?: string) => {
+      const league = useLeague ?? effLeague(year);
+      const req = ++reqRef.current;
+      setSelected(year);
+      setError(null);
+      setBusy(true);
+      try {
+        const cached = force ? undefined : await cache.get(year, league, useMode);
+        if (req !== reqRef.current) return; // a newer selection superseded this one
+        if (cached) {
+          setData(cached);
+          setSource('cache');
+        } else {
+          const live = await api.generated(year, league, useMode);
+          if (req !== reqRef.current) return;
+          live.fetchedAt = Date.now();
+          await cache.set(live, useMode);
+          setData(live);
+          setSource('live');
+          setCachedYears((prev) => new Set(prev).add(year));
+        }
+        setEdits(await cache.editsGet(year, league));
+        setGearEdits(await cache.gearEditsGet(year, league));
+      } catch (e) {
+        if (req !== reqRef.current) return;
+        setError((e as Error).message);
+        setData(null);
+      } finally {
+        if (req === reqRef.current) setBusy(false);
+      }
+    },
+    [mode, effLeague]
+  );
+
+  const changeMode = useCallback(
+    (m: GenMode) => {
+      setMode(m);
+      if (selected != null) select(selected, false, m);
+    },
+    [selected, select]
+  );
+
+  const changeLeague = useCallback(
+    (lg: string) => {
+      setLeagueOverride(lg);
+      if (selected != null) select(selected, false, mode, lg);
+    },
+    [selected, select, mode]
+  );
+
+  const setEdit = useCallback(
+    (id: number, fieldName: string, value: number | string) => {
+      setEdits((prev) => {
+        const next = { ...prev, [id]: { ...(prev[id] || {}), [fieldName]: value } };
+        if (selected != null) cache.editsSet(selected, effLeague(selected), next);
+        return next;
+      });
+    },
+    [selected, effLeague]
+  );
+
+  const setGearEdit = useCallback(
+    (id: number, slot: string, asset: string) => {
+      setGearEdits((prev) => {
+        const player = { ...(prev[id] || {}) };
+        if (asset) player[slot] = asset;
+        else delete player[slot]; // empty = revert to era default
+        const next = { ...prev, [id]: player };
+        if (!Object.keys(player).length) delete next[id];
+        if (selected != null) cache.gearEditsSet(selected, effLeague(selected), next);
+        return next;
+      });
+    },
+    [selected, effLeague]
+  );
+
+  const resetPlayer = useCallback(
+    (id: number) => {
+      setEdits((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        if (selected != null) cache.editsSet(selected, effLeague(selected), next);
+        return next;
+      });
+      setGearEdits((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        if (selected != null) cache.gearEditsSet(selected, effLeague(selected), next);
+        return next;
+      });
+    },
+    [selected, effLeague]
+  );
+
+  useEffect(() => {
+    cache.cachedYears().then(setCachedYears);
+    api.archetypesByPosition().then(setArchetypeOptions).catch(() => {});
+    api
+      .years()
+      .then((ys) => {
+        setYears(ys);
+        const def = ys.includes(2003) ? 2003 : ys[ys.length - 1];
+        if (def) select(def);
+      })
+      .catch((e) => setError(e.message));
+    // Run once on mount; mode changes are handled via changeMode.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="flex h-screen flex-col">
+      <TopBar
+        mode={mode}
+        onSetMode={changeMode}
+        showLeague={selected != null && isMergeEra(selected)}
+        league={selected != null ? effLeague(selected) : 'NFL'}
+        onSetLeague={changeLeague}
+        connected={!error}
+        years={years}
+        selected={selected}
+        onSelectYear={(y) => {
+          setFocusPlayer(null);
+          select(y);
+        }}
+        onSelectPlayer={(y, name) => {
+          setFocusPlayer(name);
+          select(y);
+        }}
+        cachedYears={cachedYears}
+      />
+      <div className="flex min-h-0 flex-1">
+        <main className="min-w-0 flex-1">
+          {error && (
+            <div className="m-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
+              <div className="font-semibold text-red-100">Couldn’t load the draft class</div>
+              <div className="mt-1 text-red-200/90">{error}</div>
+              <div className="mt-2 text-xs text-red-300/70">
+                Is the backend running on <code className="rounded bg-black/30 px-1">localhost:5174</code>? Start it with{' '}
+                <code className="rounded bg-black/30 px-1">npm run dev</code> in <code className="rounded bg-black/30 px-1">server/</code>.
+              </div>
+            </div>
+          )}
+          {!data && !error && (
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-neutral-600">
+              {busy ? (
+                <>
+                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-700 border-t-primary" />
+                  <span className="text-sm">Pulling draft class…</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-4xl opacity-40">🏈</span>
+                  <span className="text-sm">Pick a draft year to build a class</span>
+                </>
+              )}
+            </div>
+          )}
+          {data && (
+            <ClassView
+              data={data}
+              source={source}
+              busy={busy}
+              edits={edits}
+              gearEdits={gearEdits}
+              onEdit={setEdit}
+              onGearEdit={setGearEdit}
+              onResetPlayer={resetPlayer}
+              archetypeOptions={archetypeOptions}
+              mode={mode}
+              focusPlayer={focusPlayer}
+              onRefresh={() => selected && select(selected, true)}
+            />
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}

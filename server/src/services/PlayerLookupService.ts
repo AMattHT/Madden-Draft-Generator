@@ -1,0 +1,495 @@
+import path from 'path';
+import { LOOKUPS_DIR } from '../config/paths';
+import { parseCsvFile, normalizeName } from '../util/csv';
+import { BaselinePlayer } from '../types/player';
+import { HistoricalAccoladeService } from './HistoricalAccoladeService';
+
+export interface PlayerSearchResult {
+  firstName: string;
+  lastName: string;
+  draftYear: number;
+  draftRound: number | null;
+  draftPick: number | null;
+  position: string;
+  college: string;
+  league: string;
+}
+
+interface RawRow {
+  'Last Name': string;
+  'First Name': string;
+  'College/Univ': string;
+  Round: string;
+  Pick: string;
+  'Draft Class': string;
+  Position: string;
+  Jersey: string;
+  PhotoID: string;
+  'Player Assets ID': string;
+  CommID: string;
+  PLPO: string;
+  Height: string;
+  Weight: string;
+  From: string;
+  To: string;
+  AP1: string;
+  PB: string;
+  St: string;
+  wAV: string;
+  League: string;
+  Race: string;
+  'Home State': string;
+  Wiki_Image_URL: string;
+  PFR_Image_URL: string;
+  isHOF: string;
+}
+
+function toInt(s: string | undefined): number | null {
+  if (s === undefined || s === null || s.trim() === '') return null;
+  const n = parseInt(s, 10);
+  return Number.isNaN(n) ? null : n;
+}
+
+function toFloat(s: string | undefined): number | null {
+  if (s === undefined || s === null || s.trim() === '') return null;
+  const n = parseFloat(s);
+  return Number.isNaN(n) ? null : n;
+}
+
+/** Strip PFR marker glyphs (‡ = Hall of Fame, † *, ^, ¤, +) and any digits that
+ *  trail them from a display name (e.g. "Motley‡" -> "Motley", "Sprinkle‡1" -> "Sprinkle"). */
+function cleanName(s: string | undefined): string {
+  return (s || '').replace(/[‡†*^¤+]\d*/g, '').trim();
+}
+
+/** Parse a height that may be inches ("74") or feet-inches ("6-2"). */
+function toHeightInches(s: string | undefined): number | null {
+  if (!s || s.trim() === '') return null;
+  const t = s.trim();
+  if (t.includes('-')) {
+    const [ft, inch] = t.split('-').map((x) => parseInt(x, 10));
+    if (!Number.isNaN(ft) && !Number.isNaN(inch)) return ft * 12 + inch;
+  }
+  const n = parseInt(t, 10);
+  return Number.isNaN(n) ? null : n;
+}
+
+let rowsCache: RawRow[] | null = null;
+let byYear: Map<number, BaselinePlayer[]> | null = null;
+
+function load(): void {
+  if (rowsCache) return;
+  rowsCache = parseCsvFile<RawRow>(path.join(LOOKUPS_DIR, 'ALL_PLAYER_LOOKUP.csv'));
+  const all: BaselinePlayer[] = [];
+  for (const row of rowsCache) {
+    const draftYear = toInt(row['Draft Class']);
+    if (draftYear === null) continue;
+    const wav = toFloat(row.wAV);
+    // A trailing '‡' on the name is PFR's Hall-of-Fame marker; it was never stripped
+    // (players exported as "Motley‡") nor turned into the flag (24 HOFers read FALSE).
+    const rawName = `${row['First Name'] || ''}${row['Last Name'] || ''}`;
+    const rawLeague = (row.League || '').trim();
+    const h = toHeightInches(row.Height);
+    const w = toInt(row.Weight);
+    const player: BaselinePlayer = {
+      firstName: cleanName(row['First Name']),
+      lastName: cleanName(row['Last Name']),
+      college: (row['College/Univ'] || '').trim(),
+      draftYear,
+      draftRound: toInt(row.Round),
+      draftPick: toInt(row.Pick),
+      position: (row.Position || '').trim(),
+      jersey: toInt(row.Jersey),
+      league: rawLeague || 'NFL',
+      isHOF: String(row.isHOF).trim().toUpperCase() === 'TRUE' || rawName.includes('‡'),
+      photoId: toInt(row.PhotoID),
+      playerAssetsId: (row['Player Assets ID'] || '').trim() || null,
+      commId: toInt(row.CommID),
+      plpo: (row.PLPO || '').trim() || null,
+      // Clamp obvious data-entry errors (450 lb, 114 in, 1 lb) so they fall back to
+      // combine/nflverse/position norms downstream instead of exporting garbage.
+      heightInches: h != null && h >= 60 && h <= 84 ? h : null,
+      weight: w != null && w >= 140 && w <= 400 ? w : null,
+      homeState: (row['Home State'] || '').trim() || null,
+      race: toInt(row.Race),
+      wikiImageUrl: (row['Wiki_Image_URL'] || '').trim() || null,
+      pfrImageUrl: (row['PFR_Image_URL'] || '').trim() || null,
+      careerFrom: toInt(row.From),
+      careerTo: toInt(row.To),
+      allPro1: toInt(row.AP1),
+      proBowls: toInt(row.PB),
+      seasonsStarted: toInt(row.St),
+      wav,
+      // PFR computes Approximate Value from 1960 on, so use actual wAV whenever
+      // it exists (1960+); pre-1960 (and any missing wAV) falls back to predicted.
+      // Require a real league too: blank-league rows with a stray wAV are data junk
+      // (Kelly Toles wAV50, Todd Shanks wAV67) that otherwise rate as Star-dev.
+      wavSource: draftYear >= 1960 && wav !== null && rawLeague !== '' ? 'actual' : 'predicted',
+      source: 'local',
+    };
+    all.push(player);
+  }
+  // Order matters: collapse same-person duplicate rows first, then backfill
+  // pre-1960 accolades (so the merged row's career signals are complete), then
+  // resolve name-matched shared assets (which use those signals to pick owners).
+  const merged = mergeDuplicatePeople(all);
+  applyHistoricalAccolades(merged);
+  dedupSharedAssets(merged);
+  byYear = new Map();
+  for (const p of merged) {
+    if (!byYear.has(p.draftYear)) byYear.set(p.draftYear, []);
+    byYear.get(p.draftYear)!.push(p);
+  }
+}
+
+/** Rough notability used to pick which of several same-named players a shared
+ *  Madden asset / HOF flag actually belongs to. */
+function accompl(p: BaselinePlayer): number {
+  return (p.wav ?? 0) + 4 * (p.allPro1 ?? 0) + 2 * (p.proBowls ?? 0);
+}
+
+/** Two same-name/college/year rows share a Madden identity (asset id). */
+function sharesIdentity(a: BaselinePlayer, b: BaselinePlayer): boolean {
+  return (
+    (a.photoId != null && a.photoId === b.photoId) ||
+    (a.commId != null && a.commId === b.commId) ||
+    (!!a.plpo && a.plpo === b.plpo) ||
+    (!!a.playerAssetsId && a.playerAssetsId === b.playerAssetsId)
+  );
+}
+
+/** A bare, undrafted row with no career/accolades/assets — a redundant stub of a
+ *  fuller same-person row (e.g. Jim Otto's blank UD duplicate of his AFL entry). */
+function isBlankStub(p: BaselinePlayer): boolean {
+  return (
+    p.draftRound == null && !p.allPro1 && !p.proBowls && !p.seasonsStarted &&
+    p.photoId == null && p.commId == null && !p.plpo && !p.playerAssetsId && p.careerTo == null
+  );
+}
+
+/** Fold `other`'s data into `keep` (fill blanks; keep the richer/real values). */
+function mergeInto(keep: BaselinePlayer, other: BaselinePlayer): void {
+  keep.draftRound = keep.draftRound ?? other.draftRound;
+  keep.draftPick = keep.draftPick ?? other.draftPick;
+  keep.jersey = keep.jersey ?? other.jersey;
+  keep.heightInches = keep.heightInches ?? other.heightInches;
+  keep.weight = keep.weight ?? other.weight;
+  keep.homeState = keep.homeState ?? other.homeState;
+  keep.photoId = keep.photoId ?? other.photoId;
+  keep.playerAssetsId = keep.playerAssetsId ?? other.playerAssetsId;
+  keep.commId = keep.commId ?? other.commId;
+  keep.plpo = keep.plpo ?? other.plpo;
+  keep.race = keep.race ?? other.race;
+  keep.wikiImageUrl = keep.wikiImageUrl ?? other.wikiImageUrl;
+  keep.pfrImageUrl = keep.pfrImageUrl ?? other.pfrImageUrl;
+  keep.allPro1 = Math.max(keep.allPro1 ?? 0, other.allPro1 ?? 0) || null;
+  keep.proBowls = Math.max(keep.proBowls ?? 0, other.proBowls ?? 0) || null;
+  keep.seasonsStarted = Math.max(keep.seasonsStarted ?? 0, other.seasonsStarted ?? 0) || null;
+  keep.wav = Math.max(keep.wav ?? 0, other.wav ?? 0) || keep.wav;
+  keep.careerFrom = Math.min(keep.careerFrom ?? 9999, other.careerFrom ?? 9999);
+  if (keep.careerFrom === 9999) keep.careerFrom = null;
+  keep.careerTo = Math.max(keep.careerTo ?? 0, other.careerTo ?? 0) || null;
+  keep.isHOF = keep.isHOF || other.isHOF;
+}
+
+/**
+ * The lookup lists a few people on more than one row (a draft row + an "all-time"
+ * legends row, e.g. Jim Brown; or a real entry + a blank undrafted stub, e.g. Jim
+ * Otto), which otherwise produces two prospects for one person in a class. Collapse
+ * them, but only within the SAME name+college+draft-year+league and only when the
+ * rows are provably the same person (shared Madden asset id, or one is a blank stub)
+ * — so distinct same-name teammates (e.g. the two 1979 Colorado St. "Mark Bell"s, a
+ * DE and a WR with no shared identity) are left alone. AFL/NFL dual-draft duplicates
+ * (a player drafted by both leagues → two rows in different leagues, e.g. 1960s) are
+ * a separate combined-mode concern and intentionally untouched here — the same-league
+ * guard keeps this from merging only the subset whose AFL row happens to be blank.
+ */
+function mergeDuplicatePeople(players: BaselinePlayer[]): BaselinePlayer[] {
+  const groups = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    const k = `${normalizeName(`${p.firstName} ${p.lastName}`)}|${normalizeName(p.college)}|${p.draftYear}`;
+    (groups.get(k) ?? groups.set(k, []).get(k)!).push(p);
+  }
+  const removed = new Set<BaselinePlayer>();
+  for (const grp of groups.values()) {
+    if (grp.length < 2) continue;
+    // Primary = the row with a real (numeric) draft round, else the most notable.
+    const primary = [...grp].sort((a, b) => {
+      const ar = a.draftRound != null ? 0 : 1;
+      const br = b.draftRound != null ? 0 : 1;
+      return ar !== br ? ar - br : accompl(b) - accompl(a);
+    })[0];
+    for (const other of grp) {
+      if (other === primary || removed.has(other)) continue;
+      if (primary.league !== other.league) continue; // leave AFL/NFL dual-draft alone
+      if (sharesIdentity(primary, other) || isBlankStub(other) || isBlankStub(primary)) {
+        mergeInto(primary, other);
+        removed.add(other);
+      }
+    }
+  }
+  return removed.size ? players.filter((p) => !removed.has(p)) : players;
+}
+
+/** How well a player's draft/career window aligns with an accolade span. Used to
+ *  pick the right person when several share a name (e.g. three "Jim Brown"s). */
+function alignScore(p: BaselinePlayer, acc: { firstYear: number; lastYear: number }): number {
+  const gap = acc.firstYear - p.draftYear; // years from draft to first selection
+  if (gap < 0) return -1; // drafted after the first selection → not this player
+  let s = gap <= 6 ? 6 - gap : 0; // stars earn honors within a few years of draft
+  if (p.careerTo != null) s += Math.abs(p.careerTo - acc.lastYear) <= 1 ? 5 : -2;
+  if ((p.allPro1 ?? 0) > 0 || (p.proBowls ?? 0) > 0) s += 3; // existing corroboration
+  return s;
+}
+
+/**
+ * The CSV's career/accolade columns are badly incomplete before 1960 (PFR's AV
+ * era). Backfill first-team All-Pro counts and career span from the Wikipedia
+ * All-Pro dataset so the wAV estimate has real signals — e.g. Bucko Kilroy goes
+ * from an empty career/accolade row to a 1943–1954 career with a first-team
+ * selection. Never lowers an existing value. When several players share a name,
+ * the accolades go only to the one whose career window aligns (and only if that
+ * choice is unambiguous), so a star's honors never land on a same-named scrub.
+ * See HistoricalAccoladeService.
+ */
+function applyHistoricalAccolades(players: BaselinePlayer[]): void {
+  const byName = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    const k = normalizeName(`${p.firstName} ${p.lastName}`);
+    if (k) (byName.get(k) ?? byName.set(k, []).get(k)!).push(p);
+  }
+  for (const [norm, group] of byName) {
+    const acc = HistoricalAccoladeService.getByKey(norm);
+    if (!acc) continue;
+    // Candidates that could plausibly have earned the honors (drafted no later
+    // than the last selection, and within ~2 decades of the first).
+    const cands = group.filter((p) => p.draftYear <= acc.lastYear && p.draftYear >= acc.firstYear - 18);
+    if (cands.length === 0) continue;
+    let target: BaselinePlayer;
+    if (cands.length === 1) {
+      target = cands[0];
+    } else {
+      const scored = cands.map((p) => ({ p, s: alignScore(p, acc) })).sort((a, b) => b.s - a.s);
+      if (scored[0].s <= 0 || (scored[1] && scored[0].s === scored[1].s)) continue; // ambiguous → skip
+      target = scored[0].p;
+    }
+    if (target.draftYear > 1960) continue; // fix is scoped to the pre-1960 gap
+    target.allPro1 = Math.max(target.allPro1 ?? 0, acc.firstTeamAllPro);
+    const from = target.careerFrom ?? target.draftYear;
+    target.careerFrom = Math.min(from, acc.firstYear);
+    target.careerTo = Math.max(target.careerTo ?? 0, acc.lastYear, from);
+  }
+}
+
+const recency = (p: BaselinePlayer) => p.careerTo ?? p.careerFrom ?? p.draftYear;
+const careerLen = (p: BaselinePlayer) =>
+  p.careerFrom != null && p.careerTo != null && p.careerTo >= p.careerFrom ? p.careerTo - p.careerFrom + 1 : 0;
+const carriesLegend = (p: BaselinePlayer) => (p.plpo ?? '').toLowerCase().includes('legends');
+
+/** Deterministic tie-break tail so ownership never falls through to arbitrary CSV
+ *  row order: longest known career, then earliest draft year, then draft pick. */
+function stableTail(a: BaselinePlayer, b: BaselinePlayer): number {
+  return careerLen(b) - careerLen(a) || a.draftYear - b.draftYear || (a.draftPick ?? 9999) - (b.draftPick ?? 9999);
+}
+
+/** Rank same-named players for who owns a shared Madden asset. Legend assets go to
+ *  the row that actually carries the legends PLPO, then the most accomplished (so a
+ *  legend's PhotoID/CommID/PLPO stay co-located even when its own career line is
+ *  empty — Bill Bates); non-legend (current-Madden) assets go to the most recent. */
+function assetOwner(grp: BaselinePlayer[], legend: boolean): BaselinePlayer {
+  return [...grp].sort((a, b) => {
+    if (legend) {
+      const d = (carriesLegend(b) ? 1 : 0) - (carriesLegend(a) ? 1 : 0);
+      if (d) return d;
+      if (accompl(b) !== accompl(a)) return accompl(b) - accompl(a);
+    } else {
+      if (recency(b) !== recency(a)) return recency(b) - recency(a);
+      if (accompl(b) !== accompl(a)) return accompl(b) - accompl(a);
+    }
+    return stableTail(a, b);
+  })[0];
+}
+
+/** Most-accomplished member of a same-name group (for isHOF / accolade ownership). */
+function mostAccomplished(grp: BaselinePlayer[]): BaselinePlayer {
+  return [...grp].sort((a, b) => accompl(b) - accompl(a) || stableTail(a, b))[0];
+}
+
+/**
+ * The lookup's identity fields (PhotoID, Player Assets ID, CommID, PLPO, isHOF) AND
+ * the accolade columns (AP1/PB/St) were populated by name-only matching, so same-
+ * named players collide (2003 Sam Williams inherited 2022 Sam Williams's portrait;
+ * all three "Jim Brown"s read isHOF=TRUE and shared the legend's PhotoID/CommID/PLPO;
+ * the 2005 Washington "Derrick Johnson" carries the Texas star's Pro Bowls). Each
+ * such value depicts ONE person, so keep it for the true owner and clear it on the
+ * rest (they fall back to a generic face / no bonus). Ownership:
+ *  - **Legend assets** (`plpo_legends_*`) → the row carrying the legends PLPO, then
+ *    the most accomplished (NOT the most recent — Jim Brown's face was going to the
+ *    obscure 1966 Nebraska lineman because his career "ended" later).
+ *  - **Other (current-Madden) assets** → the most-recent career.
+ *  - **isHOF** → promoted onto the most-accomplished same-named player (the CSV often
+ *    puts the flag on the wrong row — the real HOFer Eric Allen had it on false).
+ *  - **AP1/PB/St** → cleared on a same-name player only when it shares an asset id
+ *    with the owner AND carries the owner's exact accolades (the name-stamp tell), so
+ *    genuinely-earned honors on distinct same-named players are never stripped.
+ * All ties use a deterministic tail, never CSV row order.
+ */
+function dedupSharedAssets(players: BaselinePlayer[]): void {
+  // Per same-name group: promote isHOF to the true owner, and strip name-stamped
+  // accolade copies. Runs BEFORE asset nulling so shared-asset detection still works.
+  const byName = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    const k = normalizeName(`${p.firstName} ${p.lastName}`);
+    (byName.get(k) ?? byName.set(k, []).get(k)!).push(p);
+  }
+  for (const grp of byName.values()) {
+    if (grp.length < 2) continue;
+    const owner = mostAccomplished(grp);
+    if (grp.some((p) => p.isHOF)) {
+      owner.isHOF = true; // promote (not just demote) — flag may sit on the wrong row
+      for (const p of grp) if (p !== owner) p.isHOF = false;
+    }
+    for (const p of grp) {
+      if (p === owner) continue;
+      const sameAcc = (p.allPro1 ?? 0) === (owner.allPro1 ?? 0) && (p.proBowls ?? 0) === (owner.proBowls ?? 0);
+      const hasAcc = (p.allPro1 ?? 0) > 0 || (p.proBowls ?? 0) > 0;
+      if (hasAcc && sameAcc && sharesIdentity(p, owner)) {
+        p.allPro1 = null;
+        p.proBowls = null;
+        p.seasonsStarted = null;
+      }
+    }
+  }
+
+  // Asset ids — group by value; assign to the true owner, clear on the rest.
+  // (PLPO is deduped last so earlier passes still see it intact when detecting
+  // whether a shared asset is a legend's.)
+  const dedup = <K extends 'photoId' | 'playerAssetsId' | 'commId' | 'plpo'>(key: K, empty: BaselinePlayer[K]) => {
+    const groups = new Map<string, BaselinePlayer[]>();
+    for (const p of players) {
+      const v = p[key];
+      if (v == null || v === 0 || v === '') continue;
+      const k = String(v);
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k)!.push(p);
+    }
+    for (const grp of groups.values()) {
+      if (grp.length < 2) continue;
+      const owner = assetOwner(grp, grp.some(carriesLegend));
+      for (const p of grp) if (p !== owner) p[key] = empty as BaselinePlayer[K];
+    }
+  };
+  dedup('photoId', null);
+  dedup('playerAssetsId', null);
+  dedup('commId', null);
+  dedup('plpo', null);
+}
+
+/**
+ * Combined-league view only: a player drafted by BOTH the NFL and AFL in the same
+ * year has two rows (different leagues), so the 1960–66 combined class shows him
+ * twice (e.g. Mike Lucci 1961 NFL-R5 + AFL-R20). Collapse to one prospect. Done
+ * here, NOT in the source, so per-league (NFL-only / AFL-only) views keep their
+ * own row. Only collapses when every row in a name+college group is in a DISTINCT
+ * league (an unambiguous dual-draft) — same-league same-name teammates (the two
+ * 1979 Colorado St. "Mark Bell"s) are never touched. Cross-YEAR re-drafts (a
+ * player in two different years' classes, e.g. Bo Jackson 1986+1987) are a
+ * different, ambiguous case — which year is canonical needs play history — and
+ * are intentionally left as-is. Keeps the most-accomplished row, preferring the
+ * surviving NFL row then the earlier pick.
+ */
+function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
+  const groups = new Map<string, BaselinePlayer[]>();
+  for (const p of list) {
+    const k = `${normalizeName(`${p.firstName} ${p.lastName}`)}|${normalizeName(p.college)}`;
+    (groups.get(k) ?? groups.set(k, []).get(k)!).push(p);
+  }
+  const drop = new Set<BaselinePlayer>();
+  for (const grp of groups.values()) {
+    if (grp.length < 2) continue;
+    if (new Set(grp.map((p) => p.league)).size !== grp.length) continue; // ambiguous → keep all
+    const keep = [...grp].sort(
+      (a, b) =>
+        accompl(b) - accompl(a) ||
+        (a.league.toUpperCase() === 'NFL' ? 0 : 1) - (b.league.toUpperCase() === 'NFL' ? 0 : 1) ||
+        (a.draftRound ?? 99) - (b.draftRound ?? 99) ||
+        (a.draftPick ?? 999) - (b.draftPick ?? 999)
+    )[0];
+    for (const p of grp) if (p !== keep) drop.add(p);
+  }
+  return drop.size ? list.filter((p) => !drop.has(p)) : list;
+}
+
+export const PlayerLookupService = {
+  /** All draft years present in the local lookup, ascending. */
+  years(): number[] {
+    load();
+    return Array.from(byYear!.keys()).sort((a, b) => a - b);
+  },
+
+  /** Baseline players for a draft year, optionally filtered by league. */
+  byYear(year: number, league?: string): BaselinePlayer[] {
+    load();
+    let list = byYear!.get(year) || [];
+    if (league && league !== 'combined') {
+      list = list.filter((p) => p.league.toUpperCase() === league.toUpperCase());
+    } else {
+      list = dedupDualDraft(list); // combined view: one prospect per dual-drafted person
+    }
+    // Sort by overall draft order: round then pick, undrafted (null) last.
+    return [...list].sort((a, b) => {
+      const ar = a.draftRound ?? 99;
+      const br = b.draftRound ?? 99;
+      if (ar !== br) return ar - br;
+      return (a.draftPick ?? 999) - (b.draftPick ?? 999);
+    });
+  },
+
+  totalRows(): number {
+    load();
+    return rowsCache!.length;
+  },
+
+  /**
+   * Search all players by name (case/accent-insensitive) across every draft year.
+   * Scored: exact > prefix > substring, then newest draft year first.
+   */
+  search(query: string, limit = 50): PlayerSearchResult[] {
+    load();
+    const q = normalizeName(query);
+    if (!q) return [];
+    const scored: { p: BaselinePlayer; score: number }[] = [];
+    for (const list of byYear!.values()) {
+      for (const p of list) {
+        const k = normalizeName(`${p.firstName} ${p.lastName}`);
+        const score = k === q ? 3 : k.startsWith(q) ? 2 : k.includes(q) ? 1 : 0;
+        if (score) scored.push({ p, score });
+      }
+    }
+    scored.sort((a, b) => b.score - a.score || b.p.draftYear - a.p.draftYear || a.p.lastName.localeCompare(b.p.lastName));
+    return scored.slice(0, limit).map(({ p }) => ({
+      firstName: p.firstName,
+      lastName: p.lastName,
+      draftYear: p.draftYear,
+      draftRound: p.draftRound,
+      draftPick: p.draftPick,
+      position: p.position,
+      college: p.college,
+      league: p.league,
+    }));
+  },
+
+  /** Deduped first- and last-name pools (all eras) for generating filler names. */
+  namePool(): { first: string[]; last: string[] } {
+    load();
+    const first = new Set<string>();
+    const last = new Set<string>();
+    for (const list of byYear!.values()) {
+      for (const p of list) {
+        if (p.firstName) first.add(p.firstName);
+        if (p.lastName) last.add(p.lastName);
+      }
+    }
+    return { first: [...first], last: [...last] };
+  },
+};

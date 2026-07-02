@@ -1,0 +1,430 @@
+Quarterbacks
+
+Ball Carrier Vision
+=IF(OR(Archetype="Scrambler",Archetype="Improviser"),PAWR*0.2+PCAR*0.4+PBKT*0.2+PSPD*0.2,PAWR*0.2+PCAR*0.6+PBKT*0.2)
+
+Medium Accuracy
+=PTAS*0.35+PTHP*0.4+PAWR*0.25
+
+Deep Accuracy
+=PTHP*0.4+PTAM*0.30+PAWR*0.30
+
+Throw On The Run
+=IF(OR(Archetype="Scrambler",Archetype="Improviser"),(PTAS*0.15+PTAM*0.15+PTAD*0.1+PAWR*0.2+PAGI*0.2+PBCV*0.2)*1.05,PTAS*0.15+PTAM*0.15+PTAD*0.1+PAWR*0.2+PAGI*0.2+PBCV*0.2)
+
+Throw Under Pressure
+=PAWR*0.4+PTAS*0.15+PTAM*0.15+PTAD*0.15+PTOR*0.15
+
+Break Sack
+=IF(OR(Archetype="Scrambler",Archetype="Improviser"),(PAGI*0.2+PBKT*0.3+PAWR*0.2+PBCV*0.2+PCAR*0.1)*1.05,PAGI*0.2+PBKT*0.3+PAWR*0.2+PBCV*0.2+PCAR*0.1)
+
+Play Action
+=IF(OR(Archetype="Field General",Archetype="Improviser"),PTAS*0.15+PTAM*0.15+PTAD*0.2+PAWR*0.25+PCAR*0.1+PTOR*0.15,(PTAS*0.15+PTAM*0.15+PTAD*0.2+PAWR*0.25+PCAR*0.1+PTOR*0.15)*0.95)
+
+Overall
+=PAWR*0.16+PTHP*0.16+PTAS*0.12+PTAM*0.12+PTAD*0.10+PTOR*0.04+PSPD*0.03+PCAR*0.02+PAGI*0.02+PSTR*0.02+PINJ*0.01+PSTA*0.01
+
+
+Halfback
+
+Trucking
+=IF(Archetype="Power Back",(PBKT*0.65+PSTR*0.25+PACC*0.10)*1.05,PBKT*0.75+PSTR*0.2+PACC*0.05)
+
+Stiff Arm
+=IF(Archetype="Power Back",(PSTR*0.4+PBKT*0.6)*1.05,PSTR*0.4+PBKT*0.6)
+
+Elusiveness
+=IF(Archetype="Elusive Back",(PBCV*0.60+PSPD*0.10+PACC*0.15+PAGI*0.15)*1.05,PBCV*0.60+PSPD*0.10+PACC*0.15+PAGI*0.15)
+
+Spin Move
+=IF(Archetype="Elusive Back",PELU*0.5+PBKT*0.2+PACC*0.1+PAGI*0.2,(PELU*0.5+PBKT*0.2+PACC*0.1+PAGI*0.2)*0.95)
+
+Juke Move
+=IF(Archetype="Elusive Back",PELU*0.6+PAGI*0.2+PACC*0.2,(PELU*0.6+PAGI*0.2+PACC*0.2)*0.95)
+
+Catching In Traffic
+=IF(Archetype="Receiving Back",(PCTH*1.4+PAWR*0.6)*0.45,(PCTH*1.4+PAWR*0.6)*0.40)
+
+Spectacular Catching
+=IF(Archetype="Receiving Back",(PCTH*0.6+PLCI*0.75+PAWR*0.65)*0.45,(PCTH*0.6+PLCI*0.75+PAWR*0.65)*0.40)
+
+Short Route Running
+=IF(Archetype="Receiving Back",(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.2+PLRL*0.35)*0.45,(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.2+PLRL*0.35)*0.40)
+
+Medium Route Running
+=IF(Archetype="Receiving Back",(PAWR*0.24+PAGI*0.2+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.2+PLRL*0.36+PJMP*0.1)*0.4,(PAWR*0.24+PAGI*0.2+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.2+PLRL*0.36+PJMP*0.1)*0.35)
+
+Deep Route Running
+=IF(Archetype="Receiving Back",(PAWR*0.2+PAGI*0.15+PACC*0.2+PLSC*0.35+PLCI*0.25+PCTH*0.4+PLRL*0.25+PJMP*0.2)*0.33,(PAWR*0.2+PAGI*0.15+PACC*0.2+PLSC*0.35+PLCI*0.25+PCTH*0.4+PLRL*0.25+PJMP*0.2)*0.25)
+
+Release
+=IF(Archetype="Receiving Back",(PACC*0.3+PAGI*0.4+PAWR*0.5+PCTH*0.8)*0.4,(PACC*0.3+PAGI*0.4+PAWR*0.5+PCTH*0.8)*0.35)
+
+Overall
+=PSPD*0.20+PACC*0.10+PAGI*0.08+PCAR*0.10+PBCV*0.08+PBKT*0.08+PSTR*0.06+PELU*0.06+PCTH*0.04+PAWR*0.08+PSTA*0.04+PINJ*0.03+PJMP*0.03+PTGH*0.02
+
+
+Wide Receiver
+
+Catching In Traffic
+=IF(OR(Archetype="Physical",Archetype="Slot"),(PCTH*0.7+PAWR*0.3)*1.05,PCTH*0.7+PAWR*0.3)
+
+Spectacular Catching
+=IF(OR(Archetype="Physical",Archetype="Deep Threat"),(PCTH*0.4+PLCI*0.4+PAWR*0.2)*1.05,PCTH*0.4+PLCI*0.4+PAWR*0.2)
+
+Short Route Running
+=IF(OR(Archetype="Slot",Archetype="Route Running"),(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.25+PLRL*0.3)*0.55,(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.25+PLRL*0.3)*0.5)
+
+Medium Route Running
+=IF(OR(Archetype="Slot",Archetype="Route Running"),(PAWR*0.24+PAGI*0.24+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.26+PLRL*0.36)*0.55,(PAWR*0.24+PAGI*0.24+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.26+PLRL*0.36)*0.5)
+
+Deep Route Running
+=IF(OR(Archetype="Deep Threat",Archetype="Route Running"),(PAWR*0.2+PAGI*0.2+PACC*0.2+PLSC*0.3+PLCI*0.3+PCTH*0.4+PLRL*0.3+PJMP*0.1)*0.5,(PAWR*0.2+PAGI*0.2+PACC*0.2+PLSC*0.3+PLCI*0.3+PCTH*0.4+PLRL*0.3+PJMP*0.1)*0.45)
+
+Release
+=IF(Archetype="Slot",(PACC*0.2+PAGI*0.2+PAWR*0.3+PCTH*0.8+PLCI*0.3+PLSC*0.2)*0.525,(PACC*0.2+PAGI*0.2+PAWR*0.3+PCTH*0.8+PLCI*0.3+PLSC*0.2)*0.5)
+
+Overall
+=PSPD*0.18+PCTH*0.12+PLCI*0.10+PAWR*0.10+PACC*0.08+PAGI*0.08+SRRN*0.06+PDRR*0.06+PMRR*0.06+PLSC*0.04+PJMP*0.04+PSTR*0.03+PLRL*0.03+PSTA*0.02
+
+
+Tight End
+
+Catching In Traffic
+=IF(OR(Archetype="Vertical Threat",Archetype="Possession"),(PCTH*0.7+PAWR*0.3)*1.05,PCTH*0.7+PAWR*0.3)
+
+Spectacular Catching
+=IF(Archetype="Vertical Threat",(PCTH+PLCI*0.8+PAWR*0.2)*0.525,(PCTH+PLCI*0.8+PAWR*0.2)*0.5)
+
+Short Route Running
+=IF(Archetype="Possession",(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.25+PLRL*0.3)*0.525,(PAWR*0.4+PAGI*0.4+PACC*0.2+PCTH*0.35+PLCI*0.25+PLRL*0.3)*0.5)
+
+Medium Route Running
+=IF(OR(Archetype="Vertical Threat",Archetype="Possession"),(PAWR*0.24+PAGI*0.24+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.26+PLRL*0.36)*0.5,(PAWR*0.24+PAGI*0.24+PACC*0.2+PCTH*0.3+PLCI*0.4+PLSC*0.26+PLRL*0.36)*0.45)
+
+Deep Route Running
+=IF(Archetype="Vertical Threat",(PAWR*0.2+PAGI*0.2+PACC*0.2+PLSC*0.3+PLCI*0.3+PCTH*0.4+PLRL*0.3+PJMP*0.1)*0.525,(PAWR*0.2+PAGI*0.2+PACC*0.2+PLSC*0.3+PLCI*0.3+PCTH*0.4+PLRL*0.3+PJMP*0.1)*0.5)
+
+Release
+=IF(Archetype="Vertical Threat",(PACC*0.2+PAGI*0.2+PAWR*0.3+PCTH*0.8+PLCI*0.3+PLSC*0.2)*0.525,(PACC*0.2+PAGI*0.2+PAWR*0.3+PCTH*0.8+PLCI*0.3+PLSC*0.2)*0.5)
+
+Pass Block Power
+=IF(Archetype="Blocking",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.9)
+
+Pass Block Finesse
+=IF(Archetype="Blocking",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.9)
+
+Run Block Power
+=IF(Archetype="Blocking",PSTR*0.3+PRBK*0.7,(PSTR*0.3+PRBK*0.7)*0.9)
+
+Run Block Finesse
+=IF(Archetype="Blocking",PAGI*0.3+PRBK*0.7,(PAGI*0.3+PRBK*0.7)*0.9)
+
+Lead Blocking
+=IF(Archetype="Blocking",PAGI*0.15+PACC*0.15+PPBF*0.3+PLIB*0.3+PAWR*0.1,(PAGI*0.15+PACC*0.15+PPBF*0.3+PLIB*0.3+PAWR*0.1)*0.9)
+
+Impact Blocking
+=IF(Archetype="Blocking",PSTR*0.3+PPBF*0.3+PRBF*0.3+PAWR*0.1,(PSTR*0.3+PPBF*0.3+PRBF*0.3+PAWR*0.1)*0.9)
+
+Overall
+=PSPD*0.08+PCTH*0.10+PLCI*0.08+PAWR*0.08+PACC*0.06+PAGI*0.06+PRBK*0.10+PPBK*0.10+PSTR*0.08+PSRRN*0.05+PMRR*0.05+PDRR*0.05+PJMP*0.04+PLRL*0.03+PSTA*0.02+PINJ*0.02
+
+
+Defensive Linemen
+
+Impact Blocking
+=IF(Archetype="Run Stopper",(PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)*1.05,PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)
+
+Play Recognition
+=IF(Archetype="Run Stopper",(PAWR*0.8+PTAK*1.2)*0.5,(PAWR*0.8+PTAK*1.2)*0.475)
+
+Hit Power
+=PSTR*1.0+PACC*0.5+PTAK*0.5
+
+Block Shedding
+=(PTAK*0.5+PLPR*1.0+PAGI*0.3+PACC*0.2)*0.5
+
+Finesse Moves
+=IF(Archetype="Speed Rusher",(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.525,(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.45)
+
+Power Moves
+=IF(Archetype="Power Rusher",(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.525,(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.45)
+
+Pursuit
+=(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.5
+
+Man Coverage
+=(PSPD*0.35+PACC*0.15+PAGI*0.35+PAWR*0.1+PLPR*0.3+PLPU*0.2+PLCI*0.2+PLSC*0.5+PCTH*0.2)*0.2
+
+Zone Coverage
+=(PAWR*0.4+PAGI*0.4+PACC*0.2+PLPR*0.5+PLPU*0.3+PTAK*0.2)*0.2
+
+Press
+=(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.2
+
+Overall
+=PSTR*0.15+PTAK*0.12+PBSG*0.12+PAWR*0.10+PLPR*0.10+PFMS*0.08+PLPM*0.08+PSPD*0.06+PACC*0.05+PAGI*0.05+PLPU*0.04+PSTA*0.03+PINJ*0.02
+
+
+Linebackers
+
+Catching In Traffic
+=IF(OR(Archetype="Pass Coverage",Archetype="Field General"),(PCTH*0.7+PAWR*0.3)*0.6,(PCTH*0.7+PAWR*0.3)*0.4)
+
+Spectacular Catching
+=IF(OR(Archetype="Pass Coverage",Archetype="Field General"),(PCTH*0.4+PLCI*0.4+PAWR*0.2)*0.6,(PCTH*0.4+PLCI*0.4+PAWR*0.2)*0.4)
+
+Impact Blocking
+=IF(Archetype="Run Stopper",(PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)*1.05,PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)
+
+Play Recognition
+=IF(Archetype="Run Stopper",(PAWR*0.8+PTAK*1.2)*0.5,(PAWR*0.8+PTAK*1.2)*0.475)
+
+Hit Power
+=(PSTR*1.0+PACC*0.5+PTAK*0.5)*0.5
+
+Block Shedding
+=(PTAK*0.5+PLPR*1.0+PAGI*0.3+PACC*0.2)*0.5
+
+Finesse Moves
+=IF(Archetype="Pass Rush",(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.525,(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.45)
+
+Power Moves
+=IF(Archetype="Pass Rush",(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.525,(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.45)
+
+Pursuit
+=(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.5
+
+Man Coverage
+=IF(OR(Archetype="Pass Coverage",Archetype="Field General"),(PSPD*0.25+PACC*0.25+PAGI*0.25+PLPR*0.4+PLPU*0.3+PLCI*0.15+PLSC*0.15+PCTH*0.25)*0.4,(PSPD*0.25+PACC*0.25+PAGI*0.25+PLPR*0.4+PLPU*0.3+PLCI*0.15+PLSC*0.15+PCTH*0.25)*0.2)
+
+Zone Coverage
+=IF(OR(Archetype="Pass Coverage",Archetype="Field General"),(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.4,(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.2)
+
+Press
+=IF(OR(Archetype="Pass Coverage",Archetype="Field General"),(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.3,(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.2)
+
+Overall
+=PTAK*0.15+PLPR*0.12+PAWR*0.10+PLPU*0.10+PBSG*0.08+PLHT*0.08+PSPD*0.07+PACC*0.06+PAGI*0.06+PLZC*0.05+PLMC*0.05+PSTR*0.04+PSTA*0.02+PINJ*0.02
+
+
+Cornerbacks
+
+Catching In Traffic
+=IF(Archetype="Zone",(PCTH*0.7+PAWR*0.3)*0.65,(PCTH*0.7+PAWR*0.3)*0.5)
+
+Spectacular Catching
+=IF(Archetype="Zone",(PCTH*0.4+PLCI*0.4+PAWR*0.2)*0.6,(PCTH*0.4+PLCI*0.4+PAWR*0.2)*0.5)
+
+Impact Blocking
+=PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15
+
+Play Recognition
+=(PAWR*0.8+PTAK*1.2)*0.55
+
+Hit Power
+=(PSTR*1.0+PACC*0.5+PTAK*0.5)*0.5
+
+Block Shedding
+=(PTAK*0.5+PLPR*1.0+PAGI*0.3+PACC*0.2)*0.3
+
+Finesse Moves
+=(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.25
+
+Power Moves
+=(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.2
+
+Pursuit
+=IF(OR(Archetype="Zone",Archetype="Slot"),(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.525,(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.5)
+
+Man Coverage
+=IF(Archetype="Man to Man",(PSPD*0.25+PACC*0.25+PAGI*0.25+PLPR*0.4+PLPU*0.3+PLCI*0.15+PLSC*0.15+PCTH*0.25)*0.55,(PSPD*0.25+PACC*0.25+PAGI*0.25+PLPR*0.4+PLPU*0.3+PLCI*0.15+PLSC*0.15+PCTH*0.25)*0.5)
+
+Zone Coverage
+=IF(Archetype="Zone",(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.55,(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.5)
+
+Press
+=IF(Archetype="Man to Man",(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.55,(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.5)
+
+Overall
+=PSPD*0.15+PLMC*0.12+PLZC*0.12+PAWR*0.10+PLPR*0.10+PACC*0.08+PAGI*0.08+PLPE*0.06+PCTH*0.05+PLPU*0.05+PTAK*0.04+PSTA*0.03+PINJ*0.02
+
+
+Safeties
+
+Impact Blocking
+=IF(Archetype="Run Support",(PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)*1.05,PSTR*0.3+PBSG*0.2+PFMS*0.2+PLPR*0.15+PLPM*0.15)
+
+Play Recognition
+=(PAWR*0.8+PTAK*1.2)*0.55
+
+Hit Power
+=(PSTR*1.0+PACC*0.5+PTAK*0.5)*0.5
+
+Block Shedding
+=IF(Archetype="Run Support",(PTAK*0.5+PLPR*1.0+PAGI*0.3+PACC*0.2)*0.475,(PTAK*0.5+PLPR*1.0+PAGI*0.3+PACC*0.2)*0.4)
+
+Finesse Moves
+=(PACC*0.3+PAGI*0.3+PSPD*0.2+PLPR*0.8+PBSG*0.4)*0.25
+
+Power Moves
+=(PAGI*0.15+PSTR*0.5+PLPR*0.8+PBSG*0.4+PACC*0.15)*0.2
+
+Pursuit
+=IF(Archetype="Run Support",(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.525,(PAGI*0.1+PACC*0.1+PLPR*0.7+PTAK*0.4+PBSG*0.5+PSTR*0.1+PSTA*0.1)*0.5)
+
+Man Coverage
+=(PSPD*0.25+PACC*0.25+PAGI*0.25+PLPR*0.4+PLPU*0.3+PLCI*0.15+PLSC*0.15+PCTH*0.25)*0.475
+
+Zone Coverage
+=IF(Archetype="Zone",(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.55,(PAGI*0.4+PACC*0.2+PLPR*0.7+PLPU*0.5+PTAK*0.2)*0.5)
+
+Press
+=(PLPE*0.6+PLPR*0.4+PSTR*0.3+PAWR*0.2+PACC*0.2+PAGI*0.3)*0.45
+
+Overall
+=PLZC*0.14+PAWR*0.12+PLPR*0.10+PLPU*0.10+PTAK*0.09+PSPD*0.08+PLHT*0.07+PACC*0.06+PAGI*0.06+PLMC*0.06+PSTR*0.04+PSTA*0.04+PINJ*0.04
+
+
+Fullback
+
+Run Block Power
+=IF(Archetype="Blocking",(PSTR*0.3+PRBK*0.7)*1.05,PSTR*0.3+PRBK*0.7)
+
+Run Block Finesse
+=IF(Archetype="Blocking",(PAGI*0.3+PRBK*0.7)*1.05,PAGI*0.3+PRBK*0.7)
+
+Pass Block Power
+=IF(Archetype="Blocking",(PSTR*0.3+PPBK*0.7)*1.05,PSTR*0.3+PPBK*0.7)
+
+Pass Block Finesse
+=IF(Archetype="Blocking",(PAGI*0.3+PPBK*0.7)*1.05,PAGI*0.3+PPBK*0.7)
+
+Lead Blocking
+=IF(Archetype="Blocking",(PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1)*1.05,PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1)
+
+Impact Blocking
+=IF(Archetype="Blocking",(PSTR*0.3+PPBF*0.3+PRBF*0.3+PAWR*0.1)*1.05,PSTR*0.3+PPBF*0.3+PRBF*0.3+PAWR*0.1)
+
+Trucking
+=IF(Archetype="Utility",(PBKT*0.65+PSTR*0.25+PACC*0.10)*1.05,PBKT*0.65+PSTR*0.25+PACC*0.10)
+
+Overall
+=PIBL*0.18+PRBK*0.14+PPBK*0.12+PAWR*0.12+PSTR*0.10+PCAR*0.08+PSPD*0.06+PACC*0.06+PCTH*0.05+PBKT*0.05+PSTA*0.02+PINJ*0.02
+
+
+Left Tackle
+
+Pass Block Power
+=IF(Archetype="Power",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.95)
+
+Pass Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.95)
+
+Run Block Power
+=IF(Archetype="Power",PSTR*0.3+PRBK*0.7,(PSTR*0.3+PRBK*0.7)*0.95)
+
+Run Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PRBK*0.7,(PAGI*0.3+PRBK*0.7)*0.95)
+
+Lead Blocking
+=PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1
+
+Overall
+=PPBK*0.22+PAWR*0.18+PPBF*0.14+PRBK*0.13+PRBF*0.11+PSTR*0.10+PAGI*0.06+PSTA*0.03+PINJ*0.03
+
+
+Left Guard
+
+Pass Block Power
+=IF(Archetype="Power",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.95)
+
+Pass Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.95)
+
+Run Block Power
+=IF(Archetype="Power",(PSTR*0.3+PRBK*0.7)*1.05,PSTR*0.3+PRBK*0.7)
+
+Run Block Finesse
+=IF(Archetype="Agile",(PAGI*0.3+PRBK*0.7)*1.05,PAGI*0.3+PRBK*0.7)
+
+Lead Blocking
+=PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1
+
+Overall
+=PRBK*0.20+PAWR*0.18+PPBK*0.15+PSTR*0.14+PRBF*0.11+PPBF*0.10+PAGI*0.06+PSTA*0.03+PINJ*0.03
+
+
+Center
+
+Pass Block Power
+=IF(Archetype="Power",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.95)
+
+Pass Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.95)
+
+Run Block Power
+=IF(Archetype="Power",(PSTR*0.3+PRBK*0.7)*1.05,PSTR*0.3+PRBK*0.7)
+
+Run Block Finesse
+=IF(Archetype="Agile",(PAGI*0.3+PRBK*0.7)*1.05,PAGI*0.3+PRBK*0.7)
+
+Lead Blocking
+=PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1
+
+Overall
+=PAWR*0.20+PRBK*0.16+PPBK*0.14+PSTR*0.14+PRBF*0.12+PPBF*0.12+PAGI*0.06+PSTA*0.03+PINJ*0.03
+
+
+Right Guard
+
+Pass Block Power
+=IF(Archetype="Power",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.95)
+
+Pass Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.95)
+
+Run Block Power
+=IF(Archetype="Power",(PSTR*0.3+PRBK*0.7)*1.05,PSTR*0.3+PRBK*0.7)
+
+Run Block Finesse
+=IF(Archetype="Agile",(PAGI*0.3+PRBK*0.7)*1.05,PAGI*0.3+PRBK*0.7)
+
+Lead Blocking
+=PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1
+
+Overall
+=PRBK*0.20+PAWR*0.18+PPBK*0.15+PSTR*0.14+PRBF*0.11+PPBF*0.10+PAGI*0.06+PSTA*0.03+PINJ*0.03
+
+
+Right Tackle
+
+Pass Block Power
+=IF(Archetype="Power",PSTR*0.3+PPBK*0.7,(PSTR*0.3+PPBK*0.7)*0.95)
+
+Pass Block Finesse
+=IF(Archetype="Agile",PAGI*0.3+PPBK*0.7,(PAGI*0.3+PPBK*0.7)*0.95)
+
+Run Block Power
+=IF(Archetype="Power",(PSTR*0.3+PRBK*0.7)*1.05,PSTR*0.3+PRBK*0.7)
+
+Run Block Finesse
+=IF(Archetype="Agile",(PAGI*0.3+PRBK*0.7)*1.05,PAGI*0.3+PRBK*0.7)
+
+Lead Blocking
+=PAGI*0.15+PACC*0.15+PPBF*0.3+PIBL*0.3+PAWR*0.1
+
+Overall
+=PRBK*0.18+PPBK*0.18+PAWR*0.16+PSTR*0.14+PRBF*0.12+PPBF*0.10+PAGI*0.06+PSTA*0.03+PINJ*0.03
+
+
+Kicker
+
+Overall
+=PKAC*0.35+PKPR*0.32+PAWR*0.33
+
+
+Punter
+
+Overall
+=PKAC*0.33+PKPR*0.34+PAWR*0.33

@@ -1,0 +1,140 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Layered dark surfaces — cool, slightly blue-black so the board reads as a
+     broadcast console, not flat charcoal. */
+  --color-surface-0: #0a0b0d;
+  --color-surface-1: #121317;
+  --color-surface-2: #191b20;
+  --color-surface-3: #21242b;
+  --color-border: #262931;
+  --color-border-strong: #363a44;
+
+  --color-primary: #2f6bff;
+  --color-primary-light: #6f9bff;
+  --color-primary-dark: #1c4fd6;
+
+  --color-info: #34a9db;
+  --color-success: #22c55e;
+  --color-success-light: #4ade80;
+  --color-legend: #8b5cf6;
+  --color-legend-light: #a78bfa;
+  --color-gold: #f5c518;
+  --color-pink: #ec4899;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+
+  --color-ink: #edeef1;
+  --color-muted: #9aa0ac;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Subtle top-anchored glow gives the dark shell depth without a flat wash. */
+  background:
+    radial-gradient(120% 80% at 50% -10%, #14161c 0%, rgba(20, 22, 28, 0) 60%),
+    var(--color-surface-0);
+  background-attachment: fixed;
+}
+* {
+  box-sizing: border-box;
+}
+
+/* Numeric data reads as a column — tabular figures everywhere they appear. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 40%, transparent);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c3038;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3f49;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.16s ease-out both;
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-rise {
+    animation: rise 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  from {
+    transform: translateY(7px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
