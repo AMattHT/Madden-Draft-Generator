@@ -4,7 +4,11 @@ import { CuratedDbPositions } from './CuratedDbPositions';
 import { GenericFillerService } from './GenericFillerService';
 import { CombineService } from './CombineService';
 import { PositionMapper } from './PositionMapper';
+import { RosterPositionService } from './RosterPositionService';
 import { BaselinePlayer } from '../types/player';
+
+// The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
+const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
 
 /**
  * Generic-face skin tone (Race: 1=White, 5=Hispanic, 7=Black) inferred from
@@ -39,7 +43,10 @@ export async function enrichedClass(
     baseline.map(async (p) => {
       const e = enrich.size && p.draftPick != null ? enrich.get(p.draftPick) : undefined;
       const curated = CuratedDbPositions.get(p.firstName, p.lastName, p.draftYear);
-      const label = curated ?? e?.positionLabel ?? null;
+      // Reclassify the generic linebacker bucket from nflverse's more specific
+      // position (so "MLB" edge rushers like Ware/Taylor become OLB -> edge).
+      const lbFix = LB_BUCKET.test(p.position.trim()) ? RosterPositionService.frontSeven(p.firstName, p.lastName) : null;
+      const label = curated ?? e?.positionLabel ?? lbFix ?? null;
 
       // Combine (2000+): official measured height/weight + testing numbers for ratings.
       const c = await CombineService.get(p.firstName, p.lastName, p.draftYear);

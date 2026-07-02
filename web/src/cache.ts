@@ -5,7 +5,7 @@ import type { GeneratedClass, ClassEdits, GearEdits } from './types';
 // year (or reloading the page) is instant and offline-friendly.
 // Bump CACHE_VERSION whenever the backend rating/position logic changes so stale
 // cached classes are treated as a miss and re-pulled automatically.
-const CACHE_VERSION = 27; // v27: generic-face skin tone matches ethnicity — position-informed race default when unknown (2026 class + all blank-race generics)
+const CACHE_VERSION = 28; // v28: 3-4 OLB edge rushers (Ware, L.T., ...) map to LEDG/REDG not off-ball LB; nflverse reclassifies the generic "MLB" bucket
 const keyOf = (year: number, league: string, mode: string) => `class:${year}_${league}_${mode}`;
 const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
