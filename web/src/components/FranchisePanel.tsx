@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, type FranchiseInfo, type CapResetOptions, type CapResetResult } from '../api';
+import { RandomDraft } from './RandomDraft';
 
 const fmtM = (m: number) => `$${m.toFixed(1)}M`;
 const fmtDate = (ms: number) => new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -14,7 +15,21 @@ function Field({ label, children, hint }: { label: string; children: React.React
   );
 }
 
-export function FranchisePanel() {
+export function FranchisePanel({
+  years,
+  usedYears,
+  lastDrawn,
+  onDraw,
+  onToggleUsed,
+  onClearUsed,
+}: {
+  years: number[];
+  usedYears: Set<number>;
+  lastDrawn: number | null;
+  onDraw: () => void;
+  onToggleUsed: (year: number) => void;
+  onClearUsed: () => void;
+}) {
   const [savesDir, setSavesDir] = useState('');
   const [files, setFiles] = useState<FranchiseInfo[]>([]);
   const [selected, setSelected] = useState('');
@@ -68,6 +83,15 @@ export function FranchisePanel() {
 
   return (
     <div className="mx-auto flex h-full max-w-4xl flex-col gap-4 overflow-auto px-6 py-6">
+      <RandomDraft
+        years={years}
+        used={usedYears}
+        lastDrawn={lastDrawn}
+        onDraw={onDraw}
+        onToggleUsed={onToggleUsed}
+        onClear={onClearUsed}
+      />
+
       <div>
         <h1 className="text-xl font-bold tracking-tight">Franchise Salary-Cap Reset</h1>
         <p className="mt-1 text-xs text-muted">

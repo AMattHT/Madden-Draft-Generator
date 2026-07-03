@@ -89,6 +89,8 @@ function LeagueToggle({ league, onSetLeague }: { league: string; onSetLeague: (l
 export function TopBar({
   view,
   onSetView,
+  onDrawRandom,
+  canDraw,
   mode,
   onSetMode,
   showLeague,
@@ -103,6 +105,8 @@ export function TopBar({
 }: {
   view: AppView;
   onSetView: (v: AppView) => void;
+  onDrawRandom: () => void;
+  canDraw: boolean;
   mode: GenMode;
   onSetMode: (m: GenMode) => void;
   showLeague: boolean;
@@ -129,6 +133,14 @@ export function TopBar({
         {draft && (
           <>
             <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} />
+            <button
+              onClick={onDrawRandom}
+              disabled={!canDraw}
+              title={canDraw ? 'Draw a random unused draft year' : 'All years used — reset history in the Franchise tab'}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border-strong bg-surface-2 text-sm transition-colors hover:bg-surface-3 disabled:opacity-40"
+            >
+              🎲
+            </button>
             <PlayerSearch onSelect={onSelectPlayer} />
           </>
         )}

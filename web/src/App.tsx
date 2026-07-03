@@ -25,6 +25,8 @@ export default function App() {
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
   const [view, setView] = useState<AppView>('draft');
+  const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
+  const [lastDrawn, setLastDrawn] = useState<number | null>(null);
   const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
@@ -69,6 +71,40 @@ export default function App() {
     },
     [mode, effLeague]
   );
+
+  const persistUsed = useCallback((next: Set<number>) => {
+    setUsedYears(next);
+    cache.usedYearsSet([...next]);
+  }, []);
+
+  // Draw a random draft year that hasn't been used, mark it used, and jump to the
+  // draft view on that class (ready to review + export). No-repeat by construction.
+  const drawRandomYear = useCallback(() => {
+    const pool = years.filter((y) => !usedYears.has(y));
+    if (pool.length === 0) return;
+    const year = pool[Math.floor(Math.random() * pool.length)];
+    persistUsed(new Set(usedYears).add(year));
+    setLastDrawn(year);
+    setFocusPlayer(null);
+    setView('draft');
+    select(year);
+  }, [years, usedYears, persistUsed, select]);
+
+  const toggleUsedYear = useCallback(
+    (year: number) => {
+      const next = new Set(usedYears);
+      if (next.has(year)) next.delete(year);
+      else next.add(year);
+      if (lastDrawn === year && !next.has(year)) setLastDrawn(null);
+      persistUsed(next);
+    },
+    [usedYears, lastDrawn, persistUsed]
+  );
+
+  const clearUsedYears = useCallback(() => {
+    setLastDrawn(null);
+    persistUsed(new Set());
+  }, [persistUsed]);
 
   const changeMode = useCallback(
     (m: GenMode) => {
@@ -132,6 +168,7 @@ export default function App() {
 
   useEffect(() => {
     cache.cachedYears().then(setCachedYears);
+    cache.usedYearsGet().then((a) => setUsedYears(new Set(a)));
     api.archetypesByPosition().then(setArchetypeOptions).catch(() => {});
     api
       .years()
@@ -150,6 +187,8 @@ export default function App() {
       <TopBar
         view={view}
         onSetView={setView}
+        onDrawRandom={drawRandomYear}
+        canDraw={years.some((y) => !usedYears.has(y))}
         mode={mode}
         onSetMode={changeMode}
         showLeague={selected != null && isMergeEra(selected)}
@@ -170,7 +209,16 @@ export default function App() {
       />
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
-          {view === 'franchise' && <FranchisePanel />}
+          {view === 'franchise' && (
+            <FranchisePanel
+              years={years}
+              usedYears={usedYears}
+              lastDrawn={lastDrawn}
+              onDraw={drawRandomYear}
+              onToggleUsed={toggleUsedYear}
+              onClearUsed={clearUsedYears}
+            />
+          )}
           {view === 'draft' && (
             <>
           {error && (

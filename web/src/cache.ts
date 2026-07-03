@@ -30,6 +30,11 @@ export const cache = {
   gearEditsSet: (year: number, league: string, gear: GearEdits) => set(gearKeyOf(year, league), gear),
   gearEditsDel: (year: number, league: string) => del(gearKeyOf(year, league)),
 
+  // Draft years already used in the franchise (so the random picker never repeats
+  // a class). Persisted so the no-reuse history survives reloads.
+  usedYearsGet: (): Promise<number[]> => get<number[]>('usedDraftYears').then((a) => a ?? []),
+  usedYearsSet: (years: number[]) => set('usedDraftYears', years),
+
   async cachedYears(): Promise<Set<number>> {
     const all = (await keys()) as string[];
     const years = new Set<number>();
