@@ -34,6 +34,14 @@ const GROUP_BY_ID = [
   'IDL', 'LB', 'LB', 'LB', 'CB', 'S', 'S', 'K', 'P', 'LS',
 ];
 
+/** M26 position id -> coarse position group (QB, RB, WR, …). */
+export function groupForId(id: number): string {
+  return GROUP_BY_ID[id] ?? 'QB';
+}
+
+/** Position groups in rough draft-board order, for the class composition strip. */
+export const POS_GROUP_ORDER = ['QB', 'RB', 'WR', 'TE', 'OL', 'EDGE', 'IDL', 'LB', 'CB', 'S', 'K', 'P', 'LS'];
+
 // The signature attributes that define eliteness for each position group,
 // shown as radar axes: [ratingKey, shortAxisLabel].
 const KEY_ATTRS: Record<string, [string, string][]> = {

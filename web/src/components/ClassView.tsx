@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ClassEdits, GearEdits, GeneratedClass, PlayerRow } from '../types';
 import type { ArchetypeOption } from '../api';
-import { POS_NAMES } from '../constants';
+import { POS_NAMES, groupForId } from '../constants';
 import { StatsBar } from './StatsBar';
+import { PositionBreakdown } from './PositionBreakdown';
 import { WavLegend } from './WavLegend';
 import { ExportBar } from './ExportBar';
 import { Toolbar } from './Toolbar';
@@ -80,7 +81,9 @@ export function ClassView({
 
   const rows = useMemo(() => {
     let r = effRows;
-    if (pos !== 'ALL') r = r.filter((x) => x.position === pos);
+    // `pos` may be an exact M26 label (from the dropdown) or a coarse group code
+    // (from the composition strip) — match either.
+    if (pos !== 'ALL') r = r.filter((x) => x.position === pos || groupForId(x.positionId) === pos);
     if (search.trim()) {
       const q = search.toLowerCase();
       r = r.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
@@ -141,6 +144,7 @@ export function ClassView({
       <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 py-4">
         <div className="shrink-0 space-y-3">
           <StatsBar data={data} />
+          <PositionBreakdown rows={effRows} active={pos} onPick={setPos} />
           <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_23rem]">
             <WavLegend />
             <ExportBar

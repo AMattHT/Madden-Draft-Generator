@@ -47,7 +47,9 @@ export function Toolbar({
       </div>
 
       <select value={pos} onChange={(e) => setPos(e.target.value)} className={select}>
-        {positions.map((p) => (
+        {/* `pos` can be a group code chosen from the composition strip that isn't in
+            the exact-label list — surface it so the dropdown stays in sync. */}
+        {(positions.includes(pos) ? positions : [...positions, pos]).map((p) => (
           <option key={p} value={p}>
             {p === 'ALL' ? 'All positions' : p}
           </option>
