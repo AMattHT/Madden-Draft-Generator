@@ -2,8 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache } from './cache';
 import { ClassView } from './components/ClassView';
+import { FranchisePanel } from './components/FranchisePanel';
 import { TopBar } from './components/TopBar';
 import type { ClassEdits, GearEdits, GeneratedClass } from './types';
+
+export type AppView = 'draft' | 'franchise';
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -21,6 +24,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
+  const [view, setView] = useState<AppView>('draft');
   const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
@@ -144,6 +148,8 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col">
       <TopBar
+        view={view}
+        onSetView={setView}
         mode={mode}
         onSetMode={changeMode}
         showLeague={selected != null && isMergeEra(selected)}
@@ -164,6 +170,9 @@ export default function App() {
       />
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
+          {view === 'franchise' && <FranchisePanel />}
+          {view === 'draft' && (
+            <>
           {error && (
             <div className="m-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
               <div className="font-semibold text-red-100">Couldn’t load the draft class</div>
@@ -204,6 +213,8 @@ export default function App() {
               focusPlayer={focusPlayer}
               onRefresh={() => selected && select(selected, true)}
             />
+          )}
+            </>
           )}
         </main>
       </div>

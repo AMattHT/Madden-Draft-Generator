@@ -1,6 +1,26 @@
-import type { GenMode } from '../App';
+import type { GenMode, AppView } from '../App';
 import { YearPicker } from './YearPicker';
 import { PlayerSearch } from './PlayerSearch';
+
+function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
+  const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
+  return (
+    <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
+      {opts.map(([val, label]) => (
+        <button
+          key={val}
+          onClick={() => onSetView(val)}
+          aria-pressed={view === val}
+          className={`rounded-md px-3 py-1.5 transition-colors ${
+            view === val ? 'bg-primary text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function LogoMark() {
   return (
@@ -67,6 +87,8 @@ function LeagueToggle({ league, onSetLeague }: { league: string; onSetLeague: (l
 }
 
 export function TopBar({
+  view,
+  onSetView,
   mode,
   onSetMode,
   showLeague,
@@ -79,6 +101,8 @@ export function TopBar({
   onSelectPlayer,
   cachedYears,
 }: {
+  view: AppView;
+  onSetView: (v: AppView) => void;
   mode: GenMode;
   onSetMode: (m: GenMode) => void;
   showLeague: boolean;
@@ -91,6 +115,7 @@ export function TopBar({
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
 }) {
+  const draft = view === 'draft';
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface-1/80 px-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
@@ -100,8 +125,13 @@ export function TopBar({
           <div className="text-[11px] text-muted">Madden 26 · wAV-rated from real NFL history</div>
         </div>
         <div className="ml-1 h-6 w-px bg-border" />
-        <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} />
-        <PlayerSearch onSelect={onSelectPlayer} />
+        <ViewToggle view={view} onSetView={onSetView} />
+        {draft && (
+          <>
+            <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} />
+            <PlayerSearch onSelect={onSelectPlayer} />
+          </>
+        )}
       </div>
       <div className="flex items-center gap-4">
         <div className="hidden items-center gap-2 text-[11px] text-muted sm:flex">
@@ -109,16 +139,18 @@ export function TopBar({
           {connected ? 'Backend connected' : 'Backend offline'}
         </div>
         <div className="hidden h-6 w-px bg-border sm:block" />
-        {showLeague && (
+        {draft && showLeague && (
           <div className="flex items-center gap-2">
             <span className="hidden text-[11px] uppercase tracking-wider text-neutral-600 md:inline">League</span>
             <LeagueToggle league={league} onSetLeague={onSetLeague} />
           </div>
         )}
-        <div className="flex items-center gap-2">
-          <span className="hidden text-[11px] uppercase tracking-wider text-neutral-600 md:inline">Rating lens</span>
-          <ModeToggle mode={mode} onSetMode={onSetMode} />
-        </div>
+        {draft && (
+          <div className="flex items-center gap-2">
+            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-600 md:inline">Rating lens</span>
+            <ModeToggle mode={mode} onSetMode={onSetMode} />
+          </div>
+        )}
       </div>
     </header>
   );

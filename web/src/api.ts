@@ -28,6 +28,35 @@ export interface PlayerSearchResult {
   league: string;
 }
 
+export interface FranchiseInfo {
+  name: string;
+  sizeBytes: number;
+  modified: number;
+}
+
+export interface CapResetOptions {
+  clearDeadMoney: boolean;
+  capRoomMode: 'off' | 'freed' | 'fixed';
+  fixedCapRoomM?: number;
+  rolloverFloorM?: number;
+  salaryScale?: number | null;
+}
+
+interface CapState {
+  deadMoneyM: number;
+  nextDeadMoneyM: number;
+  capRoomM: number;
+  rolloverM: number;
+}
+
+export interface CapResetResult {
+  input: string;
+  output: string;
+  teamsEdited: number;
+  playersScaled: number;
+  teams: { name: string; salaryM: number; before: CapState; after: CapState }[];
+}
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -78,4 +107,21 @@ export const api = {
     fetch(`/api/export/portraits/${year}?league=${league}${limit ? `&limit=${limit}` : ''}`, {
       method: 'POST',
     }).then((r) => r.json()),
+
+  /** CAREER franchise saves found in the local Madden Saves directory. */
+  franchiseList: () => jget<{ savesDir: string; franchises: FranchiseInfo[] }>('/api/franchise/list'),
+
+  /** Apply a salary-cap reset; writes a new CAREER-*-CAPRESET save (input untouched). */
+  async franchiseCapReset(fileName: string, options: CapResetOptions): Promise<CapResetResult> {
+    const res = await fetch('/api/franchise/cap-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
 };
