@@ -19,15 +19,39 @@ const PSEUDO_TEAMS = new Set(['AFC', 'NFC', 'Free Agents', 'Free Agent', 'Rest o
 const CONTRACT_SALARY_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractSalary${i}`);
 const CONTRACT_BONUS_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractBonus${i}`);
 
-/** The main franchise Player table (bep713 FranchiseTableId; stable across M24-26). */
+/** The main franchise Player table + the 32-team Team table (bep713 FranchiseTableId). */
 const PLAYER_TABLE_UID = 1612938518;
-/** UI dev-tier -> the franchise Player.TraitDevelopment enum value. */
+const TEAM_TABLE_UID = 637929298;
+/** UI dev-tier <-> the franchise Player.TraitDevelopment enum value. */
 const DEV_ENUM: Record<string, string> = {
   Normal: 'Normal',
   Star: 'College_Star',
   Superstar: 'College_Impact',
   XFactor: 'College_Elite',
 };
+const DEV_LABEL: Record<string, string> = { Normal: 'Normal', College_Star: 'Star', College_Impact: 'Superstar', College_Elite: 'XFactor' };
+
+/** Attribute keys (camelCase, same as the draft-class editor) <-> franchise "<Name>Rating" fields. */
+const RATING_KEYS = [
+  'speed', 'acceleration', 'agility', 'strength', 'awareness', 'jumping', 'stamina',
+  'changeOfDirection', 'toughness', 'injury', 'carrying', 'ballCarrierVision', 'breakTackle',
+  'trucking', 'stiffArm', 'spinMove', 'jukeMove', 'catching', 'catchInTraffic', 'spectacularCatch',
+  'shortRouteRunning', 'mediumRouteRunning', 'deepRouteRunning', 'release', 'throwPower',
+  'throwAccuracyShort', 'throwAccuracyMid', 'throwAccuracyDeep', 'throwOnTheRun', 'throwUnderPressure',
+  'playAction', 'breakSack', 'passBlock', 'passBlockPower', 'passBlockFinesse', 'runBlock',
+  'runBlockPower', 'runBlockFinesse', 'leadBlock', 'impactBlocking', 'tackle', 'hitPower',
+  'powerMoves', 'finesseMoves', 'blockShedding', 'pursuit', 'playRecognition', 'manCoverage',
+  'zoneCoverage', 'pressCoverage', 'kickPower', 'kickAccuracy', 'kickReturn', 'longSnap',
+];
+const RATING_FIELD_OVERRIDE: Record<string, string> = { ballCarrierVision: 'BCVisionRating', pressCoverage: 'PressRating' };
+const ratingField = (k: string) => RATING_FIELD_OVERRIDE[k] || `${k.charAt(0).toUpperCase()}${k.slice(1)}Rating`;
+
+/** Franchise position enum values (verified from a real save). */
+const FRANCHISE_POSITIONS = new Set([
+  'QB', 'HB', 'FB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT', 'LE', 'RE', 'DT', 'LOLB', 'MLB', 'ROLB',
+  'CB', 'FS', 'SS', 'K', 'P', 'LS',
+]);
+const clamp99 = (v: number) => Math.max(0, Math.min(99, Math.round(v)));
 
 export interface CapResetOptions {
   clearDeadMoney?: boolean; // zero this/next-year cap penalties (default true)
@@ -78,6 +102,43 @@ export interface PlayerEditResult {
   playersConsidered: number;
   injuriesCleared: number;
   devSet: number;
+}
+
+export interface FranchisePlayer {
+  id: number; // Player-table row index (stable within the file)
+  firstName: string;
+  lastName: string;
+  position: string;
+  teamIndex: number;
+  team: string;
+  overall: number;
+  age: number;
+  yearsPro: number;
+  dev: string; // Normal | Star | Superstar | XFactor
+  jersey: number;
+  status: string;
+  ratings: Record<string, number>;
+}
+
+export interface FranchisePlayersResult {
+  teams: { index: number; name: string }[];
+  players: FranchisePlayer[];
+}
+
+export interface PlayerFieldEdit {
+  overall?: number;
+  age?: number;
+  position?: string;
+  dev?: string;
+  jersey?: number;
+  ratings?: Record<string, number>;
+}
+
+export interface RosterApplyResult {
+  input: string;
+  output: string;
+  outputPath: string;
+  playersEdited: number;
 }
 
 /** A CAREER franchise save (not a CAREERDRAFT draft class). */
@@ -254,5 +315,98 @@ export const FranchiseService = {
 
     await file.save(outputPath, {});
     return { input: fileName, output: outputName, outputPath, playersConsidered: considered, injuriesCleared, devSet };
+  },
+
+  /** Read every editable player from a franchise save (name, team, position, overall,
+   *  age, dev, and the full attribute set) for the in-app roster editor. */
+  async franchisePlayers(fileName: string): Promise<FranchisePlayersResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const file = await madden.create(inputPath, { autoParse: true });
+
+    const teamMap = new Map<number, string>();
+    const teams: { index: number; name: string }[] = [];
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (tt) {
+      await tt.readRecords();
+      for (const r of tt.records) {
+        if (r.isEmpty) continue;
+        let name = '', idx = -1;
+        try { name = String(r.DisplayName || ''); } catch { /* */ }
+        try { idx = num(r.TeamIndex); } catch { /* */ }
+        if (idx < 0 || idx >= 32 || PSEUDO_TEAMS.has(name) || teamMap.has(idx)) continue; // real teams only
+        teamMap.set(idx, name);
+        teams.push({ index: idx, name });
+      }
+      teams.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    const players: FranchisePlayer[] = [];
+    for (const r of pt.records) {
+      if (r.isEmpty) continue;
+      let status = ''; try { status = String(r.ContractStatus); } catch { /* */ }
+      if (status === 'Deleted' || status === 'None') continue;
+      const teamIndex = num(r.TeamIndex);
+      const ratings: Record<string, number> = {};
+      for (const k of RATING_KEYS) { try { ratings[k] = num(r[ratingField(k)]); } catch { ratings[k] = 0; } }
+      players.push({
+        id: r.index,
+        firstName: (() => { try { return String(r.FirstName ?? ''); } catch { return ''; } })(),
+        lastName: (() => { try { return String(r.LastName ?? ''); } catch { return ''; } })(),
+        position: (() => { try { return String(r.Position ?? ''); } catch { return ''; } })(),
+        teamIndex,
+        team: teamMap.get(teamIndex) || (status === 'FreeAgent' ? 'Free Agent' : ''),
+        overall: num(r.OverallRating),
+        age: num(r.Age),
+        yearsPro: num(r.YearsPro),
+        dev: DEV_LABEL[(() => { try { return String(r.TraitDevelopment); } catch { return 'Normal'; } })()] || 'Normal',
+        jersey: num(r.JerseyNum),
+        status,
+        ratings,
+      });
+    }
+    return { teams, players };
+  },
+
+  /** Apply per-player edits from the roster editor to a franchise save (new file). */
+  async rosterApply(fileName: string, edits: Record<string, PlayerFieldEdit>): Promise<RosterApplyResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const outputName = outputNameFor(fileName, 'ROSTER');
+    const outputPath = path.join(dir, outputName);
+    if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    let playersEdited = 0;
+    for (const [idStr, e] of Object.entries(edits || {})) {
+      const rec = pt.records[Number(idStr)];
+      if (!rec || rec.isEmpty) continue;
+      let touched = false;
+      if (e.overall != null) { try { rec.OverallRating = clamp99(e.overall); touched = true; } catch { /* */ } }
+      if (e.age != null) { try { rec.Age = Math.max(18, Math.min(50, Math.round(e.age))); touched = true; } catch { /* */ } }
+      if (e.jersey != null) { try { rec.JerseyNum = clamp99(e.jersey); touched = true; } catch { /* */ } }
+      if (e.position && FRANCHISE_POSITIONS.has(e.position)) { try { rec.Position = e.position; touched = true; } catch { /* */ } }
+      if (e.dev && DEV_ENUM[e.dev]) { try { rec.TraitDevelopment = DEV_ENUM[e.dev]; touched = true; } catch { /* */ } }
+      if (e.ratings) {
+        for (const [k, v] of Object.entries(e.ratings)) {
+          if (!RATING_KEYS.includes(k) || v == null) continue;
+          try { rec[ratingField(k)] = clamp99(Number(v)); touched = true; } catch { /* */ }
+        }
+      }
+      if (touched) playersEdited++;
+    }
+
+    await file.save(outputPath, {});
+    return { input: fileName, output: outputName, outputPath, playersEdited };
   },
 };

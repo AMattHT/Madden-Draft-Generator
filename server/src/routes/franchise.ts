@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions, PlayerEditOptions } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -31,6 +31,28 @@ router.post('/franchise/player-edit', async (req: Request, res: Response) => {
   try {
     const result = await FranchiseService.playerEdit(fileName, options ?? {});
     res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** List all editable players in a franchise save (for the roster editor). */
+router.post('/franchise/players', async (req: Request, res: Response) => {
+  const { fileName } = (req.body ?? {}) as { fileName?: string };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.franchisePlayers(fileName));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Apply per-player roster edits — writes a new CAREER-*-ROSTER file. */
+router.post('/franchise/roster-apply', async (req: Request, res: Response) => {
+  const { fileName, edits } = (req.body ?? {}) as { fileName?: string; edits?: Record<string, PlayerFieldEdit> };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.rosterApply(fileName, edits ?? {}));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }

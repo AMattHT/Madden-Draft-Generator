@@ -70,6 +70,36 @@ export interface PlayerEditResult {
   devSet: number;
 }
 
+export interface FranchisePlayer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  teamIndex: number;
+  team: string;
+  overall: number;
+  age: number;
+  yearsPro: number;
+  dev: string;
+  jersey: number;
+  status: string;
+  ratings: Record<string, number>;
+}
+
+export interface FranchisePlayersResult {
+  teams: { index: number; name: string }[];
+  players: FranchisePlayer[];
+}
+
+export interface PlayerFieldEdit {
+  overall?: number;
+  age?: number;
+  position?: string;
+  dev?: string;
+  jersey?: number;
+  ratings?: Record<string, number>;
+}
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -144,6 +174,34 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Load all editable players from a franchise save (roster editor). */
+  async franchisePlayers(fileName: string): Promise<FranchisePlayersResult> {
+    const res = await fetch('/api/franchise/players', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Apply per-player roster edits; writes a new CAREER-*-ROSTER save. */
+  async franchiseRosterApply(fileName: string, edits: Record<number, PlayerFieldEdit>): Promise<{ output: string; playersEdited: number }> {
+    const res = await fetch('/api/franchise/roster-apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, edits }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
