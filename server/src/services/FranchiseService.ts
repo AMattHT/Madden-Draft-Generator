@@ -85,7 +85,7 @@ function savesDir(): string {
 /** A valid CAREER-* output name (so Madden lists it), derived from the input, never the input itself. */
 function outputNameFor(inputName: string, suffix: string, override?: string): string {
   if (override) return override;
-  const base = inputName.replace(/-AUTOSAVE$/i, '').replace(/-(CAPRESET|PLAYERS|EDITED)(-.*)?$/i, '');
+  const base = inputName.replace(/-AUTOSAVE$/i, '').replace(/-(CAPRESET|PLAYERS|EDITED|ROSTER|RELOCATE|REBRAND)(-.*)?$/i, '');
   return `${base}-${suffix}`;
 }
 
@@ -141,6 +141,60 @@ export interface RosterApplyResult {
   playersEdited: number;
 }
 
+export interface RgbColor { r: number; g: number; b: number; }
+
+/** A team's editable identity as read from the Team record. Note: in a franchise save
+ *  the TeamIdentity/City/Stadium catalog tables are empty — the Team record itself is
+ *  the source of truth for names/city/abbreviation/colors/logo. */
+export interface TeamIdentity {
+  teamIndex: number;
+  displayName: string;    // DisplayName (team/mascot name)
+  nickName: string;       // NickName
+  city: string;           // LongName (the city/location text)
+  abbreviation: string;   // ShortName (scoreboard tricode)
+  prefix: string;         // TEAM_PREFIX_NAME
+  logoId: number;         // TEAM_LOGO
+  hasSecondaryColor: boolean;
+  primary: RgbColor;      // TEAM_BACKGROUNDCOLOR R/G/B
+  secondary: RgbColor;    // TEAM_BACKGROUNDCOLOR R2/G2/B2
+  hub: RgbColor;          // HubBackgroundColor R/G/B (menu/hub theming)
+  locked: boolean;        // TEAM_LOCKED
+}
+
+export interface FranchiseTeamsResult {
+  input: string;
+  teams: TeamIdentity[];
+}
+
+export interface RelocateRebrandOptions {
+  teamIndex: number;         // REQUIRED — which of the 32 real teams (0..31)
+  displayName?: string;      // DisplayName (max 18)
+  nickName?: string;         // NickName (max 18; defaults to displayName)
+  city?: string;             // LongName / city text (max 16) — present => RELOCATE
+  abbreviation?: string;     // ShortName (max 8)
+  prefix?: string;           // TEAM_PREFIX_NAME (max 4)
+  primary?: RgbColor;        // TEAM_BACKGROUNDCOLOR R/G/B
+  secondary?: RgbColor;      // TEAM_BACKGROUNDCOLOR R2/G2/B2 (sets TEAM_HAS_SECONDARY_COLOR)
+  hub?: RgbColor;            // HubBackgroundColor R/G/B
+  logoId?: number;           // TEAM_LOGO (0..2047)
+  setRelocatedFlag?: boolean;
+  outputName?: string;
+}
+
+export interface FieldChange { field: string; before: string | number; after: string | number; }
+
+export interface RelocateRebrandResult {
+  input: string;
+  output: string;
+  outputPath: string;
+  teamIndex: number;
+  mode: 'REBRAND' | 'RELOCATE';
+  teamName: string;          // resulting DisplayName
+  wasLocked: boolean;
+  changes: FieldChange[];    // before -> after for every field actually written
+  skippedFields: string[];   // fields that threw (range/enum/length) and were skipped
+}
+
 /** A CAREER franchise save (not a CAREERDRAFT draft class). */
 export interface FranchiseFileInfo {
   name: string;
@@ -152,6 +206,10 @@ function num(v: unknown): number {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 }
+
+const clampByte = (v: number) => Math.max(0, Math.min(255, Math.round(num(v))));
+const clampLogo = (v: number) => Math.max(0, Math.min(2047, Math.round(num(v))));
+const trunc = (s: unknown, max: number) => String(s ?? '').slice(0, max);
 
 async function findTeamTable(file: any): Promise<any | null> {
   for (const t of file.tables || []) {
@@ -408,5 +466,126 @@ export const FranchiseService = {
 
     await file.save(outputPath, {});
     return { input: fileName, output: outputName, outputPath, playersEdited };
+  },
+
+  /** Read each real team's editable identity (name, city, abbreviation, colors, logo)
+   *  for the relocation/rebrand tool's team picker + before/after preview. Read-only. */
+  async franchiseTeams(fileName: string): Promise<FranchiseTeamsResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const file = await madden.create(inputPath, { autoParse: true });
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (!tt) throw new Error('team table not found');
+    await tt.readRecords();
+
+    const rd = (r: any, f: string): string => { try { return String(r[f] ?? ''); } catch { return ''; } };
+    const rb = (r: any, f: string): boolean => { try { return !!r[f]; } catch { return false; } };
+    const rgb = (r: any, a: string, b: string, c: string): RgbColor => {
+      const g = (f: string) => { try { return num(r[f]); } catch { return 0; } };
+      return { r: g(a), g: g(b), b: g(c) };
+    };
+
+    const teams: TeamIdentity[] = [];
+    for (const r of tt.records) {
+      if (r.isEmpty) continue;
+      const name = rd(r, 'DisplayName');
+      const idx = num(r.TeamIndex);
+      if (idx < 0 || idx >= 32 || !name || PSEUDO_TEAMS.has(name)) continue;
+      teams.push({
+        teamIndex: idx,
+        displayName: name,
+        nickName: rd(r, 'NickName'),
+        city: rd(r, 'LongName'),
+        abbreviation: rd(r, 'ShortName'),
+        prefix: rd(r, 'TEAM_PREFIX_NAME'),
+        logoId: (() => { try { return num(r.TEAM_LOGO); } catch { return 0; } })(),
+        hasSecondaryColor: rb(r, 'TEAM_HAS_SECONDARY_COLOR'),
+        primary: rgb(r, 'TEAM_BACKGROUNDCOLORR', 'TEAM_BACKGROUNDCOLORG', 'TEAM_BACKGROUNDCOLORB'),
+        secondary: rgb(r, 'TEAM_BACKGROUNDCOLORR2', 'TEAM_BACKGROUNDCOLORG2', 'TEAM_BACKGROUNDCOLORB2'),
+        hub: rgb(r, 'HubBackgroundColorR', 'HubBackgroundColorG', 'HubBackgroundColorB'),
+        locked: rb(r, 'TEAM_LOCKED'),
+      });
+    }
+    teams.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    return { input: fileName, teams };
+  },
+
+  /** Relocate and/or rebrand one team by editing its Team record in place (name, city,
+   *  abbreviation, colors, logo). Direct scalar writes only — the same low-risk pattern
+   *  as capReset; never touches TeamIndex or row order, so schedule/standings/stats/roster
+   *  references (all by index/pointer) stay intact. Writes a NEW file. */
+  async relocateRebrand(fileName: string, opts: RelocateRebrandOptions): Promise<RelocateRebrandResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    if (opts.teamIndex == null || opts.teamIndex < 0 || opts.teamIndex >= 32) throw new Error('teamIndex (0..31) required');
+
+    // A city change reads as a RELOCATE; identity-only is a REBRAND (drives the output suffix).
+    const mode: 'REBRAND' | 'RELOCATE' = opts.city != null ? 'RELOCATE' : 'REBRAND';
+    const outputName = outputNameFor(fileName, mode, opts.outputName);
+    const outputPath = path.join(dir, outputName);
+    if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (!tt) throw new Error('team table not found');
+    await tt.readRecords();
+
+    // Locate the ONE target record by TeamIndex, skipping empties + pseudo-teams.
+    let target: any = null;
+    for (const r of tt.records) {
+      if (r.isEmpty) continue;
+      let name = ''; try { name = String(r.DisplayName || ''); } catch { /* */ }
+      const idx = num(r.TeamIndex);
+      if (idx < 0 || idx >= 32 || PSEUDO_TEAMS.has(name)) continue;
+      if (idx === opts.teamIndex) { target = r; break; }
+    }
+    if (!target) throw new Error(`team with TeamIndex ${opts.teamIndex} not found`);
+
+    const changes: FieldChange[] = [];
+    const skipped: string[] = [];
+    let wasLocked = false; try { wasLocked = !!target.TEAM_LOCKED; } catch { /* */ }
+
+    // Write one field, capturing before->after and swallowing range/enum/length throws.
+    const put = (field: string, raw: string | number | boolean) => {
+      try {
+        let before: string | number = '';
+        try { before = typeof raw === 'number' ? num(target[field]) : String(target[field] ?? ''); } catch { /* */ }
+        target[field] = raw;
+        if (typeof raw !== 'boolean' && String(before) !== String(raw)) changes.push({ field, before, after: raw });
+      } catch { skipped.push(field); }
+    };
+
+    const nick = opts.nickName ?? opts.displayName;
+    if (opts.displayName != null) put('DisplayName', trunc(opts.displayName, 18));
+    if (nick != null) put('NickName', trunc(nick, 18));
+    if (opts.city != null) put('LongName', trunc(opts.city, 16));
+    if (opts.abbreviation != null) put('ShortName', trunc(opts.abbreviation, 8));
+    if (opts.prefix != null) put('TEAM_PREFIX_NAME', trunc(opts.prefix, 4));
+
+    if (opts.primary) {
+      put('TEAM_BACKGROUNDCOLORR', clampByte(opts.primary.r));
+      put('TEAM_BACKGROUNDCOLORG', clampByte(opts.primary.g));
+      put('TEAM_BACKGROUNDCOLORB', clampByte(opts.primary.b));
+    }
+    if (opts.secondary) {
+      put('TEAM_BACKGROUNDCOLORR2', clampByte(opts.secondary.r));
+      put('TEAM_BACKGROUNDCOLORG2', clampByte(opts.secondary.g));
+      put('TEAM_BACKGROUNDCOLORB2', clampByte(opts.secondary.b));
+      put('TEAM_HAS_SECONDARY_COLOR', true);
+    }
+    if (opts.hub) {
+      put('HubBackgroundColorR', clampByte(opts.hub.r));
+      put('HubBackgroundColorG', clampByte(opts.hub.g));
+      put('HubBackgroundColorB', clampByte(opts.hub.b));
+    }
+
+    if (opts.logoId != null) put('TEAM_LOGO', clampLogo(opts.logoId));
+    if (opts.setRelocatedFlag) put('IsRelocated', true);
+
+    let teamName = ''; try { teamName = String(target.DisplayName || ''); } catch { /* */ }
+    await file.save(outputPath, {});
+    return { input: fileName, output: outputName, outputPath, teamIndex: opts.teamIndex, mode, teamName, wasLocked, changes, skippedFields: skipped };
   },
 };

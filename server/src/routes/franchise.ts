@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -53,6 +53,29 @@ router.post('/franchise/roster-apply', async (req: Request, res: Response) => {
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
     res.json(await FranchiseService.rosterApply(fileName, edits ?? {}));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Read each real team's editable identity (name, city, abbreviation, colors, logo). */
+router.post('/franchise/teams', async (req: Request, res: Response) => {
+  const { fileName } = (req.body ?? {}) as { fileName?: string };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.franchiseTeams(fileName));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Relocate/rebrand a team — writes a new CAREER-*-RELOCATE / -REBRAND file. */
+router.post('/franchise/relocate-rebrand', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: RelocateRebrandOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  if (!options || options.teamIndex == null) return res.status(400).json({ error: 'options.teamIndex required' });
+  try {
+    res.json(await FranchiseService.relocateRebrand(fileName, options));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }

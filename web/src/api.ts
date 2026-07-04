@@ -100,6 +100,50 @@ export interface PlayerFieldEdit {
   ratings?: Record<string, number>;
 }
 
+export interface RgbColor { r: number; g: number; b: number; }
+
+export interface TeamIdentity {
+  teamIndex: number;
+  displayName: string;
+  nickName: string;
+  city: string;
+  abbreviation: string;
+  prefix: string;
+  logoId: number;
+  hasSecondaryColor: boolean;
+  primary: RgbColor;
+  secondary: RgbColor;
+  hub: RgbColor;
+  locked: boolean;
+}
+
+export interface RelocateRebrandOptions {
+  teamIndex: number;
+  displayName?: string;
+  nickName?: string;
+  city?: string;
+  abbreviation?: string;
+  prefix?: string;
+  primary?: RgbColor;
+  secondary?: RgbColor;
+  hub?: RgbColor;
+  logoId?: number;
+  setRelocatedFlag?: boolean;
+}
+
+export interface FieldChange { field: string; before: string | number; after: string | number; }
+
+export interface RelocateRebrandResult {
+  input: string;
+  output: string;
+  teamIndex: number;
+  mode: 'REBRAND' | 'RELOCATE';
+  teamName: string;
+  wasLocked: boolean;
+  changes: FieldChange[];
+  skippedFields: string[];
+}
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -232,6 +276,34 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, edits }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Read each team's current identity (name/city/abbr/colors/logo) for the rebrand tool. */
+  async franchiseTeams(fileName: string): Promise<{ input: string; teams: TeamIdentity[] }> {
+    const res = await fetch('/api/franchise/teams', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Relocate/rebrand a team; writes a new CAREER-*-RELOCATE / -REBRAND save. */
+  async franchiseRelocateRebrand(fileName: string, options: RelocateRebrandOptions): Promise<RelocateRebrandResult> {
+    const res = await fetch('/api/franchise/relocate-rebrand', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
