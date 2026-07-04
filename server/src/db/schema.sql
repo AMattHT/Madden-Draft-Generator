@@ -73,6 +73,20 @@ CREATE TABLE IF NOT EXISTS generated_ratings (
   UNIQUE(player_id, rating_mode, seed)
 );
 
+-- Wikipedia-photo skin-tone crawl cache: one row per ATTEMPTED player so a
+-- resumable crawl skips both successes AND known dead ends, only re-trying
+-- transient failures. Keyed by normName|draftYear. outcome:
+--   'ok'      -> tone found (terminal)
+--   'no_skin' -> photo fetched but no detectable face/skin (terminal)
+--   'gone'    -> permanent HTTP error, e.g. 404 bad URL (terminal)
+--   'retry'   -> transient (429 rate-limit / network / timeout) -> retried next run
+CREATE TABLE IF NOT EXISTS wiki_skintone (
+  key          TEXT PRIMARY KEY,       -- normName|draftYear
+  tone         INTEGER,                -- 1-7 when outcome='ok', else NULL
+  outcome      TEXT NOT NULL,
+  attempted_at INTEGER NOT NULL        -- epoch ms
+);
+
 CREATE TABLE IF NOT EXISTS exports (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   draft_class_id  INTEGER,
