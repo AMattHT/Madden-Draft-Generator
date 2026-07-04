@@ -26,6 +26,7 @@ export default function App() {
   const [mode, setMode] = useState<GenMode>('madden');
   const [view, setView] = useState<AppView>('draft');
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
+  const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
   const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
@@ -77,10 +78,29 @@ export default function App() {
     cache.usedYearsSet([...next]);
   }, []);
 
-  // Draw a random draft year that hasn't been used, mark it used, and jump to the
-  // draft view on that class (ready to review + export). No-repeat by construction.
+  const inRange = useCallback(
+    (y: number) => !range || (y >= range.from && y <= range.to),
+    [range]
+  );
+
+  const updateRange = useCallback(
+    (from: number, to: number) => {
+      if (!years.length) return;
+      const lo = Math.min(...years);
+      const hi = Math.max(...years);
+      const f = Math.max(lo, Math.min(hi, from));
+      const t = Math.max(f, Math.min(hi, to));
+      const r = { from: f, to: t };
+      setRange(r);
+      cache.rangeSet(r);
+    },
+    [years]
+  );
+
+  // Draw a random unused draft year within the selected range, mark it used, and
+  // jump to the draft view on that class (ready to export). No-repeat by construction.
   const drawRandomYear = useCallback(() => {
-    const pool = years.filter((y) => !usedYears.has(y));
+    const pool = years.filter((y) => !usedYears.has(y) && inRange(y));
     if (pool.length === 0) return;
     const year = pool[Math.floor(Math.random() * pool.length)];
     persistUsed(new Set(usedYears).add(year));
@@ -88,7 +108,16 @@ export default function App() {
     setFocusPlayer(null);
     setView('draft');
     select(year);
-  }, [years, usedYears, persistUsed, select]);
+  }, [years, usedYears, inRange, persistUsed, select]);
+
+  // Undo the most recent draw — puts that year back in the pool.
+  const undoLastDraw = useCallback(() => {
+    const arr = [...usedYears];
+    if (arr.length === 0) return;
+    arr.pop();
+    persistUsed(new Set(arr));
+    setLastDrawn(null);
+  }, [usedYears, persistUsed]);
 
   const toggleUsedYear = useCallback(
     (year: number) => {
@@ -166,6 +195,17 @@ export default function App() {
     [selected, effLeague]
   );
 
+  // Once the available years are known, load the saved range (or default to full span).
+  useEffect(() => {
+    if (!years.length) return;
+    const lo = Math.min(...years);
+    const hi = Math.max(...years);
+    cache.rangeGet().then((r) => {
+      if (r) setRange({ from: Math.max(lo, Math.min(hi, r.from)), to: Math.max(lo, Math.min(hi, r.to)) });
+      else setRange({ from: lo, to: hi });
+    });
+  }, [years]);
+
   useEffect(() => {
     cache.cachedYears().then(setCachedYears);
     cache.usedYearsGet().then((a) => setUsedYears(new Set(a)));
@@ -188,7 +228,7 @@ export default function App() {
         view={view}
         onSetView={setView}
         onDrawRandom={drawRandomYear}
-        canDraw={years.some((y) => !usedYears.has(y))}
+        canDraw={years.some((y) => !usedYears.has(y) && inRange(y))}
         mode={mode}
         onSetMode={changeMode}
         showLeague={selected != null && isMergeEra(selected)}
@@ -214,7 +254,10 @@ export default function App() {
               years={years}
               usedYears={usedYears}
               lastDrawn={lastDrawn}
+              range={range}
               onDraw={drawRandomYear}
+              onUndo={undoLastDraw}
+              onSetRange={updateRange}
               onToggleUsed={toggleUsedYear}
               onClearUsed={clearUsedYears}
             />

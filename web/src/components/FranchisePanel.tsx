@@ -19,14 +19,20 @@ export function FranchisePanel({
   years,
   usedYears,
   lastDrawn,
+  range,
   onDraw,
+  onUndo,
+  onSetRange,
   onToggleUsed,
   onClearUsed,
 }: {
   years: number[];
   usedYears: Set<number>;
   lastDrawn: number | null;
+  range: { from: number; to: number } | null;
   onDraw: () => void;
+  onUndo: () => void;
+  onSetRange: (from: number, to: number) => void;
   onToggleUsed: (year: number) => void;
   onClearUsed: () => void;
 }) {
@@ -87,7 +93,10 @@ export function FranchisePanel({
         years={years}
         used={usedYears}
         lastDrawn={lastDrawn}
+        range={range}
         onDraw={onDraw}
+        onUndo={onUndo}
+        onSetRange={onSetRange}
         onToggleUsed={onToggleUsed}
         onClear={onClearUsed}
       />

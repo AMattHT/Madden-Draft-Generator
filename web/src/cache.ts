@@ -35,6 +35,11 @@ export const cache = {
   usedYearsGet: (): Promise<number[]> => get<number[]>('usedDraftYears').then((a) => a ?? []),
   usedYearsSet: (years: number[]) => set('usedDraftYears', years),
 
+  // The random-picker year range (inclusive). Persisted alongside the used years.
+  rangeGet: (): Promise<{ from: number; to: number } | null> =>
+    get<{ from: number; to: number }>('draftRange').then((r) => r ?? null),
+  rangeSet: (range: { from: number; to: number }) => set('draftRange', range),
+
   async cachedYears(): Promise<Set<number>> {
     const all = (await keys()) as string[];
     const years = new Set<number>();
