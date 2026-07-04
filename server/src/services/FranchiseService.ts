@@ -22,14 +22,26 @@ const CONTRACT_BONUS_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractBonus
 /** The main franchise Player table + the 32-team Team table (bep713 FranchiseTableId). */
 const PLAYER_TABLE_UID = 1612938518;
 const TEAM_TABLE_UID = 637929298;
-/** UI dev-tier <-> the franchise Player.TraitDevelopment enum value. */
+const SEASONGAME_TABLE_UID = 1607878349; // SeasonGame (schedule)
+const SEASONINFO_TABLE_UID = 3123991521; // SeasonInfo (current week/type/year)
+// UI dev-tier <-> the franchise Player.TraitDevelopment enum. The enum aliases each
+// tier: value 0=Normal, 1=College_Impact(=Star), 2=College_Star(=Superstar),
+// 3=College_Elite(=XFactor) — verified from a real save. We WRITE the plain display
+// names (the lib rejects numeric ordinals and accepts 'Star'/'Superstar'/'XFactor'
+// directly), and READ by mapping the stored College_* aliases back to display names.
 const DEV_ENUM: Record<string, string> = {
   Normal: 'Normal',
-  Star: 'College_Star',
-  Superstar: 'College_Impact',
-  XFactor: 'College_Elite',
+  Star: 'Star',
+  Superstar: 'Superstar',
+  XFactor: 'XFactor',
 };
-const DEV_LABEL: Record<string, string> = { Normal: 'Normal', College_Star: 'Star', College_Impact: 'Superstar', College_Elite: 'XFactor' };
+const DEV_LABEL: Record<string, string> = {
+  Normal: 'Normal',
+  College_Impact: 'Star', Star: 'Star',
+  College_Star: 'Superstar', Superstar: 'Superstar',
+  College_Elite: 'XFactor', XFactor: 'XFactor',
+};
+type DevTier = 'Normal' | 'Star' | 'Superstar' | 'XFactor';
 
 /** Attribute keys (camelCase, same as the draft-class editor) <-> franchise "<Name>Rating" fields. */
 const RATING_KEYS = [
@@ -195,6 +207,55 @@ export interface RelocateRebrandResult {
   skippedFields: string[];   // fields that threw (range/enum/length) and were skipped
 }
 
+export interface TraitRealismOptions {
+  includeUnsigned?: boolean; // default false: Signed roster only (~1698)
+  xfactorCap?: number;       // default 36 (~1/team)
+  superstarCap?: number;     // default 72 (~2/team)
+  dryRun?: boolean;          // compute + report counts, do NOT write a file
+  outputName?: string;
+}
+
+export interface TraitTierCounts { Normal: number; Star: number; Superstar: number; XFactor: number; }
+
+export interface TraitUpgrade {
+  name: string; position: string; team: string; overall: number; age: number;
+  from: DevTier; to: DevTier;
+}
+
+export interface TraitRealismResult {
+  input: string;
+  output: string;      // '' when dryRun
+  outputPath: string;  // '' when dryRun
+  dryRun: boolean;
+  playersConsidered: number;
+  changed: number;
+  before: TraitTierCounts;
+  after: TraitTierCounts;
+  byPosition: Record<string, TraitTierCounts>;
+  notable: TraitUpgrade[]; // up to 40, elevated promotions first then OVR desc
+}
+
+export interface ScheduleGame {
+  away: string;        // '' when unassigned (NULL ref / placeholder)
+  home: string;
+  played: boolean;
+  awayScore: number;
+  homeScore: number;
+  status: string;      // GameStatus enum
+  day: string;         // DayOfWeek enum
+  time: string;        // formatted kickoff ('' if unset)
+  timeMinutes: number; // raw TimeOfDay
+  gameId: number;      // SeasonGameID (stable)
+}
+export interface ScheduleWeek { stage: string; seasonWeek: number; label: string; games: ScheduleGame[]; }
+export interface FranchiseScheduleResult {
+  input: string;
+  seasonYear: number;
+  currentStage: string;
+  currentWeek: number;
+  weeks: ScheduleWeek[];
+}
+
 /** A CAREER franchise save (not a CAREERDRAFT draft class). */
 export interface FranchiseFileInfo {
   name: string;
@@ -210,6 +271,30 @@ function num(v: unknown): number {
 const clampByte = (v: number) => Math.max(0, Math.min(255, Math.round(num(v))));
 const clampLogo = (v: number) => Math.max(0, Math.min(2047, Math.round(num(v))));
 const trunc = (s: unknown, max: number) => String(s ?? '').slice(0, max);
+
+/** Kickoff time from TimeOfDay minutes-past-midnight -> 'h:mm AM/PM' ('' if unset). */
+const fmtKick = (mins: number): string => {
+  if (!Number.isFinite(mins) || mins <= 0) return '';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  const ap = h >= 12 ? 'PM' : 'AM';
+  const h12 = ((h + 11) % 12) + 1;
+  return `${h12}:${String(m).padStart(2, '0')} ${ap}`;
+};
+/** Display label from SeasonWeekType + 0-based SeasonWeek (regular season shows week+1). */
+const weekLabel = (stage: string, sw: number): string => {
+  switch (stage) {
+    case 'PreSeason': return `Preseason ${sw + 1}`;
+    case 'RegularSeason': return `Week ${sw + 1}`;
+    case 'WildcardPlayoff': return 'Wild Card';
+    case 'DivisionalPlayoff': return 'Divisional';
+    case 'ConferencePlayoff': return 'Conference';
+    case 'SuperBowl': return 'Super Bowl';
+    default: return stage || `Week ${sw + 1}`;
+  }
+};
+const STAGE_ORDER: Record<string, number> = {
+  PreSeason: 0, RegularSeason: 1, WildcardPlayoff: 2, DivisionalPlayoff: 3, ConferencePlayoff: 4, SuperBowl: 5,
+};
 
 async function findTeamTable(file: any): Promise<any | null> {
   for (const t of file.tables || []) {
@@ -587,5 +672,183 @@ export const FranchiseService = {
     let teamName = ''; try { teamName = String(target.DisplayName || ''); } catch { /* */ }
     await file.save(outputPath, {});
     return { input: fileName, output: outputName, outputPath, teamIndex: opts.teamIndex, mode, teamName, wasLocked, changes, skippedFields: skipped };
+  },
+
+  /** Rewrite TraitDevelopment league-wide into a realistic scarcity pyramid (the base game
+   *  gives nearly every 85+ an elevated trait). Signed roster only by default. dryRun previews
+   *  counts without writing; otherwise writes a new CAREER-*-TRAITS file. */
+  async applyTraitRealism(fileName: string, opts: TraitRealismOptions = {}): Promise<TraitRealismResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+
+    const includeUnsigned = !!opts.includeUnsigned;
+    const xCap = opts.xfactorCap ?? 36;
+    const sCap = opts.superstarCap ?? 72;
+    const dryRun = !!opts.dryRun;
+
+    const outputName = dryRun ? '' : outputNameFor(fileName, 'TRAITS', opts.outputName);
+    const outputPath = dryRun ? '' : path.join(dir, outputName);
+    if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+
+    // team-index -> name for readable notable[] entries
+    const teamMap = new Map<number, string>();
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (tt) {
+      await tt.readRecords();
+      for (const r of tt.records) {
+        if (r.isEmpty) continue;
+        let name = '', idx = -1;
+        try { name = String(r.DisplayName || ''); } catch { /* */ }
+        try { idx = num(r.TeamIndex); } catch { /* */ }
+        if (idx < 0 || idx >= 32 || PSEUDO_TEAMS.has(name) || teamMap.has(idx)) continue;
+        teamMap.set(idx, name);
+      }
+    }
+
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    interface Work { rec: any; ovr: number; age: number; pos: string; team: string; name: string; cur: DevTier; want: DevTier; }
+    const work: Work[] = [];
+    const before: TraitTierCounts = { Normal: 0, Star: 0, Superstar: 0, XFactor: 0 };
+    let considered = 0;
+
+    for (const r of pt.records) {
+      if (r.isEmpty) continue;
+      let status = ''; try { status = String(r.ContractStatus); } catch { /* */ }
+      if (status === 'Deleted' || status === 'None') continue;
+      if (!includeUnsigned && status !== 'Signed') continue;
+      considered++;
+
+      const ovr = num(r.OverallRating);
+      const age = num(r.Age);
+      let cur: DevTier = 'Normal';
+      try { cur = (DEV_LABEL[String(r.TraitDevelopment)] as DevTier) || 'Normal'; } catch { /* */ }
+      before[cur]++;
+
+      // Threshold pass -> desired tier (age nudges up-and-comers, downgrades declining vets).
+      let want: DevTier = 'Normal';
+      if (ovr >= 92) want = 'XFactor';
+      else if (ovr >= 88) want = age >= 31 ? 'Star' : 'Superstar';
+      else if (ovr >= 84) want = (ovr >= 86 && age <= 26) ? 'Superstar' : 'Star';
+      else if (ovr >= 80) want = age <= 25 ? 'Star' : 'Normal';
+      else if (ovr >= 76) want = age <= 23 ? 'Star' : 'Normal';
+      else want = 'Normal';
+
+      let name = '', pos = '';
+      try { name = `${String(r.FirstName ?? '')} ${String(r.LastName ?? '')}`.trim(); } catch { /* */ }
+      try { pos = String(r.Position ?? ''); } catch { /* */ }
+      work.push({ rec: r, ovr, age, pos, team: teamMap.get(num(r.TeamIndex)) || status, name, cur, want });
+    }
+
+    // Enforce league caps: demote lowest-OVR (older first) over the limit.
+    const demote = (tier: DevTier, cap: number, to: DevTier) => {
+      const pool = work.filter((w) => w.want === tier).sort((a, b) => a.ovr - b.ovr || b.age - a.age);
+      for (let i = 0; i < pool.length - cap; i++) pool[i].want = to;
+    };
+    demote('XFactor', xCap, 'Superstar');
+    demote('Superstar', sCap, 'Star');
+
+    const after: TraitTierCounts = { Normal: 0, Star: 0, Superstar: 0, XFactor: 0 };
+    const byPosition: Record<string, TraitTierCounts> = {};
+    const notable: TraitUpgrade[] = [];
+    let changed = 0;
+
+    for (const w of work) {
+      after[w.want]++;
+      (byPosition[w.pos] ??= { Normal: 0, Star: 0, Superstar: 0, XFactor: 0 })[w.want]++;
+      if (w.want !== w.cur) {
+        changed++;
+        notable.push({ name: w.name, position: w.pos, team: w.team, overall: w.ovr, age: w.age, from: w.cur, to: w.want });
+        if (!dryRun) { try { w.rec.TraitDevelopment = DEV_ENUM[w.want]; } catch { /* enum/range */ } }
+      }
+    }
+
+    const rank: Record<DevTier, number> = { Normal: 0, Star: 1, Superstar: 2, XFactor: 3 };
+    notable.sort((a, b) => (rank[b.to] - rank[a.to]) || (b.overall - a.overall));
+
+    if (!dryRun) await file.save(outputPath, {});
+    return {
+      input: fileName, output: outputName, outputPath, dryRun,
+      playersConsidered: considered, changed, before, after, byPosition, notable: notable.slice(0, 40),
+    };
+  },
+
+  /** Read the full season schedule grouped by stage then week. Read-only — cannot corrupt. */
+  async franchiseSchedule(fileName: string): Promise<FranchiseScheduleResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const file = await madden.create(inputPath, { autoParse: true });
+
+    // Team names indexed BY ROW NUMBER (schedule refs resolve to row number, NOT TeamIndex).
+    const teamByRow: string[] = [];
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (tt) {
+      await tt.readRecords();
+      tt.records.forEach((r: any, rowNum: number) => {
+        if (r.isEmpty) { teamByRow[rowNum] = ''; return; }
+        try { teamByRow[rowNum] = String(r.DisplayName || ''); } catch { teamByRow[rowNum] = ''; }
+      });
+    }
+
+    // SeasonInfo -> current position + year.
+    let seasonYear = 0, currentStage = '', currentWeek = 0;
+    const si = file.getTableByUniqueId(SEASONINFO_TABLE_UID);
+    if (si) {
+      await si.readRecords();
+      const r = si.records.find((x: any) => !x.isEmpty);
+      if (r) {
+        try { seasonYear = num(r.CurrentSeasonYear); } catch { /* */ }
+        try { currentStage = String(r.CurrentWeekType); } catch { /* */ }
+        try { currentWeek = num(r.CurrentWeek); } catch { /* */ }
+      }
+    }
+
+    const sg = file.getTableByUniqueId(SEASONGAME_TABLE_UID) || file.getTableByName('SeasonGame');
+    if (!sg) throw new Error('SeasonGame table not found');
+    await sg.readRecords();
+
+    // Resolve a Team-typed ref to a name, guarding the all-zero NULL ref (which would
+    // falsely resolve to row 0 / the 49ers).
+    const resolveTeam = (rec: any, key: 'HomeTeam' | 'AwayTeam'): string => {
+      try {
+        const raw = String(rec[key] ?? '');
+        if (/^0*$/.test(raw)) return '';
+        const ref = rec.getReferenceDataByKey(key);
+        if (!ref || ref.rowNumber == null) return '';
+        return teamByRow[ref.rowNumber] || '';
+      } catch { return ''; }
+    };
+
+    const buckets = new Map<string, ScheduleWeek>();
+    for (const rec of sg.records) {
+      if (rec.isEmpty) continue;
+      let stage = ''; try { stage = String(rec.SeasonWeekType); } catch { /* */ }
+      let sw = 0; try { sw = num(rec.SeasonWeek); } catch { /* */ }
+      let status = ''; try { status = String(rec.GameStatus); } catch { /* */ }
+
+      const home = resolveTeam(rec, 'HomeTeam');
+      const away = resolveTeam(rec, 'AwayTeam');
+      if (!home && !away) continue; // empty placeholder row
+
+      const hs = num(rec.HomeScore), as = num(rec.AwayScore);
+      const played = status === 'HomeWon' || status === 'AwayWon' || (hs + as) > 0;
+      let day = ''; try { day = String(rec.DayOfWeek); } catch { /* */ }
+      let tmin = 0; try { tmin = num(rec.TimeOfDay); } catch { /* */ }
+      let gid = 0; try { gid = num(rec.SeasonGameID); } catch { /* */ }
+
+      const key = `${STAGE_ORDER[stage] ?? 9}|${String(sw).padStart(2, '0')}`;
+      let wk = buckets.get(key);
+      if (!wk) { wk = { stage, seasonWeek: sw, label: weekLabel(stage, sw), games: [] }; buckets.set(key, wk); }
+      wk.games.push({ away, home, played, awayScore: as, homeScore: hs, status, day, time: fmtKick(tmin), timeMinutes: tmin, gameId: gid });
+    }
+
+    const weeks = Array.from(buckets.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([, w]) => w);
+    return { input: fileName, seasonYear, currentStage, currentWeek, weeks };
   },
 };

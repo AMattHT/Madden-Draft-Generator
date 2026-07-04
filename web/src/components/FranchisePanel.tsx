@@ -9,6 +9,8 @@ import {
   type RgbColor,
   type RelocateRebrandOptions,
   type RelocateRebrandResult,
+  type TraitRealismResult,
+  type FranchiseScheduleResult,
 } from '../api';
 import { RandomDraft } from './RandomDraft';
 
@@ -90,6 +92,19 @@ export function FranchisePanel({
   const [rbResult, setRbResult] = useState<RelocateRebrandResult | null>(null);
   const [rbError, setRbError] = useState<string | null>(null);
   const rbTeam = teams.find((t) => t.teamIndex === rbTeamIndex) ?? null;
+
+  // Trait realism
+  const [trIncludeUnsigned, setTrIncludeUnsigned] = useState(false);
+  const [trXCap, setTrXCap] = useState(36);
+  const [trSCap, setTrSCap] = useState(72);
+  const [trBusy, setTrBusy] = useState(false);
+  const [trResult, setTrResult] = useState<TraitRealismResult | null>(null);
+  const [trError, setTrError] = useState<string | null>(null);
+
+  // Season schedule
+  const [schedule, setSchedule] = useState<FranchiseScheduleResult | null>(null);
+  const [schedBusy, setSchedBusy] = useState(false);
+  const [schedError, setSchedError] = useState<string | null>(null);
 
   useEffect(() => {
     api.franchiseList()
@@ -182,6 +197,33 @@ export function FranchisePanel({
     } finally {
       setRbBusy(false);
     }
+  }
+
+  // Reset schedule when the selected save changes.
+  useEffect(() => { setSchedule(null); setSchedError(null); setTrResult(null); setTrError(null); }, [selected]);
+
+  async function runTraitRealism(dryRun: boolean) {
+    if (!selected) return;
+    setTrBusy(true); setTrError(null);
+    try {
+      const res = await api.franchiseTraitRealism(selected, {
+        includeUnsigned: trIncludeUnsigned, xfactorCap: trXCap, superstarCap: trSCap, dryRun,
+      });
+      setTrResult(res);
+      if (!dryRun) api.franchiseList().then((r) => setFiles(r.franchises)).catch(() => {});
+    } catch (e) {
+      setTrError((e as Error).message);
+    } finally {
+      setTrBusy(false);
+    }
+  }
+
+  async function loadSchedule() {
+    if (!selected) return;
+    setSchedBusy(true); setSchedError(null);
+    try { setSchedule(await api.franchiseSchedule(selected)); }
+    catch (e) { setSchedError((e as Error).message); }
+    finally { setSchedBusy(false); }
   }
 
   const inputCls = 'w-full rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
@@ -388,6 +430,101 @@ export function FranchisePanel({
         </div>
       )}
 
+      {/* Trait Realism */}
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">Realistic Dev Traits</h1>
+        <p className="mt-1 text-xs text-muted">
+          Rebuilds development traits into a real NFL scarcity pyramid — the base game hands an elevated
+          trait to almost every 85+ player. Preview the new spread, then write a{' '}
+          <code className="rounded bg-black/30 px-1">CAREER-…-TRAITS</code> file.
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface-1 p-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <Field label="X-Factor cap" hint="~1 per team">
+            <input type="number" min={0} max={64} value={trXCap} onChange={(e) => setTrXCap(Number(e.target.value))} className={`${inputCls} max-w-[7rem]`} />
+          </Field>
+          <Field label="Superstar cap" hint="~2 per team">
+            <input type="number" min={0} max={128} value={trSCap} onChange={(e) => setTrSCap(Number(e.target.value))} className={`${inputCls} max-w-[7rem]`} />
+          </Field>
+          <label className="flex items-center gap-2 text-sm text-neutral-200">
+            <input type="checkbox" checked={trIncludeUnsigned} onChange={(e) => setTrIncludeUnsigned(e.target.checked)} />
+            Include free agents / practice squad / draft pool
+          </label>
+        </div>
+
+        <div className="mt-4 flex gap-3">
+          <button
+            onClick={() => runTraitRealism(true)}
+            disabled={trBusy || !selected}
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-surface-0 px-4 py-2 text-sm font-semibold text-neutral-200 transition-colors hover:border-primary disabled:opacity-50"
+          >
+            {trBusy ? 'Working…' : 'Preview'}
+          </button>
+          <button
+            onClick={() => runTraitRealism(false)}
+            disabled={trBusy || !selected || !trResult}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
+          >
+            {trBusy ? 'Applying…' : 'Apply → new save'}
+          </button>
+        </div>
+      </div>
+
+      {trError && (
+        <div className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">{trError}</div>
+      )}
+
+      {trResult && (
+        <div className="rounded-lg border border-success/40 bg-success/10 p-4 text-sm">
+          <div className="font-semibold text-green-100">
+            {trResult.dryRun
+              ? `Preview — ${trResult.changed} of ${trResult.playersConsidered} players would change`
+              : <>Wrote <code className="rounded bg-black/30 px-1">{trResult.output}</code> — {trResult.changed} traits changed</>}
+          </div>
+          <div className="mt-2 grid grid-cols-4 gap-2 text-center">
+            {(['XFactor', 'Superstar', 'Star', 'Normal'] as const).map((t) => (
+              <div key={t} className="rounded-md border border-border/60 bg-surface-0 px-2 py-1.5">
+                <div className="text-[10px] uppercase tracking-wide text-muted">{t}</div>
+                <div className="tabular-nums">
+                  <span className="text-neutral-500">{trResult.before[t]}</span>
+                  <span className="text-neutral-600"> → </span>
+                  <span className="text-green-300">{trResult.after[t]}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {trResult.notable.length > 0 && (
+            <div className="mt-3 max-h-64 overflow-auto rounded-md border border-border bg-surface-1">
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-surface-2 text-[10px] uppercase tracking-wide text-neutral-400">
+                  <tr>
+                    <th className="px-2 py-1.5 text-left font-semibold">Player</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Pos</th>
+                    <th className="px-2 py-1.5 text-right font-semibold">OVR</th>
+                    <th className="px-2 py-1.5 text-left font-semibold">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {trResult.notable.map((u, i) => (
+                    <tr key={i} className="border-t border-border/50">
+                      <td className="px-2 py-1 text-neutral-100">{u.name} <span className="text-neutral-500">· {u.team}</span></td>
+                      <td className="px-2 py-1 text-neutral-300">{u.position}</td>
+                      <td className="px-2 py-1 text-right tabular-nums">{u.overall}</td>
+                      <td className="px-2 py-1"><span className="text-neutral-500">{u.from}</span> → <span className="text-green-300">{u.to}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="mt-2 text-xs text-green-200/70">
+            {trResult.dryRun ? 'Looks right? Hit Apply to write the save.' : 'Load it in Madden (Franchise → Load).'}
+          </div>
+        </div>
+      )}
+
       {/* Relocation & Rebrand */}
       <div>
         <h1 className="text-xl font-bold tracking-tight">Relocation &amp; Rebrand</h1>
@@ -504,6 +641,68 @@ export function FranchisePanel({
           <div className="mt-1 text-xs text-green-200/70">Load it in Madden (Franchise → Load).</div>
         </div>
       )}
+
+      {/* Season schedule (read-only) */}
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">Season Schedule</h1>
+        <p className="mt-1 text-xs text-muted">
+          The whole season at a glance — every matchup by week, with results for games already played.
+          Read-only: nothing here changes your save.
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface-1 p-4">
+        <button
+          onClick={loadSchedule}
+          disabled={schedBusy || !selected}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
+        >
+          {schedBusy ? 'Loading…' : schedule ? 'Reload schedule' : 'Load schedule'}
+        </button>
+
+        {schedError && (
+          <div className="mt-3 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-red-200">{schedError}</div>
+        )}
+
+        {schedule && (
+          <div className="mt-4">
+            <div className="mb-3 text-xs text-muted">
+              {schedule.seasonYear} season · currently {schedule.currentStage} week {schedule.currentWeek + 1}
+            </div>
+            <div className="max-h-[32rem] space-y-4 overflow-auto">
+              {schedule.weeks.map((wk) => {
+                const isCurrent = wk.stage === schedule.currentStage && wk.seasonWeek === schedule.currentWeek;
+                return (
+                  <div
+                    key={`${wk.stage}-${wk.seasonWeek}`}
+                    className={`rounded-md border p-3 ${isCurrent ? 'border-primary/60 bg-primary/5' : 'border-border/60 bg-surface-0'}`}
+                  >
+                    <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-100">
+                      {wk.label}
+                      {isCurrent && <span className="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] uppercase text-primary">Current</span>}
+                      <span className="text-[11px] font-normal text-muted">{wk.games.length} games</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                      {wk.games.map((g, i) => (
+                        <div key={i} className="flex items-center justify-between rounded px-2 py-1 text-sm odd:bg-black/10">
+                          <span className="text-neutral-200">
+                            {g.away || '—'} <span className="text-neutral-500">@</span> {g.home || '—'}
+                          </span>
+                          <span className="text-xs tabular-nums">
+                            {g.played
+                              ? <span className="font-semibold text-green-300">{g.awayScore}–{g.homeScore}</span>
+                              : <span className="text-muted">{g.day}{g.time ? ` · ${g.time}` : ''}</span>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

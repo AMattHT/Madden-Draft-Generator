@@ -144,6 +144,34 @@ export interface RelocateRebrandResult {
   skippedFields: string[];
 }
 
+export interface TraitRealismOptions {
+  includeUnsigned?: boolean;
+  xfactorCap?: number;
+  superstarCap?: number;
+  dryRun?: boolean;
+}
+export interface TraitTierCounts { Normal: number; Star: number; Superstar: number; XFactor: number; }
+export interface TraitUpgrade {
+  name: string; position: string; team: string; overall: number; age: number; from: string; to: string;
+}
+export interface TraitRealismResult {
+  input: string; output: string; dryRun: boolean;
+  playersConsidered: number; changed: number;
+  before: TraitTierCounts; after: TraitTierCounts;
+  byPosition: Record<string, TraitTierCounts>;
+  notable: TraitUpgrade[];
+}
+
+export interface ScheduleGame {
+  away: string; home: string; played: boolean;
+  awayScore: number; homeScore: number; status: string;
+  day: string; time: string; timeMinutes: number; gameId: number;
+}
+export interface ScheduleWeek { stage: string; seasonWeek: number; label: string; games: ScheduleGame[]; }
+export interface FranchiseScheduleResult {
+  input: string; seasonYear: number; currentStage: string; currentWeek: number; weeks: ScheduleWeek[];
+}
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -304,6 +332,34 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Realistic dev-trait pass. dryRun:true previews counts; else writes a new CAREER-*-TRAITS save. */
+  async franchiseTraitRealism(fileName: string, options: TraitRealismOptions): Promise<TraitRealismResult> {
+    const res = await fetch('/api/franchise/trait-realism', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Read the full season schedule grouped by week (read-only). */
+  async franchiseSchedule(fileName: string): Promise<FranchiseScheduleResult> {
+    const res = await fetch('/api/franchise/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

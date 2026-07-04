@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -64,6 +64,28 @@ router.post('/franchise/teams', async (req: Request, res: Response) => {
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
     res.json(await FranchiseService.franchiseTeams(fileName));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Realistic dev-trait pass. options.dryRun previews counts; otherwise writes CAREER-*-TRAITS. */
+router.post('/franchise/trait-realism', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: TraitRealismOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.applyTraitRealism(fileName, options ?? {}));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Read the full season schedule grouped by week (read-only). */
+router.post('/franchise/schedule', async (req: Request, res: Response) => {
+  const { fileName } = (req.body ?? {}) as { fileName?: string };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.franchiseSchedule(fileName));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
