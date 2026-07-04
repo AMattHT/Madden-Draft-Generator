@@ -1,6 +1,7 @@
 import type { GenMode, AppView } from '../App';
 import { YearPicker } from './YearPicker';
 import { PlayerSearch } from './PlayerSearch';
+import { Icon, ICONS } from './ui';
 
 function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
   const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
@@ -141,9 +142,9 @@ export function TopBar({
               onClick={onDrawRandom}
               disabled={!canDraw}
               title={canDraw ? 'Draw a random unused draft year' : 'All years used — reset history in the Franchise tab'}
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border-strong bg-surface-2 text-sm transition-colors hover:bg-surface-3 disabled:opacity-40"
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border-strong bg-surface-2 text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100 disabled:opacity-40"
             >
-              🎲
+              <Icon path={ICONS.shuffle} className="h-4 w-4" />
             </button>
             <PlayerSearch onSelect={onSelectPlayer} />
           </>

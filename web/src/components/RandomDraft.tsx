@@ -5,6 +5,8 @@
  * used-year history are cached (persist across reloads). Picks can be undone (last
  * draw), put back individually (chips), or fully reset.
  */
+import { Icon, ICONS } from './ui';
+
 export function RandomDraft({
   years,
   used,
@@ -86,7 +88,8 @@ export function RandomDraft({
           disabled={exhausted || rangeYears.length === 0}
           className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
         >
-          🎲 Draw a random unused year
+          <Icon path={ICONS.shuffle} className="h-4 w-4" />
+          Draw a random unused year
         </button>
         <button
           onClick={onUndo}
@@ -94,7 +97,8 @@ export function RandomDraft({
           title={lastUsed != null ? `Undo — put ${lastUsed} back` : 'Nothing to undo'}
           className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100 disabled:opacity-40"
         >
-          ↩ Undo{lastUsed != null ? ` (${lastUsed})` : ''}
+          <Icon path={ICONS.undo} className="h-4 w-4" />
+          Undo{lastUsed != null ? ` (${lastUsed})` : ''}
         </button>
         {lastDrawn != null && (
           <span className="text-sm text-neutral-300">
@@ -121,7 +125,7 @@ export function RandomDraft({
                 className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-medium tabular-nums text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100"
               >
                 {y}
-                <span className="text-neutral-500">✕</span>
+                <Icon path={ICONS.x} className="h-3 w-3 text-neutral-500" />
               </button>
             ))}
           </div>

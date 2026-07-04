@@ -5,6 +5,7 @@ import { ClassView } from './components/ClassView';
 import { FranchisePanel } from './components/FranchisePanel';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
+import { Icon, ICONS } from './components/ui';
 import type { ClassEdits, GearEdits, GeneratedClass } from './types';
 
 export type AppView = 'home' | 'draft' | 'franchise';
@@ -286,7 +287,7 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <span className="text-4xl opacity-40">🏈</span>
+                  <Icon path={ICONS.board} className="h-10 w-10 opacity-30" />
                   <span className="text-sm">Pick a draft year to build a class</span>
                 </>
               )}

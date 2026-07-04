@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { clear as idbClear } from 'idb-keyval';
+import { Icon, ICONS } from './ui';
 
 interface Props {
   children: ReactNode;
@@ -28,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.state.error) return this.props.children;
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-surface p-6 text-center">
-        <span className="text-4xl opacity-50">⚠️</span>
+        <Icon path={ICONS.warning} className="h-9 w-9 text-amber-400 opacity-80" />
         <div className="text-lg font-semibold text-neutral-100">Something went wrong</div>
         <div className="max-w-md text-sm text-neutral-400">{this.state.error.message}</div>
         <div className="flex gap-3">
