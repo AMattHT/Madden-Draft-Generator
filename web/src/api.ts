@@ -120,12 +120,38 @@ export const api = {
   generated: (year: number, league: string, mode: string) =>
     jget<GeneratedClass>(`/api/draft/${year}/generated?league=${league}&mode=${mode}`),
 
+  /** Custom class: All-Time Greats source and/or generation modifiers. */
+  generatedCustom: (opts: {
+    source: 'year' | 'alltime';
+    year?: number;
+    league?: string;
+    mode: string;
+    strength?: number;
+    studs?: number;
+    generational?: boolean;
+  }) =>
+    fetch('/api/draft/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opts),
+    }).then(async (res) => {
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
+      return res.json() as Promise<GeneratedClass>;
+    }),
+
   /** Build the .mdc on the server (with any edits) and trigger a browser download. */
-  async downloadMdc(year: number, league: string, edits?: ClassEdits, mode?: string, gearEdits?: GearEdits) {
+  async downloadMdc(
+    year: number,
+    league: string,
+    edits?: ClassEdits,
+    mode?: string,
+    gearEdits?: GearEdits,
+    draftOpts?: { source: 'year' | 'alltime'; strength: number; studs: number; generational: boolean }
+  ) {
     const res = await fetch('/api/export/mdc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year, league, edits, mode, gearEdits }),
+      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts }),
     });
     if (!res.ok) throw new Error(`export failed: HTTP ${res.status}`);
     const blob = await res.blob();
@@ -134,7 +160,7 @@ export const api = {
     a.href = url;
     // Match Madden's own save naming (extensionless CAREERDRAFT-*) so the file
     // drops straight into the Saves folder and shows up in "Load Draft Class".
-    a.download = `CAREERDRAFT-${year}DRAFT`;
+    a.download = draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : `CAREERDRAFT-${year}DRAFT`;
     document.body.appendChild(a);
     a.click();
     a.remove();

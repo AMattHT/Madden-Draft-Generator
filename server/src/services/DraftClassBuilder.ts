@@ -22,6 +22,16 @@ const LOGICAL_CAPACITY = 402;
  *  out, uncapped). */
 export type GenMode = 'madden' | 'retro';
 
+/** Optional generation modifiers for custom draft classes (madden mode):
+ *  - strength: scales the whole OVR curve (1 = normal; >1 stronger, allows >85).
+ *  - studs: guarantee this many top prospects at first-round caliber (OVR>=80, dev>=SS).
+ *  - generational: make the #1 prospect a can't-miss X-Factor (OVR>=90). */
+export interface GenOptions {
+  strength?: number;
+  studs?: number;
+  generational?: boolean;
+}
+
 /** Elite = career wAV >= 90, or a Hall of Famer whose own career corroborates it
  *  → always X-Factor (dev 3). The source isHOF flag is name-matched and collides
  *  across same-named players (all three "Jim Brown"s read TRUE), so it's only
@@ -436,7 +446,8 @@ export const DraftClassBuilder = {
   /** Build prospect objects for export (block i = pick i), honoring the cap. */
   buildProspects(
     players: BaselinePlayer[],
-    mode: GenMode = 'madden'
+    mode: GenMode = 'madden',
+    opts: GenOptions = {}
   ): {
     prospects: MdcProspect[];
     truncated: boolean;
@@ -463,12 +474,25 @@ export const DraftClassBuilder = {
       // Madden-realistic: rank by caliber, then map each rank to Madden's
       // empirical OVR curve + dev-trait rates (real Madden class shape).
       const N = items.length || 1;
+      const strength = opts.strength && opts.strength > 0 ? opts.strength : 1;
+      const studs = Math.max(0, Math.round(opts.studs ?? 0));
+      // A stronger class raises the ceiling above the usual realistic 85 cap.
+      const capMax = Math.round(85 + Math.max(0, strength - 1) * 40);
       [...items]
         .sort((a, b) => b.caliber - a.caliber)
         .forEach((it, rank) => {
           const topFrac = (rank + 0.5) / N; // 0 = best player in the class
-          it.overall = Math.min(85, CalibrationService.ovrAtPercentile(1 - topFrac));
+          const base = CalibrationService.ovrAtPercentile(1 - topFrac);
+          it.overall = Math.min(capMax, Math.round(base * strength));
           it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(topFrac);
+          if (rank < studs) {
+            it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
+            it.devTrait = Math.max(it.devTrait, 2);
+          }
+          if (opts.generational && rank === 0) {
+            it.overall = Math.max(it.overall, 90); // a can't-miss #1
+            it.devTrait = 3;
+          }
         });
     }
 
@@ -484,10 +508,10 @@ export const DraftClassBuilder = {
 
   /** Full JSON preview of the generated class for the UI: per-player bio, photo,
    *  and the complete editable attribute set (no .mdc written). */
-  preview(players: BaselinePlayer[], mode: GenMode = 'madden'): PreviewResult {
+  preview(players: BaselinePlayer[], mode: GenMode = 'madden', opts: GenOptions = {}): PreviewResult {
     const capped = players.slice(0, LOGICAL_CAPACITY);
     const portraitMap = PortraitSlotService.pidMap(capped);
-    const { prospects, likeness } = this.buildProspects(players, mode);
+    const { prospects, likeness } = this.buildProspects(players, mode, opts);
     const rows: PreviewRow[] = prospects.map((p, i) => {
       const peps = String(p.PEPS || '').toLowerCase();
       const face: 'asset' | 'generic' | 'photo' = portraitMap.has(i)
@@ -536,8 +560,8 @@ export const DraftClassBuilder = {
 
   /** Build a complete, importable .mdc buffer from baseline players, applying
    *  any user edits (keyed by pick) on top of the deterministic base class. */
-  buildMdc(players: BaselinePlayer[], edits?: ClassEdits, mode: GenMode = 'madden', gearEdits?: GearEdits): BuildResult {
-    const { prospects, truncated, dropped, likeness } = this.buildProspects(players, mode);
+  buildMdc(players: BaselinePlayer[], edits?: ClassEdits, mode: GenMode = 'madden', gearEdits?: GearEdits, opts: GenOptions = {}): BuildResult {
+    const { prospects, truncated, dropped, likeness } = this.buildProspects(players, mode, opts);
     applyEdits(prospects, edits);
     applyGearEdits(prospects, gearEdits);
     const template = MdcService.loadTemplate();

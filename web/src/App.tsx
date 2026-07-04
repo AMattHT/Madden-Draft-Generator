@@ -11,6 +11,16 @@ import type { ClassEdits, GearEdits, GeneratedClass } from './types';
 
 export type AppView = 'home' | 'draft' | 'franchise';
 
+/** Draft-class generation modifiers (custom classes). */
+export interface DraftOpts {
+  source: 'year' | 'alltime';
+  strength: number; // OVR curve multiplier (1 = normal)
+  studs: number; // guaranteed first-round-caliber prospects
+  generational: boolean; // force a can't-miss #1
+}
+export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', strength: 1, studs: 0, generational: false };
+export const isCustomDraft = (o: DraftOpts) => o.source === 'alltime' || o.strength !== 1 || o.studs !== 0 || o.generational;
+
 const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
 export type GenMode = 'madden' | 'retro';
@@ -35,6 +45,7 @@ export default function App() {
   const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
+  const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
   const reqRef = useRef(0); // guards against a slow earlier response clobbering a newer selection
 
   const effLeague = useCallback(
@@ -43,29 +54,45 @@ export default function App() {
   );
 
   const select = useCallback(
-    async (year: number, force = false, useMode: GenMode = mode, useLeague?: string) => {
-      const league = useLeague ?? effLeague(year);
+    async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts) => {
+      const opts = useOpts ?? draftOpts;
+      const custom = isCustomDraft(opts);
+      // All-time classes key their edits/cache under a fixed pseudo-year.
+      const league = opts.source === 'alltime' ? 'all-time' : useLeague ?? effLeague(year);
+      const ekYear = opts.source === 'alltime' ? 0 : year;
       const req = ++reqRef.current;
       setSelected(year);
       setError(null);
       setBusy(true);
       try {
-        const cached = force ? undefined : await cache.get(year, league, useMode);
-        if (req !== reqRef.current) return; // a newer selection superseded this one
-        if (cached) {
-          setData(cached);
-          setSource('cache');
-        } else {
-          const live = await api.generated(year, league, useMode);
+        if (custom) {
+          // Custom classes aren't year-cached — always generated fresh.
+          const live = await api.generatedCustom({
+            source: opts.source, year, league: opts.source === 'alltime' ? undefined : league,
+            mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
+          });
           if (req !== reqRef.current) return;
           live.fetchedAt = Date.now();
-          await cache.set(live, useMode);
           setData(live);
           setSource('live');
-          setCachedYears((prev) => new Set(prev).add(year));
+        } else {
+          const cached = force ? undefined : await cache.get(year, league, useMode);
+          if (req !== reqRef.current) return; // a newer selection superseded this one
+          if (cached) {
+            setData(cached);
+            setSource('cache');
+          } else {
+            const live = await api.generated(year, league, useMode);
+            if (req !== reqRef.current) return;
+            live.fetchedAt = Date.now();
+            await cache.set(live, useMode);
+            setData(live);
+            setSource('live');
+            setCachedYears((prev) => new Set(prev).add(year));
+          }
         }
-        setEdits(await cache.editsGet(year, league));
-        setGearEdits(await cache.gearEditsGet(year, league));
+        setEdits(await cache.editsGet(ekYear, league));
+        setGearEdits(await cache.gearEditsGet(ekYear, league));
       } catch (e) {
         if (req !== reqRef.current) return;
         setError((e as Error).message);
@@ -74,13 +101,24 @@ export default function App() {
         if (req === reqRef.current) setBusy(false);
       }
     },
-    [mode, effLeague]
+    [mode, effLeague, draftOpts]
   );
 
   const persistUsed = useCallback((next: Set<number>) => {
     setUsedYears(next);
     cache.usedYearsSet([...next]);
   }, []);
+
+  // Apply draft-class generation options (source + modifiers) and regenerate.
+  const applyDraftOpts = useCallback(
+    (next: DraftOpts) => {
+      setDraftOpts(next);
+      setFocusPlayer(null);
+      const year = next.source === 'alltime' ? 0 : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
+      select(year, true, mode, undefined, next);
+    },
+    [selected, years, mode, select]
+  );
 
   const inRange = useCallback(
     (y: number) => !range || (y >= range.from && y <= range.to),
@@ -244,11 +282,15 @@ export default function App() {
         selected={selected}
         onSelectYear={(y) => {
           setFocusPlayer(null);
-          select(y);
+          const next = { ...draftOpts, source: 'year' as const };
+          setDraftOpts(next);
+          select(y, false, mode, undefined, next);
         }}
         onSelectPlayer={(y, name) => {
           setFocusPlayer(name);
-          select(y);
+          const next = { ...draftOpts, source: 'year' as const };
+          setDraftOpts(next);
+          select(y, false, mode, undefined, next);
         }}
         cachedYears={cachedYears}
       />
@@ -330,7 +372,9 @@ export default function App() {
               archetypeOptions={archetypeOptions}
               mode={mode}
               focusPlayer={focusPlayer}
-              onRefresh={() => selected && select(selected, true)}
+              draftOpts={draftOpts}
+              onApplyDraftOpts={applyDraftOpts}
+              onRefresh={() => selected != null && select(selected, true)}
             />
           )}
             </>

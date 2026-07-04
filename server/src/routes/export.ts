@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { DraftClassBuilder } from '../services/DraftClassBuilder';
+import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
-import { enrichedClass } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
 
 const r = Router();
 
@@ -12,25 +12,34 @@ const r = Router();
  * engine refines attribute spreads in a later task.
  */
 r.post('/export/mdc', async (req, res) => {
-  const year = parseInt(String(req.body?.year ?? req.query.year), 10);
-  if (Number.isNaN(year)) {
-    return res.status(400).json({ error: 'year is required' });
-  }
   const edits = req.body?.edits as Record<string, Record<string, number | string>> | undefined;
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
-  const isMergeEra = year >= 1960 && year <= 1969;
-  const league = String(req.body?.league ?? req.query.league ?? (isMergeEra ? 'combined' : 'NFL'));
-  // Same DB-position correction + class fill as the preview so the exported file
-  // matches the UI (fill defaults on; pass fill:false to export real players only).
-  const fill = req.body?.fill !== false;
-  const { players } = await enrichedClass(year, league, { fill });
+  const source = req.body?.source === 'alltime' ? 'alltime' : 'year';
+  const opts: GenOptions = {
+    strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
+    studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
+    generational: !!req.body?.generational,
+  };
+
+  let players; let filename: string;
+  if (source === 'alltime') {
+    ({ players } = await allTimeGreatsClass());
+    filename = 'CAREERDRAFT-ALLTIMEGREATS';
+  } else {
+    const year = parseInt(String(req.body?.year ?? req.query.year), 10);
+    if (Number.isNaN(year)) return res.status(400).json({ error: 'year is required' });
+    const isMergeEra = year >= 1960 && year <= 1969;
+    const league = String(req.body?.league ?? req.query.league ?? (isMergeEra ? 'combined' : 'NFL'));
+    const fill = req.body?.fill !== false; // matches the preview (full class) by default
+    ({ players } = await enrichedClass(year, league, { fill }));
+    filename = `CAREERDRAFT-${year}DRAFT`;
+  }
   if (players.length === 0) {
-    return res.status(404).json({ error: `no players found for ${year} (${league})` });
+    return res.status(404).json({ error: 'no players found' });
   }
 
-  const { buffer, count, truncated, dropped, likeness } = DraftClassBuilder.buildMdc(players, edits, mode, gearEdits);
-  const filename = `CAREERDRAFT-${year}DRAFT`;
+  const { buffer, count, truncated, dropped, likeness } = DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
   res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('X-Prospect-Count', String(count));

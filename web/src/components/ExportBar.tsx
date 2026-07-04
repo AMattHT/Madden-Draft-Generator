@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api';
 import type { ClassEdits, GearEdits, LikenessStats, PlayerRow } from '../types';
+import type { DraftOpts } from '../App';
 import { DEV_NAMES } from '../constants';
 import { Icon, ICONS } from './ui';
 
@@ -13,6 +14,7 @@ export function ExportBar({
   editedCount,
   mode,
   rows,
+  draftOpts,
 }: {
   year: number;
   league: string;
@@ -22,7 +24,9 @@ export function ExportBar({
   editedCount: number;
   mode: 'madden' | 'retro';
   rows: PlayerRow[];
+  draftOpts: DraftOpts;
 }) {
+  const allTime = draftOpts.source === 'alltime';
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -55,10 +59,11 @@ export function ExportBar({
     setBusy('mdc');
     setMsg(null);
     try {
-      const r = await api.downloadMdc(year, league, edits, mode, gearEdits);
+      const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts);
+      const file = allTime ? 'CAREERDRAFT-ALLTIMEGREATS' : `CAREERDRAFT-${year}DRAFT`;
       setMsg({
         ok: true,
-        text: `Downloaded CAREERDRAFT-${year}DRAFT — ${r.count} prospects, ${r.asset} real faces${
+        text: `Downloaded ${file} — ${r.count} prospects, ${r.asset} real faces${
           editedCount ? `, ${editedCount} edited` : ''
         }. Move it into Documents\\Madden NFL 26\\Saves, then load it in Madden: Franchise → Choose Draft Class.`,
       });

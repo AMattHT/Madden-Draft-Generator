@@ -459,6 +459,17 @@ export const PlayerLookupService = {
     return rowsCache!.length;
   },
 
+  /** The best players in history for an "All-Time Greats" class: every drafted
+   *  person, de-duped, scored by career greatness (wAV + weighted All-Pros / Pro
+   *  Bowls + a HOF bonus), highest first, sliced to `limit`. */
+  allTimeGreats(limit = 402): BaselinePlayer[] {
+    load();
+    const all = dedupDualDraft([...byYear!.values()].flat());
+    const score = (p: BaselinePlayer) =>
+      (p.wav ?? 0) + 4 * (p.allPro1 ?? 0) + 2 * (p.proBowls ?? 0) + (p.isHOF ? 40 : 0);
+    return [...all].sort((a, b) => score(b) - score(a)).slice(0, limit);
+  },
+
   /**
    * Search all players by name (case/accent-insensitive) across every draft year.
    * Scored: exact > prefix > substring, then newest draft year first.
