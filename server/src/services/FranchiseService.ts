@@ -19,6 +19,16 @@ const PSEUDO_TEAMS = new Set(['AFC', 'NFC', 'Free Agents', 'Free Agent', 'Rest o
 const CONTRACT_SALARY_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractSalary${i}`);
 const CONTRACT_BONUS_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractBonus${i}`);
 
+/** The main franchise Player table (bep713 FranchiseTableId; stable across M24-26). */
+const PLAYER_TABLE_UID = 1612938518;
+/** UI dev-tier -> the franchise Player.TraitDevelopment enum value. */
+const DEV_ENUM: Record<string, string> = {
+  Normal: 'Normal',
+  Star: 'College_Star',
+  Superstar: 'College_Impact',
+  XFactor: 'College_Elite',
+};
+
 export interface CapResetOptions {
   clearDeadMoney?: boolean; // zero this/next-year cap penalties (default true)
   capRoomMode?: 'off' | 'freed' | 'fixed'; // 'freed' = add cleared penalties to room; 'fixed' = set to fixedCapRoomM
@@ -46,6 +56,28 @@ export interface CapResetResult {
 
 function savesDir(): string {
   return process.env.MADDEN_SAVES_DIR || path.join(os.homedir(), 'Documents', 'Madden NFL 26', 'Saves');
+}
+
+/** A valid CAREER-* output name (so Madden lists it), derived from the input, never the input itself. */
+function outputNameFor(inputName: string, suffix: string, override?: string): string {
+  if (override) return override;
+  const base = inputName.replace(/-AUTOSAVE$/i, '').replace(/-(CAPRESET|PLAYERS|EDITED)(-.*)?$/i, '');
+  return `${base}-${suffix}`;
+}
+
+export interface PlayerEditOptions {
+  healInjuries?: boolean; // clear injuries + IR league-wide
+  setDev?: { scope: 'all' | 'rookies'; tier: 'Normal' | 'Star' | 'Superstar' | 'XFactor' } | null;
+  outputName?: string;
+}
+
+export interface PlayerEditResult {
+  input: string;
+  output: string;
+  outputPath: string;
+  playersConsidered: number;
+  injuriesCleared: number;
+  devSet: number;
 }
 
 /** A CAREER franchise save (not a CAREERDRAFT draft class). */
@@ -176,5 +208,51 @@ export const FranchiseService = {
       playersScaled,
       teams,
     };
+  },
+
+  /** Bulk player edits over the franchise Player table (heal injuries, set dev traits).
+   *  Direct field writes only — the same low-risk pattern as the cap reset. New file. */
+  async playerEdit(fileName: string, opts: PlayerEditOptions = {}): Promise<PlayerEditResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const outputName = outputNameFor(fileName, 'PLAYERS', opts.outputName);
+    const outputPath = path.join(dir, outputName);
+    if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    const devVal = opts.setDev ? DEV_ENUM[opts.setDev.tier] : null;
+    const injuryZero = ['TotalInjuryDuration', 'MinInjuryDuration', 'MaxInjuryDuration'];
+    let considered = 0, injuriesCleared = 0, devSet = 0;
+
+    for (const r of pt.records) {
+      if (r.isEmpty) continue;
+      let status = '';
+      try { status = String(r.ContractStatus); } catch { /* */ }
+      if (status === 'Deleted' || status === 'None') continue; // skip tombstones
+      considered++;
+
+      if (opts.healInjuries) {
+        let wasInjured = false;
+        try { if (String(r.InjuryStatus) !== 'Uninjured') wasInjured = true; } catch { /* */ }
+        try { if (r.IsInjuredReserve) wasInjured = true; } catch { /* */ }
+        try { r.InjuryStatus = 'Uninjured'; } catch { /* */ }
+        try { r.IsInjuredReserve = false; } catch { /* */ }
+        for (const f of injuryZero) { try { r[f] = 0; } catch { /* */ } }
+        if (wasInjured) injuriesCleared++;
+      }
+
+      if (opts.setDev && devVal) {
+        const inScope = opts.setDev.scope === 'all' || (opts.setDev.scope === 'rookies' && num(r.YearsPro) === 0);
+        if (inScope) { try { r.TraitDevelopment = devVal; devSet++; } catch { /* enum/range */ } }
+      }
+    }
+
+    await file.save(outputPath, {});
+    return { input: fileName, output: outputName, outputPath, playersConsidered: considered, injuriesCleared, devSet };
   },
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, type FranchiseInfo, type CapResetOptions, type CapResetResult } from '../api';
+import { api, type FranchiseInfo, type CapResetOptions, type CapResetResult, type PlayerEditResult } from '../api';
 import { RandomDraft } from './RandomDraft';
 
 const fmtM = (m: number) => `$${m.toFixed(1)}M`;
@@ -52,6 +52,15 @@ export function FranchisePanel({
   const [result, setResult] = useState<CapResetResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Player tools
+  const [healInjuries, setHealInjuries] = useState(true);
+  const [setDevOn, setSetDevOn] = useState(false);
+  const [devScope, setDevScope] = useState<'all' | 'rookies'>('rookies');
+  const [devTier, setDevTier] = useState<'Normal' | 'Star' | 'Superstar' | 'XFactor'>('Star');
+  const [ptBusy, setPtBusy] = useState(false);
+  const [ptResult, setPtResult] = useState<PlayerEditResult | null>(null);
+  const [ptError, setPtError] = useState<string | null>(null);
+
   useEffect(() => {
     api.franchiseList()
       .then((r) => {
@@ -82,6 +91,24 @@ export function FranchisePanel({
       setError((e as Error).message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function runPlayerEdit() {
+    if (!selected) return;
+    if (!healInjuries && !setDevOn) return;
+    setPtBusy(true); setPtError(null); setPtResult(null);
+    try {
+      const res = await api.franchisePlayerEdit(selected, {
+        healInjuries,
+        setDev: setDevOn ? { scope: devScope, tier: devTier } : null,
+      });
+      setPtResult(res);
+      api.franchiseList().then((r) => setFiles(r.franchises)).catch(() => {});
+    } catch (e) {
+      setPtError((e as Error).message);
+    } finally {
+      setPtBusy(false);
     }
   }
 
@@ -217,6 +244,75 @@ export function FranchisePanel({
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Player tools */}
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">Player Tools</h1>
+        <p className="mt-1 text-xs text-muted">
+          Bulk edits to your league's players — safe, direct edits to the same save (writes a new{' '}
+          <code className="rounded bg-black/30 px-1">CAREER-…-PLAYERS</code> file).
+        </p>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface-1 p-4">
+        <div className="grid grid-cols-1 gap-4">
+          <label className="flex items-center gap-2 text-sm text-neutral-200">
+            <input type="checkbox" checked={healInjuries} onChange={(e) => setHealInjuries(e.target.checked)} />
+            Heal all injuries (clear injuries + injured reserve, league-wide)
+          </label>
+
+          <div className="rounded-md border border-border/60 p-3">
+            <label className="flex items-center gap-2 text-sm text-neutral-200">
+              <input type="checkbox" checked={setDevOn} onChange={(e) => setSetDevOn(e.target.checked)} />
+              Set development trait
+            </label>
+            {setDevOn && (
+              <div className="mt-3 flex flex-wrap items-end gap-4">
+                <Field label="For">
+                  <select value={devScope} onChange={(e) => setDevScope(e.target.value as 'all' | 'rookies')} className={inputCls}>
+                    <option value="rookies">Rookies only (0 years pro)</option>
+                    <option value="all">All players</option>
+                  </select>
+                </Field>
+                <Field label="Trait">
+                  <select value={devTier} onChange={(e) => setDevTier(e.target.value as typeof devTier)} className={inputCls}>
+                    <option value="Normal">Normal</option>
+                    <option value="Star">Star</option>
+                    <option value="Superstar">Superstar</option>
+                    <option value="XFactor">X-Factor</option>
+                  </select>
+                </Field>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button
+          onClick={runPlayerEdit}
+          disabled={ptBusy || !selected || (!healInjuries && !setDevOn)}
+          className="mt-4 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50"
+        >
+          {ptBusy ? 'Applying…' : 'Apply player edits → new save'}
+        </button>
+      </div>
+
+      {ptError && (
+        <div className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">{ptError}</div>
+      )}
+
+      {ptResult && (
+        <div className="rounded-lg border border-success/40 bg-success/10 p-4 text-sm">
+          <div className="font-semibold text-green-100">
+            Wrote <code className="rounded bg-black/30 px-1">{ptResult.output}</code>
+          </div>
+          <div className="mt-1 text-green-200/90">
+            {ptResult.playersConsidered} players processed
+            {ptResult.injuriesCleared > 0 && ` · ${ptResult.injuriesCleared} injuries cleared`}
+            {ptResult.devSet > 0 && ` · ${ptResult.devSet} dev traits set`}
+          </div>
+          <div className="mt-1 text-xs text-green-200/70">Load it in Madden (Franchise → Load).</div>
         </div>
       )}
     </div>

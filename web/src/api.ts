@@ -57,6 +57,19 @@ export interface CapResetResult {
   teams: { name: string; salaryM: number; before: CapState; after: CapState }[];
 }
 
+export interface PlayerEditOptions {
+  healInjuries: boolean;
+  setDev: { scope: 'all' | 'rookies'; tier: 'Normal' | 'Star' | 'Superstar' | 'XFactor' } | null;
+}
+
+export interface PlayerEditResult {
+  input: string;
+  output: string;
+  playersConsidered: number;
+  injuriesCleared: number;
+  devSet: number;
+}
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -114,6 +127,20 @@ export const api = {
   /** Apply a salary-cap reset; writes a new CAREER-*-CAPRESET save (input untouched). */
   async franchiseCapReset(fileName: string, options: CapResetOptions): Promise<CapResetResult> {
     const res = await fetch('/api/franchise/cap-reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Bulk player edits (heal injuries, set dev traits); writes a new CAREER-*-PLAYERS save. */
+  async franchisePlayerEdit(fileName: string, options: PlayerEditOptions): Promise<PlayerEditResult> {
+    const res = await fetch('/api/franchise/player-edit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, options }),

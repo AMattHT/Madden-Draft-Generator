@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -18,6 +18,18 @@ router.post('/franchise/cap-reset', async (req: Request, res: Response) => {
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
     const result = await FranchiseService.capReset(fileName, options ?? {});
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Bulk player edits (heal injuries, set dev traits) — writes a new CAREER-*-PLAYERS file. */
+router.post('/franchise/player-edit', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: PlayerEditOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    const result = await FranchiseService.playerEdit(fileName, options ?? {});
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
