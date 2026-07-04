@@ -3,10 +3,11 @@ import { api, type ArchetypeOption } from './api';
 import { cache } from './cache';
 import { ClassView } from './components/ClassView';
 import { FranchisePanel } from './components/FranchisePanel';
+import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
 import type { ClassEdits, GearEdits, GeneratedClass } from './types';
 
-export type AppView = 'draft' | 'franchise';
+export type AppView = 'home' | 'draft' | 'franchise';
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -24,7 +25,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
-  const [view, setView] = useState<AppView>('draft');
+  const [view, setView] = useState<AppView>('home');
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
@@ -227,6 +228,7 @@ export default function App() {
       <TopBar
         view={view}
         onSetView={setView}
+        onGoHome={() => setView('home')}
         onDrawRandom={drawRandomYear}
         canDraw={years.some((y) => !usedYears.has(y) && inRange(y))}
         mode={mode}
@@ -249,6 +251,7 @@ export default function App() {
       />
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
+          {view === 'home' && <HomePage onSelect={setView} />}
           {view === 'franchise' && (
             <FranchisePanel
               years={years}

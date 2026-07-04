@@ -89,6 +89,7 @@ function LeagueToggle({ league, onSetLeague }: { league: string; onSetLeague: (l
 export function TopBar({
   view,
   onSetView,
+  onGoHome,
   onDrawRandom,
   canDraw,
   mode,
@@ -105,6 +106,7 @@ export function TopBar({
 }: {
   view: AppView;
   onSetView: (v: AppView) => void;
+  onGoHome: () => void;
   onDrawRandom: () => void;
   canDraw: boolean;
   mode: GenMode;
@@ -123,11 +125,13 @@ export function TopBar({
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface-1/80 px-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
-        <LogoMark />
-        <div className="hidden leading-tight sm:block">
-          <div className="text-[13px] font-bold tracking-tight text-neutral-100">Draft Class Generator</div>
-          <div className="text-[11px] text-muted">Madden 26 · wAV-rated from real NFL history</div>
-        </div>
+        <button onClick={onGoHome} title="Home" className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-80">
+          <LogoMark />
+          <div className="hidden leading-tight text-left sm:block">
+            <div className="text-[13px] font-bold tracking-tight text-neutral-100">Madden 26 Toolkit</div>
+            <div className="text-[11px] text-muted">Draft classes · Franchise tools</div>
+          </div>
+        </button>
         <div className="ml-1 h-6 w-px bg-border" />
         <ViewToggle view={view} onSetView={onSetView} />
         {draft && (
