@@ -7,6 +7,7 @@ import { PositionMapper } from './PositionMapper';
 import { RosterPositionService } from './RosterPositionService';
 import { SkinToneService } from './SkinToneService';
 import { DerivedSkinToneService } from './DerivedSkinToneService';
+import { WikiSkinToneService } from './WikiSkinToneService';
 import { BaselinePlayer } from '../types/player';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
@@ -37,11 +38,13 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const height = c?.heightInches ?? e?.heightInches ?? null;
   const weight = c?.weight ?? e?.weight ?? null;
   const age = e?.age ?? null; // real draft age
-  // Skin tone for generic faces, best source first: derived portrait tone > explicit
-  // non-7 CSV race > position-weighted guess. Only matters for players without an asset.
+  // Skin tone for generic faces, best source first: real Madden portrait tone >
+  // Wikipedia-photo tone (for players with no Madden portrait) > explicit non-7 CSV
+  // race > position-weighted guess. Only matters for players without a 3D face asset.
   const derived = DerivedSkinToneService.toneForPid(p.photoId);
+  const wiki = derived == null ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = derived ?? trusted ?? SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
+  const race = derived ?? wiki ?? trusted ?? SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
 
   if (!label && !c && height == null && weight == null && age == null && race == null) return p;
   const out: BaselinePlayer = { ...p };
