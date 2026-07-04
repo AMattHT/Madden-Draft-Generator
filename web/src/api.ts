@@ -120,10 +120,11 @@ export const api = {
   generated: (year: number, league: string, mode: string) =>
     jget<GeneratedClass>(`/api/draft/${year}/generated?league=${league}&mode=${mode}`),
 
-  /** Custom class: All-Time Greats source and/or generation modifiers. */
+  /** Custom class: All-Time Greats / by-decade source and/or generation modifiers. */
   generatedCustom: (opts: {
-    source: 'year' | 'alltime';
+    source: 'year' | 'alltime' | 'decade';
     year?: number;
+    decade?: number;
     league?: string;
     mode: string;
     strength?: number;
@@ -146,7 +147,7 @@ export const api = {
     edits?: ClassEdits,
     mode?: string,
     gearEdits?: GearEdits,
-    draftOpts?: { source: 'year' | 'alltime'; strength: number; studs: number; generational: boolean }
+    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean }
   ) {
     const res = await fetch('/api/export/mdc', {
       method: 'POST',
@@ -160,7 +161,10 @@ export const api = {
     a.href = url;
     // Match Madden's own save naming (extensionless CAREERDRAFT-*) so the file
     // drops straight into the Saves folder and shows up in "Load Draft Class".
-    a.download = draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : `CAREERDRAFT-${year}DRAFT`;
+    a.download =
+      draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
+      : draftOpts?.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS`
+      : `CAREERDRAFT-${year}DRAFT`;
     document.body.appendChild(a);
     a.click();
     a.remove();

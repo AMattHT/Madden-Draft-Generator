@@ -29,6 +29,7 @@ export function ClassView({
   mode,
   focusPlayer,
   draftOpts,
+  decades,
   onApplyDraftOpts,
 }: {
   data: GeneratedClass;
@@ -44,6 +45,7 @@ export function ClassView({
   mode: 'madden' | 'retro';
   focusPlayer: string | null;
   draftOpts: DraftOpts;
+  decades: number[];
   onApplyDraftOpts: (o: DraftOpts) => void;
 }) {
   const [search, setSearch] = useState('');
@@ -51,6 +53,7 @@ export function ClassView({
   const [sort, setSort] = useState('pick');
   const [showOpts, setShowOpts] = useState(false);
   const allTime = data.league === 'all-time';
+  const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // Jumping to a searched player: clear filters so the row is visible to highlight.
@@ -115,6 +118,8 @@ export function ClassView({
             <h1 className="text-xl font-bold tracking-tight">
               {allTime ? (
                 <span className="text-gold">All-Time Greats</span>
+              ) : decade ? (
+                <span className="text-gold">Greatest of the {decade}</span>
               ) : (
                 <>
                   {data.year}{' '}
@@ -148,7 +153,7 @@ export function ClassView({
             onClick={() => setShowOpts((v) => !v)}
             aria-pressed={showOpts}
             className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
-              showOpts || draftOpts.source === 'alltime' || draftOpts.strength !== 1 || draftOpts.studs !== 0 || draftOpts.generational
+              showOpts || draftOpts.source !== 'year' || draftOpts.strength !== 1 || draftOpts.studs !== 0 || draftOpts.generational
                 ? 'border-primary/60 bg-primary/10 text-primary'
                 : 'border-border-strong bg-surface-2 text-neutral-300 hover:bg-surface-3 hover:text-neutral-100'
             }`}
@@ -169,7 +174,7 @@ export function ClassView({
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 py-4">
         <div className="shrink-0 space-y-3">
-          {showOpts && <DraftOptions opts={draftOpts} busy={busy} onApply={onApplyDraftOpts} />}
+          {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
           <StatsBar data={data} />
           <PositionBreakdown rows={effRows} active={pos} onPick={setPos} />
           <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_23rem]">

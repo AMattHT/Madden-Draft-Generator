@@ -15,7 +15,7 @@ r.post('/export/mdc', async (req, res) => {
   const edits = req.body?.edits as Record<string, Record<string, number | string>> | undefined;
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
-  const source = req.body?.source === 'alltime' ? 'alltime' : 'year';
+  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : 'year';
   const opts: GenOptions = {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
     studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
@@ -23,9 +23,11 @@ r.post('/export/mdc', async (req, res) => {
   };
 
   let players; let filename: string;
-  if (source === 'alltime') {
-    ({ players } = await allTimeGreatsClass());
-    filename = 'CAREERDRAFT-ALLTIMEGREATS';
+  if (source === 'alltime' || source === 'decade') {
+    const decade = Math.floor(Number(req.body?.decade) / 10) * 10;
+    const range = source === 'decade' && decade > 0 ? { from: decade, to: decade + 9 } : undefined;
+    ({ players } = await allTimeGreatsClass(range));
+    filename = range ? `CAREERDRAFT-${decade}sGREATS` : 'CAREERDRAFT-ALLTIMEGREATS';
   } else {
     const year = parseInt(String(req.body?.year ?? req.query.year), 10);
     if (Number.isNaN(year)) return res.status(400).json({ error: 'year is required' });

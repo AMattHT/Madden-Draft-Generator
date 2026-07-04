@@ -26,7 +26,10 @@ export function ExportBar({
   rows: PlayerRow[];
   draftOpts: DraftOpts;
 }) {
-  const allTime = draftOpts.source === 'alltime';
+  const greatsFile =
+    draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
+    : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS`
+    : null;
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -60,7 +63,7 @@ export function ExportBar({
     setMsg(null);
     try {
       const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts);
-      const file = allTime ? 'CAREERDRAFT-ALLTIMEGREATS' : `CAREERDRAFT-${year}DRAFT`;
+      const file = greatsFile ?? `CAREERDRAFT-${year}DRAFT`;
       setMsg({
         ok: true,
         text: `Downloaded ${file} — ${r.count} prospects, ${r.asset} real faces${

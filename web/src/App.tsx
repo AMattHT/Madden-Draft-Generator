@@ -13,13 +13,14 @@ export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
-  source: 'year' | 'alltime';
+  source: 'year' | 'alltime' | 'decade';
+  decade: number; // used when source === 'decade' (e.g. 1990)
   strength: number; // OVR curve multiplier (1 = normal)
   studs: number; // guaranteed first-round-caliber prospects
   generational: boolean; // force a can't-miss #1
 }
-export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', strength: 1, studs: 0, generational: false };
-export const isCustomDraft = (o: DraftOpts) => o.source === 'alltime' || o.strength !== 1 || o.studs !== 0 || o.generational;
+export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false };
+export const isCustomDraft = (o: DraftOpts) => o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational;
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -57,9 +58,9 @@ export default function App() {
     async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts) => {
       const opts = useOpts ?? draftOpts;
       const custom = isCustomDraft(opts);
-      // All-time classes key their edits/cache under a fixed pseudo-year.
-      const league = opts.source === 'alltime' ? 'all-time' : useLeague ?? effLeague(year);
-      const ekYear = opts.source === 'alltime' ? 0 : year;
+      // Greats classes key their edits/cache under a fixed pseudo-year / decade label.
+      const league = opts.source === 'alltime' ? 'all-time' : opts.source === 'decade' ? `${opts.decade}s` : useLeague ?? effLeague(year);
+      const ekYear = opts.source === 'alltime' ? 0 : opts.source === 'decade' ? opts.decade : year;
       const req = ++reqRef.current;
       setSelected(year);
       setError(null);
@@ -68,7 +69,8 @@ export default function App() {
         if (custom) {
           // Custom classes aren't year-cached — always generated fresh.
           const live = await api.generatedCustom({
-            source: opts.source, year, league: opts.source === 'alltime' ? undefined : league,
+            source: opts.source, year, decade: opts.decade,
+            league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
           });
           if (req !== reqRef.current) return;
@@ -114,7 +116,10 @@ export default function App() {
     (next: DraftOpts) => {
       setDraftOpts(next);
       setFocusPlayer(null);
-      const year = next.source === 'alltime' ? 0 : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
+      const year =
+        next.source === 'alltime' ? 0
+        : next.source === 'decade' ? next.decade
+        : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
       select(year, true, mode, undefined, next);
     },
     [selected, years, mode, select]
@@ -373,6 +378,7 @@ export default function App() {
               mode={mode}
               focusPlayer={focusPlayer}
               draftOpts={draftOpts}
+              decades={[...new Set(years.map((y) => Math.floor(y / 10) * 10))].sort((a, b) => a - b)}
               onApplyDraftOpts={applyDraftOpts}
               onRefresh={() => selected != null && select(selected, true)}
             />

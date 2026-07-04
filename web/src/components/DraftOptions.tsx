@@ -5,17 +5,18 @@ import { DEFAULT_DRAFT_OPTS } from '../App';
 /** Draft-class generation controls: source (this year vs all-time greats) plus
  *  modifiers (class strength, guaranteed studs, a generational #1). Applied on
  *  demand so slider drags don't trigger a regenerate per tick. */
-export function DraftOptions({ opts, busy, onApply }: { opts: DraftOpts; busy: boolean; onApply: (o: DraftOpts) => void }) {
+export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts; decades: number[]; busy: boolean; onApply: (o: DraftOpts) => void }) {
   const [source, setSource] = useState(opts.source);
+  const [decade, setDecade] = useState(opts.decade);
   const [strength, setStrength] = useState(opts.strength);
   const [studs, setStuds] = useState(opts.studs);
   const [generational, setGenerational] = useState(opts.generational);
 
   useEffect(() => {
-    setSource(opts.source); setStrength(opts.strength); setStuds(opts.studs); setGenerational(opts.generational);
+    setSource(opts.source); setDecade(opts.decade); setStrength(opts.strength); setStuds(opts.studs); setGenerational(opts.generational);
   }, [opts]);
 
-  const next: DraftOpts = { source, strength, studs, generational };
+  const next: DraftOpts = { source, decade, strength, studs, generational };
   const dirty = JSON.stringify(next) !== JSON.stringify(opts);
   const strengthLabel = strength < 0.95 ? 'Weaker' : strength > 1.05 ? 'Stronger' : 'Normal';
 
@@ -27,9 +28,18 @@ export function DraftOptions({ opts, busy, onApply }: { opts: DraftOpts; busy: b
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="flex flex-col gap-1.5">
           <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Source</span>
-          <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5">
-            <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
-            <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time Greats</button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5">
+              <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
+              <button className={seg(source === 'decade')} onClick={() => setSource('decade')}>By decade</button>
+              <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time</button>
+            </div>
+            {source === 'decade' && (
+              <select value={decade} onChange={(e) => setDecade(Number(e.target.value))}
+                className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none">
+                {decades.map((d) => <option key={d} value={d}>{d}s</option>)}
+              </select>
+            )}
           </div>
         </div>
 
@@ -61,7 +71,9 @@ export function DraftOptions({ opts, busy, onApply }: { opts: DraftOpts; busy: b
           </button>
         )}
         <span className="ml-auto text-[11px] text-neutral-500">
-          {source === 'alltime' ? 'Best players in history, one class' : 'Modifiers apply to the selected year'}
+          {source === 'alltime' ? 'Best players in history, one class'
+            : source === 'decade' ? `Greatest players drafted in the ${decade}s`
+            : 'Modifiers apply to the selected year'}
         </span>
       </div>
     </div>

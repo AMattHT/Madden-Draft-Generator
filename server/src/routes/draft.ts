@@ -63,7 +63,7 @@ r.get('/draft/:year/generated', async (req, res) => {
  *  its own key. */
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
-    source?: 'year' | 'alltime'; year?: number; league?: string; mode?: string;
+    source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;
     strength?: number; studs?: number; generational?: boolean;
   };
   const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
@@ -73,11 +73,14 @@ r.post('/draft/custom', async (req, res) => {
     generational: !!b.generational,
   };
 
-  if (b.source === 'alltime') {
-    const { players, generatedCount } = await allTimeGreatsClass();
+  if (b.source === 'alltime' || b.source === 'decade') {
+    const decade = Math.floor(Number(b.decade) / 10) * 10;
+    const range = b.source === 'decade' && decade > 0 ? { from: decade, to: decade + 9 } : undefined;
+    const { players, generatedCount } = await allTimeGreatsClass(range);
     if (!players.length) return res.status(404).json({ error: 'no players' });
     const preview = DraftClassBuilder.preview(players, mode, opts);
-    return res.json({ year: 0, league: 'all-time', mode, source: 'alltime', generatedCount, ...preview });
+    const league = range ? `${decade}s` : 'all-time';
+    return res.json({ year: range ? decade : 0, league, mode, source: b.source, generatedCount, ...preview });
   }
 
   const year = parseInt(String(b.year), 10);

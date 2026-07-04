@@ -461,13 +461,21 @@ export const PlayerLookupService = {
 
   /** The best players in history for an "All-Time Greats" class: every drafted
    *  person, de-duped, scored by career greatness (wAV + weighted All-Pros / Pro
-   *  Bowls + a HOF bonus), highest first, sliced to `limit`. */
-  allTimeGreats(limit = 402): BaselinePlayer[] {
+   *  Bowls + a HOF bonus), highest first, sliced to `limit`. An optional draft-year
+   *  `range` scopes it to an era (e.g. a decade's greatest players). */
+  allTimeGreats(limit = 402, range?: { from: number; to: number }): BaselinePlayer[] {
     load();
-    const all = dedupDualDraft([...byYear!.values()].flat());
+    let all = dedupDualDraft([...byYear!.values()].flat());
+    if (range) all = all.filter((p) => p.draftYear >= range.from && p.draftYear <= range.to);
     const score = (p: BaselinePlayer) =>
       (p.wav ?? 0) + 4 * (p.allPro1 ?? 0) + 2 * (p.proBowls ?? 0) + (p.isHOF ? 40 : 0);
     return [...all].sort((a, b) => score(b) - score(a)).slice(0, limit);
+  },
+
+  /** Draft decades present in the lookup (e.g. 1930, 1940, … 2020). */
+  decades(): number[] {
+    load();
+    return [...new Set([...byYear!.keys()].map((y) => Math.floor(y / 10) * 10))].sort((a, b) => a - b);
   },
 
   /**

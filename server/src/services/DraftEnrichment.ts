@@ -75,10 +75,11 @@ export async function enrichedClass(
   return { players: [...real, ...fillers], enrich, generatedCount: fillers.length };
 }
 
-/** An "All-Time Greats" class: the best players in history (by career greatness),
- *  enriched the same way as a year class but without a per-year team map. */
-export async function allTimeGreatsClass(): Promise<{ players: BaselinePlayer[]; generatedCount: number }> {
-  const baseline = PlayerLookupService.allTimeGreats(402);
+/** A "greats" class: the best players in history (by career greatness), enriched the
+ *  same way as a year class but without a per-year team map. An optional draft-year
+ *  `range` scopes it to a decade/era (the greatest players of that span). */
+export async function allTimeGreatsClass(range?: { from: number; to: number }): Promise<{ players: BaselinePlayer[]; generatedCount: number }> {
+  const baseline = PlayerLookupService.allTimeGreats(402, range);
   const players = await Promise.all(baseline.map((p) => enrichOne(p)));
   return { players, generatedCount: 0 };
 }
