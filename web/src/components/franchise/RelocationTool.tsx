@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { api, type TeamIdentity, type RgbColor, type RelocateRebrandOptions, type RelocateRebrandResult } from '../../api';
+import { RELOCATION_NAMES, RELOCATION_CITIES } from '../../data/relocationCatalog';
 import { Field, ToolHeader, ErrorCard, cardCls, inputCls, btnPrimary } from './shared';
 
 const hex2 = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
 const rgbToHex = (c: RgbColor) => `#${hex2(c.r)}${hex2(c.g)}${hex2(c.b)}`;
 const hexToRgb = (h: string): RgbColor => ({ r: parseInt(h.slice(1, 3), 16) || 0, g: parseInt(h.slice(3, 5), 16) || 0, b: parseInt(h.slice(5, 7), 16) || 0 });
+const cityCode = (city: string) => RELOCATION_CITIES.find((c) => c.name === city)?.code ?? '';
 
 export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () => void }) {
   const [teams, setTeams] = useState<TeamIdentity[]>([]);
   const [teamIndex, setTeamIndex] = useState<number | null>(null);
+  const [mode, setMode] = useState<'preset' | 'custom'>('preset');
+  const [presetName, setPresetName] = useState('');
   const [name, setName] = useState('');
   const [nick, setNick] = useState('');
   const [city, setCity] = useState('');
@@ -30,13 +34,30 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
       .catch(() => { setTeams([]); setTeamIndex(null); });
   }, [save]);
 
+  // Prefill from the picked team's current identity (the Custom-mode starting point).
   useEffect(() => {
     const t = teams.find((x) => x.teamIndex === teamIndex);
     if (!t) return;
     setName(t.displayName); setNick(t.nickName); setCity(t.city); setAbbr(t.abbreviation);
     setPrimary(rgbToHex(t.primary)); setSecondary(rgbToHex(t.secondary)); setHub(rgbToHex(t.hub));
-    setLogo(t.logoId); setResult(null); setError(null);
+    setLogo(t.logoId); setPresetName(''); setResult(null); setError(null);
   }, [teamIndex, teams]);
+
+  // Preset: choosing a name fills nickname + (default) city + abbreviation + suggested colors.
+  function applyPresetName(nm: string) {
+    setPresetName(nm);
+    const p = RELOCATION_NAMES.find((x) => x.name === nm);
+    if (!p) return;
+    setName(p.name); setNick(p.name);
+    if (p.city) { setCity(p.city); setAbbr(cityCode(p.city) || abbr); }
+    if (p.primary) setPrimary(p.primary);
+    if (p.secondary) setSecondary(p.secondary);
+  }
+  function applyPresetCity(c: string) {
+    setCity(c);
+    const code = cityCode(c);
+    if (code) setAbbr(code);
+  }
 
   async function run() {
     if (!save || !team) return;
@@ -51,7 +72,7 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
     if (changed(secondary, rgbToHex(team.secondary))) opts.secondary = hexToRgb(secondary);
     if (changed(hub, rgbToHex(team.hub))) opts.hub = hexToRgb(hub);
     if (logo !== team.logoId) opts.logoId = logo;
-    if (Object.keys(opts).length <= 1) { setError('No changes — edit a field first.'); setBusy(false); return; }
+    if (Object.keys(opts).length <= 1) { setError('No changes — pick a name/city or edit a field first.'); setBusy(false); return; }
     try {
       setResult(await api.franchiseRelocateRebrand(save, opts));
       onWrote?.();
@@ -62,11 +83,22 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
     }
   }
 
+  const modeBtn = (m: 'preset' | 'custom', label: string) => (
+    <button
+      onClick={() => setMode(m)}
+      aria-pressed={mode === m}
+      className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${mode === m ? 'bg-primary text-white' : 'border border-border text-neutral-400 hover:text-neutral-200'}`}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <>
       <ToolHeader title="Relocation & Rebrand">
-        Rename a team, move its city, and recolor it. Edits the team in place — schedule, standings, and rosters
-        stay attached — and writes a new <code className="rounded bg-black/30 px-1">CAREER-…-REBRAND</code> /{' '}
+        Move or rebrand a team. <span className="text-neutral-300">Preset</span> uses Madden 26's real relocation
+        names + cities (pulled from the game); <span className="text-neutral-300">Custom</span> is free-text. Writes a new{' '}
+        <code className="rounded bg-black/30 px-1">CAREER-…-REBRAND</code> /{' '}
         <code className="rounded bg-black/30 px-1">-RELOCATE</code> file.
       </ToolHeader>
 
@@ -88,20 +120,54 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
               </div>
             )}
 
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="City" hint="max 16 — moving this makes it a relocation">
-                <input value={city} maxLength={16} onChange={(e) => setCity(e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Team name" hint="max 18">
-                <input value={name} maxLength={18} onChange={(e) => setName(e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Nickname" hint="max 18">
-                <input value={nick} maxLength={18} onChange={(e) => setNick(e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Abbreviation" hint="max 8 · 2–4 ideal">
-                <input value={abbr} maxLength={8} onChange={(e) => setAbbr(e.target.value.toUpperCase())} className={inputCls} />
-              </Field>
+            <div className="mt-4 flex items-center gap-2">
+              {modeBtn('preset', 'Preset')}
+              {modeBtn('custom', 'Custom')}
             </div>
+
+            {mode === 'preset' ? (
+              <>
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="Relocation name" hint="Madden 26's real relocation team names">
+                    <select value={presetName} onChange={(e) => applyPresetName(e.target.value)} className={inputCls}>
+                      <option value="">Choose a name…</option>
+                      {RELOCATION_NAMES.map((n) => (
+                        <option key={n.name} value={n.name}>{n.name}{n.city ? ` — ${n.city}` : ''}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="City" hint="relocation destinations">
+                    <select value={RELOCATION_CITIES.some((c) => c.name === city) ? city : ''} onChange={(e) => applyPresetCity(e.target.value)} className={inputCls}>
+                      <option value="">Choose a city…</option>
+                      {RELOCATION_CITIES.map((c) => (
+                        <option key={c.name} value={c.name}>{c.name} ({c.code})</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Abbreviation" hint="max 8 · auto from city">
+                    <input value={abbr} maxLength={8} onChange={(e) => setAbbr(e.target.value.toUpperCase())} className={inputCls} />
+                  </Field>
+                </div>
+                <p className="mt-2 text-[11px] text-neutral-500">
+                  Colors below are approximate defaults for each name (Madden's exact per-name values aren't stored in save data) — tweak freely.
+                </p>
+              </>
+            ) : (
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Field label="City" hint="max 16 — moving this makes it a relocation">
+                  <input value={city} maxLength={16} onChange={(e) => setCity(e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Team name" hint="max 18">
+                  <input value={name} maxLength={18} onChange={(e) => setName(e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Nickname" hint="max 18">
+                  <input value={nick} maxLength={18} onChange={(e) => setNick(e.target.value)} className={inputCls} />
+                </Field>
+                <Field label="Abbreviation" hint="max 8 · 2–4 ideal">
+                  <input value={abbr} maxLength={8} onChange={(e) => setAbbr(e.target.value.toUpperCase())} className={inputCls} />
+                </Field>
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap items-end gap-5">
               <Field label="Primary">
