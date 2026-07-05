@@ -162,6 +162,28 @@ export interface TraitRealismResult {
   notable: TraitUpgrade[];
 }
 
+export interface FaTrimOptions {
+  ovrThreshold?: number;
+  ageThreshold?: number;
+  targetN?: number;
+  dryRun?: boolean;
+}
+export interface FaTrimVictim { name: string; position: string; overall: number; age: number; }
+export interface FaTrimResult {
+  input: string; output: string; dryRun: boolean;
+  freeAgentsBefore: number; trimmed: number; freeAgentsAfter: number;
+  maxFreeAgents: number; victims: FaTrimVictim[];
+}
+
+export interface DraftPickResetOptions { dryRun?: boolean; }
+export interface DraftPickRestore {
+  round: number; pickNumber: number; yearOffset: number; fromTeam: string; toTeam: string;
+}
+export interface DraftPickResetResult {
+  input: string; output: string; dryRun: boolean;
+  poolRows: number; traded: number; restored: number; restores: DraftPickRestore[];
+}
+
 export interface ScheduleGame {
   away: string; home: string; played: boolean;
   awayScore: number; homeScore: number; status: string;
@@ -343,6 +365,34 @@ export const api = {
   /** Realistic dev-trait pass. dryRun:true previews counts; else writes a new CAREER-*-TRAITS save. */
   async franchiseTraitRealism(fileName: string, options: TraitRealismOptions): Promise<TraitRealismResult> {
     const res = await fetch('/api/franchise/trait-realism', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Trim the FA pool by OVR/age. dryRun:true previews; else writes a new CAREER-*-FATRIM save. */
+  async franchiseTrimFreeAgents(fileName: string, options: FaTrimOptions): Promise<FaTrimResult> {
+    const res = await fetch('/api/franchise/trim-free-agents', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Un-trade future draft picks. dryRun:true previews; else writes a new CAREER-*-DRAFTPICKS save. */
+  async franchiseResetDraftPicks(fileName: string, options: DraftPickResetOptions): Promise<DraftPickResetResult> {
+    const res = await fetch('/api/franchise/reset-draft-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, options }),

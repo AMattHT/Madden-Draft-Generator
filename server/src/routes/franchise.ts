@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions, FaTrimOptions, DraftPickResetOptions } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -75,6 +75,28 @@ router.post('/franchise/trait-realism', async (req: Request, res: Response) => {
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
     res.json(await FranchiseService.applyTraitRealism(fileName, options ?? {}));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Trim the free-agent pool by OVR/age. options.dryRun previews; else writes CAREER-*-FATRIM. */
+router.post('/franchise/trim-free-agents', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: FaTrimOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.trimFreeAgents(fileName, options ?? {}));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Un-trade future draft picks (CurrentTeam:=OriginalTeam). options.dryRun previews; else CAREER-*-DRAFTPICKS. */
+router.post('/franchise/reset-draft-picks', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: DraftPickResetOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.resetDraftPicks(fileName, options ?? {}));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }

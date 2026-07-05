@@ -24,6 +24,8 @@ const PLAYER_TABLE_UID = 1612938518;
 const TEAM_TABLE_UID = 637929298;
 const SEASONGAME_TABLE_UID = 1607878349; // SeasonGame (schedule)
 const SEASONINFO_TABLE_UID = 3123991521; // SeasonInfo (current week/type/year)
+const ROSTERINFO_TABLE_UID = 2907326382; // RosterInfo (MaxFreeAgentsSize etc. — read-only)
+const DRAFTPICK_FUTURE_POOL_UID = 2546719563; // future draft-pick pool (OriginalTeam vs CurrentTeam)
 // UI dev-tier <-> the franchise Player.TraitDevelopment enum. The enum aliases each
 // tier: value 0=Normal, 1=College_Impact(=Star), 2=College_Star(=Superstar),
 // 3=College_Elite(=XFactor) — verified from a real save. We WRITE the plain display
@@ -254,6 +256,43 @@ export interface FranchiseScheduleResult {
   currentStage: string;
   currentWeek: number;
   weeks: ScheduleWeek[];
+}
+
+export interface FaTrimOptions {
+  ovrThreshold?: number; // delete FAs with OverallRating < this (default 65; 0 = don't cut by OVR)
+  ageThreshold?: number; // ALSO delete FAs with Age >= this (0/undefined = off)
+  targetN?: number;      // after threshold cuts, delete worst-OVR FAs until pool == targetN (0 = off)
+  dryRun?: boolean;
+  outputName?: string;
+}
+export interface FaTrimVictim { name: string; position: string; overall: number; age: number; }
+export interface FaTrimResult {
+  input: string;
+  output: string;      // '' when dryRun
+  outputPath: string;  // '' when dryRun
+  dryRun: boolean;
+  freeAgentsBefore: number;
+  trimmed: number;
+  freeAgentsAfter: number;
+  maxFreeAgents: number; // RosterInfo.MaxFreeAgentsSize (informational; never written)
+  victims: FaTrimVictim[]; // up to 60, worst-OVR first
+}
+
+export interface DraftPickResetOptions { dryRun?: boolean; outputName?: string; }
+export interface DraftPickRestore {
+  round: number; pickNumber: number; yearOffset: number;
+  fromTeam: string; // current owner (being reverted)
+  toTeam: string;   // original owner (restored)
+}
+export interface DraftPickResetResult {
+  input: string;
+  output: string;      // '' when dryRun
+  outputPath: string;  // '' when dryRun
+  dryRun: boolean;
+  poolRows: number;    // non-empty rows in the future-pool table
+  traded: number;      // rows where CurrentTeam != OriginalTeam (OriginalTeam non-null)
+  restored: number;
+  restores: DraftPickRestore[]; // up to 100
 }
 
 /** A CAREER franchise save (not a CAREERDRAFT draft class). */
@@ -850,5 +889,147 @@ export const FranchiseService = {
 
     const weeks = Array.from(buckets.entries()).sort((a, b) => a[0].localeCompare(b[0])).map(([, w]) => w);
     return { input: fileName, seasonYear, currentStage, currentWeek, weeks };
+  },
+
+  /** Trim the free-agent pool by OVR/age threshold (optionally trim-to-N by worst OVR).
+   *  Flips ContractStatus='Deleted' on matched FreeAgents ONLY — the game-native trim status
+   *  (the game itself produces Deleted rows via DeleteExcessFreeAgentsTransaction). Never removes
+   *  rows, never touches TeamIndex/contracts, never writes any other status. No pool counter to
+   *  update — the game recomputes the FA pool from ContractStatus. dryRun previews without writing;
+   *  else writes a new CAREER-*-FATRIM file. */
+  async trimFreeAgents(fileName: string, opts: FaTrimOptions = {}): Promise<FaTrimResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+
+    const ovrThreshold = opts.ovrThreshold ?? 65;
+    const ageThreshold = opts.ageThreshold && opts.ageThreshold > 0 ? opts.ageThreshold : 0;
+    const targetN = opts.targetN && opts.targetN > 0 ? opts.targetN : 0;
+    const dryRun = !!opts.dryRun;
+
+    const outputName = dryRun ? '' : outputNameFor(fileName, 'FATRIM', opts.outputName);
+    const outputPath = dryRun ? '' : path.join(dir, outputName);
+    if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    // The live FA pool. Status is the ONLY correct discriminator: TeamIndex 32 is shared by
+    // Draft prospects, Deleted, None, Created, and even 2 Signed players.
+    interface Fa { rec: any; ovr: number; age: number; pos: string; name: string; }
+    const pool: Fa[] = [];
+    for (const r of pt.records) {
+      if (r.isEmpty) continue;
+      let status = ''; try { status = String(r.ContractStatus); } catch { /* */ }
+      if (status !== 'FreeAgent') continue;   // PRIMARY GATE
+      if (num(r.TeamIndex) !== 32) continue;  // belt-and-suspenders: a real FA is always 32
+      let name = '', pos = '';
+      try { name = `${String(r.FirstName ?? '')} ${String(r.LastName ?? '')}`.trim(); } catch { /* */ }
+      try { pos = String(r.Position ?? ''); } catch { /* */ }
+      pool.push({ rec: r, ovr: num(r.OverallRating), age: num(r.Age), pos, name });
+    }
+    const freeAgentsBefore = pool.length;
+
+    const victimSet = new Set<Fa>();
+    for (const f of pool) {
+      const cutByOvr = ovrThreshold > 0 && f.ovr < ovrThreshold;
+      const cutByAge = ageThreshold > 0 && f.age >= ageThreshold;
+      if (cutByOvr || cutByAge) victimSet.add(f);
+    }
+    if (targetN > 0) {
+      const survivors = pool.filter((f) => !victimSet.has(f)).sort((a, b) => a.ovr - b.ovr || b.age - a.age);
+      let need = (freeAgentsBefore - victimSet.size) - targetN;
+      for (let i = 0; i < survivors.length && need > 0; i++, need--) victimSet.add(survivors[i]);
+    }
+
+    const victims = Array.from(victimSet).sort((a, b) => a.ovr - b.ovr);
+    if (!dryRun) {
+      for (const v of victims) { try { v.rec.ContractStatus = 'Deleted'; } catch { /* enum/range */ } }
+      await file.save(outputPath, {});
+    }
+
+    let maxFreeAgents = 750;
+    try {
+      const ri = file.getTableByUniqueId(ROSTERINFO_TABLE_UID);
+      if (ri) { await ri.readRecords(); const r = ri.records.find((x: any) => !x.isEmpty); if (r) maxFreeAgents = num(r.MaxFreeAgentsSize) || 750; }
+    } catch { /* informational only */ }
+
+    return {
+      input: fileName, output: outputName, outputPath, dryRun,
+      freeAgentsBefore, trimmed: victims.length, freeAgentsAfter: freeAgentsBefore - victims.length,
+      maxFreeAgents, victims: victims.slice(0, 60).map((v) => ({ name: v.name, position: v.pos, overall: v.ovr, age: v.age })),
+    };
+  },
+
+  /** Un-trade every traded pick in the FUTURE draft-pick pool by restoring CurrentTeam:=OriginalTeam,
+   *  row by row (assign the raw OriginalTeam bitstring — verified write). Targets ONLY the future pool
+   *  by uniqueId (2546719563); never the current-draft table (whose SelectedPlayer must not desync).
+   *  Guards the all-zero NULL OriginalTeam. Leaves OriginalTeam/Round/PickNumber/YearOffset alone.
+   *  dryRun previews; else writes a new CAREER-*-DRAFTPICKS file. On a save with no traded future
+   *  picks this is a safe no-op (restored=0). */
+  async resetDraftPicks(fileName: string, opts: DraftPickResetOptions = {}): Promise<DraftPickResetResult> {
+    const dir = savesDir();
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+
+    const dryRun = !!opts.dryRun;
+    const outputName = dryRun ? '' : outputNameFor(fileName, 'DRAFTPICKS', opts.outputName);
+    const outputPath = dryRun ? '' : path.join(dir, outputName);
+    if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const file = await madden.create(inputPath, { autoParse: true });
+
+    // Team names indexed BY ROW NUMBER (pick refs resolve to row number, NOT TeamIndex).
+    const teamByRow: string[] = [];
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (tt) {
+      await tt.readRecords();
+      tt.records.forEach((r: any, rowNum: number) => {
+        if (r.isEmpty) { teamByRow[rowNum] = ''; return; }
+        try { teamByRow[rowNum] = String(r.DisplayName || ''); } catch { teamByRow[rowNum] = ''; }
+      });
+    }
+
+    // MUST target by uniqueId — the name 'DraftPick' is shared by the current-draft table and stubs.
+    const dp = file.getTableByUniqueId(DRAFTPICK_FUTURE_POOL_UID);
+    if (!dp) throw new Error('future draft-pick pool (uid 2546719563) not found');
+    await dp.readRecords();
+
+    const isNull = (bits: string) => /^0+$/.test(bits); // full-32-bit zero (row 0 has non-zero tableId bits)
+    const resolveTeam = (rec: any, key: 'CurrentTeam' | 'OriginalTeam'): string => {
+      try {
+        const raw = String(rec[key] ?? '');
+        if (isNull(raw)) return '';
+        const ref = rec.getReferenceDataByKey(key);
+        if (!ref || ref.rowNumber == null) return '';
+        return teamByRow[ref.rowNumber] || '';
+      } catch { return ''; }
+    };
+
+    let poolRows = 0, traded = 0, restored = 0;
+    const restores: DraftPickRestore[] = [];
+
+    for (const r of dp.records) {
+      if (r.isEmpty) continue;
+      poolRows++;
+      let origBits = '', curBits = '';
+      try { origBits = String(r.OriginalTeam ?? ''); } catch { /* */ }
+      try { curBits = String(r.CurrentTeam ?? ''); } catch { /* */ }
+      if (!origBits || isNull(origBits)) continue; // never derive a target from a null OriginalTeam
+      if (origBits === curBits) continue;          // not traded
+      traded++;
+      restores.push({
+        round: num(r.Round), pickNumber: num(r.PickNumber), yearOffset: num(r.YearOffset),
+        fromTeam: resolveTeam(r, 'CurrentTeam'), toTeam: resolveTeam(r, 'OriginalTeam'),
+      });
+      if (!dryRun) { try { r.CurrentTeam = origBits; restored++; } catch { /* ref/range */ } }
+      else restored++;
+    }
+
+    if (!dryRun) await file.save(outputPath, {});
+    restores.sort((a, b) => a.yearOffset - b.yearOffset || a.round - b.round || a.pickNumber - b.pickNumber);
+    return { input: fileName, output: outputName, outputPath, dryRun, poolRows, traded, restored, restores: restores.slice(0, 100) };
   },
 };
