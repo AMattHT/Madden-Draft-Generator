@@ -10,10 +10,14 @@ import { PositionMapper } from './PositionMapper';
  * helmet/cleats, taped or no gloves, NO visor) instead of modern.
  *
  * Asset names + era brackets come from equipment-years.json (the same data the
- * Editor Suite's EquipmentAssignmentService uses for retro rosters). We set only
- * the high-confidence, era-defining slots whose asset vocabulary is verified
- * valid against both that data and the live template (helmet, cleats, gloves,
- * visor). Facemask era models aren't in the data, so we leave the block default.
+ * Editor Suite's EquipmentAssignmentService uses for retro rosters). We set the
+ * era-defining slots whose asset vocabulary is verified valid against both that
+ * data and the live template (helmet, cleats, gloves, visor, facemask).
+ *
+ * Facemask is a SLOTLESS loadout element (itemAssetName GearFaceMask_*, no slotType
+ * — verified in the template); for the vintage eras we force a period-correct
+ * two-bar/three-bar mask (universal-compatible, so it sits right on the Riddell TK
+ * shell). Modern eras keep the helmet's default facemask.
  */
 
 interface EraDefaults {
@@ -67,6 +71,15 @@ function pick(arr: string[] | null | undefined, seed: string): string | null {
 const SKILL = new Set(['QB', 'RB', 'WR', 'TE', 'CB', 'S']);
 const LINE = new Set(['OL', 'IDL', 'EDGE']);
 
+/** Period-correct facemask by era bracket. Two-bar for skill, three-bar for
+ *  linemen; both are 'universal' compat so they fit the Riddell TK vintage shell.
+ *  Modern eras (2000+) are omitted so the helmet's default facemask is used. */
+const ERA_FACEMASK: Record<string, { skill: string; line: string }> = {
+  '1970-1979': { skill: 'GearFaceMask_2Bar', line: 'GearFaceMask_3Bar' },
+  '1980-1989': { skill: 'GearFaceMask_2Bar', line: 'GearFaceMask_3Bar' },
+  '1990-1999': { skill: 'GearFaceMask_3Bar', line: 'GearFaceMask_3Bar' },
+};
+
 export interface LoadoutElement {
   slotType?: string;
   itemAssetName: string;
@@ -82,6 +95,10 @@ export const EraGearService = {
 
     const helmet = pick(era.helmet, `${seedKey}|helmet`);
     if (helmet) els.push({ slotType: 'HeadWear', itemAssetName: helmet });
+
+    // Vintage facemask (slotless GearFaceMask_* element) for the old eras.
+    const fm = ERA_FACEMASK[eraBracket(year)];
+    if (fm) els.push({ itemAssetName: LINE.has(group) ? fm.line : fm.skill });
 
     const shoe = pick(era.shoes, `${seedKey}|shoe`);
     if (shoe) {

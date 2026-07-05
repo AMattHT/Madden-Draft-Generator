@@ -426,6 +426,14 @@ export function applyGearEdits(prospects: MdcProspect[], gearEdits?: GearEdits):
     const els = (loadout.loadoutElements ??= []);
     for (const [slot, asset] of Object.entries(slots)) {
       if (!asset) continue;
+      // Facemask is a SLOTLESS element (itemAssetName GearFaceMask_*, no slotType):
+      // replace the existing prefix-matched element or push a new one.
+      if (slot === 'facemask') {
+        const existing = els.find((e) => !e.slotType && e.itemAssetName?.startsWith('GearFaceMask_'));
+        if (existing) existing.itemAssetName = asset;
+        else els.push({ itemAssetName: asset });
+        continue;
+      }
       for (const slotType of GEAR_SLOT_TYPES[slot] ?? []) {
         const existing = els.find((e) => e.slotType === slotType);
         if (existing) existing.itemAssetName = asset;

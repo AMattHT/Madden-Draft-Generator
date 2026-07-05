@@ -21,6 +21,7 @@ export interface GearOption {
   label: string;
   image?: string; // thumbnail URL, if a sprite exists
   year?: number; // release year (fallback catalog only)
+  compatibility?: string; // facemask helmet-family ('universal' | 'f7' | …) for UI filtering
 }
 
 // slot -> display label, gear-atlas category, M26 slotType(s), and optional
@@ -37,6 +38,9 @@ interface SlotDef {
 }
 const SLOTS: SlotDef[] = [
   { slot: 'helmet', label: 'Helmet', category: 'helmets', slotTypes: ['HeadWear'] },
+  // Facemask is a SLOTLESS loadout element (itemAssetName GearFaceMask_*, no slotType —
+  // verified in the M26 template); applyGearEdits/M26Writer handle it by prefix.
+  { slot: 'facemask', label: 'Facemask', category: 'facemasks', slotTypes: [] },
   { slot: 'visor', label: 'Visor', category: 'visors', slotTypes: ['Visor'], none: { value: 'GearVisor_None', label: 'No visor' } },
   { slot: 'gloveLeft', label: 'Left glove', category: 'gloves', slotTypes: ['LeftHandWear'], none: { value: 'GearHand_None', label: 'No glove' } },
   { slot: 'gloveRight', label: 'Right glove', category: 'gloves', slotTypes: ['RightHandWear'], none: { value: 'GearHand_None', label: 'No glove' } },
@@ -228,7 +232,7 @@ export const GearOptionsService = {
       for (const s of SLOTS) {
         let items: GearOption[] = s.synthetic
           ? s.synthetic.map((o) => ({ ...o }))
-          : (cats[s.category ?? ''] ?? []).map((it) => ({ value: it.value, label: it.label, image: it.image }));
+          : (cats[s.category ?? ''] ?? []).map((it) => ({ value: it.value, label: it.label, image: it.image, compatibility: it.compatibility }));
         if (s.extra) {
           const seen = new Set(items.map((i) => i.value));
           items = [...s.extra.filter((e) => !seen.has(e.value)), ...items];

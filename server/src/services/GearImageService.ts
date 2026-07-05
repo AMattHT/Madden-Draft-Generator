@@ -27,6 +27,7 @@ export interface GearCatalogItem {
   value: string;
   label: string;
   image?: string; // thumbnail URL if a sprite exists
+  compatibility?: string; // e.g. facemask helmet-family ('universal' | 'f7' | 'speedflex' | …)
 }
 
 let valueToImage: Map<string, string> | null = null;
@@ -37,7 +38,7 @@ function load(): boolean {
   if (!DATA_DIR) return false;
   const atlas = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'gear-atlas.json'), 'utf8')) as Record<
     string,
-    Array<{ value?: string; label?: string; image?: string | null }>
+    Array<{ value?: string; label?: string; image?: string | null; compatibility?: string }>
   >;
   valueToImage = new Map();
   catalog = {};
@@ -47,7 +48,7 @@ function load(): boolean {
     for (const it of items) {
       if (!it.value) continue;
       if (it.image) valueToImage.set(it.value, it.image);
-      list.push({ value: it.value, label: it.label || it.value, image: it.image ? `/api/gear-image/${it.value}` : undefined });
+      list.push({ value: it.value, label: it.label || it.value, image: it.image ? `/api/gear-image/${it.value}` : undefined, compatibility: it.compatibility });
     }
     catalog[category] = list;
   }

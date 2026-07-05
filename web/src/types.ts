@@ -57,6 +57,7 @@ export interface GearOption {
   label: string;
   year?: number;
   image?: string; // thumbnail URL
+  compatibility?: string; // facemask helmet-family ('universal' | 'f7' | …)
 }
 
 export interface LikenessStats {

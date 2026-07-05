@@ -8,6 +8,7 @@ const GROUPS: { group: string; slots: { slot: string; label: string }[] }[] = [
     group: 'Head',
     slots: [
       { slot: 'helmet', label: 'Helmet' },
+      { slot: 'facemask', label: 'Facemask' },
       { slot: 'visor', label: 'Visor' },
       { slot: 'mouthpiece', label: 'Mouthpiece' },
       { slot: 'guardianCap', label: 'Guardian cap' },
@@ -234,7 +235,7 @@ export function GearEditor({
         </div>
 
         <div className="flex items-center justify-between border-t border-border px-5 py-2.5 text-[11px] text-neutral-500">
-          <span>Picks apply to the .mdc export. Facemask &amp; pants aren’t editable (team-uniform / helmet-baked in Madden 26).</span>
+          <span>Picks apply to the .mdc export. Old-era classes get a period-correct facemask automatically (Riddell TK two-bar); override it here.</span>
           <button onClick={onClose} className="rounded-md bg-surface-2 px-3 py-1.5 font-medium text-neutral-200 hover:bg-surface-3">
             Done
           </button>
