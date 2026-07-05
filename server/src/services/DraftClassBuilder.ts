@@ -341,6 +341,8 @@ export interface PreviewRow {
   wav: number | null;
   wavSource: string;
   face: 'asset' | 'generic' | 'photo';
+  skinTone: number; // 1-8, for the face picker's per-tone pool
+  genericHead: string | null; // current generic head code (gen_*), null if a real asset
   college: string;
   age: number;
   heightInches: number;
@@ -388,6 +390,16 @@ export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits): void {
       }
       if (k === 'bodyType') {
         if (BODY_TYPES.includes(String(raw))) p.bodyType = String(raw);
+        continue;
+      }
+      // Face pick: a gen_* generic head code. Drive it via PEPS (M26Writer routes a
+      // GEN_ PEPS into visuals.genericHeadName); mirror into visuals for safety.
+      if (k === 'genericHeadName') {
+        const code = String(raw);
+        if (/^gen_\d/i.test(code)) {
+          p.PEPS = code;
+          ((p.visuals ??= {}) as { genericHeadName?: string }).genericHeadName = code;
+        }
         continue;
       }
       const v = Number(raw);
@@ -548,6 +560,8 @@ export const DraftClassBuilder = {
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         wavSource: base.wavSource,
         face,
+        skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
+        genericHead: peps.startsWith('gen_') ? String(p.PEPS) : null,
         college: base.college,
         age: Number(p.age) || 0,
         heightInches: Number(p.heightInches) || 0,

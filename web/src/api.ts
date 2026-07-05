@@ -206,6 +206,9 @@ export const api = {
   /** A Madden id/name lookup table (e.g. "college", "state") for editor dropdowns. */
   lookup: (name: string) => jget<{ id: number; name: string }[]>(`/api/lookups/${name}`),
 
+  /** Generic draft-class head codes grouped by skin tone (1-8), for the face picker. */
+  genericHeads: () => jget<Record<string, string[]>>('/api/lookups/generic-heads'),
+
   playerSearch: (query: string, limit = 40) =>
     jget<{ results: PlayerSearchResult[] }>(
       `/api/players/search?q=${encodeURIComponent(query)}&limit=${limit}`

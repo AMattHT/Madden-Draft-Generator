@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { LookupService } from '../services/LookupService';
 import { CalibrationService } from '../services/CalibrationService';
 import { GearOptionsService } from '../services/GearOptionsService';
+import { LikenessService } from '../services/LikenessService';
 
 const r = Router();
 
@@ -18,6 +19,11 @@ r.get('/lookups/archetypes-by-position', (_req, res) => {
 r.get('/lookups/equipment', (req, res) => {
   const year = parseInt(String(req.query.year), 10);
   res.json(GearOptionsService.optionsForYear(Number.isNaN(year) ? 2025 : year));
+});
+
+/** Generic draft-class head codes grouped by skin tone, for the face picker. */
+r.get('/lookups/generic-heads', (_req, res) => {
+  res.json(LikenessService.genericHeadsByTone());
 });
 
 r.get('/lookups/:name', (req, res) => {

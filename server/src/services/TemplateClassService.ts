@@ -45,6 +45,11 @@ function build() {
   const rows: PreviewRow[] = ordered.map((p, i) => {
     const ratings: Record<string, number> = {};
     for (const k of RATING_KEYS) ratings[k] = Number(p[k]) || 0;
+    const gh = (() => {
+      const v = String((p as { PEPS?: string; visuals?: { genericHeadName?: string } }).PEPS || (p as { visuals?: { genericHeadName?: string } }).visuals?.genericHeadName || '');
+      return /^gen_\d/i.test(v) ? v : null;
+    })();
+    const tone = gh ? parseInt(gh.match(/^gen_(\d+)/i)?.[1] ?? '4', 10) : 4;
     return {
       id: i + 1,
       pick: i + 1,
@@ -61,6 +66,8 @@ function build() {
       wav: null,
       wavSource: 'preset', // EA's official rookie rating — no career wAV yet
       face: faceOf(p),
+      skinTone: tone,
+      genericHead: gh,
       college: LookupService.idToName('college', Number(p.college)) || '',
       age: Number(p.age) || 0,
       heightInches: Number(p.heightInches) || 0,

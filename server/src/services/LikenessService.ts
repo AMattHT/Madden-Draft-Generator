@@ -78,6 +78,14 @@ export interface Likeness {
 }
 
 export const LikenessService = {
+  /** Generic draft-class face codes grouped by skin tone (1-8), for the face picker. */
+  genericHeadsByTone(): Record<number, string[]> {
+    load();
+    const out: Record<number, string[]> = {};
+    for (const [tone, codes] of byTone!) out[tone] = [...codes].sort();
+    return out;
+  },
+
   /** Assign a face for a player. `index` keeps generic picks reproducible. */
   assign(player: BaselinePlayer, index: number): Likeness {
     load();

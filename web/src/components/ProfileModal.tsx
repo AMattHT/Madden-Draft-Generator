@@ -31,6 +31,8 @@ export function ProfileModal({
   const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
   const [gearOpen, setGearOpen] = useState(false);
   const [colleges, setColleges] = useState<{ id: number; name: string }[]>([]);
+  const [heads, setHeads] = useState<Record<string, string[]>>({});
+  const [faceTone, setFaceTone] = useState<number>(row.skinTone ?? 4);
 
   useEffect(() => {
     let alive = true;
@@ -47,6 +49,11 @@ export function ProfileModal({
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    api.genericHeads().then(setHeads).catch(() => {});
+  }, []);
+  useEffect(() => setFaceTone(row.skinTone ?? 4), [row.id, row.skinTone]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -80,6 +87,15 @@ export function ProfileModal({
   const archName = archOpts.find((o) => o.id === archetype)?.name ?? row.archetypeName;
 
   const field = 'rounded-md border border-border bg-surface-0 px-1.5 py-1 text-sm focus:border-primary focus:outline-none';
+  // Face (generic head) picker: pool for the chosen skin tone; PEPS drives the write.
+  const facePool = heads[String(faceTone)] ?? [];
+  const curFace = effStr('genericHeadName', row.genericHead ?? '');
+  const faceIdx = facePool.indexOf(curFace);
+  const pickFace = (i: number) => {
+    if (!facePool.length) return;
+    onEdit('genericHeadName', facePool[((i % facePool.length) + facePool.length) % facePool.length]);
+  };
+  const faceBtn = 'rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-xs text-neutral-200 transition-colors hover:bg-surface-3 disabled:opacity-40';
   const num = (key: string) => {
     const v = eff(key);
     return (
@@ -330,6 +346,25 @@ export function ProfileModal({
               ))}
             </select>
           </label>
+          <div className="block text-xs text-neutral-400">
+            Face <span className="text-neutral-600">(generic head — no preview available)</span>
+            <div className="mt-1 flex items-center gap-1.5">
+              <select value={faceTone} onChange={(e) => setFaceTone(Number(e.target.value))} className={field} title="Skin tone">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((t) => (
+                  <option key={t} value={t}>Tone {t}</option>
+                ))}
+              </select>
+              <button type="button" onClick={() => pickFace(faceIdx < 0 ? 0 : faceIdx - 1)} disabled={!facePool.length} className={faceBtn} title="Previous head">‹</button>
+              <span className="flex-1 text-center text-sm tabular-nums text-neutral-200">
+                {faceIdx >= 0 ? `Head ${faceIdx + 1} / ${facePool.length}` : row.face === 'asset' ? 'Real face' : `— / ${facePool.length}`}
+              </span>
+              <button type="button" onClick={() => pickFace(faceIdx < 0 ? 0 : faceIdx + 1)} disabled={!facePool.length} className={faceBtn} title="Next head">›</button>
+              <button type="button" onClick={() => pickFace(Math.floor(Math.random() * facePool.length))} disabled={!facePool.length} className={faceBtn} title="Random head">
+                <Icon path={ICONS.shuffle} className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            {curFace && <span className="mt-0.5 block truncate text-[10px] text-neutral-600">{curFace}</span>}
+          </div>
         </div>
 
         <div className="space-y-2.5 border-b border-border px-5 py-4">
