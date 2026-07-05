@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache } from './cache';
 import { ClassView } from './components/ClassView';
-import { FranchisePanel } from './components/FranchisePanel';
-import { RosterEditor } from './components/RosterEditor';
+import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
 import { Icon, ICONS } from './components/ui';
@@ -39,7 +38,6 @@ export default function App() {
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
   const [view, setView] = useState<AppView>('home');
-  const [franchiseTab, setFranchiseTab] = useState<'tools' | 'roster'>('tools');
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
@@ -303,39 +301,17 @@ export default function App() {
         <main className="min-w-0 flex-1">
           {view === 'home' && <HomePage onSelect={setView} />}
           {view === 'franchise' && (
-            <div className="flex h-full flex-col">
-              <div className="flex shrink-0 items-center gap-2 border-b border-border px-6 py-2.5">
-                {(['tools', 'roster'] as const).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setFranchiseTab(t)}
-                    aria-pressed={franchiseTab === t}
-                    className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      franchiseTab === t ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
-                    }`}
-                  >
-                    {t === 'tools' ? 'Tools' : 'Roster Editor'}
-                  </button>
-                ))}
-              </div>
-              <div className="min-h-0 flex-1">
-                {franchiseTab === 'tools' ? (
-                  <FranchisePanel
-                    years={years}
-                    usedYears={usedYears}
-                    lastDrawn={lastDrawn}
-                    range={range}
-                    onDraw={drawRandomYear}
-                    onUndo={undoLastDraw}
-                    onSetRange={updateRange}
-                    onToggleUsed={toggleUsedYear}
-                    onClearUsed={clearUsedYears}
-                  />
-                ) : (
-                  <RosterEditor />
-                )}
-              </div>
-            </div>
+            <FranchiseView
+              years={years}
+              usedYears={usedYears}
+              lastDrawn={lastDrawn}
+              range={range}
+              onDraw={drawRandomYear}
+              onUndo={undoLastDraw}
+              onSetRange={updateRange}
+              onToggleUsed={toggleUsedYear}
+              onClearUsed={clearUsedYears}
+            />
           )}
           {view === 'draft' && (
             <>

@@ -1,0 +1,140 @@
+import { useCallback, useEffect, useState } from 'react';
+import { api, type FranchiseInfo } from '../../api';
+import { RandomDraft } from '../RandomDraft';
+import { RosterEditor } from '../RosterEditor';
+import { CapResetTool } from './CapResetTool';
+import { PlayerBulkTools } from './PlayerBulkTools';
+import { DevTraitsTool } from './DevTraitsTool';
+import { FaTrimTool } from './FaTrimTool';
+import { RelocationTool } from './RelocationTool';
+import { DraftPickResetTool } from './DraftPickResetTool';
+import { ScheduleViewer } from './ScheduleViewer';
+import { ToolStack } from './shared';
+
+type Tab = 'cap' | 'players' | 'roster' | 'teams' | 'draft' | 'schedule';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'cap', label: 'Cap' },
+  { id: 'players', label: 'Players' },
+  { id: 'roster', label: 'Roster' },
+  { id: 'teams', label: 'Teams' },
+  { id: 'draft', label: 'Draft' },
+  { id: 'schedule', label: 'Schedule' },
+];
+
+// Our own generated outputs — a fresh session should default to the user's real save, not one of these.
+const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAND|RELOCATE)$/i;
+const fmtDate = (ms: number) => new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+export function FranchiseView(props: {
+  years: number[];
+  usedYears: Set<number>;
+  lastDrawn: number | null;
+  range: { from: number; to: number } | null;
+  onDraw: () => void;
+  onUndo: () => void;
+  onSetRange: (from: number, to: number) => void;
+  onToggleUsed: (year: number) => void;
+  onClearUsed: () => void;
+}) {
+  const [savesDir, setSavesDir] = useState('');
+  const [files, setFiles] = useState<FranchiseInfo[]>([]);
+  const [selected, setSelected] = useState('');
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>('cap');
+
+  const refresh = useCallback(() => {
+    api.franchiseList().then((r) => setFiles(r.franchises)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    api.franchiseList()
+      .then((r) => {
+        setSavesDir(r.savesDir);
+        setFiles(r.franchises);
+        const def = r.franchises.find((f) => !OUTPUT_SUFFIX.test(f.name)) || r.franchises[0];
+        if (def) setSelected(def.name);
+      })
+      .catch((e) => setLoadErr(e.message));
+  }, []);
+
+  const inputCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Shared save picker + tab nav */}
+      <div className="shrink-0 border-b border-border px-6 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Save</span>
+          <select value={selected} onChange={(e) => setSelected(e.target.value)} className={`${inputCls} min-w-[18rem]`}>
+            {files.length === 0 && <option value="">No CAREER saves found</option>}
+            {files.map((f) => (
+              <option key={f.name} value={f.name}>
+                {f.name}  ·  {(f.sizeBytes / 1e6).toFixed(1)}MB  ·  {fmtDate(f.modified)}
+              </option>
+            ))}
+          </select>
+          {savesDir && <span className="hidden text-[11px] text-neutral-500 lg:inline">from {savesDir}</span>}
+        </div>
+
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              aria-pressed={tab === t.id}
+              className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                tab === t.id ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loadErr && (
+        <div className="mx-6 mt-4 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
+          Couldn’t read the Madden Saves folder: {loadErr}
+        </div>
+      )}
+
+      <div className="min-h-0 flex-1">
+        {tab === 'roster' ? (
+          <RosterEditor save={selected} onWrote={refresh} />
+        ) : (
+          <ToolStack>
+            {tab === 'cap' && <CapResetTool save={selected} onWrote={refresh} />}
+            {tab === 'players' && (
+              <>
+                <PlayerBulkTools save={selected} onWrote={refresh} />
+                <div className="border-t border-border/60" />
+                <DevTraitsTool save={selected} onWrote={refresh} />
+                <div className="border-t border-border/60" />
+                <FaTrimTool save={selected} onWrote={refresh} />
+              </>
+            )}
+            {tab === 'teams' && <RelocationTool save={selected} onWrote={refresh} />}
+            {tab === 'draft' && (
+              <>
+                <RandomDraft
+                  years={props.years}
+                  used={props.usedYears}
+                  lastDrawn={props.lastDrawn}
+                  range={props.range}
+                  onDraw={props.onDraw}
+                  onUndo={props.onUndo}
+                  onSetRange={props.onSetRange}
+                  onToggleUsed={props.onToggleUsed}
+                  onClear={props.onClearUsed}
+                />
+                <div className="border-t border-border/60" />
+                <DraftPickResetTool save={selected} onWrote={refresh} />
+              </>
+            )}
+            {tab === 'schedule' && <ScheduleViewer save={selected} />}
+          </ToolStack>
+        )}
+      </div>
+    </div>
+  );
+}
