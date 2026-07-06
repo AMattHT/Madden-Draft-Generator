@@ -77,7 +77,7 @@ const LINE = new Set(['OL', 'IDL', 'EDGE']);
 const ERA_FACEMASK: Record<string, { skill: string; line: string }> = {
   '1970-1979': { skill: 'GearFaceMask_2Bar', line: 'GearFaceMask_3Bar' },
   '1980-1989': { skill: 'GearFaceMask_2Bar', line: 'GearFaceMask_3Bar' },
-  '1990-1999': { skill: 'GearFaceMask_3Bar', line: 'GearFaceMask_3Bar' },
+  '1990-1999': { skill: 'GearFaceMask_2Bar', line: 'GearFaceMask_3Bar' },
 };
 
 export interface LoadoutElement {

@@ -624,21 +624,21 @@
       "notes": "Riddell TK era - linemen heavily taped hands"
     },
     "1980-1989": {
-      "helmet": ["GearHelmet_RiddellTK"],
+      "helmet": ["GearHelmet_RiddellTK", "GearHelmet_Standard", "GearHelmet_Schutt"],
       "shoes": ["GearFootwear_shoeLowVintage_nike"],
       "gloves": ["GearHand_None", "GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
       "linemanGloves": ["GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
-      "notes": "Late TK era - taped hands common"
+      "notes": "Transition: Riddell TK still common early, VSR4 + Schutt Air Advantage arriving late 80s"
     },
     "1990-1999": {
-      "helmet": ["GearHelmet_RiddellTK", "GearHelmet_Standard"],
+      "helmet": ["GearHelmet_Standard", "GearHelmet_Schutt", "GearHelmet_AirXP"],
       "shoes": ["GearFootwear_shoeLowVintage_nike", "GearFootwear_shoe_Mid_NikeDiamondTURF"],
       "gloves": ["GearHand_None", "GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
       "linemanGloves": ["GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
-      "notes": "TK and VSR4 (introduced 1992) - Diamond Turf starts 1993"
+      "notes": "Riddell VSR4 (Standard) + Schutt Air Advantage / Air XP era - Diamond Turf starts 1993"
     },
     "2000-2007": {
-      "helmet": ["GearHelmet_Revolution"],
+      "helmet": ["GearHelmet_Revolution", "GearHelmet_Standard", "GearHelmet_Schutt"],
       "shoes": ["GearFootwear_shoeLowVintage_nike", "GearFootwear_shoe_Mid_NikeDiamondTURF"],
       "gloves": ["GearHand_None", "GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
       "linemanGloves": ["GearHand_tapedHandFinger_White", "GearHand_tapedHandNormal_White"],
