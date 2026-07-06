@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type FranchisePlayer, type PlayerFieldEdit } from '../api';
+import type { GearOption } from '../types';
 import { ATTR_GROUPS, humanize, tierColor } from '../constants';
+import { GearEditor } from './GearEditor';
+import { Icon, ICONS } from './ui';
 
 const POSITIONS = ['QB', 'HB', 'FB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT', 'LE', 'RE', 'DT', 'LOLB', 'MLB', 'ROLB', 'CB', 'FS', 'SS', 'K', 'P', 'LS'];
 const DEVS = ['Normal', 'Star', 'Superstar', 'XFactor'];
@@ -22,6 +25,16 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
   const [applying, setApplying] = useState(false);
   const [result, setResult] = useState<{ output: string; playersEdited: number } | null>(null);
   const [applyErr, setApplyErr] = useState<string | null>(null);
+
+  const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
+  const [gearOpen, setGearOpen] = useState(false);
+  const [heads, setHeads] = useState<Record<string, string[]>>({});
+  const [headTone, setHeadTone] = useState(4);
+
+  useEffect(() => {
+    api.equipmentOptions(2025).then(setGearOpts).catch(() => {});
+    api.genericHeads().then(setHeads).catch(() => {});
+  }, []);
 
   // Reset everything when the shared save changes — a loaded roster from a different file is stale.
   useEffect(() => {
@@ -64,9 +77,23 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
     dev: e?.dev ?? sel?.dev ?? 'Normal',
     position: e?.position ?? sel?.position ?? '',
     jersey: e?.jersey ?? sel?.jersey ?? 0,
+    bodyType: e?.bodyType ?? sel?.bodyType ?? 'Standard',
+    genericHead: e?.genericHead ?? sel?.genericHead ?? '',
     rating: (k: string) => e?.ratings?.[k] ?? sel?.ratings[k] ?? 0,
   };
   const editedCount = Object.keys(edits).length;
+
+  // Face (generic head) picker: pool for the chosen tone; edit stores the gen_ code.
+  useEffect(() => {
+    const m = (sel?.genericHead || '').match(/^gen_(\d+)/i);
+    setHeadTone(m ? parseInt(m[1], 10) : 4);
+  }, [selectedId, sel?.genericHead]);
+  const headPool = heads[String(headTone)] ?? [];
+  const headIdx = headPool.indexOf(eff.genericHead);
+  const pickHead = (i: number) => { if (headPool.length && sel) editPlayer(sel.id, { genericHead: headPool[((i % headPool.length) + headPool.length) % headPool.length] }); };
+  // Gear for the GearEditor: current helmet/facemask merged with any pending edits.
+  const gearPatch: Record<string, string> = { ...(sel ? { helmet: sel.helmet, facemask: sel.facemask } : {}), ...(e?.gear ?? {}) };
+  const editGear = (slot: string, asset: string) => { if (sel) editPlayer(sel.id, { gear: { ...(edits[sel.id]?.gear ?? {}), [slot]: asset } }); };
 
   async function apply() {
     if (!save || editedCount === 0) return;
@@ -192,6 +219,34 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
                       </select></label>
                   </div>
 
+                  {/* Appearance: body type, generic head, gear (helmet/facemask/…) */}
+                  <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Body type</span>
+                        <select value={eff.bodyType} onChange={(ev) => editPlayer(sel.id, { bodyType: ev.target.value })} className={inputCls}>
+                          {['Standard', 'Thin', 'Muscular', 'Heavy'].map((b) => <option key={b} value={b}>{b}</option>)}
+                        </select></label>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[10px] uppercase tracking-wider text-muted">Face (generic head)</span>
+                        <div className="flex items-center gap-1">
+                          <select value={headTone} onChange={(ev) => setHeadTone(Number(ev.target.value))} className={`${inputCls} px-1`} title="Skin tone">
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((t) => <option key={t} value={t}>T{t}</option>)}
+                          </select>
+                          <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx - 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">‹</button>
+                          <span className="flex-1 text-center text-xs tabular-nums text-neutral-300">{headIdx >= 0 ? `${headIdx + 1}/${headPool.length}` : '—'}</span>
+                          <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx + 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">›</button>
+                          <button type="button" onClick={() => pickHead(Math.floor(Math.random() * headPool.length))} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-neutral-200 hover:bg-surface-3 disabled:opacity-40" title="Random"><Icon path={ICONS.shuffle} className="h-3 w-3" /></button>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="button" onClick={() => setGearOpen(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3">
+                      <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit gear
+                    </button>
+                    <div className="truncate text-[10px] text-neutral-500">
+                      Helmet: {gearOpts.helmet?.find((o) => o.value === gearPatch.helmet)?.label ?? gearPatch.helmet ?? '—'} · Facemask: {gearOpts.facemask?.find((o) => o.value === gearPatch.facemask)?.label ?? gearPatch.facemask ?? '—'}
+                    </div>
+                  </div>
+
                   <div className="mt-4 space-y-3">
                     {ATTR_GROUPS.map((g) => (
                       <div key={g.title}>
@@ -214,6 +269,16 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
             )}
           </div>
         </div>
+      )}
+
+      {gearOpen && sel && (
+        <GearEditor
+          playerName={`${sel.firstName} ${sel.lastName}`}
+          options={gearOpts}
+          gearPatch={gearPatch}
+          onGearEdit={editGear}
+          onClose={() => setGearOpen(false)}
+        />
       )}
     </div>
   );

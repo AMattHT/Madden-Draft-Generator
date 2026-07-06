@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { GEAR_SLOT_TYPES } from './GearOptionsService';
 
 // madden-franchise is a CommonJS (.cjs) module; require it the way the vendored
 // draft-class parser is required. `create()` is a static async factory that returns
@@ -26,6 +27,7 @@ const SEASONGAME_TABLE_UID = 1607878349; // SeasonGame (schedule)
 const SEASONINFO_TABLE_UID = 3123991521; // SeasonInfo (current week/type/year)
 const ROSTERINFO_TABLE_UID = 2907326382; // RosterInfo (MaxFreeAgentsSize etc. — read-only)
 const DRAFTPICK_FUTURE_POOL_UID = 2546719563; // future draft-pick pool (OriginalTeam vs CurrentTeam)
+const CHARVISUALS_TABLE_UID = 1429178382; // CharacterVisuals (RawData = loadout JSON, table3 blob)
 // UI dev-tier <-> the franchise Player.TraitDevelopment enum. The enum aliases each
 // tier: value 0=Normal, 1=College_Impact(=Star), 2=College_Star(=Superstar),
 // 3=College_Elite(=XFactor) — verified from a real save. We WRITE the plain display
@@ -132,6 +134,11 @@ export interface FranchisePlayer {
   jersey: number;
   status: string;
   ratings: Record<string, number>;
+  // Appearance (Standard/Thin/Muscular/Heavy build; gen_* head; current gear asset ids)
+  bodyType: string;
+  genericHead: string;
+  helmet: string;
+  facemask: string;
 }
 
 export interface FranchisePlayersResult {
@@ -146,6 +153,9 @@ export interface PlayerFieldEdit {
   dev?: string;
   jersey?: number;
   ratings?: Record<string, number>;
+  bodyType?: string; // Standard | Thin | Muscular | Heavy
+  genericHead?: string; // gen_* code
+  gear?: Record<string, string>; // slot -> asset (helmet/facemask), written into the loadout JSON
 }
 
 export interface RosterApplyResult {
@@ -334,6 +344,32 @@ const weekLabel = (stage: string, sw: number): string => {
 const STAGE_ORDER: Record<string, number> = {
   PreSeason: 0, RegularSeason: 1, WildcardPlayoff: 2, DivisionalPlayoff: 3, ConferencePlayoff: 4, SuperBowl: 5,
 };
+
+const bitsNull = (b: string) => /^0+$/.test(b);
+
+interface CvHandle { row: any; obj: any; els: Array<{ slotType?: string; itemAssetName: string }>; }
+/** Resolve a player's CharacterVisuals ref -> its CV-table row + parsed PlayerOnField
+ *  loadout elements. Returns null if the ref is NULL or the visuals overflow (none do
+ *  in practice — verified 0/3194) or don't parse. RawData is a table3 blob holding JSON. */
+function cvLoadout(file: any, cvTable: any, playerRec: any): CvHandle | null {
+  try {
+    const raw = String(playerRec.CharacterVisuals ?? '');
+    if (bitsNull(raw)) return null;
+    const ref = playerRec.getReferenceDataByKey('CharacterVisuals');
+    if (!ref || ref.rowNumber == null) return null;
+    const row = cvTable.records[ref.rowNumber];
+    if (!row) return null;
+    let overflow = ''; try { overflow = String(row.Overflow); } catch { /* */ }
+    if (!bitsNull(overflow)) return null; // chained overflow — skip (not observed)
+    let data = ''; try { data = String(row.RawData); } catch { return null; }
+    const obj = JSON.parse(data);
+    const lo = (obj.loadouts || []).find((l: { loadoutType?: string }) => l.loadoutType === 'PlayerOnField');
+    if (!lo) return null;
+    return { row, obj, els: (lo.loadoutElements ??= []) };
+  } catch { return null; }
+}
+const helmetOf = (els: Array<{ slotType?: string; itemAssetName: string }>) => els.find((e) => e.slotType === 'HeadWear')?.itemAssetName ?? '';
+const facemaskOf = (els: Array<{ slotType?: string; itemAssetName: string }>) => els.find((e) => !e.slotType && String(e.itemAssetName || '').startsWith('GearFaceMask_'))?.itemAssetName ?? '';
 
 async function findTeamTable(file: any): Promise<any | null> {
   for (const t of file.tables || []) {
@@ -528,6 +564,10 @@ export const FranchiseService = {
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
 
+    // CharacterVisuals table holds each player's loadout JSON (helmet/facemask).
+    const cvt = file.getTableByUniqueId(CHARVISUALS_TABLE_UID);
+    if (cvt) await cvt.readRecords();
+
     const players: FranchisePlayer[] = [];
     for (const r of pt.records) {
       if (r.isEmpty) continue;
@@ -536,6 +576,7 @@ export const FranchiseService = {
       const teamIndex = num(r.TeamIndex);
       const ratings: Record<string, number> = {};
       for (const k of RATING_KEYS) { try { ratings[k] = num(r[ratingField(k)]); } catch { ratings[k] = 0; } }
+      const cv = cvt ? cvLoadout(file, cvt, r) : null;
       players.push({
         id: r.index,
         firstName: (() => { try { return String(r.FirstName ?? ''); } catch { return ''; } })(),
@@ -550,6 +591,10 @@ export const FranchiseService = {
         jersey: num(r.JerseyNum),
         status,
         ratings,
+        bodyType: (() => { try { return String(r.CharacterBodyType ?? ''); } catch { return ''; } })(),
+        genericHead: (() => { try { return String(r.GenericHeadAssetName ?? ''); } catch { return ''; } })(),
+        helmet: cv ? helmetOf(cv.els) : '',
+        facemask: cv ? facemaskOf(cv.els) : '',
       });
     }
     return { teams, players };
@@ -568,6 +613,9 @@ export const FranchiseService = {
     const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
+    const cvt = file.getTableByUniqueId(CHARVISUALS_TABLE_UID);
+    if (cvt) await cvt.readRecords();
+    const bodyTypes = new Set(['Standard', 'Thin', 'Muscular', 'Heavy']);
 
     let playersEdited = 0;
     for (const [idStr, e] of Object.entries(edits || {})) {
@@ -583,6 +631,31 @@ export const FranchiseService = {
         for (const [k, v] of Object.entries(e.ratings)) {
           if (!RATING_KEYS.includes(k) || v == null) continue;
           try { rec[ratingField(k)] = clamp99(Number(v)); touched = true; } catch { /* */ }
+        }
+      }
+      // Appearance: body type + generic head are direct fields; helmet/facemask live in
+      // the CharacterVisuals loadout JSON (RawData table3 blob) — edit in place & rewrite.
+      if (e.bodyType && bodyTypes.has(e.bodyType)) { try { rec.CharacterBodyType = e.bodyType; touched = true; } catch { /* */ } }
+      if (e.genericHead && /^gen_\d/i.test(e.genericHead)) { try { rec.GenericHeadAssetName = e.genericHead; touched = true; } catch { /* */ } }
+      if (e.gear && cvt) {
+        const cv = cvLoadout(file, cvt, rec);
+        if (cv) {
+          let changed = false;
+          for (const [slot, asset] of Object.entries(e.gear)) {
+            if (!asset) continue;
+            if (slot === 'facemask') {
+              const el = cv.els.find((x) => !x.slotType && String(x.itemAssetName || '').startsWith('GearFaceMask_'));
+              if (el) el.itemAssetName = asset; else cv.els.push({ itemAssetName: asset });
+              changed = true;
+              continue;
+            }
+            for (const slotType of GEAR_SLOT_TYPES[slot] ?? []) {
+              const el = cv.els.find((x) => x.slotType === slotType);
+              if (el) el.itemAssetName = asset; else cv.els.push({ slotType, itemAssetName: asset });
+              changed = true;
+            }
+          }
+          if (changed) { try { cv.row.RawData = JSON.stringify(cv.obj); touched = true; } catch { /* */ } }
         }
       }
       if (touched) playersEdited++;

@@ -84,6 +84,10 @@ export interface FranchisePlayer {
   jersey: number;
   status: string;
   ratings: Record<string, number>;
+  bodyType: string;
+  genericHead: string;
+  helmet: string;
+  facemask: string;
 }
 
 export interface FranchisePlayersResult {
@@ -98,6 +102,9 @@ export interface PlayerFieldEdit {
   dev?: string;
   jersey?: number;
   ratings?: Record<string, number>;
+  bodyType?: string;
+  genericHead?: string;
+  gear?: Record<string, string>; // slot -> asset (helmet/facemask/…)
 }
 
 export interface RgbColor { r: number; g: number; b: number; }
