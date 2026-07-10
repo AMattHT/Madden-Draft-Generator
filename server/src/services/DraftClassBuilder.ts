@@ -478,8 +478,15 @@ export const DraftClassBuilder = {
     const dropped = players.slice(LOGICAL_CAPACITY).map((p) => `${p.firstName} ${p.lastName}`.trim());
     const portraitMap = PortraitSlotService.pidMap(capped);
 
+    // Resolve each player's M26 position, then balance the LEDG/REDG edge cohort:
+    // the source over-labels edges as "LE" (all -> LEDG), so left/right come out
+    // ~85/15. Side is cosmetic (both share the EDGE rating group), so we split it
+    // ~50/50 down the board — deterministic, so preview and export stay identical.
+    const posIds = PositionMapper.balanceEdgeSides(
+      capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight))
+    );
     const items: RankedItem[] = capped.map((player, index) => {
-      const posId = PositionMapper.resolve(player.firstName, player.lastName, player.position, player.weight);
+      const posId = posIds[index];
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
     });
 

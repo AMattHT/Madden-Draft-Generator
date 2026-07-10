@@ -138,6 +138,20 @@ export const PositionMapper = {
     return this.toM26Id(label);
   },
 
+  /**
+   * Balance LEDG(10)/REDG(11) across a whole class. The source data (nflverse)
+   * labels the great majority of edge rushers "LE", which maps straight to LEDG,
+   * so a raw class comes out ~85% left. Side is purely cosmetic — LEDG and REDG
+   * share one rating group (EDGE) and identical profiles — so we deterministically
+   * alternate edges down the draft board to a clean ~50/50 split (differs by at
+   * most one). Non-edge ids pass through untouched. Stable: same input order (pick
+   * order) yields the same output, so the preview and the exported .mdc match.
+   */
+  balanceEdgeSides(ids: number[]): number[] {
+    let n = 0;
+    return ids.map((id) => (id === 10 || id === 11 ? (n++ % 2 === 0 ? 10 : 11) : id));
+  },
+
   /** M26 position id -> coarse rating/dedup group. */
   groupFromId(id: number): string {
     return GROUP[M26_NAME[id] ?? 'WR'] ?? 'WR';
