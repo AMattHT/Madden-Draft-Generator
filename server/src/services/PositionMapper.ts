@@ -139,17 +139,22 @@ export const PositionMapper = {
   },
 
   /**
-   * Balance LEDG(10)/REDG(11) across a whole class. The source data (nflverse)
-   * labels the great majority of edge rushers "LE", which maps straight to LEDG,
-   * so a raw class comes out ~85% left. Side is purely cosmetic — LEDG and REDG
-   * share one rating group (EDGE) and identical profiles — so we deterministically
-   * alternate edges down the draft board to a clean ~50/50 split (differs by at
-   * most one). Non-edge ids pass through untouched. Stable: same input order (pick
-   * order) yields the same output, so the preview and the exported .mdc match.
+   * Round-robin the members of a cosmetic position cohort across a whole class so
+   * no single side/role dominates. The source data (nflverse) over-concentrates
+   * certain positions — nearly all edges arrive labeled "LE" (-> LEDG) and nearly
+   * all off-ball LBs as "MLB" (-> MIKE) — so a raw class comes out ~85% LEDG and
+   * ~80-98% MIKE. But each cohort shares one rating group (EDGE / LB) with identical
+   * profiles, so the specific member is purely cosmetic. We deterministically cycle
+   * the cohort's members down the draft board to an even split (counts differ by at
+   * most one). Ids outside `members` pass through untouched. Stable: same input
+   * order (pick order) yields the same output, so the preview and export match.
+   *
+   * Cohorts: edges [10 LEDG, 11 REDG]; off-ball LBs [13 SAM, 14 MIKE, 15 WILL].
    */
-  balanceEdgeSides(ids: number[]): number[] {
+  balanceCohort(ids: number[], members: number[]): number[] {
+    const set = new Set(members);
     let n = 0;
-    return ids.map((id) => (id === 10 || id === 11 ? (n++ % 2 === 0 ? 10 : 11) : id));
+    return ids.map((id) => (set.has(id) ? members[n++ % members.length] : id));
   },
 
   /** M26 position id -> coarse rating/dedup group. */

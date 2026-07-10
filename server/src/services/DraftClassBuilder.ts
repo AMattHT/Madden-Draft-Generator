@@ -478,13 +478,14 @@ export const DraftClassBuilder = {
     const dropped = players.slice(LOGICAL_CAPACITY).map((p) => `${p.firstName} ${p.lastName}`.trim());
     const portraitMap = PortraitSlotService.pidMap(capped);
 
-    // Resolve each player's M26 position, then balance the LEDG/REDG edge cohort:
-    // the source over-labels edges as "LE" (all -> LEDG), so left/right come out
-    // ~85/15. Side is cosmetic (both share the EDGE rating group), so we split it
-    // ~50/50 down the board — deterministic, so preview and export stay identical.
-    const posIds = PositionMapper.balanceEdgeSides(
-      capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight))
-    );
+    // Resolve each player's M26 position, then even out the two cohorts the source
+    // data badly over-concentrates: edges (nearly all labeled "LE" -> LEDG, ~85/15)
+    // and off-ball LBs (nearly all "MLB" -> MIKE, ~80-98%). Side/role is cosmetic
+    // within each cohort (LEDG/REDG share the EDGE group; SAM/MIKE/WILL share LB),
+    // so round-robin each to an even split — deterministic, so preview == export.
+    let posIds = capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
+    posIds = PositionMapper.balanceCohort(posIds, [10, 11]); // LEDG / REDG
+    posIds = PositionMapper.balanceCohort(posIds, [13, 14, 15]); // SAM / MIKE / WILL
     const items: RankedItem[] = capped.map((player, index) => {
       const posId = posIds[index];
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
