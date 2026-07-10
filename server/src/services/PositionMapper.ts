@@ -62,11 +62,18 @@ const M26_NAME: Record<number, string> = {
 };
 
 /**
- * Curated per-player position overrides for edge rushers the source data
- * mislabels as off-ball LB (PFR lists role-as-position inconsistently). Keyed by
- * normalized first+last name. Extend as needed; an unmatched name is a no-op.
+ * Curated per-player position overrides for well-known players the source data
+ * mislabels (PFR/nflverse list role-as-position inconsistently — nearly every
+ * front-seven 'backer collapses to "MLB"). Keyed by normalized first+last name.
+ * Two kinds, both a no-op if unmatched:
+ *   - EDGE (10 LEDG / 11 REDG): pass rushers tagged as off-ball LB. Side is cosmetic.
+ *   - off-ball LB ROLE (13 SAM / 14 MIKE / 15 WILL): the data can't tell MIKE from
+ *     WILL, so iconic 'backers are pinned to their real role; the build-based split
+ *     (balanceLbByBuild) leaves these locked instead of reshuffling them.
+ * Extend as needed.
  */
 const NAME_OVERRIDES: Record<string, number> = {
+  // Edge rushers mislabeled as off-ball LB
   micahparsons: 11, // REDG — plays edge despite an "MLB" listing
   khalilmack: 11,
   vonmiller: 10,
@@ -76,6 +83,19 @@ const NAME_OVERRIDES: Record<string, number> = {
   zadariussmith: 11,
   demarcusware: 11, // iconic 3-4 edge, listed "MLB" in the source
   lawrencetaylor: 11,
+  derrickthomas: 10, // HOF pass rusher tagged "MLB"/OLB — an edge, not an off-ball LB
+  kevingreene: 11, // HOF pass rusher (160 sacks), frequently listed as LB
+  // Iconic off-ball MIKEs (14) — true middle linebackers
+  raylewis: 14,
+  brianurlacher: 14,
+  patrickwillis: 14,
+  lukekuechly: 14,
+  bobbywagner: 14,
+  // Iconic off-ball WILLs (15) — weakside / coverage 'backers
+  lavontedavid: 15,
+  derrickbrooks: 15,
+  lancebriggs: 15,
+  telvinsmith: 15,
 };
 
 function normName(first: string | undefined | null, last: string | undefined | null): string {
@@ -155,6 +175,31 @@ export const PositionMapper = {
     const set = new Set(members);
     let n = 0;
     return ids.map((id) => (set.has(id) ? members[n++ % members.length] : id));
+  },
+
+  /**
+   * Assign the off-ball LB cohort — SAM(13) / MIKE(14) / WILL(15) — by BUILD rather
+   * than blindly, so roles match the player. The source can't tell MIKE from WILL
+   * (nearly everyone is tagged "MLB"), but weight is a good proxy for the real
+   * spectrum: weakside WILLs are the lightest/fastest (coverage), MIKEs sit in the
+   * middle, strongside SAMs are the heaviest (edge-setting). Rank the cohort by
+   * weight and cut into even thirds — lightest -> WILL, middle -> MIKE, heaviest ->
+   * SAM — which keeps the class balanced (~1/3 each) AND role-appropriate (a 233-lb
+   * Lavonte David lands WILL, a 240-lb Ray Lewis MIKE), unlike a role-blind
+   * round-robin that would shuffle a true MIKE off his position. Ties break by draft
+   * order for determinism. Ids outside 13-15 pass through untouched.
+   */
+  balanceLbByBuild(ids: number[], weights: Array<number | null | undefined>, locked?: boolean[]): number[] {
+    // Distribute only the un-curated LBs; players pinned by a role override keep it.
+    const lbIdx = ids.map((_, i) => i).filter((i) => ids[i] >= 13 && ids[i] <= 15 && !locked?.[i]);
+    const ranked = [...lbIdx].sort((a, b) => ((weights[a] ?? 240) - (weights[b] ?? 240)) || a - b);
+    const out = ids.slice();
+    const n = ranked.length;
+    ranked.forEach((i, r) => {
+      const third = n ? Math.floor((r * 3) / n) : 0; // 0 lightest .. 2 heaviest
+      out[i] = third === 0 ? 15 : third === 1 ? 14 : 13; // WILL / MIKE / SAM
+    });
+    return out;
   },
 
   /** M26 position id -> coarse rating/dedup group. */

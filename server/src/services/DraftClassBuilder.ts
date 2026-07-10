@@ -484,8 +484,10 @@ export const DraftClassBuilder = {
     // within each cohort (LEDG/REDG share the EDGE group; SAM/MIKE/WILL share LB),
     // so round-robin each to an even split — deterministic, so preview == export.
     let posIds = capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
-    posIds = PositionMapper.balanceCohort(posIds, [10, 11]); // LEDG / REDG
-    posIds = PositionMapper.balanceCohort(posIds, [13, 14, 15]); // SAM / MIKE / WILL
+    posIds = PositionMapper.balanceCohort(posIds, [10, 11]); // LEDG / REDG (side is cosmetic — same build)
+    // SAM/MIKE/WILL by build, but leave curated 'backers (Ray Lewis, Lavonte David…) pinned.
+    const lockedLb = capped.map((p) => PositionMapper.overrideId(p.firstName, p.lastName) != null);
+    posIds = PositionMapper.balanceLbByBuild(posIds, capped.map((p) => p.weight), lockedLb);
     const items: RankedItem[] = capped.map((player, index) => {
       const posId = posIds[index];
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
