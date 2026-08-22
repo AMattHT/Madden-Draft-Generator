@@ -224,7 +224,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
                     <div className="grid grid-cols-2 gap-3">
                       <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Body type</span>
                         <select value={eff.bodyType} onChange={(ev) => editPlayer(sel.id, { bodyType: ev.target.value })} className={inputCls}>
-                          {['Standard', 'Thin', 'Muscular', 'Heavy'].map((b) => <option key={b} value={b}>{b}</option>)}
+                          {['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'].map((b) => <option key={b} value={b}>{b}</option>)}
                         </select></label>
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] uppercase tracking-wider text-muted">Face (generic head)</span>

@@ -26,7 +26,7 @@ export function decodeBirthdate(v: number): { year: number; month: number; day: 
 }
 
 /** visuals.bodyType string -> byte at 0x91 (from the game's generated classes). */
-export const BODY_TYPE_ID: Record<string, number> = { Standard: 0, Thin: 1, Muscular: 2, Heavy: 3 };
+export const BODY_TYPE_ID: Record<string, number> = { Standard: 0, Thin: 1, Muscular: 2, Heavy: 3, Lean: 4 /* Player-table enum `Freshman` */ };
 
 /** Rookies are drafted into the franchise's current season, not the historical
  *  draft year, so a 1965 class imported today is born ~2004. The game's own rookies

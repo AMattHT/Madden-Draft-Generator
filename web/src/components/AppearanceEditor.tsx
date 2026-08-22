@@ -3,7 +3,7 @@ import type { FaceScan } from '../types';
 import { Icon, ICONS } from './ui';
 export type { FaceScan };
 
-const BODY_TYPES = ['Standard', 'Thin', 'Muscular', 'Heavy'] as const;
+const BODY_TYPES = ['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'] as const;
 const TONES = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 function humanizeGen(code: string): string {

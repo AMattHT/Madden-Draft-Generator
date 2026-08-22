@@ -81,7 +81,7 @@ function writeM27AttributeData(buffer, offset, prospect, blockIndex = 0) {
   buffer[offset + M27_FIELDS.const7d.off] = M27_FIELDS.const7d.value;
   if (prospect.birthdate != null) buffer.writeUInt16LE(prospect.birthdate & 0xffff, offset + M27_FIELDS.birthdate.off);
   if (prospect.personalityRating != null) buffer[offset + M27_FIELDS.personalityRating.off] = Math.max(0, Math.min(99, prospect.personalityRating | 0));
-  if (prospect.bodyTypeId != null) buffer[offset + M27_FIELDS.bodyTypeId.off] = prospect.bodyTypeId & 0x03;
+  if (prospect.bodyTypeId != null) buffer[offset + M27_FIELDS.bodyTypeId.off] = prospect.bodyTypeId & 0x07; // 0-3 + Lean/Freshman = 4
   if (prospect.qbStyle != null) buffer[offset + M27_FIELDS.qbStyle.off] = prospect.qbStyle & 0xff;
   if (prospect.focus != null) buffer[offset + M27_FIELDS.focus.off] = prospect.focus & 0x03;
   if (prospect.hidden87 != null) buffer[offset + M27_FIELDS.hidden87.off] = prospect.hidden87 & 0xff;

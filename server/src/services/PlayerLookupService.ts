@@ -98,6 +98,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 let rowsCache: RawRow[] | null = null;
 let byYear: Map<number, BaselinePlayer[]> | null = null;
+let byNormName: Map<string, BaselinePlayer[]> | null = null;
+const normName = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
 
 function load(): void {
   if (rowsCache) return;
@@ -164,6 +166,8 @@ function load(): void {
   dedupSharedAssets(merged);
   sanitizeWikiPhotos(merged);
   byYear = new Map();
+  byNormName = new Map();
+  for (const p of merged) { const k = normName(p.firstName, p.lastName); (byNormName.get(k) ?? byNormName.set(k, []).get(k)!).push(p); }
   for (const p of merged) {
     if (!byYear.has(p.draftYear)) byYear.set(p.draftYear, []);
     byYear.get(p.draftYear)!.push(p);
@@ -511,6 +515,17 @@ function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
 }
 
 export const PlayerLookupService = {
+  /** Is this the most accomplished player of this name in the lookup? Shared
+   *  assets keyed by name (legends portraits: plpo_legends_johnsonchris) belong to
+   *  him, not to a 2003 seventh-round namesake. Same-year rows are the same person. */
+  isMostNotable(p: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear'>): boolean {
+    load();
+    const group = byNormName?.get(normName(p.firstName, p.lastName)) ?? [];
+    if (group.length <= 1) return true;
+    const best = group.reduce((a, b) => (greatness(b) > greatness(a) ? b : a));
+    return best.draftYear === p.draftYear;
+  },
+
   /** All draft years present in the local lookup, ascending. */
   years(): number[] {
     load();

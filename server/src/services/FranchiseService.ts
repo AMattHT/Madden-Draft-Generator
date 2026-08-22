@@ -201,7 +201,7 @@ export interface PlayerFieldEdit {
   dev?: string;
   jersey?: number;
   ratings?: Record<string, number>;
-  bodyType?: string; // Standard | Thin | Muscular | Heavy
+  bodyType?: string; // Standard | Thin | Lean | Muscular | Heavy (Lean is the table's `Freshman`)
   genericHead?: string; // gen_* code
   gear?: Record<string, string>; // slot -> asset (helmet/facemask), written into the loadout JSON
 }
@@ -698,7 +698,7 @@ export const FranchiseService = {
         jersey: num(r.JerseyNum),
         status,
         ratings,
-        bodyType: (() => { try { return String(r.CharacterBodyType ?? ''); } catch { return ''; } })(),
+        bodyType: (() => { try { const b = String(r.CharacterBodyType ?? ''); return b === 'Freshman' ? 'Lean' : b; } catch { return ''; } })(),
         genericHead: (() => { try { return String(r.GenericHeadAssetName ?? ''); } catch { return ''; } })(),
         helmet: cv ? helmetOf(cv.els) : '',
         facemask: cv ? facemaskOf(cv.els) : '',
@@ -722,7 +722,7 @@ export const FranchiseService = {
     await pt.readRecords();
     const cvt = file.getTableByUniqueId(CHARVISUALS_TABLE_UID);
     if (cvt) await cvt.readRecords();
-    const bodyTypes = new Set(['Standard', 'Thin', 'Muscular', 'Heavy']);
+    const bodyTypes = new Set(['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy']);
 
     let playersEdited = 0;
     for (const [idStr, e] of Object.entries(edits || {})) {
@@ -742,7 +742,7 @@ export const FranchiseService = {
       }
       // Appearance: body type + generic head are direct fields; helmet/facemask live in
       // the CharacterVisuals loadout JSON (RawData table3 blob) — edit in place & rewrite.
-      if (e.bodyType && bodyTypes.has(e.bodyType) && writeField(rec, 'CharacterBodyType', e.bodyType)) touched = true;
+      if (e.bodyType && bodyTypes.has(e.bodyType) && writeField(rec, 'CharacterBodyType', e.bodyType === 'Lean' ? 'Freshman' : e.bodyType)) touched = true;
       if (e.genericHead && /^gen_\d/i.test(e.genericHead) && writeField(rec, 'GenericHeadAssetName', e.genericHead)) touched = true;
       if (e.gear && cvt) {
         const cv = cvLoadout(file, cvt, rec);

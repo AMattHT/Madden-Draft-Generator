@@ -140,30 +140,102 @@ function jerseyFor(group: string, rand: () => number, year = 2000): number {
   return ranges[0][0];
 }
 
-/** Body type (Standard / Thin / Muscular / Heavy) the way the games assign it,
- *  fitted to 3,566 prospects from M26 + M27's own generated classes
- *  (scripts/probes/probe-builds.js). Highlights: WR/CB/S are always Standard,
- *  K/P/LS always Thin, EDGE always Muscular, DT/G/C always Heavy, tackles turn
- *  Heavy around 305-325 lb, TEs are never Heavy (Muscular only when light), and
- *  QBs are Heavy only at ~300 lb. Where the game mixes two types at one weight
- *  the split is reproduced with the seeded `rand`. */
-export function bodyTypeFor(posName: string, weight: number | null, rand: () => number): 'Heavy' | 'Muscular' | 'Thin' | 'Standard' {
-  const w = weight ?? 0;
-  const r = rand();
+export type BodyType = 'Standard' | 'Thin' | 'Lean' | 'Muscular' | 'Heavy';
+
+/** The editor's weight band per body type (Madden 27 Appearance screen). */
+export const BODY_TYPE_BANDS: Record<BodyType, [number, number]> = {
+  Lean: [160, 215], Standard: [175, 230], Thin: [180, 240], Muscular: [210, 285], Heavy: [280, 400],
+};
+
+/** Body type the way Madden assigns it. Two sources, combined:
+ *   - the editor's weight bands (Lean 160-215, Standard 175-230, Thin 180-240,
+ *     Muscular 210-285, Heavy 280+) decide what a weight can be;
+ *   - the M27 career roster (3,129 real players, EA-assigned builds;
+ *     scripts/probes/probe-roster-builds.ts) decides the mix inside an overlap and
+ *     where EA itself ignores the band (edge rushers stay Muscular to 320 lb,
+ *     tackles to 354; DBs are never Muscular; WR/CB/K use Lean when light).
+ *  "Lean" is the Player table's `Freshman` (enum 4) / loadout item Lean_BodyType.
+ *  `rand` (seeded) reproduces the mix so exports are stable. */
+export function bodyTypeFor(posName: string, weight: number | null, rand: () => number): BodyType {
+  return fitBand(posName, weight ?? 0, pickBodyType(posName, weight ?? 0, rand()));
+}
+
+/** Big men EA keeps Muscular well past the 285 band (roster: edge to 320, tackles to 354). */
+const MUSCULAR_PAST_BAND = new Set(['LT', 'RT', 'LG', 'RG', 'C', 'LEDG', 'REDG', 'DT', 'FB']);
+
+/** Pull a pick into its editor band (an out-of-band pick shows a pegged weight
+ *  slider in the Appearance screen): too light steps down, too heavy steps up. */
+function fitBand(posName: string, w: number, bt: BodyType): BodyType {
+  const [lo, hi] = BODY_TYPE_BANDS[bt];
+  if (w > hi) {
+    if (bt === 'Muscular') return MUSCULAR_PAST_BAND.has(posName) ? bt : 'Heavy';
+    if (bt === 'Heavy') return bt;
+    return w >= 286 ? (MUSCULAR_PAST_BAND.has(posName) ? 'Muscular' : 'Heavy') : 'Muscular';
+  }
+  if (w < lo) {
+    if (bt === 'Heavy') return 'Muscular';
+    if (bt === 'Muscular') return w < 175 ? 'Lean' : 'Standard';
+    return 'Lean';
+  }
+  return bt;
+}
+
+function pickBodyType(posName: string, w: number, r: number): BodyType {
+  const pick = (a: BodyType, pa: number, b: BodyType): BodyType => (r < pa ? a : b);
   switch (posName) {
-    case 'QB': return w >= 290 ? 'Heavy' : r < 0.2 ? 'Thin' : 'Standard';
-    case 'HB': return w >= 220 && r < 0.8 ? 'Muscular' : 'Standard';
-    case 'FB': return r < 0.6 ? 'Muscular' : 'Standard';
-    case 'WR': case 'CB': case 'FS': case 'SS': return 'Standard';
-    case 'TE': return w < 245 ? (r < 0.55 ? 'Muscular' : 'Standard') : w < 260 ? (r < 0.22 ? 'Muscular' : 'Standard') : 'Standard';
-    case 'LT': case 'RT': return w < 305 ? 'Muscular' : w < 325 ? (r < 0.55 ? 'Heavy' : 'Muscular') : 'Heavy';
-    case 'LG': case 'RG': case 'C': case 'DT': return 'Heavy';
-    case 'LEDG': case 'REDG': return 'Muscular';
-    case 'SAM': return w < 230 ? (r < 0.45 ? 'Muscular' : 'Standard') : 'Muscular';
-    case 'MIKE': return w < 235 && r < 0.15 ? 'Standard' : 'Muscular';
-    case 'WILL': return w < 230 ? (r < 0.4 ? 'Muscular' : 'Standard') : w < 240 ? (r < 0.65 ? 'Muscular' : 'Standard') : 'Muscular';
-    case 'K': case 'P': case 'LS': return 'Thin';
-    default: return 'Standard';
+    case 'QB':
+      if (w < 175) return 'Lean';
+      if (w < 180) return 'Standard';
+      if (w <= 230) return pick('Thin', 0.2, 'Standard');
+      if (w <= 240) return 'Thin';
+      return w >= 286 ? 'Heavy' : 'Muscular';
+    case 'HB':
+      if (w < 175) return 'Lean';
+      if (w < 216) return 'Standard';
+      if (w <= 240) return pick('Muscular', 0.75, 'Standard');
+      return 'Muscular';
+    case 'FB':
+      return pick('Muscular', 0.9, 'Standard');
+    case 'WR':
+      if (w < 175) return 'Lean';
+      if (w <= 190) return pick('Lean', 0.3, 'Standard');
+      return w <= 230 ? 'Standard' : 'Muscular';
+    case 'TE':
+      if (w <= 230) return 'Standard';
+      if (w <= 245) return pick('Standard', 0.5, 'Muscular');
+      return w >= 286 ? 'Heavy' : 'Muscular';
+    case 'LT': case 'RT':
+      if (w < 280) return 'Muscular';
+      if (w <= 300) return pick('Heavy', 0.5, 'Muscular');
+      return pick('Heavy', 0.8, 'Muscular');
+    case 'LG': case 'RG': case 'C':
+      return w < 290 ? 'Muscular' : pick('Heavy', 0.95, 'Muscular');
+    case 'LEDG': case 'REDG':
+      return w >= 300 ? pick('Heavy', 0.1, 'Muscular') : 'Muscular';
+    case 'DT':
+      if (w < 280) return 'Muscular';
+      if (w <= 300) return pick('Heavy', 0.5, 'Muscular');
+      return pick('Heavy', 0.75, 'Muscular');
+    case 'SAM': case 'MIKE': case 'WILL':
+      if (w < 210) return 'Standard';
+      if (w < 216) return pick('Muscular', 0.5, 'Standard');
+      if (w <= 240) return pick('Muscular', 0.85, 'Standard');
+      return 'Muscular';
+    case 'CB': case 'FS': case 'SS':
+      if (w < 175) return 'Lean';
+      if (w <= 190) return r < 0.15 ? 'Lean' : r < 0.85 ? 'Standard' : 'Thin';
+      if (w <= 215) return pick('Standard', 0.85, 'Thin');
+      return w <= 230 ? 'Standard' : 'Muscular';
+    case 'K': case 'P':
+      if (w < 180) return 'Lean';
+      if (w <= 215) return r < 0.8 ? 'Thin' : r < 0.95 ? 'Standard' : 'Lean';
+      if (w <= 240) return pick('Thin', 0.85, 'Standard');
+      return 'Muscular';
+    case 'LS':
+      if (w <= 230) return pick('Thin', 0.85, 'Standard');
+      return w <= 240 ? 'Thin' : 'Muscular';
+    default:
+      return w < 175 ? 'Lean' : w <= 230 ? 'Standard' : w < 286 ? 'Muscular' : 'Heavy';
   }
 }
 
@@ -245,10 +317,14 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
     return gameVersion === 'm27' ? genericHeadPid(g.peps) : (LikenessService.genericPid(g.peps, 'm26') ?? 0);
   };
   // A generic-head legend (no renderable scan) still gets his legends portrait.
-  const legendPortrait = like.kind === 'generic' && (player.draftYear ?? 0) < 2015 ? LikenessService.legendPortraitPid(player.firstName, player.lastName, gameVersion) : 0;
+  // Legends portraits are keyed by name, so only the most accomplished player of
+  // the name gets it (the 2003 CB Chris Johnson is not the 2008 Titans back).
+  const legendPortrait = like.kind === 'generic' && (player.draftYear ?? 0) < 2015 && PlayerLookupService.isMostNotable(player)
+    ? LikenessService.legendPortraitPid(player.firstName, player.lastName, gameVersion) : 0;
+  const realPid = real && !(real.portraitKind === 'legend' && !PlayerLookupService.isMostNotable(player)) ? real.portraitPid : 0;
   prospect.PID = gameVersion === 'm27'
-    ? (real ? (real.portraitPid || genericPortrait()) : (legendPortrait || 0))
-    : (portraitPid ?? (like.kind === 'generic' ? (legendPortrait || genericPortrait()) : (real?.portraitPid || player.photoId || genericPortrait())));
+    ? (real ? (realPid || genericPortrait()) : (legendPortrait || 0))
+    : (portraitPid ?? (like.kind === 'generic' ? (legendPortrait || genericPortrait()) : (realPid || player.photoId || genericPortrait())));
   if (gameVersion === 'm27' && !real && legendPortrait) prospect.pinPortrait = true;
   // Announcer name call: the game keys this by SURNAME (same id space in both games,
   // mined from the real files). The CSV CommID column is a different id space.
@@ -379,7 +455,7 @@ function fitToCapacity(players: BaselinePlayer[]): { kept: BaselinePlayer[]; dro
 }
 
 /** Valid Madden 26 body types (from the shipped template's visuals JSON). */
-export const BODY_TYPES = ['Standard', 'Thin', 'Muscular', 'Heavy'];
+export const BODY_TYPES = ['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'];
 
 // Per-field clamp ranges for non-rating numeric fields (everything else = 0-99).
 const EDIT_CLAMP: Record<string, [number, number]> = {

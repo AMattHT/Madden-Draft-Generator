@@ -109,3 +109,11 @@ test('an undrafted legend with a scan (Gates) is not rejected for lacking an nfl
   const p = player({ firstName: 'Antonio', lastName: 'Gates', playerAssetsId: 'gatesAntonio_17523', photoId: 1216, draftYear: 2003 });
   assert.equal(LikenessService.realFace(p, 'm27')?.assetName, 'gatesAntonio_17523');
 });
+
+test('a legends portrait keyed by name goes to the notable namesake only (Chris Johnson RB 2008, not the 2003 CB)', skipWithoutCatalog, async () => {
+  const { PlayerLookupService } = await import('../PlayerLookupService');
+  assert.ok(LikenessService.legendPortraitPid('Chris', 'Johnson', 'm27') > 0, 'M27 ships a Chris Johnson legends portrait');
+  assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Chris', lastName: 'Johnson', draftYear: 2008 }), true);
+  assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Chris', lastName: 'Johnson', draftYear: 2003 }), false);
+  assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Troy', lastName: 'Polamalu', draftYear: 2003 }), true);
+});
