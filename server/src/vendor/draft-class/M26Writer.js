@@ -802,6 +802,15 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
         if (sourceElement.slotType === 'CharacterBodyType') continue;
         if (sourceElement.itemAssetName && sourceElement.itemAssetName.endsWith('_BodyType')) continue;
 
+        // Removal marker: drop the donor's element for this slot (era gear says
+        // "no sleeves / no mouthpiece" - the game expresses none by absence).
+        if (sourceElement.remove && sourceElement.slotType) {
+          const before = targetLoadout.loadoutElements.length;
+          targetLoadout.loadoutElements = targetLoadout.loadoutElements.filter((t) => t.slotType !== sourceElement.slotType);
+          if (targetLoadout.loadoutElements.length !== before) updated = true;
+          continue;
+        }
+
         if (!sourceElement.itemAssetName) continue;
 
         // For facemasks (no slotType), identify by GearFaceMask_ prefix

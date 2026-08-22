@@ -33,3 +33,42 @@ test('M27 modern brackets use the verified M27 helmet pools, not the M26 timelin
   assert.ok(!seen.has('GearHelmet_Standard') && !seen.has('GearHelmet_Schutt'), [...seen].join(','));
   assert.ok(seen.has('GearHelmet_Revolution') || seen.has('GearHelmet_AirXP'));
 });
+
+test('vintage M26 classes strip modern accessories inherited from the 2026 donor', () => {
+  const els = EraGearService.loadoutElements(1965, 3, 'vintage-seed', 'm26');
+  const slot = (s: string) => els.find((e) => e.slotType === s);
+  assert.equal(slot('Shoulderpads')?.itemAssetName, 'Medium_Pads');
+  assert.equal(slot('MouthWear')?.remove, true, 'no pacifier mouthpiece in 1965');
+  assert.equal(slot('LeftArmWear')?.remove, true, 'no compression sleeve in 1965');
+  assert.equal(slot('LeftSpat')?.remove, true, 'no spats in 1965');
+  assert.equal(slot('KneeWear')?.itemAssetName, 'KneePad_Regular', 'everyone wore knee pads');
+  assert.equal(slot('InnerShirt')?.remove, true);
+});
+
+test('modern M26 classes keep the modern accessory mix (some sleeves and pacifiers, small pads)', () => {
+  let sleeves = 0, pacifiers = 0, small = 0;
+  for (let i = 0; i < 60; i++) {
+    const els = EraGearService.loadoutElements(2024, 3, `modern-${i}`, 'm26');
+    if (els.find((e) => e.slotType === 'LeftArmWear' && !e.remove)) sleeves++;
+    if (els.find((e) => e.slotType === 'MouthWear' && !e.remove)) pacifiers++;
+    if (els.find((e) => e.slotType === 'Shoulderpads')?.itemAssetName === 'Small_Pads') small++;
+  }
+  assert.ok(sleeves > 10 && sleeves < 50, `sleeves ${sleeves}/60`);
+  assert.ok(pacifiers > 5 && pacifiers < 40, `pacifiers ${pacifiers}/60`);
+  assert.ok(small > 30, `small pads ${small}/60`);
+});
+
+test('the M26 writer removes a donor slot when the loadout carries a removal marker', async () => {
+  const { MdcService } = await import('../MdcService');
+  const template = MdcService.loadTemplate();
+  const parsed = MdcService.parse(template) as any[];
+  const idx = parsed.findIndex((p: any) => p.firstName && p.visuals?.loadouts?.some((l: any) => l.loadoutElements?.some((e: any) => e.slotType === 'MouthWear')));
+  assert.ok(idx >= 0, 'template has a donor with a MouthWear element');
+  // Block i is written over donor block i, so write the earlier blocks unchanged and the target with a removal marker.
+  const prospects = parsed.slice(0, idx + 1).map((p: any) => ({ ...p }));
+  prospects[idx] = { ...prospects[idx], firstName: 'Test', lastName: 'Removal', visuals: { loadouts: [{ loadoutType: 'PlayerOnField', loadoutElements: [{ slotType: 'MouthWear', itemAssetName: '', remove: true }] }] } };
+  const out = MdcService.write(prospects, template);
+  const back = MdcService.parse(out)[idx] as any;
+  const slots = back.visuals.loadouts.flatMap((l: any) => l.loadoutElements || []).map((e: any) => e.slotType);
+  assert.ok(!slots.includes('MouthWear'), `MouthWear still present: ${slots.join(',')}`);
+});

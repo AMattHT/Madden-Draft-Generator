@@ -357,6 +357,8 @@ const ERA_EXTRAS: Record<string, EraExtras> = {
 export interface LoadoutElement {
   slotType?: string;
   itemAssetName: string;
+  /** M26 only: remove the donor block's element for this slot (absence = none). */
+  remove?: boolean;
 }
 
 /**
@@ -405,6 +407,62 @@ const M27_EQUIPMENT: Record<string, EraDefaults> = {
     linemanGloves: ['GearHand_glove_NikeDTack_Black', 'GearHand_glove_NikeHyperBeast_Black', 'GearHand_glove_NikeHyperBeast_White'],
   },
 };
+
+/** Era-appropriate body accessories. Percentages for 2013+ match the game's own
+ *  M26 classes (sleeves ~45%, pacifier ~27%, spats ~11%, knee/thigh pads ~22%,
+ *  small pads 69%, back plate 48%, undershirt 34%); older eras phase them out:
+ *  no sleeves before ~2000, no spats before ~2010, no pacifier before ~1996,
+ *  medium pads before 2005, knee/thigh pads on everyone before 1995. */
+function bodyAccessories(year: number, group: string, seedKey: string, m27: boolean): LoadoutElement[] {
+  const roll = (slot: string) => pick(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], `${seedKey}|${slot}`) as string;
+  const chance = (slot: string, p: number) => parseInt(roll(slot), 10) / 10 < p;
+  const out: LoadoutElement[] = [];
+  const none = (slot: string): LoadoutElement => ({ slotType: slot, itemAssetName: '', remove: true });
+  const line = LINE.has(group) || group === 'LB';
+
+  // Shoulder pads
+  const pads = year < 2005 ? 'Medium_Pads' : chance('pads', 0.69) ? 'Small_Pads' : 'Medium_Pads';
+  out.push({ slotType: 'Shoulderpads', itemAssetName: pads });
+
+  // Mouthpiece (pacifier style)
+  const pacifierP = year < 1996 ? 0 : year < 2010 ? 0.08 : 0.27;
+  if (chance('mouth', pacifierP)) {
+    out.push({ slotType: 'MouthWear', itemAssetName: pick(['GearMouthpiece_PacifierDual_White', 'GearMouthpiece_PacifierDual_TeamColor', 'GearMouthpiece_PacifierDual_SecondaryColor', 'GearMouthpiece_PacifierDual_Black'], `${seedKey}|mouthColor`)! });
+  } else out.push(none('MouthWear'));
+
+  // Arm sleeves (independently per arm, like the game)
+  const sleeveP = year < 2000 ? 0 : year < 2010 ? 0.2 : 0.45;
+  const sleevePool = ['GearArmSleeve_NikeProDriFitSleeve_White', 'GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_TeamColor', 'GearArmSleeve_McDavidPaddedCompressionSleeve_TeamColor', 'GearArmSleeve_Half_sleeveLongUnderarmor_normal_TeamColor', 'GearArmSleeve_Full_sleeveLongUnderarmor_normal_TeamColor', 'GearArmSleeve_NikeProDriFitSleeve_Black'];
+  for (const side of ['Left', 'Right']) {
+    if (chance(`sleeve${side}`, sleeveP)) out.push({ slotType: `${side}ArmWear`, itemAssetName: pick(sleevePool, `${seedKey}|sleeve${side}Asset`)! });
+    else out.push(none(`${side}ArmWear`));
+  }
+
+  // Spats
+  const spatP = year < 2010 ? 0 : 0.11;
+  if (chance('spats', spatP)) {
+    const spat = pick(['GearSpats_spatThin_TeamColor', 'GearSpats_spatThin_White', 'GearSpats_spatThin_Black'], `${seedKey}|spatColor`)!;
+    out.push({ slotType: 'LeftSpat', itemAssetName: spat }, { slotType: 'RightSpat', itemAssetName: spat });
+  } else out.push(none('LeftSpat'), none('RightSpat'));
+
+  // Knee / thigh pads: universal before 1995, optional until the 2013 mandate era mix
+  const kneeP = year < 1995 ? 1 : year < 2013 ? 0.4 : 0.22;
+  if (chance('knee', kneeP)) {
+    const brand = year >= 2010 && chance('kneeBrand', 0.3) ? 'Nike' : 'Regular';
+    out.push({ slotType: 'KneeWear', itemAssetName: `KneePad_${brand}` }, { slotType: 'LeftThighWear', itemAssetName: `ThighPad_${brand}` }, { slotType: 'RightThighWear', itemAssetName: `ThighPad_${brand}` });
+  } else out.push(none('KneeWear'), none('LeftThighWear'), none('RightThighWear'));
+
+  // Back plate (1990s on), flak jacket (QBs 1985-2010 mostly), untucked undershirt (modern)
+  if (year >= 1990 && chance('backplate', 0.48)) out.push({ slotType: 'BackPlate', itemAssetName: 'Backplate_Standard' });
+  else out.push(none('BackPlate'));
+  if (group === 'QB' && year >= 1985 && year <= 2012 && chance('flak', 0.35)) out.push({ slotType: 'FlakJacket', itemAssetName: 'Flakjacket_On' });
+  else out.push(none('FlakJacket'));
+  if (year >= 2000 && !line && chance('undershirt', 0.34)) out.push({ slotType: 'InnerShirt', itemAssetName: 'Undershirt_Untucked' });
+  else out.push(none('InnerShirt'));
+
+  // M27 rebuilds the loadout wholesale: removal markers would write nothing, so drop them.
+  return m27 ? out.filter((e) => !e.remove) : out;
+}
 
 /** M27 substitutions for era-extras assets that M26 had but M27 no longer uses
  *  (verified against M27 game-assigned classes). '' = omit the element — M27
@@ -608,6 +666,13 @@ export const EraGearService = {
 
       const jersey = pick(extras.jersey, `${seedKey}|jersey`);
       if (jersey) els.push({ slotType: 'OuterShirt', itemAssetName: jersey });
+
+      // Body accessories the 2026 donor carries that vintage classes must not inherit
+      // (shoulder-pad size, pacifier mouthpiece, compression sleeves, spats, knee and
+      // thigh pads, back plate, untucked undershirt). Mixes for the modern brackets
+      // come from the game's own generated classes; absence is expressed with a
+      // removal marker for M26 (merge-into-donor) and by omission for M27.
+      for (const el of bodyAccessories(year, group, seedKey, m27)) els.push(el);
 
       let eyePaint = pick(skill ? extras.eyePaintSkill : null, `${seedKey}|eyePaint`);
       if (match && observed!.eyeBlack) eyePaint = m27 ? 'FaceMarks_EyePaint' : 'EyeBlack_Grease';
