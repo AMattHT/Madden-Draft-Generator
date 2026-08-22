@@ -162,6 +162,7 @@ function load(): void {
   const merged = mergeDuplicatePeople(all);
   applyHistoricalAccolades(merged);
   dedupSharedAssets(merged);
+  sanitizeWikiPhotos(merged);
   byYear = new Map();
   for (const p of merged) {
     if (!byYear.has(p.draftYear)) byYear.set(p.draftYear, []);
@@ -196,6 +197,31 @@ function reconstructUnorderedDrafts(): void {
       });
       void year;
     }
+  }
+}
+
+/**
+ * The lookup's Wikipedia image URLs were matched by name only, so ~450 are SVG
+ * icons / logos and ~270 photos are shared by same-named players decades apart
+ * (a 1942 Bruce Smith carried the Virginia Tech DE's photo). These feed portraits,
+ * skin tone and gear observation, so: drop non-photos, and keep a URL shared
+ * across draft years only on its most accomplished owner.
+ */
+function sanitizeWikiPhotos(players: BaselinePlayer[]): void {
+  const nonPhoto = /\.svg(\.png)?$|\/flag_|logo|icon|emblem|seal_of|coat_of_arms|wordmark|helmet|placeholder|no_image|silhouette/i;
+  const byUrl = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    if (!p.wikiImageUrl) continue;
+    if (nonPhoto.test(p.wikiImageUrl)) { p.wikiImageUrl = null; continue; }
+    const list = byUrl.get(p.wikiImageUrl) ?? [];
+    list.push(p);
+    byUrl.set(p.wikiImageUrl, list);
+  }
+  for (const list of byUrl.values()) {
+    const years = new Set(list.map((p) => p.draftYear));
+    if (years.size <= 1) continue; // same-year rows (dual drafts) are the same person
+    const owner = list.reduce((a, b) => (greatness(b) > greatness(a) ? b : a));
+    for (const p of list) if (p.draftYear !== owner.draftYear) p.wikiImageUrl = null;
   }
 }
 

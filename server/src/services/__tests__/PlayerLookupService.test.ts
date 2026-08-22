@@ -22,3 +22,16 @@ test('1967-69 common drafts are one league, not "AFL"', () => {
     assert.ok(nfl.length > 400, `${year} NFL view has ${nfl.length} players`);
   }
 });
+
+test('wiki photo URLs: icons/SVGs are dropped and a photo shared across decades stays only with its real owner', () => {
+  const all = PlayerLookupService.years().flatMap((y) => PlayerLookupService.byYear(y, 'combined'));
+  const svg = all.filter((p) => p.wikiImageUrl && /\.svg(\.png)?$/i.test(p.wikiImageUrl));
+  assert.equal(svg.length, 0, `${svg.length} SVG photo URLs survive`);
+  const smiths = all.filter((p) => p.firstName === 'Bruce' && p.lastName === 'Smith' && p.wikiImageUrl);
+  assert.ok(smiths.every((p) => p.draftYear >= 1980), `Bruce Smith photo on draft years ${smiths.map((p) => p.draftYear).join(',')}`);
+  // no URL is attached to rows from more than one draft year (other than dual-draft same-year rows)
+  const byUrl = new Map<string, Set<number>>();
+  for (const p of all) if (p.wikiImageUrl) byUrl.set(p.wikiImageUrl, (byUrl.get(p.wikiImageUrl) ?? new Set()).add(p.draftYear));
+  const shared = [...byUrl.values()].filter((ys) => ys.size > 1).length;
+  assert.equal(shared, 0, `${shared} photo URLs still shared across draft years`);
+});

@@ -58,7 +58,9 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // the position prior is dark — including legends whose M26 asset we will
   // drop on M27 (otherwise Rod Woodson gets gen_3 + a white player's PID).
   let derived = DerivedSkinToneService.toneForPid(p.photoId);
-  let wiki = WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear);
+  // The wiki tone was read from the row's Wikipedia photo; if that photo was
+  // sanitized away (icon, or another same-named player's picture) the tone goes too.
+  let wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   if (fallback >= 6) {
     if (derived != null && derived <= 4) derived = null;
     if (wiki != null && wiki <= 4) wiki = null;
