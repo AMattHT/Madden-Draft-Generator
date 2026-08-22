@@ -32,9 +32,13 @@ function loadJson<T>(file: string, fallback: T): T {
   } catch { /* corrupt cache */ }
   return fallback;
 }
+/** Atomic JSON write (temp + rename): a crash mid-write used to leave a truncated
+ *  cache that loadJson silently replaced with {} - and then re-crawled Wikipedia. */
 function saveJson(file: string, data: unknown): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(data));
+  const tmp = `${file}.tmp-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(data));
+  fs.renameSync(tmp, file);
 }
 
 function wikiMap(): WikiMap {
@@ -228,18 +232,17 @@ function inspect(buf: Buffer): Promise<Omit<ObservedGear, 'photoUrl'>> {
 async function observeUrl(url: string): Promise<ObservedGear> {
   const cache = gearMap();
   if (cache[url]) return cache[url];
-  fs.mkdirSync(PHOTO_DIR, { recursive: true });
+  // The photo is analysed once and only the verdict is kept (photo-gear.json);
+  // the full-resolution bytes are never read again, so they are not written to
+  // disk any more (the old cache held 2+ GB of dead .bin files). A leftover .bin
+  // from an earlier run is used, then removed.
   const disk = path.join(PHOTO_DIR, `${photoKey(url)}.bin`);
   let buf: Buffer | null = null;
   if (fs.existsSync(disk)) {
     try { buf = fs.readFileSync(disk); } catch { buf = null; }
+    try { fs.unlinkSync(disk); } catch { /* ignore */ }
   }
-  if (!buf) {
-    buf = await fetchBuf(url);
-    if (buf) {
-      try { fs.writeFileSync(disk, buf); } catch { /* ignore */ }
-    }
-  }
+  if (!buf) buf = await fetchBuf(url);
   const seen = buf
     ? await inspect(buf)
     : { onField: false, gloves: null, gloveColor: null, visor: null, wristband: null, socks: null, eyeBlack: null };

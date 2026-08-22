@@ -101,6 +101,7 @@ export interface GeneratedClass {
   dropped?: string[]; // players that did not fit (years with more than 402 rows)
   fetchedAt?: number; // stamped client-side when pulled
   _v?: number; // cache schema/logic version (see cache.ts)
+  _gen?: string; // backend generator fingerprint the class was built by (see cache.ts)
 }
 
 export type GameVersion = 'm26' | 'm27';

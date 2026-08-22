@@ -9,7 +9,7 @@ const { MdcService } = require('../src/services/MdcService');
 const { PositionMapper } = require('../src/services/PositionMapper');
 const { RATING_KEYS } = require('../src/services/DraftClassBuilder');
 
-const DIR = 'C:/Users/amatthews/Documents/Madden NFL 26/Saves';
+const DIR = process.env.MADDEN_SAVES_DIR || require('path').join(require('os').homedir(), 'Documents', 'Madden NFL 26', 'Saves');
 const files =
   process.argv.slice(2).length > 0
     ? process.argv.slice(2)

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { skipWithoutData } from './data';
 import fs from 'fs';
 import path from 'path';
 import { enrichedClass } from '../DraftEnrichment';
@@ -25,7 +26,7 @@ async function rows(year: number) {
   return cache.get(year)!;
 }
 
-test('injury and toughness no longer track overall; awareness does (like Madden)', async () => {
+test('injury and toughness no longer track overall; awareness does (like Madden)', skipWithoutData, async () => {
   const r = await rows(2000);
   const ovr = r.map((x) => x.overall);
   const cInjury = corr(ovr, r.map((x) => x.ratings.injury));
@@ -36,25 +37,25 @@ test('injury and toughness no longer track overall; awareness does (like Madden)
   assert.ok(cAware > 0.6, `corr(OVR, awareness) = ${cAware.toFixed(2)}`);
 });
 
-test('better halfbacks are faster when the model alone decides (1995: no combine data)', async () => {
+test('better halfbacks are faster when the model alone decides (1995: no combine data)', skipWithoutData, async () => {
   const hb = (await rows(1995)).filter((x) => x.position === 'HB');
   const c = corr(hb.map((x) => x.overall), hb.map((x) => x.ratings.speed));
   assert.ok(c > 0.25, `HB corr(OVR, speed) = ${c.toFixed(2)} over ${hb.length} backs`);
 });
 
-test('the overall Madden recomputes from the attributes equals the overall we wrote', async () => {
+test('the overall Madden recomputes from the attributes equals the overall we wrote', skipWithoutData, async () => {
   const r = await rows(2000);
   let exact = 0;
   for (const x of r) if (OVRWeightsCalculator.computeOverall(x.positionId, x.archetype, x.ratings) === x.overall) exact++;
   assert.ok(exact / r.length >= 0.98, `${exact}/${r.length} exact`);
 });
 
-test('offensive linemen never fall below the observed speed floor after combine mapping', async () => {
+test('offensive linemen never fall below the observed speed floor after combine mapping', skipWithoutData, async () => {
   const ol = (await rows(2000)).filter((x) => ['LT', 'LG', 'C', 'RG', 'RT'].includes(x.position));
   assert.deepEqual(ol.filter((x) => x.ratings.speed < 50).map((x) => `${x.lastName} ${x.ratings.speed}`), []);
 });
 
-test('attribute spread tracks the per-position spread of the real classes (not a flat +-3)', async () => {
+test('attribute spread tracks the per-position spread of the real classes (not a flat +-3)', skipWithoutData, async () => {
   const cal = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'madden-calibration.json'), 'utf8'));
   const r = await rows(2000);
   for (const pos of ['CB', 'WR', 'LT']) {
@@ -67,7 +68,7 @@ test('attribute spread tracks the per-position spread of the real classes (not a
   }
 });
 
-test('Tom Brady is not a Scrambler (career rush totals normalised per game)', async () => {
+test('Tom Brady is not a Scrambler (career rush totals normalised per game)', skipWithoutData, async () => {
   const brady = (await rows(2000)).find((x) => x.lastName === 'Brady')!;
   assert.ok(brady, 'Brady in the 2000 class');
   assert.notEqual(brady.archetypeName, 'Scrambler', `Brady archetype: ${brady.archetypeName}`);

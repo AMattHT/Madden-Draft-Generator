@@ -13,6 +13,11 @@ export interface TableFilters {
 // Bump CACHE_VERSION whenever the backend rating/position logic changes so stale
 // cached classes are treated as a miss and re-pulled automatically.
 const CACHE_VERSION = 46; // v46: front-seven classifier (3-4 OLBs -> edge, pinned SAM/MIKE/WILL)
+/** Backend generator fingerprint (from /api/health). A cached class built by a
+ *  different generator is treated as stale, so rating/likeness changes show up
+ *  without a manual CACHE_VERSION bump. */
+let generatorFingerprint: string | null = null;
+export function setGeneratorFingerprint(fp: string | null): void { generatorFingerprint = fp; }
 const keyOf = (year: number, league: string, mode: string) => `class:${year}_${league}_${mode}`;
 const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
@@ -20,9 +25,11 @@ const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
 export const cache = {
   async get(year: number, league: string, mode: string): Promise<GeneratedClass | undefined> {
     const c = await get<GeneratedClass>(keyOf(year, league, mode));
-    return c && c._v === CACHE_VERSION ? c : undefined; // ignore stale-version entries
+    if (!c || c._v !== CACHE_VERSION) return undefined; // ignore stale-version entries
+    if (generatorFingerprint && c._gen && c._gen !== generatorFingerprint) return undefined; // built by an older generator
+    return c;
   },
-  set: (c: GeneratedClass, mode: string) => set(keyOf(c.year, c.league, mode), { ...c, _v: CACHE_VERSION }),
+  set: (c: GeneratedClass, mode: string) => set(keyOf(c.year, c.league, mode), { ...c, _v: CACHE_VERSION, _gen: generatorFingerprint ?? undefined }),
   del: (year: number, league: string, mode: string) => del(keyOf(year, league, mode)),
 
   // Per-year user edits (shared across modes; keyed by pick, which is stable).

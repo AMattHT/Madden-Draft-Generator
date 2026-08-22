@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
-import { cache } from './cache';
+import { cache, setGeneratorFingerprint } from './cache';
 import { ClassView } from './components/ClassView';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
@@ -57,7 +57,9 @@ export default function App() {
   const [connected, setConnected] = useState(true);
   useEffect(() => {
     let alive = true;
-    const ping = () => fetch('/api/health', { cache: 'no-store' }).then((r) => alive && setConnected(r.ok)).catch(() => alive && setConnected(false));
+    const ping = () => fetch('/api/health', { cache: 'no-store' })
+      .then(async (r) => { if (!alive) return; setConnected(r.ok); if (r.ok) { const j = await r.json().catch(() => null); if (j?.generator) setGeneratorFingerprint(j.generator); } })
+      .catch(() => alive && setConnected(false));
     ping();
     const t = setInterval(ping, 15000);
     return () => { alive = false; clearInterval(t); };

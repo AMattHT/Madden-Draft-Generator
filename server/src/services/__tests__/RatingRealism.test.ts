@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { skipWithoutData } from './data';
 import { enrichedClass } from '../DraftEnrichment';
 import { DraftClassBuilder } from '../DraftClassBuilder';
 
@@ -9,7 +10,7 @@ async function preview(year: number) {
   return DraftClassBuilder.preview(players, 'madden').rows;
 }
 
-test('2025: the top-5 picks are top-40 overalls and no specialist is a top-50 player', async () => {
+test('2025: the top-5 picks are top-40 overalls and no specialist is a top-50 player', skipWithoutData, async () => {
   const rows = await preview(2025);
   const byOvr = [...rows].sort((a, b) => b.overall - a.overall);
   const rankOf = (last: string) => byOvr.findIndex((r) => r.lastName === last) + 1;
@@ -22,14 +23,14 @@ test('2025: the top-5 picks are top-40 overalls and no specialist is a top-50 pl
   assert.ok(!xf.some((p) => ['K', 'P', 'LS'].includes(p)), `X-Factor specialists: ${xf.join(',')}`);
 });
 
-test('2003: a completed career still orders the class (Polamalu, Suggs, A. Johnson in the top 20)', async () => {
+test('2003: a completed career still orders the class (Polamalu, Suggs, A. Johnson in the top 20)', skipWithoutData, async () => {
   const rows = await preview(2003);
   const byOvr = [...rows].sort((a, b) => b.overall - a.overall);
   const rankOf = (last: string) => byOvr.findIndex((r) => r.lastName === last) + 1;
   for (const last of ['Polamalu', 'Suggs', 'Johnson']) assert.ok(rankOf(last) <= 20, `${last} ranks ${rankOf(last)}`);
 });
 
-test('when a year has more than 402 players, the weakest undrafted are dropped, never a draftee', async () => {
+test('when a year has more than 402 players, the weakest undrafted are dropped, never a draftee', skipWithoutData, async () => {
   const { players } = await enrichedClass(1968, 'NFL', { fill: false }); // 488 rows
   assert.ok(players.length > 402, `1968 has ${players.length} rows`);
   const pv = DraftClassBuilder.preview(players, 'madden');
@@ -46,7 +47,7 @@ test('when a year has more than 402 players, the weakest undrafted are dropped, 
   assert.equal(pv.rows[0].draftPick, 1);
 });
 
-test('hindsight 0 orders the 2000 class like draft day (Courtney Brown over Brady); hindsight 1 by career', async () => {
+test('hindsight 0 orders the 2000 class like draft day (Courtney Brown over Brady); hindsight 1 by career', skipWithoutData, async () => {
   const { players } = await enrichedClass(2000, 'NFL', { fill: true });
   const byName = (rows: { lastName: string; firstName: string; overall: number }[], last: string, first?: string) => rows.find((r) => r.lastName === last && (!first || r.firstName === first))!.overall;
   const board = DraftClassBuilder.preview(players, 'madden', { hindsight: 0 }).rows;
@@ -57,7 +58,7 @@ test('hindsight 0 orders the 2000 class like draft day (Courtney Brown over Brad
   assert.ok(board.find((r) => r.lastName === 'Brady' && r.firstName === 'Tom')!.devTrait >= 2, 'Brady keeps a high dev trait at hindsight 0');
 });
 
-test('auto strength lifts a famous class (1983) above a weak one (2013)', async () => {
+test('auto strength lifts a famous class (1983) above a weak one (2013)', skipWithoutData, async () => {
   const top = async (year: number) => {
     const { players } = await enrichedClass(year, 'NFL', { fill: true });
     const rows = DraftClassBuilder.preview(players, 'madden', { autoStrength: true }).rows;
@@ -68,7 +69,7 @@ test('auto strength lifts a famous class (1983) above a weak one (2013)', async 
   assert.ok(t83 >= 86 && t83 <= 92, `1983 top ${t83}`);
 });
 
-test('a variant re-rolls faces/gear/noise but keeps the players, order and overalls', async () => {
+test('a variant re-rolls faces/gear/noise but keeps the players, order and overalls', skipWithoutData, async () => {
   const { players } = await enrichedClass(1990, 'NFL', { fill: true });
   const a = DraftClassBuilder.preview(players, 'madden', { variant: 0 }).rows;
   const b = DraftClassBuilder.preview(players, 'madden', { variant: 3 }).rows;

@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { skipWithoutData } from './data';
 import { FrontSevenService } from '../FrontSevenService';
 import { BaselinePlayer } from '../../types/player';
 
@@ -16,32 +17,32 @@ function player(first: string, last: string, draftYear: number, over: Partial<Ba
 }
 
 // Uses the real cached nflverse CSVs in server/cache.
-test('Andre Tippett (1982, "MLB" in the source) resolves to an edge by sack rate', () => {
+test('Andre Tippett (1982, "MLB" in the source) resolves to an edge by sack rate', skipWithoutData, () => {
   const r = FrontSevenService.resolve(player('Andre', 'Tippett', 1982), 'NWE');
   assert.equal(r.label, 'DE');
   assert.equal(r.frontSeven?.role, 'EDGE');
   assert.equal(r.frontSeven?.reason, 'sacks');
 });
 
-test('Cornelius Bennett (1987 Colts pick, moderate sacks) resolves to an edge via the 3-4 scheme table', () => {
+test('Cornelius Bennett (1987 Colts pick, moderate sacks) resolves to an edge via the 3-4 scheme table', skipWithoutData, () => {
   const r = FrontSevenService.resolve(player('Cornelius', 'Bennett', 1987), 'IND');
   assert.equal(r.label, 'DE');
   assert.equal(r.frontSeven?.reason, '3-4 olb');
 });
 
-test('drafting team falls back to nflverse when no pick-team is supplied', () => {
+test('drafting team falls back to nflverse when no pick-team is supplied', skipWithoutData, () => {
   const r = FrontSevenService.resolve(player('Cornelius', 'Bennett', 1987));
   assert.equal(r.frontSeven?.role, 'EDGE');
   assert.equal(r.frontSeven?.scheme, '3-4');
 });
 
-test('a pre-1980 player with no nflverse row gets no label and a null role', () => {
+test('a pre-1980 player with no nflverse row gets no label and a null role', skipWithoutData, () => {
   const r = FrontSevenService.resolve(player('Chuck', 'Bednarik', 1949));
   assert.equal(r.label, null);
   assert.equal(r.frontSeven?.role ?? null, null);
 });
 
-test('nflverse DT/NT listing still maps the LB bucket to the interior line', () => {
+test('nflverse DT/NT listing still maps the LB bucket to the interior line', skipWithoutData, () => {
   // Bill Maas, 1984 Chiefs NT (listed in the source as a front-seven LB bucket for this test)
   const r = FrontSevenService.resolve(player('Bill', 'Maas', 1984), 'KAN');
   assert.equal(r.label, 'DT');
