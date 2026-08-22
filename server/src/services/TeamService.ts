@@ -8,12 +8,22 @@ import { DbPositionService } from './DbPositionService';
 export interface TeamInfo {
   abbr: string; // display abbreviation (as of the draft season)
   name: string; // full franchise name (as of the draft season)
-  logo: string | null; // ESPN CDN logo URL, or null for historical/relocated teams
+  logo: string | null; // ESPN or era-correct PFR logo URL
 }
 
 /** ESPN CDN logo URL for a team code (e.g. 'gb', 'wsh'). */
-export const espnLogo = (code: string) => `https://a.espncdn.com/i/teamlogos/nfl/500/${code}.png`;
+const viaProxy = (url: string) => `/api/logo?url=${encodeURIComponent(url)}`;
+
+export const espnLogo = (code: string) =>
+  viaProxy(`https://a.espncdn.com/i/teamlogos/nfl/500/${code}.png`);
 const ESPN = espnLogo;
+
+/** Year-stamped Sports-Reference team mark (Oilers derrick, SD bolt, etc.). */
+export const pfrLogo = (code: string, year: number) =>
+  viaProxy(`https://cdn.ssref.net/req/20230307/tlogo/pfr/${code}-${year}.png`);
+
+/** Bundled historical mark (e.g. defunct Brooklyn Dodgers/Tigers). */
+export const localLogo = (id: string) => `/api/logo?file=${encodeURIComponent(id)}`;
 
 // nflverse abbreviation -> current franchise (ESPN logo code + name).
 // nflverse uses the abbreviation contemporary to the draft season, so relocated
@@ -54,30 +64,84 @@ const CURRENT: Record<string, { espn: string; name: string }> = {
   WAS: { espn: 'wsh', name: 'Washington Commanders' },
 };
 
-// Relocated / renamed franchises that no longer exist under this identity — shown
-// as a neutral abbreviation chip (no current logo), per the "current teams only"
-// choice.
-const HISTORICAL: Record<string, string> = {
-  OAK: 'Oakland Raiders',
-  RAI: 'Los Angeles Raiders',
-  SDG: 'San Diego Chargers',
-  STL: 'St. Louis Rams',
-  RAM: 'Los Angeles Rams',
-  PHO: 'Phoenix Cardinals',
+// Relocated / renamed identities. `pfr` is the Sports-Reference franchise code
+// so we can pull the logo they actually used in `season` (not today's mark).
+const HISTORICAL: Record<string, { name: string; pfr: string; espn?: string }> = {
+  OAK: { name: 'Oakland Raiders', pfr: 'rai', espn: 'oak' },
+  RAI: { name: 'Los Angeles Raiders', pfr: 'rai', espn: 'oak' },
+  SDG: { name: 'San Diego Chargers', pfr: 'sdg', espn: 'sd' },
+  STL: { name: 'St. Louis Rams', pfr: 'ram', espn: 'stl' },
+  RAM: { name: 'Los Angeles Rams', pfr: 'ram', espn: 'lar' },
+  PHO: { name: 'Phoenix Cardinals', pfr: 'crd', espn: 'ari' },
 };
 
 /** Resolve an nflverse team abbreviation + draft season to logo/name info. */
 function resolveTeam(abbr: string, season: number): TeamInfo {
   const a = abbr.trim().toUpperCase();
   // Codes shared by a historical team and the current franchise — split by year.
-  if (a === 'BAL' && season < 1996) return { abbr: 'BAL', name: 'Baltimore Colts', logo: null };
-  if (a === 'HOU' && season < 2002) return { abbr: 'HOU', name: 'Houston Oilers', logo: null };
+  if (a === 'BAL' && season < 1996) {
+    return { abbr: 'BAL', name: 'Baltimore Colts', logo: pfrLogo('clt', season) };
+  }
+  if (a === 'HOU' && season < 1997) {
+    return { abbr: 'HOU', name: 'Houston Oilers', logo: pfrLogo('oti', season) };
+  }
+  if (a === 'HOU' && season < 2002) {
+    return { abbr: 'HOU', name: 'Houston Oilers', logo: pfrLogo('oti', 1996) };
+  }
+  if ((a === 'TEN' || a === 'OTI') && season <= 1998) {
+    return { abbr: 'TEN', name: 'Tennessee Oilers', logo: pfrLogo('oti', season) };
+  }
+  if (a === 'WAS' && season < 2020) {
+    return { abbr: 'WAS', name: 'Washington Redskins', logo: pfrLogo('was', season) };
+  }
+  if (a === 'WAS' && season < 2022) {
+    return { abbr: 'WAS', name: 'Washington Football Team', logo: ESPN('wsh') };
+  }
 
   const cur = CURRENT[a];
   if (cur) return { abbr: a, name: cur.name, logo: ESPN(cur.espn) };
   const hist = HISTORICAL[a];
-  if (hist) return { abbr: a, name: hist, logo: null };
+  if (hist) {
+    return { abbr: a, name: hist.name, logo: pfrLogo(hist.pfr, season) };
+  }
   return { abbr: a, name: a, logo: null };
+}
+
+/** Full historical team name -> era-correct logo (Wikipedia pre-1980 drafts). */
+const WIKI_LOGO: Record<string, { abbr: string; pfr?: string; espn?: string; year?: number; file?: string }> = {
+  'Houston Oilers': { abbr: 'HOU', pfr: 'oti', year: 1995 },
+  'Tennessee Oilers': { abbr: 'TEN', pfr: 'oti', year: 1998 },
+  'Baltimore Colts': { abbr: 'BAL', pfr: 'clt', year: 1983 },
+  'San Diego Chargers': { abbr: 'SD', pfr: 'sdg', espn: 'sd', year: 2005 },
+  'Oakland Raiders': { abbr: 'OAK', pfr: 'rai', espn: 'oak', year: 1995 },
+  'Los Angeles Raiders': { abbr: 'RAI', pfr: 'rai', espn: 'oak', year: 1990 },
+  'St. Louis Rams': { abbr: 'STL', pfr: 'ram', espn: 'stl', year: 2001 },
+  'Los Angeles Rams': { abbr: 'LAR', pfr: 'ram', espn: 'lar' },
+  'Cleveland Rams': { abbr: 'RAM', pfr: 'ram', year: 1945 },
+  'St. Louis Cardinals': { abbr: 'CRD', pfr: 'crd', year: 1987 },
+  'Chicago Cardinals': { abbr: 'CRD', pfr: 'crd', year: 1959 },
+  'Phoenix Cardinals': { abbr: 'PHO', pfr: 'crd', year: 1993 },
+  'Boston Patriots': { abbr: 'BOS', pfr: 'nwe', year: 1965 },
+  'Washington Redskins': { abbr: 'WAS', pfr: 'was', year: 1995 },
+  'Boston Redskins': { abbr: 'BOS', pfr: 'was', year: 1936 },
+  'Washington Football Team': { abbr: 'WAS', espn: 'wsh' },
+  'Pittsburgh Pirates': { abbr: 'PIT', espn: 'pit' },
+  'Brooklyn Dodgers': { abbr: 'BKN', file: 'bkn' },
+  'Brooklyn Tigers': { abbr: 'BKN', file: 'bkn' },
+};
+
+export function logoForHistoricalName(name: string, year?: number): string | null {
+  const hit = WIKI_LOGO[name];
+  if (!hit) return null;
+  if (hit.file) return localLogo(hit.file);
+  if (hit.pfr) return pfrLogo(hit.pfr, year ?? hit.year ?? 1990);
+  if (hit.espn) return ESPN(hit.espn);
+  return null;
+}
+
+export function wikiTeamIdentity(name: string): { abbr: string } | null {
+  const hit = WIKI_LOGO[name];
+  return hit ? { abbr: hit.abbr } : null;
 }
 
 /** Per-pick enrichment joined onto a generated class by overall draft pick. */

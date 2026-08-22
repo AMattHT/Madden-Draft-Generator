@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { TeamInfo } from '../types';
 
 /** OVR chip — color encodes tier (gold elite … gray fringe), mirroring wAV. */
@@ -30,7 +30,7 @@ const DEV = [
 
 export function DevBadge({ dev }: { dev: number }) {
   const d = DEV[dev] || DEV[0];
-  if (dev <= 0) return <span className="text-xs text-neutral-600">—</span>;
+  if (dev <= 0) return <span className="text-xs text-neutral-500">—</span>;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.pill}`}>
       {dev === 3 && <span aria-hidden>✦</span>}
@@ -92,8 +92,9 @@ export function Portrait({ src, size = 'md' }: { src?: string | null; size?: 'xs
  *  chip (historical/relocated teams, or a missing logo). */
 export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' | 'md' }) {
   const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [team?.logo]);
   const dim = size === 'sm' ? 'h-5 w-5' : 'h-6 w-6';
-  if (!team) return <span className="text-xs text-neutral-600">—</span>;
+  if (!team) return <span className="text-xs text-neutral-500">—</span>;
   if (team.logo && !broken) {
     return (
       <img

@@ -4,10 +4,13 @@ import { CuratedDbPositions } from './CuratedDbPositions';
 import { GenericFillerService } from './GenericFillerService';
 import { CombineService } from './CombineService';
 import { PositionMapper } from './PositionMapper';
-import { RosterPositionService } from './RosterPositionService';
+import { FrontSevenService } from './FrontSevenService';
 import { SkinToneService } from './SkinToneService';
 import { DerivedSkinToneService } from './DerivedSkinToneService';
 import { WikiSkinToneService } from './WikiSkinToneService';
+import { resolveSkinTone } from './SkinToneClassify';
+import { NflverseCareerService } from './NflverseCareerService';
+import { PhotoLookService } from './PhotoLookService';
 import { BaselinePlayer } from '../types/player';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
@@ -26,34 +29,72 @@ const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
  *  nothing was added, so the shared lookup cache is never mutated. */
 async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<BaselinePlayer> {
   const curated = CuratedDbPositions.get(p.firstName, p.lastName, p.draftYear);
-  // Reclassify the generic linebacker bucket from nflverse's more specific position
-  // (so "MLB" edge rushers like Ware/Taylor become OLB -> edge).
-  const lbFix = LB_BUCKET.test(p.position.trim()) ? RosterPositionService.frontSeven(p.firstName, p.lastName) : null;
-  const label = curated ?? e?.positionLabel ?? lbFix ?? null;
+  // Reclassify the generic linebacker bucket: 3-4 OLB pass rushers become edges
+  // (LEDG/REDG) and off-ball backers get a pinned SAM/MIKE/WILL where the career
+  // signals (sacks, interceptions, scheme, PFF) support it.
+  const f7 = LB_BUCKET.test(p.position.trim()) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
+  const label = curated ?? e?.positionLabel ?? f7?.label ?? null;
 
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear);
 
-  // Accuracy priority — height/weight: combine (measured) > nflverse roster > CSV.
-  const height = c?.heightInches ?? e?.heightInches ?? null;
-  const weight = c?.weight ?? e?.weight ?? null;
-  const age = e?.age ?? null; // real draft age
+  const nv = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+
+  // Accuracy priority — height/weight: combine (measured) > pick-join > nflverse name > CSV.
+  const height = c?.heightInches ?? e?.heightInches ?? nv?.heightInches ?? null;
+  const weight = c?.weight ?? e?.weight ?? nv?.weight ?? null;
+  const age = e?.age ?? nv?.age ?? null;
   // Skin tone for generic faces, best source first: real Madden portrait tone >
   // Wikipedia-photo tone (for players with no Madden portrait) > explicit non-7 CSV
   // race > position-weighted guess. Only matters for players without a 3D face asset.
-  const derived = DerivedSkinToneService.toneForPid(p.photoId);
-  const wiki = derived == null ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
+  const fallback = SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
+  // ITA-from-photo is biased light on dark skin. Ignore a light/mid ITA when
+  // the position prior is dark — including legends whose M26 asset we will
+  // drop on M27 (otherwise Rod Woodson gets gen_3 + a white player's PID).
+  let derived = DerivedSkinToneService.toneForPid(p.photoId);
+  let wiki = WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear);
+  if (fallback >= 6) {
+    if (derived != null && derived <= 4) derived = null;
+    if (wiki != null && wiki <= 4) wiki = null;
+  }
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = derived ?? wiki ?? trusted ?? SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
+  const race = resolveSkinTone({ derived, wiki, trustedCsv: trusted, fallback });
 
-  if (!label && !c && height == null && weight == null && age == null && race == null) return p;
+  if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
+    const photo = await PhotoLookService.resolvePhoto(p);
+    if (!photo) return p;
+    const out: BaselinePlayer = { ...p };
+    if (!out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) out.wikiImageUrl = photo;
+    out.observedGear = await PhotoLookService.observe(out);
+    return out;
+  }
   const out: BaselinePlayer = { ...p };
   if (label) out.position = label;
+  if (f7?.frontSeven) out.frontSeven = f7.frontSeven;
   if (c) out.combine = { forty: c.forty, bench: c.bench, vertical: c.vertical, broad: c.broad, cone: c.cone, shuttle: c.shuttle };
   if (height != null) out.heightInches = height;
   if (weight != null) out.weight = weight;
   if (age != null) out.age = age;
   if (race != null) out.race = race;
+  if (nv) {
+    if (out.wav == null && nv.wav != null) {
+      out.wav = nv.wav;
+      out.wavSource = 'actual';
+    }
+    if (!(out.proBowls) && nv.proBowls) out.proBowls = nv.proBowls;
+    if (!(out.allPro1) && nv.allPro1) out.allPro1 = nv.allPro1;
+    if (!(out.seasonsStarted) && nv.seasonsStarted) out.seasonsStarted = nv.seasonsStarted;
+    if (out.careerTo == null && nv.careerTo != null) out.careerTo = nv.careerTo;
+    if (!out.isHOF && nv.isHOF) out.isHOF = true;
+    if (!out.headshotUrl && nv.headshotUrl) out.headshotUrl = nv.headshotUrl;
+  }
+  const photo = await PhotoLookService.resolvePhoto(out);
+  if (photo && !out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) {
+    out.wikiImageUrl = photo;
+  }
+  if (photo) {
+    out.observedGear = await PhotoLookService.observe(out);
+  }
   return out;
 }
 

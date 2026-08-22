@@ -1,6 +1,10 @@
 import { Router } from 'express';
+import fs from 'fs';
+import path from 'path';
 import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
+import { FranchiseService } from '../services/FranchiseService';
+import { M27_SAVES_DIR } from '../config/paths';
 import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
 
 const r = Router();
@@ -15,6 +19,7 @@ r.post('/export/mdc', async (req, res) => {
   const edits = req.body?.edits as Record<string, Record<string, number | string>> | undefined;
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
+  const gameVersion: 'm26' | 'm27' = req.body?.gameVersion === 'm27' ? 'm27' : 'm26';
   const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : 'year';
   const opts: GenOptions = {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
@@ -41,7 +46,22 @@ r.post('/export/mdc', async (req, res) => {
     return res.status(404).json({ error: 'no players found' });
   }
 
-  const { buffer, count, truncated, dropped, likeness } = DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
+  const { buffer, count, truncated, dropped, likeness } = gameVersion === 'm27'
+    ? DraftClassBuilder.buildMdc27(players, edits, mode, gearEdits, opts)
+    : DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
+
+  // saveToSaves: write the class straight into the Madden Saves folder (the name
+  // is already Madden's CAREERDRAFT-* convention) so it shows up in Franchise →
+  // Choose Draft Class without a manual file move. Overwrites our own previous
+  // export of the same class intentionally.
+  if (req.body?.saveToSaves) {
+    const dir = gameVersion === 'm27' ? M27_SAVES_DIR : FranchiseService.savesDir();
+    if (!fs.existsSync(dir)) return res.status(400).json({ error: `Madden Saves folder not found: ${dir}` });
+    const outPath = path.join(dir, filename);
+    fs.writeFileSync(outPath, buffer);
+    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness });
+  }
+
   res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('X-Prospect-Count', String(count));

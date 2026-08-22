@@ -1,7 +1,14 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan } from './types';
 
 /** Backend-proxied image URL (avoids hotlink/CORS blocks on Wikipedia/PFR). */
 export const imageUrl = (url: string) => `/api/image?url=${encodeURIComponent(url)}`;
+
+/** 2D portrait for the board/profile: official NFL headshot / PFR / Wiki first
+ *  (the Carter/Bennett look). Fall back to the in-game menu portrait. */
+export function displayPortrait(row: { face?: string; photoUrl?: string | null; portrait?: string | null }): string | null {
+  if (row.photoUrl) return imageUrl(row.photoUrl);
+  return row.portrait ?? null;
+}
 
 async function jget<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -28,10 +35,37 @@ export interface PlayerSearchResult {
   league: string;
 }
 
+/** A real NFL player whose in-game loadout can be copied onto a prospect. */
+export interface RealGearPlayerSummary {
+  id: number;
+  name: string;
+  team: string;
+  position: string;
+  jersey: number;
+}
+export interface RealGearPlayer extends RealGearPlayerSummary {
+  gear: Record<string, string>; // slot -> M26 asset
+}
+
+/** One selectable M27 persona DNA trait. */
+export interface PersonaTrait {
+  id: number;
+  name: string;
+}
+
 export interface FranchiseInfo {
   name: string;
   sizeBytes: number;
   modified: number;
+}
+
+/** Result of writing an export straight into the Madden Saves folder. */
+export interface SaveMdcResult {
+  saved: boolean;
+  path: string;
+  filename: string;
+  count: number;
+  likeness: LikenessStats;
 }
 
 export interface CapResetOptions {
@@ -207,8 +241,8 @@ export const api = {
   archetypesByPosition: () =>
     jget<Record<string, ArchetypeOption[]>>('/api/lookups/archetypes-by-position'),
 
-  equipmentOptions: (year: number) =>
-    jget<Record<string, GearOption[]>>(`/api/lookups/equipment?year=${year}`),
+  equipmentOptions: (year: number, gameVersion: "m26" | "m27" = "m26") =>
+    jget<Record<string, GearOption[]>>(`/api/lookups/equipment?year=${year}&gameVersion=${gameVersion}`),
 
   /** A Madden id/name lookup table (e.g. "college", "state") for editor dropdowns. */
   lookup: (name: string) => jget<{ id: number; name: string }[]>(`/api/lookups/${name}`),
@@ -216,13 +250,62 @@ export const api = {
   /** Generic draft-class head codes grouped by skin tone (1-8), for the face picker. */
   genericHeads: () => jget<Record<string, string[]>>('/api/lookups/generic-heads'),
 
+  /** Real face-scan catalog for the target game (M26 vs M27). */
+  faceScans: (gameVersion: 'm26' | 'm27' = 'm26') =>
+    jget<{ gameVersion: string; scans: FaceScan[] }>(
+      `/api/lookups/face-scans?gameVersion=${gameVersion}`
+    ).then((r) => r.scans),
+
+  /** Selectable M27 persona DNA traits (id + name) for the persona editor. */
+  personaDnaTraits: () => jget<{ traits: PersonaTrait[] }>('/api/lookups/persona-dna').then((r) => r.traits),
+
   playerSearch: (query: string, limit = 40) =>
     jget<{ results: PlayerSearchResult[] }>(
       `/api/players/search?q=${encodeURIComponent(query)}&limit=${limit}`
     ).then((r) => r.results),
 
-  generated: (year: number, league: string, mode: string) =>
-    jget<GeneratedClass>(`/api/draft/${year}/generated?league=${league}&mode=${mode}`),
+  /** Search real NFL players whose in-game gear can be copied (Equipment Builder). */
+  gearPlayerSearch: (query: string, limit = 12) =>
+    jget<{ players: RealGearPlayerSummary[] }>(
+      `/api/gear/players?q=${encodeURIComponent(query)}&limit=${limit}`
+    ).then((r) => r.players),
+
+  /** One donor player's full loadout, keyed by gear slot. */
+  gearPlayer: (id: number) => jget<RealGearPlayer>(`/api/gear/players/${id}`),
+
+  /** Inspect an uploaded photo (data URL) or image URL and return matched gear slots. */
+  async gearFromPhoto(opts: {
+    imageBase64?: string;
+    imageUrl?: string;
+    year: number;
+    positionId: number;
+    gameVersion?: GameVersion;
+  }) {
+    const res = await fetch('/api/gear/from-photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opts),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json() as Promise<{
+      observed: {
+        onField: boolean;
+        gloves: boolean | null;
+        gloveColor: string | null;
+        visor: string | null;
+        wristband: boolean | null;
+        socks: string | null;
+        eyeBlack: boolean | null;
+      };
+      slots: Record<string, string>;
+    }>;
+  },
+
+  generated: (year: number, league: string, mode: string, gameVersion: GameVersion = 'm26') =>
+    jget<GeneratedClass>(`/api/draft/${year}/generated?league=${league}&mode=${mode}&gameVersion=${gameVersion}`),
 
   /** Custom class: All-Time Greats / by-decade source and/or generation modifiers. */
   generatedCustom: (opts: {
@@ -234,6 +317,7 @@ export const api = {
     strength?: number;
     studs?: number;
     generational?: boolean;
+    gameVersion?: GameVersion;
   }) =>
     fetch('/api/draft/custom', {
       method: 'POST',
@@ -251,12 +335,13 @@ export const api = {
     edits?: ClassEdits,
     mode?: string,
     gearEdits?: GearEdits,
-    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean }
+    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean },
+    gameVersion: GameVersion = 'm26'
   ) {
     const res = await fetch('/api/export/mdc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts }),
+      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, gameVersion }),
     });
     if (!res.ok) throw new Error(`export failed: HTTP ${res.status}`);
     const blob = await res.blob();
@@ -278,6 +363,28 @@ export const api = {
       asset: res.headers.get('X-Likeness-Asset'),
       custom: res.headers.get('X-Likeness-CustomPortrait'),
     };
+  },
+
+  /** Build the .mdc on the server and write it straight into the Madden Saves folder. */
+  async saveMdcToSaves(
+    year: number,
+    league: string,
+    edits: ClassEdits | undefined,
+    mode: string | undefined,
+    gearEdits: GearEdits | undefined,
+    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean },
+    gameVersion: GameVersion = 'm26'
+  ): Promise<SaveMdcResult> {
+    const res = await fetch('/api/export/mdc', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, saveToSaves: true, gameVersion }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `export failed: HTTP ${res.status}`);
+    }
+    return res.json();
   },
 
   buildPortraits: (year: number, league: string, limit?: number) =>

@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import { LOOKUPS_DIR } from '../config/paths';
+import { LOOKUPS_DIR, CACHE_DIR } from '../config/paths';
 import { BaselinePlayer } from '../types/player';
+import { parseCsvFile } from '../util/csv';
 
 /**
  * Player likeness assignment. Each generated prospect gets, in priority order:
@@ -18,13 +19,59 @@ interface FaceEntry {
   skinTone: number;
   isTrueGeneric: boolean;
   assetName: string;
+  pid?: number;
 }
 
 let byTone: Map<number, string[]> | null = null;
+let pidByCode: Map<string, number> | null = null;
+
+/** M27 real-face map: normalized "first last" -> M27 asset name + portrait PID
+ *  (from data/lookups/m27-face-assets.json, extracted from an M27 career save).
+ *  Covers current-era NFL players only. */
+interface M27Face { assetName: string; portraitPid: number; genericHead: string | null }
+let m27Faces: Map<string, M27Face> | null = null;
+let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
+function loadM27Faces(): Map<string, M27Face> {
+  if (m27Faces) return m27Faces;
+  m27Faces = new Map();
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-face-assets.json'), 'utf8'));
+    for (const [k, v] of Object.entries(raw.players ?? {})) m27Faces.set(k, v as M27Face);
+  } catch { /* map absent — M27 face override simply no-ops */ }
+  return m27Faces;
+}
+const m27Key = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
+
+/** nflverse draft year by the same name key as the M27 face map. */
+let draftYearByKey: Map<string, number> | null = null;
+function loadDraftYears(): Map<string, number> {
+  if (draftYearByKey) return draftYearByKey;
+  draftYearByKey = new Map();
+  try {
+    const rows = parseCsvFile<Record<string, string>>(path.join(CACHE_DIR, 'nflverse_players.csv'));
+    for (const r of rows) {
+      const year = parseInt(r.draft_year || '', 10);
+      if (!year) continue;
+      const display = (r.display_name || '').trim();
+      if (display) {
+        const k = display.toLowerCase().replace(/[^a-z ]/g, '');
+        if (k && !draftYearByKey.has(k)) draftYearByKey.set(k, year);
+      }
+      const first = (r.first_name || r.common_first_name || '').trim();
+      const last = (r.last_name || '').trim();
+      if (first && last) {
+        const k = m27Key(first, last);
+        if (k && !draftYearByKey.has(k)) draftYearByKey.set(k, year);
+      }
+    }
+  } catch { /* nflverse cache absent — year guard degrades to the 2015 cutoff */ }
+  return draftYearByKey;
+}
 
 function load(): void {
   if (byTone) return;
   byTone = new Map();
+  pidByCode = new Map();
   const file = path.join(LOOKUPS_DIR, 'generic-face-DRAFTCLASS-FINAL.json');
   const arr: FaceEntry[] = JSON.parse(fs.readFileSync(file, 'utf8'));
   // Prefer true generics; fall back to any validated draft-class face per tone.
@@ -32,6 +79,7 @@ function load(): void {
   for (const e of arr) {
     const code = e.genericCode;
     if (!code || !/^gen_\d/i.test(code)) continue;
+    if (typeof e.pid === 'number') pidByCode.set(code, e.pid);
     // Bucket by the gen_N prefix, NOT the JSON skinTone field — M26Writer derives the
     // exported skin tone from that prefix, and 48 entries disagree with their field, so
     // a field-bucketed pick would write a tone that mismatches the player's race.
@@ -86,12 +134,75 @@ export const LikenessService = {
     return out;
   },
 
-  /** Assign a face for a player. `index` keeps generic picks reproducible. */
-  assign(player: BaselinePlayer, index: number): Likeness {
+  /** Portrait PID for a gen_* generic face code (for head previews), else null. */
+  genericPid(code: string): number | null {
+    load();
+    return pidByCode!.get(code) ?? null;
+  },
+
+  /** M27-native real face only when this is the same person — name match AND
+   *  draft year within 1 of the face owner's nflverse year. A 1987 Cornelius
+   *  Bennett must not receive a current Bennett's scan or a recycled portrait PID. */
+  m27FaceFor(firstName: string, lastName: string, draftYear?: number): M27Face | null {
+    const face = loadM27Faces().get(m27Key(firstName, lastName)) ?? null;
+    if (!face) return null;
+    const ownerYear = loadDraftYears().get(m27Key(firstName, lastName));
+    if (draftYear != null && ownerYear != null) {
+      return Math.abs(draftYear - ownerYear) <= 1 ? face : null;
+    }
+    // No owner year on file: keep the old modern-era guard (blocks historical collisions).
+    if (draftYear != null && draftYear < 2015) return null;
+    return face;
+  },
+
+  /** Real 3D face-scan catalog for the target game (M26 lookup assets vs M27 save extract). */
+  faceScans(gameVersion: 'm26' | 'm27'): Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> {
+    const title = (s: string) => s.replace(/\w/g, (c) => c.toUpperCase());
+    if (gameVersion === 'm27') {
+      return [...loadM27Faces().entries()]
+        .map(([name, v]) => ({
+          id: v.assetName,
+          name: title(name),
+          asset: v.assetName,
+          portraitPid: v.portraitPid || undefined,
+          image: v.portraitPid ? `/api/portrait/pid/${v.portraitPid}` : undefined,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+    if (!m26Scans) {
+      m26Scans = [];
+      try {
+        const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'ALL_PLAYER_LOOKUP.csv'));
+        const seen = new Set<string>();
+        for (const r of rows) {
+          const asset = (r['Player Assets ID'] || '').trim();
+          if (!asset || /^gen_/i.test(asset) || seen.has(asset)) continue;
+          seen.add(asset);
+          const first = (r['First Name'] || '').trim();
+          const last = (r['Last Name'] || '').trim();
+          const pid = parseInt(r.PhotoID || '', 10);
+          m26Scans.push({
+            id: asset,
+            name: `${first} ${last}`.trim() || asset,
+            asset,
+            portraitPid: Number.isFinite(pid) && pid > 0 ? pid : undefined,
+            image: Number.isFinite(pid) && pid > 0 ? `/api/portrait/pid/${pid}` : undefined,
+          });
+        }
+        m26Scans.sort((a, b) => a.name.localeCompare(b.name));
+      } catch { /* lookup missing */ }
+    }
+    return m26Scans;
+  },
+
+  /** Assign a face for a player. `index` keeps generic picks reproducible.
+   *  M27 only accepts assets that exist in that game (m27-face-assets / m27FaceFor).
+   *  M26 legend ids like TestaverdeVinny_19980 resolve to an empty silhouette in M27. */
+  assign(player: BaselinePlayer, index: number, gameVersion: 'm26' | 'm27' = 'm26'): Likeness {
     load();
     const tone = raceToSkinTone(player.race);
     const asset = (player.playerAssetsId || '').trim();
-    if (asset && !/^gen_/i.test(asset)) {
+    if (gameVersion !== 'm27' && asset && !/^gen_/i.test(asset)) {
       return { peps: asset, kind: 'asset', skinTone: tone };
     }
     let pool = byTone!.get(tone);

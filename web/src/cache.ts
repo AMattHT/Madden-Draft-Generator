@@ -1,11 +1,18 @@
 import { get, set, keys, del } from 'idb-keyval';
 import type { GeneratedClass, ClassEdits, GearEdits } from './types';
 
+/** Persisted board view state per class. */
+export interface TableFilters {
+  search: string;
+  pos: string;
+  sort: string;
+}
+
 // Client-side cache: every pulled class is stored in IndexedDB so revisiting a
 // year (or reloading the page) is instant and offline-friendly.
 // Bump CACHE_VERSION whenever the backend rating/position logic changes so stale
 // cached classes are treated as a miss and re-pulled automatically.
-const CACHE_VERSION = 35; // v35: real per-player skin tone derived from portrait face pixels (8.5k players) as the trusted race source
+const CACHE_VERSION = 46; // v46: front-seven classifier (3-4 OLBs -> edge, pinned SAM/MIKE/WILL)
 const keyOf = (year: number, league: string, mode: string) => `class:${year}_${league}_${mode}`;
 const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
@@ -39,6 +46,16 @@ export const cache = {
   rangeGet: (): Promise<{ from: number; to: number } | null> =>
     get<{ from: number; to: number }>('draftRange').then((r) => r ?? null),
   rangeSet: (range: { from: number; to: number }) => set('draftRange', range),
+
+  // Per-year table view state (search text, position filter, sort order), so the
+  // board looks the way you left it when revisiting a class.
+  filtersGet: (year: number, league: string): Promise<TableFilters | null> =>
+    get<TableFilters>(`filters:${year}_${league}`).then((f) => f ?? null),
+  filtersSet: (year: number, league: string, filters: TableFilters) => set(`filters:${year}_${league}`, filters),
+
+  // Recently viewed draft years (most recent first, capped), for the year picker.
+  recentYearsGet: (): Promise<number[]> => get<number[]>('recentDraftYears').then((a) => a ?? []),
+  recentYearsSet: (years: number[]) => set('recentDraftYears', years.slice(0, 8)),
 
   async cachedYears(): Promise<Set<number>> {
     const all = (await keys()) as string[];

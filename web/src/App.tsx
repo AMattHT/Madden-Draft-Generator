@@ -6,7 +6,7 @@ import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
 import { Icon, ICONS } from './components/ui';
-import type { ClassEdits, GearEdits, GeneratedClass } from './types';
+import type { ClassEdits, GearEdits, GeneratedClass, GameVersion } from './types';
 
 export type AppView = 'home' | 'draft' | 'franchise';
 
@@ -37,11 +37,13 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
+  const [gameVersion, setGameVersion] = useState<GameVersion>('m27');
   const [view, setView] = useState<AppView>('home');
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
   const [focusPlayer, setFocusPlayer] = useState<string | null>(null);
+  const [recentYears, setRecentYears] = useState<number[]>([]);
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
   const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
@@ -53,16 +55,26 @@ export default function App() {
   );
 
   const select = useCallback(
-    async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts) => {
+    async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts, useVersion: GameVersion = gameVersion) => {
       const opts = useOpts ?? draftOpts;
       const custom = isCustomDraft(opts);
       // Greats classes key their edits/cache under a fixed pseudo-year / decade label.
       const league = opts.source === 'alltime' ? 'all-time' : opts.source === 'decade' ? `${opts.decade}s` : useLeague ?? effLeague(year);
       const ekYear = opts.source === 'alltime' ? 0 : opts.source === 'decade' ? opts.decade : year;
+      // M27 classes are cached under a versioned key so M26/M27 views never collide.
+      const cacheMode = useVersion === 'm27' ? `${useMode}-m27` : useMode;
       const req = ++reqRef.current;
       setSelected(year);
       setError(null);
       setBusy(true);
+      // Track recently viewed real years for the year picker's "Recent" row.
+      if (year > 0 && opts.source === 'year') {
+        setRecentYears((prev) => {
+          const next = [year, ...prev.filter((y) => y !== year)].slice(0, 8);
+          cache.recentYearsSet(next);
+          return next;
+        });
+      }
       try {
         if (custom) {
           // Custom classes aren't year-cached — always generated fresh.
@@ -70,22 +82,26 @@ export default function App() {
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
+            gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;
           live.fetchedAt = Date.now();
+          live.gameVersion = useVersion;
           setData(live);
           setSource('live');
         } else {
-          const cached = force ? undefined : await cache.get(year, league, useMode);
+          const cached = force ? undefined : await cache.get(year, league, cacheMode);
           if (req !== reqRef.current) return; // a newer selection superseded this one
           if (cached) {
+            cached.gameVersion = useVersion;
             setData(cached);
             setSource('cache');
           } else {
-            const live = await api.generated(year, league, useMode);
+            const live = await api.generated(year, league, useMode, useVersion);
             if (req !== reqRef.current) return;
             live.fetchedAt = Date.now();
-            await cache.set(live, useMode);
+            live.gameVersion = useVersion;
+            await cache.set(live, cacheMode);
             setData(live);
             setSource('live');
             setCachedYears((prev) => new Set(prev).add(year));
@@ -101,7 +117,7 @@ export default function App() {
         if (req === reqRef.current) setBusy(false);
       }
     },
-    [mode, effLeague, draftOpts]
+    [mode, effLeague, draftOpts, gameVersion]
   );
 
   const persistUsed = useCallback((next: Set<number>) => {
@@ -188,6 +204,14 @@ export default function App() {
     [selected, select]
   );
 
+  const changeGameVersion = useCallback(
+    (v: GameVersion) => {
+      setGameVersion(v);
+      if (selected != null) select(selected, false, mode, undefined, undefined, v);
+    },
+    [selected, select, mode]
+  );
+
   const changeLeague = useCallback(
     (lg: string) => {
       setLeagueOverride(lg);
@@ -254,6 +278,7 @@ export default function App() {
   useEffect(() => {
     cache.cachedYears().then(setCachedYears);
     cache.usedYearsGet().then((a) => setUsedYears(new Set(a)));
+    cache.recentYearsGet().then(setRecentYears);
     api.archetypesByPosition().then(setArchetypeOptions).catch(() => {});
     api
       .years()
@@ -277,6 +302,8 @@ export default function App() {
         canDraw={years.some((y) => !usedYears.has(y) && inRange(y))}
         mode={mode}
         onSetMode={changeMode}
+        gameVersion={gameVersion}
+        onSetGameVersion={changeGameVersion}
         showLeague={selected != null && isMergeEra(selected)}
         league={selected != null ? effLeague(selected) : 'NFL'}
         onSetLeague={changeLeague}
@@ -296,6 +323,7 @@ export default function App() {
           select(y, false, mode, undefined, next);
         }}
         cachedYears={cachedYears}
+        recentYears={recentYears}
       />
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
@@ -326,7 +354,7 @@ export default function App() {
             </div>
           )}
           {!data && !error && (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-neutral-600">
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-neutral-500">
               {busy ? (
                 <>
                   <span className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-700 border-t-primary" />

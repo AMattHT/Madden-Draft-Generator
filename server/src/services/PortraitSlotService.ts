@@ -37,7 +37,7 @@ function load(): void {
 
 /** Best available real photo for a player (prefer the tighter PFR headshot). */
 function photoUrl(p: BaselinePlayer): string | null {
-  return p.pfrImageUrl || p.wikiImageUrl || null;
+  return p.headshotUrl || p.pfrImageUrl || p.wikiImageUrl || null;
 }
 
 /** A player needs a custom portrait if they have a photo but no Madden 3D asset

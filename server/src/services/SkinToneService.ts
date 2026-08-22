@@ -48,12 +48,21 @@ function weightedTone(weights: Array<[number, number]>, roll: number): number {
   return weights[weights.length - 1][0];
 }
 
-/** A position-appropriate skin tone (1-7) for a player with unknown/untrusted race.
- *  `key` makes the pick deterministic and varied across a class. */
-export function defaultRaceFor(label: string | null | undefined, key: string): number {
+/** Modal (most common) skin tone for a position — used when we have no
+ *  portrait/wiki signal. A random draw here is how Charles Rogers (Black WR)
+ *  was assigned tone 2 ~7% of the time. Variety belongs on the generic *head*,
+ *  not the tone, for named historical players. */
+export function defaultRaceFor(label: string | null | undefined, _key?: string): number {
+  const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
+  const weights = GROUP_TONE_WEIGHTS[group] ?? GROUP_TONE_WEIGHTS.LB;
+  return weights[0][0];
+}
+
+/** Weighted random tone — for generated UDFA fillers so a class is not a clone army. */
+export function defaultRaceForVaried(label: string | null | undefined, key: string): number {
   const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
   const weights = GROUP_TONE_WEIGHTS[group] ?? GROUP_TONE_WEIGHTS.LB;
   return weightedTone(weights, hashUnit(key));
 }
 
-export const SkinToneService = { defaultRaceFor };
+export const SkinToneService = { defaultRaceFor, defaultRaceForVaried };

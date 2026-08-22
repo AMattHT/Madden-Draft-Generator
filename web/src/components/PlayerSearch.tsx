@@ -13,8 +13,10 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Debounced search.
   useEffect(() => {
@@ -35,6 +37,9 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
     return () => clearTimeout(t);
   }, [query]);
 
+  // Reset the keyboard highlight whenever the result set changes.
+  useEffect(() => setActiveIdx(0), [results]);
+
   // Close on outside click / Escape; focus input on open.
   useEffect(() => {
     if (!open) return;
@@ -51,6 +56,18 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
     };
   }, [open]);
 
+  // Ctrl/Cmd+K opens the search from anywhere in the app.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   const choose = (p: PlayerSearchResult) => {
     onSelect(p.draftYear, norm(`${p.firstName}${p.lastName}`));
     setOpen(false);
@@ -64,7 +81,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
         aria-haspopup="listbox"
         aria-expanded={open}
         className="flex items-center gap-2 rounded-lg border border-border-strong bg-surface-2 py-1.5 pl-2.5 pr-3 text-neutral-400 transition-colors hover:bg-surface-3 hover:text-neutral-200"
-        title="Find a player across all draft classes"
+        title="Find a player across all draft classes (Ctrl+K)"
       >
         <Icon path={ICONS.search} className="h-4 w-4" />
         <span className="hidden text-xs md:inline">Find player</span>
@@ -81,7 +98,22 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (!results.length) return;
+                  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const next = (activeIdx + (e.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
+                    setActiveIdx(next);
+                    listRef.current?.children[next]?.scrollIntoView({ block: 'nearest' });
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    choose(results[activeIdx]);
+                  }
+                }}
                 placeholder="Search any player by name…"
+                role="combobox"
+                aria-expanded={results.length > 0}
+                aria-activedescendant={results.length ? `ps-${activeIdx}` : undefined}
                 className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
               />
               {query && (
@@ -96,21 +128,27 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
             </div>
           </div>
 
-          <div className="max-h-[60vh] overflow-auto py-1">
-            {loading && <div className="px-4 py-6 text-center text-xs text-neutral-600">Searching…</div>}
+          <div ref={listRef} className="max-h-[60vh] overflow-auto py-1">
+            {loading && <div className="px-4 py-6 text-center text-xs text-neutral-500">Searching…</div>}
             {!loading && query.trim() && results.length === 0 && (
-              <div className="px-4 py-6 text-center text-xs text-neutral-600">No player matches “{query}”.</div>
+              <div className="px-4 py-6 text-center text-xs text-neutral-500">No player matches “{query}”.</div>
             )}
             {!loading && !query.trim() && (
-              <div className="px-4 py-6 text-center text-xs text-neutral-600">
+              <div className="px-4 py-6 text-center text-xs text-neutral-500">
                 Type a name to find their draft class.
               </div>
             )}
             {results.map((p, i) => (
               <button
                 key={`${p.firstName}${p.lastName}${p.draftYear}${p.draftPick}${i}`}
+                id={`ps-${i}`}
+                role="option"
+                aria-selected={i === activeIdx}
+                onMouseEnter={() => setActiveIdx(i)}
                 onClick={() => choose(p)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-2 text-left transition-colors hover:bg-surface-2"
+                className={`flex w-full items-center justify-between gap-3 px-4 py-2 text-left transition-colors ${
+                  i === activeIdx ? 'bg-surface-2' : 'hover:bg-surface-2'
+                }`}
               >
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-neutral-100">

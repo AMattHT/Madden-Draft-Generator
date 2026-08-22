@@ -43,7 +43,7 @@ export const GenericFillerService = {
     for (let i = 0; i < need; i++) {
       const rand = seededRng(`filler|${year}|${i}`);
       const position = weightedPick(POSITION_WEIGHTS, rand());
-      const race = SkinToneService.defaultRaceFor(position, `filler|${year}|${i}|race`);
+      const race = SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`);
       const firstName = first[Math.floor(rand() * first.length)] || 'Draft';
       const lastName = last[Math.floor(rand() * last.length)] || 'Prospect';
       out.push({
@@ -67,6 +67,7 @@ export const GenericFillerService = {
         race,
         wikiImageUrl: null,
         pfrImageUrl: null,
+        headshotUrl: null,
         careerFrom: null,
         careerTo: null,
         allPro1: null,

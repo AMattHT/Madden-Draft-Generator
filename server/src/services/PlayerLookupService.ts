@@ -119,6 +119,7 @@ function load(): void {
       race: toInt(row.Race),
       wikiImageUrl: (row['Wiki_Image_URL'] || '').trim() || null,
       pfrImageUrl: (row['PFR_Image_URL'] || '').trim() || null,
+      headshotUrl: null,
       careerFrom: toInt(row.From),
       careerTo: toInt(row.To),
       allPro1: toInt(row.AP1),
@@ -191,6 +192,7 @@ function mergeInto(keep: BaselinePlayer, other: BaselinePlayer): void {
   keep.race = keep.race ?? other.race;
   keep.wikiImageUrl = keep.wikiImageUrl ?? other.wikiImageUrl;
   keep.pfrImageUrl = keep.pfrImageUrl ?? other.pfrImageUrl;
+  keep.headshotUrl = keep.headshotUrl ?? other.headshotUrl;
   keep.allPro1 = Math.max(keep.allPro1 ?? 0, other.allPro1 ?? 0) || null;
   keep.proBowls = Math.max(keep.proBowls ?? 0, other.proBowls ?? 0) || null;
   keep.seasonsStarted = Math.max(keep.seasonsStarted ?? 0, other.seasonsStarted ?? 0) || null;

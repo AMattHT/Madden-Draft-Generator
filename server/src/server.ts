@@ -10,6 +10,7 @@ import media from './routes/media';
 import portrait from './routes/portrait';
 import players from './routes/players';
 import franchise from './routes/franchise';
+import gear from './routes/gear';
 
 const app = express();
 app.use(cors());
@@ -23,6 +24,7 @@ app.use('/api', media);
 app.use('/api', portrait);
 app.use('/api', players);
 app.use('/api', franchise);
+app.use('/api', gear);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

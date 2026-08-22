@@ -39,7 +39,25 @@ function load(): void {
   }
 }
 
+export interface RosterPositionRaw {
+  position: string; // nflverse position (OLB / ILB / MLB / LB / DE / DT ...)
+  pffPosition: string; // 'ED' / 'LB' / '' (PFF era only)
+  ngsPosition: string;
+}
+
 export const RosterPositionService = {
+  /** Raw nflverse position fields for a player (by name), or null when absent. */
+  raw(first: string | null | undefined, last: string | null | undefined): RosterPositionRaw | null {
+    load();
+    const r = byName!.get(normalizeName(`${first ?? ''} ${last ?? ''}`));
+    if (!r) return null;
+    return {
+      position: (r.position || '').toUpperCase(),
+      pffPosition: (r.pff_position || '').toUpperCase(),
+      ngsPosition: (r.ngs_position || '').toUpperCase(),
+    };
+  },
+
   /** Edge-vs-off-ball-aware front-seven label for a player (by name), else null. */
   frontSeven(first: string | null | undefined, last: string | null | undefined): string | null {
     load();

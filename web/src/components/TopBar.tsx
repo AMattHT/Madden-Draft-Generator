@@ -1,7 +1,32 @@
 import type { GenMode, AppView } from '../App';
+import type { GameVersion } from '../types';
 import { YearPicker } from './YearPicker';
 import { PlayerSearch } from './PlayerSearch';
 import { Icon, ICONS } from './ui';
+
+function GameToggle({ gameVersion, onSetGameVersion }: { gameVersion: GameVersion; onSetGameVersion: (v: GameVersion) => void }) {
+  const opts: [GameVersion, string, string][] = [
+    ['m26', 'M26', 'Build classes for Madden 26 (4296-byte format)'],
+    ['m27', 'M27', 'Build classes for Madden 27 (5876-byte format + persona DNA)'],
+  ];
+  return (
+    <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium" title="Target game for generated classes">
+      {opts.map(([val, label, title]) => (
+        <button
+          key={val}
+          onClick={() => onSetGameVersion(val)}
+          aria-pressed={gameVersion === val}
+          title={title}
+          className={`rounded-md px-3 py-1.5 transition-colors ${
+            gameVersion === val ? 'bg-gold text-black shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
   const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
@@ -95,6 +120,8 @@ export function TopBar({
   canDraw,
   mode,
   onSetMode,
+  gameVersion,
+  onSetGameVersion,
   showLeague,
   league,
   onSetLeague,
@@ -104,6 +131,7 @@ export function TopBar({
   onSelectYear,
   onSelectPlayer,
   cachedYears,
+  recentYears = [],
 }: {
   view: AppView;
   onSetView: (v: AppView) => void;
@@ -112,6 +140,8 @@ export function TopBar({
   canDraw: boolean;
   mode: GenMode;
   onSetMode: (m: GenMode) => void;
+  gameVersion: GameVersion;
+  onSetGameVersion: (v: GameVersion) => void;
   showLeague: boolean;
   league: string;
   onSetLeague: (l: string) => void;
@@ -121,15 +151,16 @@ export function TopBar({
   onSelectYear: (y: number) => void;
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
+  recentYears?: number[];
 }) {
   const draft = view === 'draft';
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface-1/80 px-4 backdrop-blur-sm">
+    <header className="relative z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface-1/80 px-4 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <button onClick={onGoHome} title="Home" className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-80">
           <LogoMark />
           <div className="hidden leading-tight text-left sm:block">
-            <div className="text-[13px] font-bold tracking-tight text-neutral-100">Madden 26 Toolkit</div>
+            <div className="text-[13px] font-bold tracking-tight text-neutral-100">Madden Draft Toolkit</div>
             <div className="text-[11px] text-muted">Draft classes · Franchise tools</div>
           </div>
         </button>
@@ -137,7 +168,7 @@ export function TopBar({
         <ViewToggle view={view} onSetView={onSetView} />
         {draft && (
           <>
-            <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} />
+            <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} recent={recentYears} />
             <button
               onClick={onDrawRandom}
               disabled={!canDraw}
@@ -156,15 +187,16 @@ export function TopBar({
           {connected ? 'Backend connected' : 'Backend offline'}
         </div>
         <div className="hidden h-6 w-px bg-border sm:block" />
+        {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} />}
         {draft && showLeague && (
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-600 md:inline">League</span>
+            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-500 md:inline">League</span>
             <LeagueToggle league={league} onSetLeague={onSetLeague} />
           </div>
         )}
         {draft && (
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-600 md:inline">Rating lens</span>
+            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-500 md:inline">Rating lens</span>
             <ModeToggle mode={mode} onSetMode={onSetMode} />
           </div>
         )}

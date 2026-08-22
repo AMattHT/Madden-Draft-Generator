@@ -1,7 +1,16 @@
 import { Router } from 'express';
+import { LogoService } from '../services/LogoService';
 
 // Only proxy images from these hosts (player photos from the lookup).
-const ALLOWED = ['upload.wikimedia.org', 'commons.wikimedia.org', 'pro-football-reference.com', 'sports-reference.com'];
+const ALLOWED = [
+  'upload.wikimedia.org',
+  'commons.wikimedia.org',
+  'pro-football-reference.com',
+  'sports-reference.com',
+  'static.www.nfl.com',
+  'static.nfl.com',
+  'nfl.com',
+];
 
 const r = Router();
 
@@ -29,6 +38,31 @@ r.get('/image', async (req, res) => {
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'image/jpeg');
     res.setHeader('Cache-Control', 'public, max-age=86400');
     return res.send(Buffer.from(await upstream.arrayBuffer()));
+  } catch (e) {
+    return res.status(502).json({ error: (e as Error).message });
+  }
+});
+
+/** Transparent team-logo PNG (white page backdrop knocked out). */
+r.get('/logo', async (req, res) => {
+  const file = String(req.query.file || '');
+  if (file) {
+    try {
+      const buf = LogoService.local(file);
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+      return res.send(buf);
+    } catch (e) {
+      return res.status(404).json({ error: (e as Error).message });
+    }
+  }
+  const url = String(req.query.url || '');
+  if (!url || !LogoService.allowed(url)) return res.status(400).json({ error: 'bad url' });
+  try {
+    const buf = await LogoService.png(url);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    return res.send(buf);
   } catch (e) {
     return res.status(502).json({ error: (e as Error).message });
   }

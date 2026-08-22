@@ -25,6 +25,11 @@ export interface BaselinePlayer {
   race: number | null; // 1=White, 5=Hispanic, 7=Black (drives generic-face skin tone)
   wikiImageUrl: string | null; // real photo (Wikipedia) for custom portraits
   pfrImageUrl: string | null; // real photo (Pro-Football-Reference headshot)
+  headshotUrl: string | null; // official NFL.com mugshot (nflverse)
+
+  // Set when a real on-field photo was found and inspected. Missing/unusable
+  // photos leave this null and EraGearService falls back to era defaults.
+  observedGear?: ObservedGear | null;
 
   // Career value metrics
   careerFrom: number | null;
@@ -37,7 +42,32 @@ export interface BaselinePlayer {
 
   combine?: CombineMeasurements | null; // NFL Combine testing (nflverse, 2000+)
 
+  /** Front-seven verdict for LB-labeled players (edge vs SAM/MIKE/WILL) and why. */
+  frontSeven?: FrontSevenInfo | null;
+
   source: string; // origin of this record (local, pfr, nflverse, wikipedia, ...)
+}
+
+/** How a linebacker-labeled player was placed in Madden's front seven. */
+export interface FrontSevenInfo {
+  role: 'EDGE' | 'MIKE' | 'SAM' | 'WILL' | null;
+  reason: string; // 'sacks' | '3-4 olb' | '3-4 ilb' | 'coverage' | 'pff' | ... | 'none'
+  lock: boolean; // pinned role (the class-level build split must not move it)
+  scheme: '3-4' | '4-3' | null; // drafting team's base front over the early career
+  team: string | null; // team code the scheme came from
+  sackRate: number | null; // career sacks per starting season (when known)
+}
+
+/** What we could actually see on a real photo of this player. */
+export interface ObservedGear {
+  photoUrl: string;
+  onField: boolean; // helmet / uniform visible (not a studio mugshot or suit)
+  gloves: boolean | null;
+  gloveColor: 'white' | 'black' | 'team' | null;
+  visor: 'none' | 'clear' | 'dark' | null;
+  wristband: boolean | null;
+  socks: 'high' | 'mid' | 'low' | null;
+  eyeBlack: boolean | null;
 }
 
 /** NFL Combine testing numbers used for authentic height/weight + athletic ratings. */

@@ -5,9 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    port: Number(process.env.PORT) || 5173,
+    // Never inherit process.env.PORT — the API uses 5174. If Vite can't get
+    // 5173 it used to silently steal 5174, proxy /api to itself, and balloon RAM.
+    port: 5173,
+    strictPort: true,
+    host: '127.0.0.1',
     proxy: {
-      '/api': 'http://localhost:5174',
+      '/api': 'http://127.0.0.1:5174',
     },
   },
 });

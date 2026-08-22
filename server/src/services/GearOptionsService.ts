@@ -14,14 +14,17 @@ import { GearImageService } from './GearImageService';
  * PlayerOnField loadout). Facemask is intentionally omitted: M26 has no FaceMask
  * loadout slot (the facemask is baked into the helmet asset), so it can't be set
  * as a loadout element.
+ *
+ * Extended for M26/M27: passes gameVersion to filter options for M27's verified
+ * asset vocabulary; attaches helmetCompatibility for UI filtering in GearEditor.
  */
 
 export interface GearOption {
-  value: string; // M26 asset name (loadout itemAssetName)
+  value: string; // asset name (loadout itemAssetName)
   label: string;
   image?: string; // thumbnail URL, if a sprite exists
   year?: number; // release year (fallback catalog only)
-  compatibility?: string; // facemask helmet-family ('universal' | 'f7' | …) for UI filtering
+  compatibility?: string; // facemask helmet-family ('universal' | 'f7' | 'speedflex' | …)
 }
 
 // slot -> display label, gear-atlas category, M26 slotType(s), and optional
@@ -39,7 +42,7 @@ interface SlotDef {
 const SLOTS: SlotDef[] = [
   { slot: 'helmet', label: 'Helmet', category: 'helmets', slotTypes: ['HeadWear'] },
   // Facemask is a SLOTLESS loadout element (itemAssetName GearFaceMask_*, no slotType —
-  // verified in the M26 template); applyGearEdits/M26Writer handle it by prefix.
+  // verified in the M26 template); applyGearEdits/M26Writer (and M27) handle it by prefix.
   { slot: 'facemask', label: 'Facemask', category: 'facemasks', slotTypes: [] },
   { slot: 'visor', label: 'Visor', category: 'visors', slotTypes: ['Visor'], none: { value: 'GearVisor_None', label: 'No visor' } },
   { slot: 'gloveLeft', label: 'Left glove', category: 'gloves', slotTypes: ['LeftHandWear'], none: { value: 'GearHand_None', label: 'No glove' } },
@@ -220,29 +223,65 @@ function merge(catalog: GearOption[], assets: string[]): GearOption[] {
   return [...extra.sort((a, b) => a.label.localeCompare(b.label)), ...catalog];
 }
 function withImages(opts: GearOption[]): GearOption[] {
-  return opts.map((o) => (GearImageService.has(o.value) ? { ...o, image: `/api/gear-image/${o.value}` } : o));
+  return opts.map((o) => {
+    if (o.image) return o;
+    return GearImageService.has(o.value) ? { ...o, image: `/api/gear-image/${o.value}` } : o;
+  });
+}
+
+let m27ValidCache: Set<string> | null | undefined;
+function loadM27Valid(): Set<string> | null {
+  if (m27ValidCache !== undefined) return m27ValidCache;
+  try {
+    const pth = path.join(DATA_ROOT, "..", "..", "m27-game-gear-assets.json");
+    const raw = JSON.parse(fs.readFileSync(pth, "utf8")) as string[];
+    m27ValidCache = new Set(raw);
+  } catch {
+    m27ValidCache = null;
+  }
+  return m27ValidCache;
 }
 
 export const GearOptionsService = {
-  optionsForYear(year: number): Record<string, GearOption[]> {
+  optionsForYear(year: number, gameVersion: "m26" | "m27" = "m26"): Record<string, GearOption[]> {
+    const isM27 = gameVersion === "m27";
+    const m27Valid = isM27 ? loadM27Valid() : null;
+
     // Preferred: full visual catalog from the Editor Suite gear atlas.
     if (GearImageService.available) {
       const cats = GearImageService.categories();
+      const helmetCompat = GearImageService.helmetCompatibility();
+
       const out: Record<string, GearOption[]> = {};
       for (const s of SLOTS) {
         let items: GearOption[] = s.synthetic
           ? s.synthetic.map((o) => ({ ...o }))
-          : (cats[s.category ?? ''] ?? []).map((it) => ({ value: it.value, label: it.label, image: it.image, compatibility: it.compatibility }));
+          : (cats[s.category ?? ""] ?? []).map((it) => {
+              const opt: GearOption = { value: it.value, label: it.label, image: it.image, compatibility: it.compatibility };
+              if (s.slot === "helmet" && helmetCompat[it.value]) {
+                opt.compatibility = helmetCompat[it.value];
+              }
+              return opt;
+            });
         if (s.extra) {
           const seen = new Set(items.map((i) => i.value));
           items = [...s.extra.filter((e) => !seen.has(e.value)), ...items];
         }
         items = withImages(items).sort((a, b) => a.label.localeCompare(b.label));
-        out[s.slot] = s.none ? [{ ...s.none }, ...items] : items;
+        if (s.none) items = [{ ...s.none }, ...items];
+        if (isM27 && m27Valid) {
+          items = items.filter((o) =>
+            !o.value ||
+            m27Valid.has(o.value) ||
+            /_None$|None$|^none$/i.test(o.value) ||
+            /none|auto|era default/i.test(o.label || "")
+          );
+        }
+        out[s.slot] = items;
       }
       return out;
     }
-    // Fallback: era-filtered equipment-years catalog when the Suite data is absent.
+// Fallback: era-filtered equipment-years catalog when the Suite data is absent.
     const d = loadEq();
     const gloves = withImages(merge([...GLOVE_BASICS, ...fromBrands(d.gloves, year)], eraAssets(d, year, ['gloves', 'linemanGloves'])));
     const cleats = withImages(merge(fromBrands(d.shoes, year), eraAssets(d, year, ['shoes'])));

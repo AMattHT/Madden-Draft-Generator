@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type FranchisePlayer, type PlayerFieldEdit } from '../api';
 import type { GearOption } from '../types';
-import { ATTR_GROUPS, humanize, tierColor } from '../constants';
+import { ATTR_GROUPS, humanize, tierColor, POS_NAMES } from '../constants';
 import { GearEditor } from './GearEditor';
 import { Icon, ICONS } from './ui';
 
@@ -150,7 +150,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
       )}
 
       {players.length === 0 ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center text-neutral-600">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center text-neutral-500">
           <div className="text-sm">{save ? 'Load the roster to edit any player’s ratings, position, age, and dev trait.' : 'Pick a save above first.'}</div>
           <div className="text-xs text-neutral-700">Edits write a new <code className="rounded bg-black/30 px-1">CAREER-…-ROSTER</code> file; your original is untouched.</div>
         </div>
@@ -192,7 +192,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
           {/* editor */}
           <div className="min-h-0 overflow-auto rounded-lg border border-border bg-surface-1">
             {!sel ? (
-              <div className="flex h-full items-center justify-center p-4 text-sm text-neutral-600">Select a player to edit</div>
+              <div className="flex h-full items-center justify-center p-4 text-sm text-neutral-500">Select a player to edit</div>
             ) : (
               <>
                 <div className="sticky top-0 z-10 border-b border-border bg-surface-1 px-4 py-3">
@@ -278,6 +278,8 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
           gearPatch={gearPatch}
           onGearEdit={editGear}
           onClose={() => setGearOpen(false)}
+          year={2025}
+          positionId={Math.max(0, POS_NAMES.indexOf(String(sel.position || '')))}
         />
       )}
     </div>

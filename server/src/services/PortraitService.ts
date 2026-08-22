@@ -117,6 +117,13 @@ export const PortraitService = {
     return genericFor(race, seed);
   },
 
+  /** plpo for a known portrait PID only (no generic fallback), else null. */
+  plpoForPid(pid: number): string | null {
+    if (!load()) return null;
+    const plpo = pidToPlpo!.get(pid);
+    return plpo && plpo !== 'plpo_Blank' && byPlpo!.has(plpo) ? plpo : null;
+  },
+
   /** Crop and cache the 256x256 portrait PNG for a plpo, or null if unknown. */
   async cropByPlpo(plpo: string): Promise<Buffer | null> {
     if (!load()) return null;

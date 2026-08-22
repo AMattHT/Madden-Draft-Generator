@@ -25,13 +25,15 @@ function load(): Record<string, number> {
   } catch {
     /* table absent — fall through to the committed JSON */
   }
-  // Fall back to / union with the committed JSON (portable across clones).
-  if (Object.keys(map).length === 0) {
-    try {
-      map = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'wiki_skintone.json'), 'utf8'));
-    } catch {
-      /* no data yet */
+  // Union with the committed JSON so newly classified keys (and fresh clones
+  // with no SQLite table) are visible. SQLite wins on conflict.
+  try {
+    const json = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'wiki_skintone.json'), 'utf8')) as Record<string, number>;
+    for (const [k, v] of Object.entries(json)) {
+      if (map[k] == null && typeof v === 'number') map[k] = v;
     }
+  } catch {
+    /* no json yet */
   }
   return map!;
 }

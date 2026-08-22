@@ -46,6 +46,7 @@ r.get('/draft/:year/generated', async (req, res) => {
   const isMergeEra = year >= 1960 && year <= 1969;
   const league = (req.query.league as string) || (isMergeEra ? 'combined' : 'NFL');
   const mode: 'madden' | 'retro' = req.query.mode === 'retro' ? 'retro' : 'madden';
+  const gameVersion: 'm26' | 'm27' = req.query.gameVersion === 'm27' ? 'm27' : 'm26';
   const fill = req.query.fill !== '0'; // pad to a full class by default
 
   // Baseline players with DB positions corrected + per-pick team map (shared with
@@ -53,9 +54,9 @@ r.get('/draft/:year/generated', async (req, res) => {
   const { players, enrich, generatedCount } = await enrichedClass(year, league, { fill });
   if (!players.length) return res.status(404).json({ error: `no players for ${year}` });
 
-  const preview = DraftClassBuilder.preview(players, mode);
+  const preview = DraftClassBuilder.preview(players, mode, {}, gameVersion);
   await attachTeams(preview, year, enrich);
-  return res.json({ year, league, mode, generatedCount, ...preview });
+  return res.json({ year, league, mode, gameVersion, generatedCount, ...preview });
 });
 
 /** Custom class generation: All-Time Greats source and/or generation modifiers
@@ -64,9 +65,10 @@ r.get('/draft/:year/generated', async (req, res) => {
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
     source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;
-    strength?: number; studs?: number; generational?: boolean;
+    strength?: number; studs?: number; generational?: boolean; gameVersion?: string;
   };
   const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
+  const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
   const opts: GenOptions = {
     strength: Number(b.strength) > 0 ? Number(b.strength) : 1,
     studs: Math.max(0, Math.round(Number(b.studs) || 0)),
@@ -78,9 +80,9 @@ r.post('/draft/custom', async (req, res) => {
     const range = b.source === 'decade' && decade > 0 ? { from: decade, to: decade + 9 } : undefined;
     const { players, generatedCount } = await allTimeGreatsClass(range);
     if (!players.length) return res.status(404).json({ error: 'no players' });
-    const preview = DraftClassBuilder.preview(players, mode, opts);
+    const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
     const league = range ? `${decade}s` : 'all-time';
-    return res.json({ year: range ? decade : 0, league, mode, source: b.source, generatedCount, ...preview });
+    return res.json({ year: range ? decade : 0, league, mode, gameVersion, source: b.source, generatedCount, ...preview });
   }
 
   const year = parseInt(String(b.year), 10);
@@ -89,9 +91,9 @@ r.post('/draft/custom', async (req, res) => {
   const league = b.league || (isMergeEra ? 'combined' : 'NFL');
   const { players, enrich, generatedCount } = await enrichedClass(year, league, { fill: true });
   if (!players.length) return res.status(404).json({ error: `no players for ${year}` });
-  const preview = DraftClassBuilder.preview(players, mode, opts);
+  const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
   await attachTeams(preview, year, enrich);
-  return res.json({ year, league, mode, source: 'year', generatedCount, ...preview });
+  return res.json({ year, league, mode, gameVersion, source: 'year', generatedCount, ...preview });
 });
 
 /**

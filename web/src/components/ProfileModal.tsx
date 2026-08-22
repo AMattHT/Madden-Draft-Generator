@@ -1,10 +1,147 @@
-import { useEffect, useState } from 'react';
-import type { PlayerRow, GearOption } from '../types';
-import { api, type ArchetypeOption } from '../api';
+import { useEffect, useRef, useState } from 'react';
+import type { PlayerRow, GearOption, FrontSevenInfo } from '../types';
+import { api, displayPortrait, type ArchetypeOption, type PersonaTrait } from '../api';
 import { POS_NAMES, DEV_NAMES, ATTR_GROUPS, humanize, fmtHeight, keyAttrsForPosition, tierColor } from '../constants';
 import { RatingChip, DevBadge, Icon, ICONS } from './ui';
 import { RadarChart } from './RadarChart';
 import { GearEditor } from './GearEditor';
+import { AppearanceEditor } from './AppearanceEditor';
+import type { FaceScan } from '../types';
+
+/**
+ * M27 Persona DNA editor: the generated (or edited) trait set as removable chips
+ * plus an add picker. Writes a comma-separated id list into the player's edit
+ * patch ('personaDNA'), which the export maps into the draft binary's 5 slots.
+ */
+function PersonaEditor({
+  generated,
+  patch,
+  onEdit,
+}: {
+  generated?: string[];
+  patch: Record<string, number | string>;
+  onEdit: (field: string, value: string) => void;
+}) {
+  const [traits, setTraits] = useState<PersonaTrait[]>([]);
+  const [adding, setAdding] = useState(false);
+  const [query, setQuery] = useState('');
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    api.personaDnaTraits().then(setTraits).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!adding) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setAdding(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setAdding(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [adding]);
+
+  const idOf = new Map(traits.map((t) => [t.name, t.id]));
+  const nameOf = new Map(traits.map((t) => [t.id, t.name]));
+  const edited = typeof patch.personaDNA === 'string';
+  const ids: number[] = edited
+    ? String(patch.personaDNA).split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isFinite(n) && n > 0)
+    : (generated ?? []).map((n) => idOf.get(n)).filter((n): n is number => n != null);
+
+  const apply = (next: number[]) => onEdit('personaDNA', next.join(','));
+  const q = query.trim().toLowerCase();
+  const available = traits.filter((t) => !ids.includes(t.id) && (!q || t.name.toLowerCase().includes(q)));
+
+  return (
+    <div ref={wrapRef} className="relative mt-1.5 flex flex-wrap items-center gap-1" title="M27 Persona DNA — written into the export (5 slots max)">
+      <span className="text-[9px] font-semibold uppercase tracking-wider text-neutral-500">DNA</span>
+      {ids.map((id) => (
+        <span
+          key={id}
+          className="group inline-flex items-center gap-1 rounded-full bg-legend/15 px-2 py-0.5 text-[10px] font-medium text-legend-light ring-1 ring-legend/30"
+        >
+          {nameOf.get(id) ?? `#${id}`}
+          <button
+            onClick={() => apply(ids.filter((x) => x !== id))}
+            className="text-legend-light/50 transition-colors hover:text-white"
+            aria-label={`Remove ${nameOf.get(id)}`}
+            title="Remove trait"
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      {/* Before the trait list loads (unedited players), show names without remove. */}
+      {!edited && traits.length === 0 &&
+        (generated ?? []).map((n) => (
+          <span key={n} className="rounded-full bg-legend/15 px-2 py-0.5 text-[10px] font-medium text-legend-light ring-1 ring-legend/30">
+            {n}
+          </span>
+        ))}
+      {ids.length < 5 && (
+        <button
+          onClick={() => setAdding((v) => !v)}
+          className="rounded-full border border-dashed border-legend/40 px-2 py-0.5 text-[10px] font-medium text-legend-light transition-colors hover:bg-legend/10"
+        >
+          + Add
+        </button>
+      )}
+      {adding && (
+        <div className="absolute left-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-lg border border-border-strong bg-surface-1 shadow-xl">
+          <div className="border-b border-border p-2">
+            <input
+              autoFocus
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter traits…"
+              className="w-full rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+            />
+          </div>
+          <div className="max-h-52 overflow-auto py-1">
+            {available.slice(0, 40).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  apply([...ids, t.id]);
+                  setAdding(false);
+                  setQuery('');
+                }}
+                className="block w-full px-3 py-1.5 text-left text-xs text-neutral-200 hover:bg-surface-2"
+              >
+                {t.name}
+              </button>
+            ))}
+            {available.length === 0 && <div className="px-3 py-3 text-center text-[11px] text-neutral-500">No matching traits.</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Tooltip for the front-seven badge: how an LB-labeled player was placed (edge vs
+ *  SAM/MIKE/WILL) and which signal decided it. */
+function frontSevenTitle(f: FrontSevenInfo): string {
+  const why: Record<string, string> = {
+    sacks: 'career sack rate (>= 6 per starting season) marks an edge rusher',
+    'sacks (no scheme)': 'high sack rate with few interceptions; drafting team scheme unknown',
+    '3-4 olb': 'outside linebacker on a 3-4 team = edge rusher in Madden',
+    '3-4 ilb': 'low sack rate on a 3-4 team = inside linebacker (MIKE)',
+    '3-4 build': '3-4 team, no career stats; edge-sized build (low confidence)',
+    '4-3 blitzer': 'moderate sack rate on a 4-3 team = blitzing strongside backer (SAM)',
+    coverage: 'interception rate on a lighter frame = weakside coverage backer (WILL)',
+    pff: 'PFF position data',
+    nflverse: 'nflverse roster position',
+  };
+  const parts = [why[f.reason] ?? f.reason];
+  if (f.scheme) parts.push(`drafting team (${f.team ?? '?'}) ran a ${f.scheme}`);
+  if (f.sackRate != null) parts.push(`${f.sackRate} sacks per starting season`);
+  return parts.join(' · ');
+}
 
 export function ProfileModal({
   row,
@@ -12,35 +149,52 @@ export function ProfileModal({
   gearPatch,
   year,
   archetypeOptions,
+  gameVersion = "m26",
   onEdit,
   onGearEdit,
   onReset,
   onClose,
+  onNavigate,
+  canPrev = false,
+  canNext = false,
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
   gearPatch: Record<string, string>;
   year: number;
   archetypeOptions: Record<string, ArchetypeOption[]>;
+  gameVersion?: "m26" | "m27";
   onEdit: (field: string, value: number | string) => void;
   onGearEdit: (slot: string, asset: string) => void;
   onReset: () => void;
   onClose: () => void;
+  onNavigate?: (delta: number) => void;
+  canPrev?: boolean;
+  canNext?: boolean;
 }) {
   const [imgErr, setImgErr] = useState(false);
   const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
   const [gearOpen, setGearOpen] = useState(false);
+  const [appearOpen, setAppearOpen] = useState(false);
+  const [scans, setScans] = useState<FaceScan[]>([]);
   const [colleges, setColleges] = useState<{ id: number; name: string }[]>([]);
   const [heads, setHeads] = useState<Record<string, string[]>>({});
   const [faceTone, setFaceTone] = useState<number>(row.skinTone ?? 4);
+  // Section jump-nav: the profile is a long scroll; these refs anchor each block.
+  const scoutingRef = useRef<HTMLDivElement>(null);
+  const ratingsRef = useRef<HTMLDivElement>(null);
+  const bioRef = useRef<HTMLDivElement>(null);
+  const appearRef = useRef<HTMLDivElement>(null);
+  const equipRef = useRef<HTMLDivElement>(null);
+  const attrsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let alive = true;
-    api.equipmentOptions(year).then((o) => alive && setGearOpts(o)).catch(() => {});
+    api.equipmentOptions(year, gameVersion).then((o) => alive && setGearOpts(o)).catch(() => {});
     return () => {
       alive = false;
     };
-  }, [year]);
+  }, [year, gameVersion]);
 
   useEffect(() => {
     let alive = true;
@@ -53,15 +207,28 @@ export function ProfileModal({
   useEffect(() => {
     api.genericHeads().then(setHeads).catch(() => {});
   }, []);
+  useEffect(() => {
+    let alive = true;
+    api.faceScans(gameVersion).then((s) => alive && setScans(s)).catch(() => {});
+    return () => { alive = false; };
+  }, [gameVersion]);
   useEffect(() => setFaceTone(row.skinTone ?? 4), [row.id, row.skinTone]);
+  useEffect(() => setImgErr(false), [row.id]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') { onClose(); return; }
+      // ←/→ step through the board's players — but never while typing in a
+      // field or while the equipment builder has focus.
+      if (gearOpen || appearOpen || !onNavigate) return;
+      const t = e.target as HTMLElement;
+      if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return;
+      if (e.key === 'ArrowLeft' && canPrev) { e.preventDefault(); onNavigate(-1); }
+      else if (e.key === 'ArrowRight' && canNext) { e.preventDefault(); onNavigate(1); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, onNavigate, canPrev, canNext, gearOpen, appearOpen]);
 
   const eff = (field: string): number =>
     Number(field in patch ? patch[field] : field === 'overall' ? row.overall : (row.ratings[field] ?? 0));
@@ -78,6 +245,15 @@ export function ProfileModal({
   const archetype = Number(patch.archetype ?? row.archetype);
   const posName = POS_NAMES[posId] ?? row.position;
   const edited = Object.keys(patch).length > 0;
+
+  // Reset is destructive (clears rating + bio edits) — two-step inline confirm.
+  const [confirmReset, setConfirmReset] = useState(false);
+  useEffect(() => setConfirmReset(false), [row.id]);
+  useEffect(() => {
+    if (!confirmReset) return;
+    const t = setTimeout(() => setConfirmReset(false), 4000);
+    return () => clearTimeout(t);
+  }, [confirmReset]);
 
   // Archetypes valid for the current position (+ the current one if it isn't listed).
   let archOpts = archetypeOptions[posName] ?? [];
@@ -118,11 +294,12 @@ export function ProfileModal({
         className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-border-strong bg-surface-1 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 flex items-start gap-4 border-b border-border bg-surface-1/95 px-5 py-4 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 border-b border-border bg-surface-1/95 backdrop-blur-sm">
+          <div className="flex items-start gap-4 px-5 pt-4">
           <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2 ring-1 ring-black/20">
-            {row.portrait && !imgErr ? (
+            {displayPortrait(row) && !imgErr ? (
               <img
-                src={row.portrait}
+                src={displayPortrait(row)!}
                 alt=""
                 className="h-full w-full object-cover"
                 onError={() => setImgErr(true)}
@@ -142,12 +319,45 @@ export function ProfileModal({
               <RatingChip ovr={overall} size="sm" />
               <DevBadge dev={dev} />
               {archName && <span className="text-xs text-neutral-500">{archName}</span>}
+              {row.frontSeven && row.frontSeven.role && (
+                <span
+                  title={frontSevenTitle(row.frontSeven)}
+                  className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-neutral-400"
+                >
+                  {row.frontSeven.role === 'EDGE' ? 'edge' : 'off-ball'} · {row.frontSeven.reason}
+                </span>
+              )}
             </div>
             <div className="mt-1.5 text-xs text-neutral-500">
               {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
               {row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
+            {row.persona && (
+              <PersonaEditor generated={row.persona} patch={patch} onEdit={onEdit} />
+            )}
           </div>
+          {onNavigate && (
+            <div className="flex shrink-0 items-center gap-0.5 self-center">
+              <button
+                onClick={() => onNavigate(-1)}
+                disabled={!canPrev}
+                title="Previous player on the board (←)"
+                aria-label="Previous player"
+                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
+              >
+                <Icon path={ICONS.chevronDown} className="h-4 w-4 rotate-90" />
+              </button>
+              <button
+                onClick={() => onNavigate(1)}
+                disabled={!canNext}
+                title="Next player on the board (→)"
+                aria-label="Next player"
+                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
+              >
+                <Icon path={ICONS.chevronDown} className="h-4 w-4 -rotate-90" />
+              </button>
+            </div>
+          )}
           <button
             onClick={onClose}
             className="shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:bg-surface-2 hover:text-neutral-200"
@@ -155,9 +365,31 @@ export function ProfileModal({
           >
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
+          </div>
+          {/* Section jump-nav — the profile is a long scroll. */}
+          <div className="flex items-center gap-1 overflow-x-auto px-5 pb-2 pt-1">
+            {(
+              [
+                ['Scouting', scoutingRef],
+                ['Ratings', ratingsRef],
+                ['Bio', bioRef],
+                ['Appearance', appearRef],
+                ['Equipment', equipRef],
+                ['Attributes', attrsRef],
+              ] as const
+            ).map(([label, ref]) => (
+              <button
+                key={label}
+                onClick={() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="border-b border-border px-5 py-4">
+        <div ref={scoutingRef} className="scroll-mt-36 border-b border-border px-5 py-4">
           <RadarChart
             data={keyAttrsForPosition(posId).map(([k, label]) => ({ label, value: eff(k) }))}
             color={tierColor(overall)}
@@ -181,7 +413,7 @@ export function ProfileModal({
             return (
               <div className="border-b border-border px-5 py-3">
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
-                  NFL Combine <span className="text-neutral-600">· drives speed / strength / jump / agility</span>
+                  NFL Combine <span className="text-neutral-500">· drives speed / strength / jump / agility</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                   {metrics.map(([label, val, unit]) => (
@@ -197,7 +429,7 @@ export function ProfileModal({
             );
           })()}
 
-        <div className="space-y-3 border-b border-border px-5 py-4">
+        <div ref={ratingsRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
           <div className="grid grid-cols-3 gap-3">
             <label className="text-xs text-neutral-400">
               Overall
@@ -259,7 +491,7 @@ export function ProfileModal({
           </label>
         </div>
 
-        <div className="space-y-3 border-b border-border px-5 py-4">
+        <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Bio</div>
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
@@ -284,7 +516,7 @@ export function ProfileModal({
             </label>
           </div>
           <label className="block text-xs text-neutral-400">
-            College <span className="text-neutral-600">(only Madden‑recognized schools)</span>
+            College <span className="text-neutral-500">(only Madden‑recognized schools)</span>
             <select
               value={currentCollegeId}
               onChange={(e) => onEdit('college', parseInt(e.target.value, 10))}
@@ -332,42 +564,46 @@ export function ProfileModal({
               />
             </label>
           </div>
-          <label className="block text-xs text-neutral-400">
-            Body type <span className="text-neutral-600">(Madden 26 build)</span>
-            <select
-              value={effStr('bodyType', row.bodyType || 'Standard')}
-              onChange={(e) => onEdit('bodyType', e.target.value)}
-              className={`${field} mt-1 block w-full`}
-            >
-              {['Standard', 'Thin', 'Muscular', 'Heavy'].map((b) => (
-                <option key={b} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="block text-xs text-neutral-400">
-            Face <span className="text-neutral-600">(generic head — no preview available)</span>
-            <div className="mt-1 flex items-center gap-1.5">
-              <select value={faceTone} onChange={(e) => setFaceTone(Number(e.target.value))} className={field} title="Skin tone">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((t) => (
-                  <option key={t} value={t}>Tone {t}</option>
-                ))}
-              </select>
-              <button type="button" onClick={() => pickFace(faceIdx < 0 ? 0 : faceIdx - 1)} disabled={!facePool.length} className={faceBtn} title="Previous head">‹</button>
-              <span className="flex-1 text-center text-sm tabular-nums text-neutral-200">
-                {faceIdx >= 0 ? `Head ${faceIdx + 1} / ${facePool.length}` : row.face === 'asset' ? 'Real face' : `— / ${facePool.length}`}
-              </span>
-              <button type="button" onClick={() => pickFace(faceIdx < 0 ? 0 : faceIdx + 1)} disabled={!facePool.length} className={faceBtn} title="Next head">›</button>
-              <button type="button" onClick={() => pickFace(Math.floor(Math.random() * facePool.length))} disabled={!facePool.length} className={faceBtn} title="Random head">
-                <Icon path={ICONS.shuffle} className="h-3.5 w-3.5" />
-              </button>
+        </div>
+
+          <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+              Appearance <span className="font-medium normal-case tracking-normal text-neutral-500">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
-            {curFace && <span className="mt-0.5 block truncate text-[10px] text-neutral-600">{curFace}</span>}
+            <button
+              onClick={() => setAppearOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3"
+            >
+              <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit appearance
+            </button>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-surface-2">
+              {curFace && /^gen_/i.test(curFace) ? (
+                <img key={curFace} src={`/api/portrait/generic-head/${encodeURIComponent(curFace)}`} alt="" className="h-full w-full object-cover" />
+              ) : displayPortrait(row) && !imgErr ? (
+                <img src={displayPortrait(row)!} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <Icon path={ICONS.image} className="h-6 w-6 text-neutral-600" />
+              )}
+            </span>
+            <div className="min-w-0 text-[11px] leading-relaxed text-neutral-400">
+              <div className="truncate text-neutral-200">
+                {typeof patch.faceAsset === 'string' && patch.faceAsset
+                  ? `Scan ${patch.faceAsset}`
+                  : curFace
+                    ? curFace
+                    : row.face === 'asset'
+                      ? 'Real face asset'
+                      : 'Generated generic'}
+              </div>
+              <div>Tone {faceTone} · {effStr('bodyType', row.bodyType || 'Standard')}</div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2.5 border-b border-border px-5 py-4">
+        <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Equipment</div>
             <button
@@ -393,11 +629,11 @@ export function ProfileModal({
               })}
             </div>
           ) : (
-            <p className="text-[11px] text-neutral-600">Auto — era-appropriate gear ({year}). Click “Edit equipment” to customize.</p>
+            <p className="text-[11px] text-neutral-500">Auto — era-appropriate gear ({year}). Click “Edit equipment” to customize.</p>
           )}
         </div>
 
-        <div className="space-y-5 px-5 py-4">
+        <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
             <div key={g.title}>
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">{g.title}</div>
@@ -416,15 +652,44 @@ export function ProfileModal({
         <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
           <span className="text-[11px] text-neutral-500">Edits save automatically &amp; apply to the .mdc export.</span>
           <button
-            onClick={onReset}
+            onClick={() => {
+              if (confirmReset) {
+                onReset();
+                setConfirmReset(false);
+              } else {
+                setConfirmReset(true);
+              }
+            }}
             disabled={!edited}
-            className="rounded-md border border-border-strong px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-surface-2 disabled:opacity-40"
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${
+              confirmReset
+                ? 'border-danger/60 bg-danger/15 text-red-200 hover:bg-danger/25'
+                : 'border-border-strong text-neutral-300 hover:bg-surface-2'
+            }`}
           >
-            Reset player
+            {confirmReset ? 'Confirm reset?' : 'Reset player'}
           </button>
         </div>
       </div>
     </div>
+    {appearOpen && (
+      <AppearanceEditor
+        playerName={`${row.firstName} ${row.lastName}`}
+        gameVersion={gameVersion}
+        heads={heads}
+        scans={scans}
+        currentHead={curFace}
+        currentAsset={typeof patch.faceAsset === 'string' ? patch.faceAsset : (row.face === 'asset' && row.genericHead == null ? '' : '')}
+        currentTone={faceTone}
+        currentBody={effStr('bodyType', row.bodyType || 'Standard')}
+        generatedHead={row.genericHead ?? ''}
+        generatedTone={row.skinTone ?? 4}
+        generatedBody={row.bodyType || 'Standard'}
+        isRealFace={row.face === 'asset'}
+        onEdit={onEdit}
+        onClose={() => setAppearOpen(false)}
+      />
+    )}
     {gearOpen && (
       <GearEditor
         playerName={`${row.firstName} ${row.lastName}`}
@@ -432,6 +697,9 @@ export function ProfileModal({
         gearPatch={gearPatch}
         onGearEdit={onGearEdit}
         onClose={() => setGearOpen(false)}
+        gameVersion={gameVersion}
+        year={year}
+        positionId={row.positionId}
       />
     )}
     </>

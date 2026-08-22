@@ -56,11 +56,18 @@ export function Toolbar({
         ))}
       </select>
 
-      <select value={sort} onChange={(e) => setSort(e.target.value)} className={select}>
+      <select value={sort.replace(/^-/, '')} onChange={(e) => {
+        const id = e.target.value;
+        setSort(id === 'ovr' || id === 'wav' || id === 'dev' ? `-${id}` : id);
+      }} className={select}>
         <option value="pick">Sort: Draft order</option>
-        <option value="ovr">Sort: OVR (high → low)</option>
-        <option value="wav">Sort: wAV (high → low)</option>
-        <option value="name">Sort: Name (A → Z)</option>
+        <option value="team">Sort: Team</option>
+        <option value="name">Sort: Name</option>
+        <option value="pos">Sort: Position</option>
+        <option value="ovr">Sort: OVR</option>
+        <option value="dev">Sort: Dev</option>
+        <option value="wav">Sort: wAV</option>
+        <option value="face">Sort: Face</option>
       </select>
 
       <span className="ml-auto text-xs tabular-nums text-neutral-500">

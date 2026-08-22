@@ -94,7 +94,7 @@ function writeM26DraftClass(originalBuffer, prospects, header) {
   const debugPath = path.join(os.tmpdir(), 'M26Writer_debug.txt');
   const tracePath = path.join(os.tmpdir(), 'M26Writer_trace.txt');
   const debugMsg = `M26Writer called at ${new Date().toISOString()}\nProspects: ${prospects.length}\n`;
-  try { fs.writeFileSync(debugPath, debugMsg, { flag: 'a' }); } catch(e) {}
+  try { if (process.env.M26_DEBUG) fs.writeFileSync(debugPath, debugMsg, { flag: 'a' }); } catch(e) {}
 
   // TRACE: Log what we received for first 5 prospects
   const traceLines = [];
@@ -635,7 +635,7 @@ prospect.visuals exists: ${!!prospect.visuals}
 prospect.visuals.genericHeadName: ${prospect.visuals?.genericHeadName}
 existing visuals.genericHeadName: ${visuals.genericHeadName}
 `;
-  fs.appendFileSync(logFile, logMsg);
+  if (process.env.M26_DEBUG) fs.appendFileSync(logFile, logMsg);
 
   console.log(`[M26Writer] PEPS check - prospect.PEPS: ${prospect.PEPS}`);
   console.log(`[M26Writer] PEPS check - prospect.visuals exists: ${!!prospect.visuals}`);

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { CACHE_DIR } from '../config/paths';
 import { normalizeName } from '../util/csv';
-import { TeamInfo, espnLogo } from './TeamService';
+import { TeamInfo, espnLogo, logoForHistoricalName, wikiTeamIdentity } from './TeamService';
 
 /**
  * Drafting teams for pre-1980 NFL drafts, which nflverse doesn't cover. Sourced
@@ -52,6 +52,7 @@ const CHIP: Record<string, string> = {
   'Pittsburgh Pirates': 'PIT',
   'New York Bulldogs': 'NYB',
   'Brooklyn Dodgers': 'BKN',
+  'Brooklyn Tigers': 'BKN',
   'Boston Patriots': 'BOS',
 };
 
@@ -62,9 +63,16 @@ function deriveAbbr(name: string): string {
 }
 
 const logoInfo = (name: string): TeamInfo => ({ abbr: LOGO[name].toUpperCase(), name, logo: espnLogo(LOGO[name]) });
-const chipInfo = (name: string): TeamInfo => ({ abbr: CHIP[name] ?? deriveAbbr(name), name, logo: null });
+const chipInfo = (name: string, year?: number): TeamInfo => {
+  const id = wikiTeamIdentity(name);
+  return {
+    abbr: id?.abbr ?? CHIP[name] ?? deriveAbbr(name),
+    name,
+    logo: logoForHistoricalName(name, year),
+  };
+};
 
-function resolveWikiTeam(fullName: string): TeamInfo {
+function resolveWikiTeam(fullName: string, year?: number): TeamInfo {
   // Strip wikilinks, then trade notes / league suffix (e.g. "… NFL (from New Orleans)").
   const name = fullName
     .replace(/\[\[|\]\]/g, '')
@@ -72,11 +80,11 @@ function resolveWikiTeam(fullName: string): TeamInfo {
     .replace(/\s+(NFL|AFL)\b.*$/i, '')
     .trim();
   if (name in LOGO) return logoInfo(name);
-  if (name in CHIP) return chipInfo(name);
+  if (name in CHIP || wikiTeamIdentity(name)) return chipInfo(name, year);
   // Substring fallback: a known team name embedded in a messier cell.
   for (const n in LOGO) if (name.includes(n)) return logoInfo(n);
-  for (const n in CHIP) if (name.includes(n)) return chipInfo(n);
-  return chipInfo(name);
+  for (const n of Object.keys(CHIP)) if (name.includes(n)) return chipInfo(n, year);
+  return chipInfo(name, year);
 }
 
 const cacheFile = (year: number) => path.join(CACHE_DIR, `wiki_nfl_draft_${year}.html`);
@@ -117,7 +125,7 @@ function cellText(html: string): string {
 const memo = new Map<number, Map<string, TeamInfo>>();
 
 /** Parse one wikitable's rows into name -> team, using header-located columns. */
-function parseTable(tableHtml: string, out: Map<string, TeamInfo>): void {
+function parseTable(tableHtml: string, out: Map<string, TeamInfo>, year: number): void {
   const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
   let teamIdx = -1;
   let playerIdx = -1;
@@ -138,7 +146,7 @@ function parseTable(tableHtml: string, out: Map<string, TeamInfo>): void {
     const player = cells[playerIdx];
     if (!team || !player) continue;
     const key = normalizeName(player);
-    if (key) out.set(key, resolveWikiTeam(team));
+    if (key) out.set(key, resolveWikiTeam(team, year));
   }
 }
 
@@ -152,7 +160,7 @@ export const WikipediaTeamService = {
     try {
       const html = await fetchHtml(year);
       const tables = html.match(/<table[^>]*wikitable[\s\S]*?<\/table>/g) ?? [];
-      for (const table of tables) parseTable(table, out);
+      for (const table of tables) parseTable(table, out, year);
     } catch {
       return out;
     }

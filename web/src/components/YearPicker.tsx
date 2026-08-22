@@ -10,11 +10,13 @@ export function YearPicker({
   selected,
   onSelect,
   cached,
+  recent = [],
 }: {
   years: number[];
   selected: number | null;
   onSelect: (y: number) => void;
   cached: Set<number>;
+  recent?: number[];
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -131,9 +133,33 @@ export function YearPicker({
 
           <div className="max-h-[60vh] overflow-auto py-1">
             {decades.length === 0 && (
-              <div className="px-4 py-8 text-center text-xs text-neutral-600">
+              <div className="px-4 py-8 text-center text-xs text-neutral-500">
                 No year matches “{query}”.
               </div>
+            )}
+            {!q && recent.length > 0 && (
+              <section className="mb-1">
+                <div className="sticky top-0 z-10 border-b border-border/60 bg-surface-1 px-4 py-1.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+                    Recent
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 px-2.5 pb-2 pt-1.5">
+                  {recent.slice(0, 6).map((y) => (
+                    <button
+                      key={y}
+                      onClick={() => choose(y)}
+                      className={`flex h-9 items-center justify-center rounded-md border px-3 text-center text-[13px] font-semibold tabular-nums transition-all duration-150 ${
+                        selected === y
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-border-strong bg-surface-2 text-neutral-200 hover:border-primary/50 hover:bg-surface-3'
+                      }`}
+                    >
+                      {y}
+                    </button>
+                  ))}
+                </div>
+              </section>
             )}
             {decades.map(([d, ys]) => {
               const cachedInDecade = ys.filter((y) => cached.has(y)).length;

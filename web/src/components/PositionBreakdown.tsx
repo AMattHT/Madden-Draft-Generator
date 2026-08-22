@@ -11,10 +11,12 @@ export function PositionBreakdown({
   rows,
   active,
   onPick,
+  compact = false,
 }: {
   rows: PlayerRow[];
   active: string;
   onPick: (group: string) => void;
+  compact?: boolean;
 }) {
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -27,7 +29,13 @@ export function PositionBreakdown({
   const groups = POS_GROUP_ORDER.filter((g) => counts[g]);
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 py-2.5">
+    <div
+      className={
+        compact
+          ? 'flex flex-wrap items-center gap-1.5'
+          : 'flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 py-2.5'
+      }
+    >
       <span className="mr-1 text-[11px] font-medium uppercase tracking-wider text-muted">Positions</span>
       {groups.map((g) => {
         const on = active === g;

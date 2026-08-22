@@ -24,8 +24,9 @@ const M26: Record<string, number> = {
   RG: 8, ORG: 8,
   RT: 9, ORT: 9,
   // edge rushers (defensive ends + explicit rush labels). The 3-4-OLB-vs-off-ball
-  // ambiguity of the plain "OLB" label is resolved upstream by RosterPositionService
-  // (pff_position: ED->edge, LB->off-ball), which relabels edge rushers as "DE".
+  // ambiguity of the plain "OLB"/"MLB" labels is resolved upstream by FrontSevenService
+  // (PFF position, sack rate, the drafting team's 3-4/4-3 scheme, interceptions),
+  // which relabels edge rushers as "DE" and pins off-ball roles as SAM/MIKE/WILL.
   DE: 10, LE: 10, E: 10, EDGE: 10, DEFENSIVEEND: 10, LDE: 10, RUSH: 10, RUSHER: 10, EDGERUSHER: 10,
   RE: 11, RDE: 11,
   // interior defensive line
@@ -178,26 +179,54 @@ export const PositionMapper = {
   },
 
   /**
-   * Assign the off-ball LB cohort — SAM(13) / MIKE(14) / WILL(15) — by BUILD rather
-   * than blindly, so roles match the player. The source can't tell MIKE from WILL
-   * (nearly everyone is tagged "MLB"), but weight is a good proxy for the real
-   * spectrum: weakside WILLs are the lightest/fastest (coverage), MIKEs sit in the
-   * middle, strongside SAMs are the heaviest (edge-setting). Rank the cohort by
-   * weight and cut into even thirds — lightest -> WILL, middle -> MIKE, heaviest ->
-   * SAM — which keeps the class balanced (~1/3 each) AND role-appropriate (a 233-lb
-   * Lavonte David lands WILL, a 240-lb Ray Lewis MIKE), unlike a role-blind
-   * round-robin that would shuffle a true MIKE off his position. Ties break by draft
-   * order for determinism. Ids outside 13-15 pass through untouched.
+   * Assign the off-ball LB cohort — SAM(13) / MIKE(14) / WILL(15) — by BUILD, toward
+   * Madden's real mix. The source can't tell MIKE from WILL (nearly everyone is tagged
+   * "MLB"), but weight is a good proxy for the real spectrum: weakside WILLs are the
+   * lightest/fastest (coverage), MIKEs sit in the middle, strongside SAMs are the
+   * heaviest (edge-setting). Madden's own generated classes run ~30% SAM / 40% MIKE /
+   * 30% WILL (madden-calibration.json), so the WHOLE cohort (locked + unlocked) is
+   * targeted at that mix: players already pinned to a role (curated overrides, or a
+   * front-seven verdict such as a 3-4 inside backer -> MIKE) keep it and consume that
+   * role's quota; the rest are ranked by weight and cut lightest -> WILL, middle ->
+   * MIKE, heaviest -> SAM to fill what remains. Ties break by draft order for
+   * determinism. Ids outside 13-15 pass through untouched.
    */
   balanceLbByBuild(ids: number[], weights: Array<number | null | undefined>, locked?: boolean[]): number[] {
-    // Distribute only the un-curated LBs; players pinned by a role override keep it.
-    const lbIdx = ids.map((_, i) => i).filter((i) => ids[i] >= 13 && ids[i] <= 15 && !locked?.[i]);
-    const ranked = [...lbIdx].sort((a, b) => ((weights[a] ?? 240) - (weights[b] ?? 240)) || a - b);
+    const SAM = 13, MIKE = 14, WILL = 15;
+    const MIX: Record<number, number> = { [SAM]: 0.3, [MIKE]: 0.4, [WILL]: 0.3 };
+    const cohort = ids.map((_, i) => i).filter((i) => ids[i] >= SAM && ids[i] <= WILL);
+    const free = cohort.filter((i) => !locked?.[i]);
     const out = ids.slice();
-    const n = ranked.length;
+    if (!free.length) return out;
+
+    // Remaining quota per role after the locked players consume theirs.
+    const N = cohort.length;
+    const target: Record<number, number> = { [SAM]: Math.round(N * MIX[SAM]), [MIKE]: Math.round(N * MIX[MIKE]), [WILL]: 0 };
+    target[WILL] = N - target[SAM] - target[MIKE];
+    const lockedCount: Record<number, number> = { [SAM]: 0, [MIKE]: 0, [WILL]: 0 };
+    for (const i of cohort) if (locked?.[i]) lockedCount[ids[i]]++;
+    const need: Record<number, number> = { [SAM]: 0, [MIKE]: 0, [WILL]: 0 };
+    for (const r of [SAM, MIKE, WILL]) need[r] = Math.max(0, target[r] - lockedCount[r]);
+    let needSum = need[SAM] + need[MIKE] + need[WILL];
+    if (needSum === 0) { for (const r of [SAM, MIKE, WILL]) need[r] = MIX[r]; needSum = 1; }
+
+    // Scale the remaining quota onto the free players (largest-remainder rounding).
+    const U = free.length;
+    const alloc: Record<number, number> = { [SAM]: 0, [MIKE]: 0, [WILL]: 0 };
+    const frac: Array<[number, number]> = [];
+    let used = 0;
+    for (const r of [MIKE, SAM, WILL]) {
+      const raw = (need[r] / needSum) * U;
+      alloc[r] = Math.floor(raw);
+      used += alloc[r];
+      frac.push([r, raw - alloc[r]]);
+    }
+    frac.sort((a, b) => b[1] - a[1]);
+    for (let k = 0; used < U; k = (k + 1) % frac.length) { alloc[frac[k][0]]++; used++; }
+
+    const ranked = [...free].sort((a, b) => ((weights[a] ?? 240) - (weights[b] ?? 240)) || a - b);
     ranked.forEach((i, r) => {
-      const third = n ? Math.floor((r * 3) / n) : 0; // 0 lightest .. 2 heaviest
-      out[i] = third === 0 ? 15 : third === 1 ? 14 : 13; // WILL / MIKE / SAM
+      out[i] = r < alloc[WILL] ? WILL : r < alloc[WILL] + alloc[MIKE] ? MIKE : SAM; // lightest .. heaviest
     });
     return out;
   },

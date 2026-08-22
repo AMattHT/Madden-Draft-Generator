@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ClassEdits, GearEdits, GeneratedClass, PlayerRow } from '../types';
 import type { ArchetypeOption } from '../api';
 import type { DraftOpts } from '../App';
+import { cache } from '../cache';
 import { POS_NAMES, groupForId } from '../constants';
-import { StatsBar } from './StatsBar';
-import { PositionBreakdown } from './PositionBreakdown';
+import { MetaStrip } from './MetaStrip';
 import { DraftOptions } from './DraftOptions';
-import { WavLegend } from './WavLegend';
-import { ExportBar } from './ExportBar';
+import { ExportMenu } from './ExportMenu';
 import { Toolbar } from './Toolbar';
 import { PlayerTable } from './PlayerTable';
 import { ProfileModal } from './ProfileModal';
@@ -56,6 +55,28 @@ export function ClassView({
   const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  // Restore this class's board view state (search / position / sort) on arrival;
+  // persist it as it changes so the board looks the way you left it.
+  const filterKey = `${data.year}_${data.league}`;
+  const filtersLoaded = useRef(false);
+  useEffect(() => {
+    filtersLoaded.current = false;
+    let alive = true;
+    cache.filtersGet(data.year, data.league).then((f) => {
+      if (!alive) return;
+      setSearch(f?.search ?? '');
+      setPos(f?.pos ?? 'ALL');
+      setSort(f?.sort ?? 'pick');
+      filtersLoaded.current = true;
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey]);
+  useEffect(() => {
+    if (filtersLoaded.current) cache.filtersSet(data.year, data.league, { search, pos, sort });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, pos, sort]);
+
   // Jumping to a searched player: clear filters so the row is visible to highlight.
   useEffect(() => {
     if (focusPlayer) {
@@ -100,19 +121,40 @@ export function ClassView({
       r = r.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
     }
     const sorted = [...r];
-    if (sort === 'ovr') sorted.sort((a, b) => b.overall - a.overall);
-    else if (sort === 'wav') sorted.sort((a, b) => (b.wav ?? -1) - (a.wav ?? -1));
-    else if (sort === 'name') sorted.sort((a, b) => a.lastName.localeCompare(b.lastName));
-    else sorted.sort((a, b) => a.pick - b.pick);
+    const desc = sort.startsWith('-');
+    const col = desc ? sort.slice(1) : sort;
+    const dir = desc ? -1 : 1;
+    const teamKey = (x: (typeof r)[0]) => (x.team?.abbr || x.team?.name || '').toUpperCase();
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      if (col === 'ovr') cmp = a.overall - b.overall;
+      else if (col === 'wav') cmp = (a.wav ?? -1) - (b.wav ?? -1);
+      else if (col === 'dev') cmp = a.devTrait - b.devTrait;
+      else if (col === 'name') cmp = a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
+      else if (col === 'pos') cmp = a.position.localeCompare(b.position) || a.pick - b.pick;
+      else if (col === 'team') cmp = teamKey(a).localeCompare(teamKey(b)) || a.pick - b.pick;
+      else if (col === 'face') cmp = a.face.localeCompare(b.face) || a.pick - b.pick;
+      else cmp = a.pick - b.pick;
+      return cmp * dir || a.pick - b.pick;
+    });
     return sorted;
   }, [effRows, pos, search, sort]);
 
   const editedCount = Object.keys(edits).length;
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
 
+  // Prev/next player navigation inside the profile modal, walking the board in
+  // its current filter+sort order (what you see is what you step through).
+  const selectedIndex = selectedId != null ? rows.findIndex((r) => r.id === selectedId) : -1;
+  const navigatePlayer = (delta: number) => {
+    if (selectedIndex < 0) return;
+    const next = rows[selectedIndex + delta];
+    if (next) setSelectedId(next.id);
+  };
+
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-6 py-4">
+      <header className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-6 py-3.5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-xl font-bold tracking-tight">
@@ -135,18 +177,8 @@ export function ClassView({
             <Pill tone={mode === 'retro' ? 'legend' : 'neutral'}>
               {mode === 'retro' ? 'Career lens' : 'Realistic lens'}
             </Pill>
+            {editedCount > 0 && <Pill tone="gold">{editedCount} edited</Pill>}
           </div>
-          <p className="mt-1 text-xs text-muted">
-            <span className="tabular-nums">{data.count}</span> prospects
-            {data.generatedCount ? (
-              <>
-                {' '}(<span className="tabular-nums">{data.count - data.generatedCount}</span> real +{' '}
-                <span className="tabular-nums text-neutral-400">{data.generatedCount}</span> generated)
-              </>
-            ) : null}{' '}
-            · rated from real career weighted AV
-            {editedCount > 0 && <span className="text-gold"> · {editedCount} edited</span>}
-          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button
@@ -169,29 +201,24 @@ export function ClassView({
             <Icon path={ICONS.refresh} className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} />
             {busy ? 'Refreshing…' : 'Rebuild'}
           </button>
+          <ExportMenu
+            year={data.year}
+            league={data.league}
+            likeness={data.likeness}
+            edits={edits}
+            gearEdits={gearEdits}
+            editedCount={editedCount}
+            mode={mode}
+            rows={effRows}
+            draftOpts={draftOpts}
+            gameVersion={data.gameVersion ?? 'm26'}
+          />
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 px-6 py-4">
-        <div className="shrink-0 space-y-3">
-          {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
-          <StatsBar data={data} />
-          <PositionBreakdown rows={effRows} active={pos} onPick={setPos} />
-          <div className="grid grid-cols-1 items-stretch gap-3 xl:grid-cols-[minmax(0,1fr)_23rem]">
-            <WavLegend />
-            <ExportBar
-              year={data.year}
-              league={data.league}
-              likeness={data.likeness}
-              edits={edits}
-              gearEdits={gearEdits}
-              editedCount={editedCount}
-              mode={mode}
-              rows={effRows}
-              draftOpts={draftOpts}
-            />
-          </div>
-        </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-3">
+        {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
+        <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} />
 
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
           <Toolbar
@@ -206,7 +233,7 @@ export function ClassView({
             total={data.count}
           />
           <div className="min-h-0 flex-1 overflow-auto">
-            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} />
+            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} />
           </div>
         </section>
       </div>
@@ -218,10 +245,14 @@ export function ClassView({
           gearPatch={gearEdits[selectedRow.id] || {}}
           year={data.year}
           archetypeOptions={archetypeOptions}
+          gameVersion={data.gameVersion ?? "m26"}
           onEdit={(f, v) => onEdit(selectedRow.id, f, v)}
           onGearEdit={(slot, asset) => onGearEdit(selectedRow.id, slot, asset)}
           onReset={() => onResetPlayer(selectedRow.id)}
           onClose={() => setSelectedId(null)}
+          onNavigate={navigatePlayer}
+          canPrev={selectedIndex > 0}
+          canNext={selectedIndex >= 0 && selectedIndex < rows.length - 1}
         />
       )}
     </div>
