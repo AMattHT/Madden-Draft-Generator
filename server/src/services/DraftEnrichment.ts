@@ -52,7 +52,8 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // Skin tone for generic faces, best source first: real Madden portrait tone >
   // Wikipedia-photo tone (for players with no Madden portrait) > explicit non-7 CSV
   // race > position-weighted guess. Only matters for players without a 3D face asset.
-  const fallback = SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`);
+  const fallback = SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`, p.draftYear);
+  const eraDark = SkinToneService.eraDarkShare(p.draftYear);
   // ITA-from-photo is biased light on dark skin. Ignore a light/mid ITA when
   // the position prior is dark — including legends whose M26 asset we will
   // drop on M27 (otherwise Rod Woodson gets gen_3 + a white player's PID).
@@ -63,7 +64,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
     if (wiki != null && wiki <= 4) wiki = null;
   }
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = resolveSkinTone({ derived, wiki, trustedCsv: trusted, fallback });
+  const race = resolveSkinTone({ derived, wiki, trustedCsv: trusted, fallback, eraDarkShare: eraDark });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);

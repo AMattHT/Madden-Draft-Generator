@@ -46,6 +46,44 @@ export interface SkinSampleOpts {
  * Median ITA of skin-like pixels in a raw RGB(A) buffer.
  * Tries a tight chroma box first, then a relaxed box for darker skin.
  */
+export interface SkinSample {
+  ita: number;
+  /** 'tight' = the Caucasian-skin chroma box matched (light/medium skin);
+   *  'loose' = only the relaxed box matched (darker skin). */
+  pass: 'tight' | 'loose';
+  pixels: number;
+}
+
+/** Median ITA of skin-like pixels plus WHICH chroma box matched — the box is as
+ *  informative as the angle, because portrait lighting shifts ITA by 20-30 degrees
+ *  while a tanned white face still fills the tight box and a dark face never does. */
+export function sampleSkin(
+  data: Buffer | Uint8Array,
+  width: number,
+  height: number,
+  channels: number,
+  opts: SkinSampleOpts = {}
+): SkinSample | null {
+  const ita = sampleSkinITA(data, width, height, channels, opts);
+  if (ita == null) return null;
+  return { ita, pass: lastPass, pixels: lastPixels };
+}
+let lastPass: 'tight' | 'loose' = 'tight';
+let lastPixels = 0;
+
+/** Median skin RGB (same sampling as sampleSkinITA), for diagnostics and L*-aware tones. */
+export function sampleSkinRGB(
+  data: Buffer | Uint8Array,
+  width: number,
+  height: number,
+  channels: number,
+  opts: SkinSampleOpts = {}
+): [number, number, number] | null {
+  const ita = sampleSkinITA(data, width, height, channels, opts);
+  return ita == null ? null : lastRGB;
+}
+let lastRGB: [number, number, number] = [0, 0, 0];
+
 export function sampleSkinITA(
   data: Buffer | Uint8Array,
   width: number,
@@ -81,10 +119,34 @@ export function sampleSkinITA(
   };
 
   let s = collect(false);
-  if (s.r.length < minPixels) s = collect(true);
+  lastPass = 'tight';
+  if (s.r.length < minPixels) { s = collect(true); lastPass = 'loose'; }
+  lastPixels = s.r.length;
   if (s.r.length < minPixels) return null;
   const med = (a: number[]) => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
-  return rgbToITA([med(s.r), med(s.g), med(s.b)]);
+  const r = med(s.r), g = med(s.g), b = med(s.b);
+  lastRGB = [r, g, b];
+  // Greyscale / near-neutral portraits (old legend photos) sit at the centre of the
+  // loose chroma box; their ITA is +-90 on a hair of blue and reads as dark skin.
+  // No chroma = no skin evidence: let the waterfall fall through to other sources.
+  const Cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+  const Cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+  if (Math.hypot(Cb - 128, Cr - 128) < 9) return null;
+  const ita = rgbToITA([r, g, b]);
+  // Real skin always has a positive b* (yellow), so ITA lives within about -75..+60.
+  // Anything beyond is a tinted greyscale print, not a complexion.
+  if (ita < -75 || ita > 70) return null;
+  return ita;
+}
+
+/** Tone from a sample, using the chroma box that matched as a guard: a face that
+ *  filled the tight (Caucasian) box is never darker than tone 4 whatever the
+ *  lighting did to its angle; a face that only the loose box caught is never
+ *  lighter than tone 4. */
+export function sampleToTone(sample: SkinSample): number {
+  const t = itaToTone(sample.ita);
+  if (sample.pass === 'tight') return Math.min(4, t);
+  return Math.max(4, t);
 }
 
 export function itaSampleToTone(ita: number | null): number | null {
@@ -101,11 +163,20 @@ export function resolveSkinTone(opts: {
   wiki?: number | null;
   trustedCsv?: number | null;
   fallback: number;
+  /** Share of Black players in the player's era (SkinToneService.eraDarkShare). */
+  eraDarkShare?: number;
 }): number {
   const clamp = (n: number) => Math.max(1, Math.min(7, Math.round(n)));
-  const derived = opts.derived != null ? clamp(opts.derived) : null;
+  let derived = opts.derived != null ? clamp(opts.derived) : null;
   const wiki = opts.wiki != null ? clamp(opts.wiki) : null;
   const trusted = opts.trustedCsv != null ? clamp(opts.trustedCsv) : null;
+
+  // Old legend portraits are underexposed: a tanned white face from the 1960s
+  // samples as dark as a modern medium-brown one (Namath reads like Lamar
+  // Jackson). A 5-6 reading is ambiguous; when the era was overwhelmingly white
+  // and the record says White, read it as the tanned end of light instead.
+  const era = opts.eraDarkShare ?? 0.66;
+  if (derived != null && derived >= 5 && derived <= 6 && ((era < 0.3 && trusted === 1) || era < 0.05)) derived = 4;
 
   if (derived != null && derived >= 6) return derived;
   if (wiki != null && wiki >= 6) return wiki;

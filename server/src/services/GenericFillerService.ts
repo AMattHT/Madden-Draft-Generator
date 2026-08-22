@@ -69,7 +69,7 @@ export const GenericFillerService = {
     for (let i = 0; i < need; i++) {
       const rand = seededRng(`filler|${year}|${i}`);
       const position = positions[i];
-      const race = SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`);
+      const race = SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`, year);
       const firstName = first[Math.floor(rand() * first.length)] || 'Draft';
       const lastName = last[Math.floor(rand() * last.length)] || 'Prospect';
       out.push({

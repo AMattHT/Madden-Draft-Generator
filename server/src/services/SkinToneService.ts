@@ -48,21 +48,58 @@ function weightedTone(weights: Array<[number, number]>, roll: number): number {
   return weights[weights.length - 1][0];
 }
 
-/** Modal (most common) skin tone for a position — used when we have no
- *  portrait/wiki signal. A random draw here is how Charles Rogers (Black WR)
+/** Share of Black players in the league by era. The NFL was segregated 1934-45,
+ *  re-integrated in 1946 and reached roughly 10% by the mid-50s, 20% by 1960,
+ *  a third by 1970, half by 1980 and two-thirds by the 1990s, where it has stayed. */
+const ERA_DARK_SHARE: Array<[number, number]> = [
+  [1933, 0.01], [1945, 0.01], [1950, 0.06], [1955, 0.10], [1960, 0.18], [1965, 0.27], [1970, 0.34],
+  [1975, 0.42], [1980, 0.50], [1985, 0.55], [1990, 0.62], [1995, 0.66], [2005, 0.68], [2030, 0.68],
+];
+/** Modern-era dark share the position table above was written against. */
+const MODERN_DARK_SHARE = 0.66;
+
+export function eraDarkShare(year: number): number {
+  if (year <= ERA_DARK_SHARE[0][0]) return ERA_DARK_SHARE[0][1];
+  for (let i = 1; i < ERA_DARK_SHARE.length; i++) {
+    const [x2, y2] = ERA_DARK_SHARE[i];
+    if (year <= x2) {
+      const [x1, y1] = ERA_DARK_SHARE[i - 1];
+      return y1 + ((y2 - y1) * (year - x1)) / (x2 - x1);
+    }
+  }
+  return ERA_DARK_SHARE[ERA_DARK_SHARE.length - 1][1];
+}
+
+/** The position's tone mix rescaled to an era: dark tones (6-7) shrink or grow with
+ *  the era's dark share; the light tones absorb the difference in proportion. */
+function eraWeights(group: string, year: number): Array<[number, number]> {
+  const base = GROUP_TONE_WEIGHTS[group] ?? GROUP_TONE_WEIGHTS.LB;
+  const total = base.reduce((s, [, w]) => s + w, 0);
+  const darkBase = base.filter(([t]) => t >= 6).reduce((s, [, w]) => s + w, 0) / total;
+  const factor = eraDarkShare(year) / MODERN_DARK_SHARE;
+  const darkEra = Math.max(0.005, Math.min(0.95, darkBase * factor));
+  const lightBase = 1 - darkBase;
+  const out: Array<[number, number]> = base.map(([t, w]) => {
+    const share = w / total;
+    const scaled = t >= 6 ? (share / Math.max(1e-9, darkBase)) * darkEra : (share / Math.max(1e-9, lightBase)) * (1 - darkEra);
+    return [t, Math.round(scaled * 1000)];
+  });
+  return out.sort((a, b) => b[1] - a[1]);
+}
+
+/** Modal (most common) skin tone for a position in a given era - used when we have
+ *  no portrait/wiki signal. A random draw here is how Charles Rogers (Black WR)
  *  was assigned tone 2 ~7% of the time. Variety belongs on the generic *head*,
  *  not the tone, for named historical players. */
-export function defaultRaceFor(label: string | null | undefined, _key?: string): number {
+export function defaultRaceFor(label: string | null | undefined, _key?: string, year = 2015): number {
   const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
-  const weights = GROUP_TONE_WEIGHTS[group] ?? GROUP_TONE_WEIGHTS.LB;
-  return weights[0][0];
+  return eraWeights(group, year)[0][0];
 }
 
-/** Weighted random tone — for generated UDFA fillers so a class is not a clone army. */
-export function defaultRaceForVaried(label: string | null | undefined, key: string): number {
+/** Weighted random tone - for generated UDFA fillers so a class is not a clone army. */
+export function defaultRaceForVaried(label: string | null | undefined, key: string, year = 2015): number {
   const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
-  const weights = GROUP_TONE_WEIGHTS[group] ?? GROUP_TONE_WEIGHTS.LB;
-  return weightedTone(weights, hashUnit(key));
+  return weightedTone(eraWeights(group, year), hashUnit(key));
 }
 
-export const SkinToneService = { defaultRaceFor, defaultRaceForVaried };
+export const SkinToneService = { defaultRaceFor, defaultRaceForVaried, eraDarkShare };
