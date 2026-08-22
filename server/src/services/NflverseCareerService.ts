@@ -1,5 +1,7 @@
 import path from 'path';
 import { CACHE_DIR } from '../config/paths';
+import fs from 'fs';
+import { LOOKUPS_DIR } from '../config/paths';
 import { parseCsvFile, normalizeName } from '../util/csv';
 
 /**
@@ -203,6 +205,22 @@ function load(): Map<string, CareerBits[]> {
   return byKey;
 }
 
+/** Curated careers for undrafted / supplemental stars (data/lookups/udfa_careers.json),
+ *  keyed "<year>|<normalized name>". */
+let udfa: Map<string, Partial<CareerBits>> | null = null;
+function loadUdfa(): Map<string, Partial<CareerBits>> {
+  if (udfa) return udfa;
+  udfa = new Map();
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'udfa_careers.json'), 'utf8')) as { players: Record<string, Partial<CareerBits>> };
+    for (const [k, v] of Object.entries(raw.players || {})) {
+      const [year, name] = k.split('|');
+      udfa.set(`${parseInt(year, 10)}|${normalizeName(name)}`, v);
+    }
+  } catch { /* optional */ }
+  return udfa;
+}
+
 export const NflverseCareerService = {
   /** Career bits for a player. `pick` (overall) disambiguates two players with the
    *  same name in the same draft (1993 had two Chad Browns); without it the more
@@ -216,8 +234,9 @@ export const NflverseCareerService = {
       hit = pick != null ? list.find((b) => b.draftPick === pick) : undefined;
       if (!hit) hit = [...list].sort((a, b) => (b.wav ?? -1) - (a.wav ?? -1))[0];
     }
-    const manual = MANUAL[nk];
+    const manual = MANUAL[nk] ?? loadUdfa().get(`${year}|${nk}`);
     if (hit && manual) return merge(hit, manual);
-    return hit ?? manual ?? null;
+    if (manual) return merge(empty(), manual);
+    return hit ?? null;
   },
 };

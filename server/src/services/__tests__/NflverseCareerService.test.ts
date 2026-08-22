@@ -32,3 +32,13 @@ test('without a pick, a name collision returns the more notable career (higher w
   const c = NflverseCareerService.get('Chad', 'Brown', 1993);
   assert.equal(c?.defSacks, 79);
 });
+
+test('famous undrafted players get their careers from udfa_careers.json (Kurt Warner 1994)', () => {
+  const c = NflverseCareerService.get('Kurt', 'Warner', 1994);
+  assert.equal(c?.wav, 93);
+  assert.equal(c?.proBowls, 4);
+  assert.equal(c?.isHOF, true);
+  // keyed by year: a different-year same-name player is untouched
+  assert.notEqual(NflverseCareerService.get('Rod', 'Smith', 1992)?.wav, 83);
+  assert.equal(NflverseCareerService.get('Rod', 'Smith', 1994)?.wav, 83);
+});
