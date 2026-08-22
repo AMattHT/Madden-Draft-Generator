@@ -233,7 +233,7 @@ let m27ValidCache: Set<string> | null | undefined;
 function loadM27Valid(): Set<string> | null {
   if (m27ValidCache !== undefined) return m27ValidCache;
   try {
-    const pth = path.join(DATA_ROOT, "..", "..", "m27-game-gear-assets.json");
+    const pth = path.join(DATA_ROOT, "lookups", "m27-game-gear-assets.json");
     const raw = JSON.parse(fs.readFileSync(pth, "utf8")) as string[];
     m27ValidCache = new Set(raw);
   } catch {

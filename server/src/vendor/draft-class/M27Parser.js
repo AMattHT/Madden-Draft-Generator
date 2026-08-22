@@ -8,8 +8,20 @@
  *
  * Attribute section offsets (relative to blockStart + 0x1600). Most fields that
  * existed in M26 shifted +4 after the widened name fields (21 bytes each, M26
- * used 17/15); the tail is restructured: devTrait 0x90, commentaryId 0x94,
- * PID 0x9e, real-face assetName 0xa0 (42 bytes), persona DNA 5xU16 at 0xca.
+ * used 17/15); the tail is restructured: devTrait 0x90, bodyType enum 0x91,
+ * portrait PID 0x94, QB style 0x96, commentary (announcer surname) id 0x9e,
+ * real-face assetName 0xa0 (42 bytes), persona DNA 5xU16 at 0xca, Focus 0xf2.
+ *
+ * Decoded 2026-08-22 against the game's own CAREERDRAFT-TEST* files and the M27
+ * career save (scripts/build-m27-field-stats.ts):
+ *   0x48 U16 birthdate (day<<11 | (month-1)<<7 | year-1940)
+ *   0x52 U16 draft pick: within-round pick for drafted players, block index for UDFAs
+ *   0x6b = 127 and 0x7d = 1 on every prospect
+ *   0x70 PersonalityRating (10-98, rises with overall; K/P ~20, QB ~63)
+ *   0x87, 0x9c: always filled, no correlation with anything known (hidden values)
+ *   0x91 body type (0 Standard, 1 Thin, 2 Muscular, 3 Heavy)
+ *   0x94 U16 menu-portrait PID - a pure function of genericHeadName (196/196)
+ *   0x9e U16 announcer id - a pure function of surname (338/338)
  */
 
 const BLOCK_SIZE = 5876; // 0x16F4
@@ -30,14 +42,23 @@ const M27_FIELDS = {
   position: { off: 0x4e },
   archetype: { off: 0x4f },
   jerseyNum: { off: 0x50 },
-  draftPick: { off: 0x52 },
+  birthdate: { off: 0x48, u16: true },
+  draftPick: { off: 0x52, u16: true },
   draftRound: { off: 0x54 },
   overall: { off: 0x55 },
+  const6b: { off: 0x6b, value: 127 },
+  personalityRating: { off: 0x70 },
+  const7d: { off: 0x7d, value: 1 },
+  hidden87: { off: 0x87 },
   devTrait: { off: 0x90 }, // 0=Normal, 1=Star, 2=Superstar, 3=X-Factor (same as M26)
-  commentaryId: { off: 0x94, u16: true }, // tentative
-  PID: { off: 0x9e, u16: true },
+  bodyTypeId: { off: 0x91 }, // 0 Standard, 1 Thin, 2 Muscular, 3 Heavy
+  PID: { off: 0x94, u16: true }, // menu-portrait id (generic heads: m27-field-stats.json headPid)
+  qbStyle: { off: 0x96 }, // QBs only
+  hidden9c: { off: 0x9c },
+  commentaryId: { off: 0x9e, u16: true }, // announcer surname id (m27-field-stats.json surnameCommentary)
   assetName: { off: 0xa0, len: 42 }, // real face asset (e.g. "WilliamsCaleb_14500")
   personaDNA: { off: 0xca, u16x5: true }, // 5 Persona DNA trait slots
+  focus: { off: 0xf2 }, // 0..3 (game mix ~56/9/8/27 %)
 };
 
 /** Rating byte offsets — M26 offsets +4 (post-name-fields shift), same order. */
@@ -77,12 +98,19 @@ function parseM27AttributeData(attr) {
   a.position = attr[M27_FIELDS.position.off] || 0;
   a.archetype = attr[M27_FIELDS.archetype.off] || 0;
   a.jerseyNum = attr[M27_FIELDS.jerseyNum.off] || 0;
-  a.draftPick = attr[M27_FIELDS.draftPick.off] || 0;
+  a.birthdate = attr.readUInt16LE(M27_FIELDS.birthdate.off) || 0;
+  a.draftPick = attr.readUInt16LE(M27_FIELDS.draftPick.off) || 0;
   a.draftRound = attr[M27_FIELDS.draftRound.off] || 0;
   a.overall = attr[M27_FIELDS.overall.off] || 0;
+  a.personalityRating = attr[M27_FIELDS.personalityRating.off] || 0;
+  a.hidden87 = attr[M27_FIELDS.hidden87.off] || 0;
   a.devTrait = attr[M27_FIELDS.devTrait.off] || 0;
-  a.commentaryId = attr.readUInt16LE(M27_FIELDS.commentaryId.off) || 0;
+  a.bodyTypeId = attr[M27_FIELDS.bodyTypeId.off] || 0;
   a.PID = attr.readUInt16LE(M27_FIELDS.PID.off) || 0;
+  a.qbStyle = attr[M27_FIELDS.qbStyle.off] || 0;
+  a.hidden9c = attr[M27_FIELDS.hidden9c.off] || 0;
+  a.commentaryId = attr.readUInt16LE(M27_FIELDS.commentaryId.off) || 0;
+  a.focus = attr[M27_FIELDS.focus.off] || 0;
   a.assetName = readAscii(attr, M27_FIELDS.assetName.off, M27_FIELDS.assetName.len) || null;
 
   const dna = [];

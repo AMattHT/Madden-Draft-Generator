@@ -107,17 +107,12 @@ export const PersonaService = {
    * 0xca). Count scales with caliber — elite ~5, mid 4–5, fringe 3–4; ~2.6%
    * carry none, matching the real league census.
    */
-  dnaFor(seedKey: string, group: string, overall: number): number[] {
+  dnaFor(seedKey: string, group: string, _overall: number): number[] {
     const h = hash(seedKey);
-    // League census has ~2.6% with empty DNA — only fringe/filler. Stars always get traits
-    // (Cris Carter hashed into the empty bucket and showed a blank DNA row).
-    if (overall < 70 && h % 1000 < 26) return [];
-    const roll = (h >>> 4) % 100;
-    const n =
-      overall >= 78 ? (roll < 75 ? 5 : 4)
-      : overall >= 70 ? (roll < 55 ? 5 : 4)
-      : (roll < 60 ? 4 : roll < 90 ? 5 : 3);
-    return pickTraits(h, n, TILT[group] ?? []);
+    // The game's own generated rookies carry exactly five traits (1,555 of 1,556
+    // across the TEST classes); the 3-5 / sometimes-none pattern belongs to the
+    // veteran census, not to draft prospects.
+    return pickTraits(h, 5, TILT[group] ?? []);
   },
 
   /** Display name for a trait id (UI). */

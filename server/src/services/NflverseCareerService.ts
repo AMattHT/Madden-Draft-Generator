@@ -28,6 +28,7 @@ export interface CareerBits {
   games: number | null;
   draftTeam: string | null; // nflverse team code at the draft (RAM, BAL, NWE ...)
   draftPick: number | null; // overall pick (resolves same-name/same-year collisions)
+  birthDate: string | null; // 'YYYY-MM-DD' (nflverse players.csv)
   passYards: number | null;
   headshotUrl: string | null;
 }
@@ -38,7 +39,7 @@ const MANUAL: Record<string, CareerBits> = {
     wav: 99, heightInches: 75, weight: 202, proBowls: 8, allPro1: 2,
     seasonsStarted: 15, careerTo: 2002, isHOF: true, age: 21,
     receptions: 1101, recYards: 13899, recTds: 130,
-    rushAtts: 13, rushYards: 41, defSacks: null, defInts: null, games: 234, draftTeam: 'PHI', draftPick: null, passYards: null, headshotUrl: null,
+    rushAtts: 13, rushYards: 41, defSacks: null, defInts: null, games: 234, draftTeam: 'PHI', draftPick: null, birthDate: '1965-11-25', passYards: null, headshotUrl: null,
   },
 };
 
@@ -71,6 +72,7 @@ interface PlayerRow {
   draft_year?: string;
   draft_team?: string;
   draft_pick?: string;
+  birth_date?: string;
   height?: string;
   weight?: string;
   headshot?: string;
@@ -108,6 +110,7 @@ function merge(into: CareerBits, extra: Partial<CareerBits>): CareerBits {
     games: extra.games ?? into.games,
     draftTeam: extra.draftTeam ?? into.draftTeam,
     draftPick: extra.draftPick ?? into.draftPick,
+    birthDate: extra.birthDate ?? into.birthDate,
     passYards: extra.passYards ?? into.passYards,
     headshotUrl: extra.headshotUrl ?? into.headshotUrl,
   };
@@ -119,7 +122,7 @@ function empty(): CareerBits {
     allPro1: null, seasonsStarted: null, careerTo: null, isHOF: null, age: null,
     receptions: null, recYards: null, recTds: null, rushAtts: null,
     rushYards: null, defSacks: null, defInts: null, games: null, draftTeam: null,
-    draftPick: null, passYards: null, headshotUrl: null,
+    draftPick: null, birthDate: null, passYards: null, headshotUrl: null,
   };
 }
 
@@ -158,6 +161,7 @@ function load(): Map<string, CareerBits[]> {
         games: num(r.games),
         draftTeam: (r.team || '').trim().toUpperCase() || null,
         draftPick: num(r.pick),
+        birthDate: null,
         passYards: num(r.pass_yards),
         headshotUrl: null,
       });
@@ -175,9 +179,11 @@ function load(): Map<string, CareerBits[]> {
       const hs = (r.headshot || '').trim();
       const dt = (r.draft_team || '').trim().toUpperCase();
       const pk = num(r.draft_pick);
+      const bd = (r.birth_date || '').trim();
       const extra: Partial<CareerBits> = {
         draftTeam: dt || null,
         draftPick: pk,
+        birthDate: /^\d{4}-\d{2}-\d{2}/.test(bd) ? bd.slice(0, 10) : null,
         heightInches: h != null && h >= 60 && h <= 84 ? h : null,
         weight: w != null && w >= 140 && w <= 400 ? w : null,
         headshotUrl: hs.startsWith('http') ? hs : null,

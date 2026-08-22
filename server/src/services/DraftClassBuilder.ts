@@ -1,5 +1,6 @@
 import { MdcService, MdcProspect } from './MdcService';
 import { Mdc27Service } from './Mdc27Service';
+import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
 import { PositionMapper } from './PositionMapper';
@@ -306,14 +307,16 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
     ? { peps: m27Face.assetName, kind: 'asset' as LikenessKind, skinTone: LikenessService.assign(player, index, gameVersion).skinTone }
     : LikenessService.assign(player, index, gameVersion);
   prospect.PEPS = like.peps;
-  // M27 portrait IDs are a different table than M26. Writing an M26 generic/legend
-  // PID (10310, 3284, …) shows a current player's headshot — e.g. a white QB on
-  // Rod Woodson. Only a year-matched M27 scan may set PID; everyone else is 0
-  // and the game uses genericHeadName.
+  // Menu portrait. M26: custom-portrait slot, else the generic head's PID, else the
+  // real photo id. M27: a year-matched M27 scan's own PID; generic heads get their
+  // fixed PID in assignM27Fields (0x94 is a pure function of genericHeadName in the
+  // game's files); M26 legend ids are not valid M27 PIDs, so those stay 0.
   prospect.PID = gameVersion === 'm27'
     ? (m27Face?.portraitPid || 0)
     : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps) ?? 0) : (player.photoId ?? 0)));
-  prospect.commentaryId = gameVersion === 'm27' && !m27Face ? 0 : (player.commId ?? 0);
+  // Announcer name call: the game keys this by SURNAME (same id space in both games,
+  // mined from the real files). The CSV CommID column is a different id space.
+  prospect.commentaryId = commentaryIdFor(player.lastName);
 
   // Era-appropriate gear (vintage helmet/cleats/gloves, no visor pre-1990).
   // gameVersion selects the verified M27 equipment vocabulary for M27 exports.
@@ -686,15 +689,19 @@ export const DraftClassBuilder = {
     const { prospects, truncated, dropped, likeness } = this.buildProspects(players, mode, opts, 'm27');
     applyEdits(prospects, edits);
     applyGearEdits(prospects, gearEdits);
-    for (const p of prospects) {
-      if (p.personaDNA) continue; // explicit user edit wins
+    const capped = players.slice(0, LOGICAL_CAPACITY);
+    prospects.forEach((p, i) => {
       const posId = Number(p.position) || 0;
-      p.personaDNA = PersonaService.dnaFor(
-        `${p.firstName}|${p.lastName}`,
-        PositionMapper.groupFromId(posId),
-        Number(p.overall) || 0
-      );
-    }
+      if (!p.personaDNA) {
+        // explicit user edit wins
+        p.personaDNA = PersonaService.dnaFor(`${p.firstName}|${p.lastName}`, PositionMapper.groupFromId(posId), Number(p.overall) || 0);
+      }
+      // Birthdate, PersonalityRating, Focus, QB style, body-type enum, hidden bytes,
+      // generic-head portrait PID — everything the game fills and reads back verbatim.
+      const base = capped[i];
+      const career = base ? NflverseCareerService.get(base.firstName, base.lastName, base.draftYear, base.draftPick) : null;
+      assignM27Fields(p, { birthDate: career?.birthDate ?? null }, `${p.firstName}|${p.lastName}|${i}`);
+    });
     const template = Mdc27Service.loadTemplate();
     const buffer = Mdc27Service.write(prospects, template);
     return { buffer, count: prospects.length, truncated, dropped, likeness };

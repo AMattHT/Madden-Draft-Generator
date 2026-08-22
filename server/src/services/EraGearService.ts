@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { DATA_ROOT } from '../config/paths';
+import { DATA_ROOT, LOOKUPS_DIR } from '../config/paths';
 import { PositionMapper } from './PositionMapper';
 import { ObservedGear } from '../types/player';
 import { GEAR_SLOT_TYPES } from './GearOptionsService';
@@ -410,6 +410,24 @@ const M27_EQUIPMENT: Record<string, EraDefaults> = {
  *  (verified against M27 game-assigned classes). '' = omit the element — M27
  *  never writes GearHand_None / GearWrist_None; it leaves the slot out. */
 const M27_ASSET_FIX: Record<string, string> = {
+  // Vintage shells/cleats/tape M27 dropped -> the closest surviving asset.
+  GearHelmet_RiddellTK: 'GearHelmet_AirXP',
+  GearHelmet_Standard: 'GearHelmet_AirXP',
+  GearHelmet_Schutt: 'GearHelmet_AirXP',
+  GearFootwear_shoeLowVintage_nike: 'GearFootwear_shoe_Low_NikeVaporCarbonEliteTD',
+  GearFootwear_shoe_Mid_NikeDiamondTURF: 'GearFootwear_shoe_Mid_NikeAlphaPro34TD',
+  GearHand_tapedHandNormal_White: 'GearHand_tapedHandFinger_White',
+  GearHand_tapedHandNormal_Black: 'GearHand_tapedHandFinger_Black',
+  GearHand_tapedHandNormal_TeamColor: 'GearHand_tapedHandFinger_TeamColor',
+  GearFaceMask_Standard2BarWR: 'GearFaceMask_2Bar',
+  GearHand_tapedHandMax_White: 'GearHand_tapedHandFinger_White',
+  GearHand_tapedHandMax_Black: 'GearHand_tapedHandFinger_Black',
+  GearWrist_wristBandDouble_White: 'GearWrist_wristBandNormal_White',
+  GearWrist_wristBandDouble_TeamColor: 'GearWrist_wristBandNormal_TeamColor',
+  ElbowGear_elbowpad_White: 'ElbowGear_elbowpad_TeamColor',
+  ElbowGear_elbowpad_Stripe_White: 'ElbowGear_elbowpadRubber_Black',
+  ElbowGear_elbowpad_Stripe_Black: 'ElbowGear_elbowpadRubber_Black',
+  GearNeckpad_ButterflyNeckRoll: 'GearNeckpad_CowboyCollarNeckRoll',
   EyeBlack_Sticker: 'FaceMarks_EyePaint',
   EyeBlack_Grease: 'FaceMarks_EyePaint',
   EyeBlack_Grease_Smear: 'FaceMarks_EyePaint2',
@@ -421,6 +439,64 @@ const M27_ASSET_FIX: Record<string, string> = {
 };
 
 const m27fix = (a: string): string => M27_ASSET_FIX[a] ?? a;
+
+/** The 305 assets M27 itself assigns to generated prospects (extracted from the
+ *  game's TEST classes into data/lookups/m27-game-gear-assets.json). */
+let m27Valid: Set<string> | null = null;
+function m27Allowlist(): Set<string> {
+  if (m27Valid) return m27Valid;
+  try {
+    m27Valid = new Set(JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-game-gear-assets.json'), 'utf8')) as string[]);
+  } catch {
+    m27Valid = new Set();
+  }
+  return m27Valid;
+}
+
+// Facemasks follow the helmet shell; when a vintage shell was substituted the mask
+// must be one the replacement shell actually carries in M27.
+const M27_GENERIC_MASK: Record<string, string[]> = {
+  GearHelmet_AirXP: ['GearFaceMask_2Bar', 'GearFaceMask_3Bar', 'GearFaceMask_Robot', 'GearFaceMask_RobotRB'],
+};
+
+const reportedMissing = new Set<string>();
+
+// Hand-typed pool names differ from the game's only by case (shoe_Low_ vs shoe_low_).
+let m27ByLower: Map<string, string> | null = null;
+function m27CanonicalCase(asset: string): string | null {
+  if (!m27ByLower) {
+    m27ByLower = new Map();
+    for (const a of m27Allowlist()) m27ByLower.set(a.toLowerCase(), a);
+  }
+  return m27ByLower.get(asset.toLowerCase()) ?? null;
+}
+
+/** Final M27 pass: substitute dead assets, then drop anything the game's own
+ *  classes never use (so an invalid name is never written into the .mdc). */
+function sanitizeForM27(els: LoadoutElement[], seedKey: string): LoadoutElement[] {
+  const valid = m27Allowlist();
+  const out: LoadoutElement[] = [];
+  let helmet: string | null = null;
+  for (const el of els) {
+    let asset = m27fix(el.itemAssetName);
+    if (el.slotType === 'HeadWear') helmet = asset;
+    // Slot-less element = facemask. If the shell changed, re-pick a mask it supports.
+    if (!el.slotType && helmet && M27_GENERIC_MASK[helmet] && !valid.has(asset)) {
+      asset = pick(M27_GENERIC_MASK[helmet], `${seedKey}|m27mask`) ?? asset;
+    }
+    if (!asset) continue;
+    if (valid.size && !valid.has(asset)) asset = m27CanonicalCase(asset) ?? asset;
+    if (valid.size && !valid.has(asset)) {
+      if (!reportedMissing.has(asset)) {
+        reportedMissing.add(asset);
+        console.warn(`[gear] dropped ${asset} from an M27 loadout: not in the M27 asset vocabulary`);
+      }
+      continue;
+    }
+    out.push({ ...el, itemAssetName: asset });
+  }
+  return out;
+}
 
 export const EraGearService = {
   /** Build era-appropriate PlayerOnField loadout elements for a prospect.
@@ -444,7 +520,7 @@ export const EraGearService = {
       return pick(pool, `${seedKey}|${slot}`);
     };
 
-    const helmet = choose(helmetPool(year, group), 'helmet');
+    const helmet = choose(m27 && era.helmet && era.helmet.length ? era.helmet : helmetPool(year, group), 'helmet');
     if (helmet) els.push({ slotType: 'HeadWear', itemAssetName: helmet });
 
     const mask = choose(facemaskPool(helmet, group, year), 'facemask');
@@ -540,7 +616,7 @@ export const EraGearService = {
       if (eyePaint && eyePaint !== 'FaceMarks_None') els.push({ slotType: 'FacePaint', itemAssetName: eyePaint });
     }
 
-    return els;
+    return m27 ? sanitizeForM27(els, seedKey) : els;
   },
 
   /** A full PlayerOnField loadout object for prospect.visuals.loadouts. */

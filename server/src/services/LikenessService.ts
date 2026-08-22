@@ -55,13 +55,15 @@ function loadDraftYears(): Map<string, number> {
       const display = (r.display_name || '').trim();
       if (display) {
         const k = display.toLowerCase().replace(/[^a-z ]/g, '');
-        if (k && !draftYearByKey.has(k)) draftYearByKey.set(k, year);
+        // M27 scans belong to CURRENT players, so among same-name rows the face's
+        // owner is the most recently drafted one (not the first row in the file).
+        if (k && (!draftYearByKey.has(k) || year > (draftYearByKey.get(k) ?? 0))) draftYearByKey.set(k, year);
       }
       const first = (r.first_name || r.common_first_name || '').trim();
       const last = (r.last_name || '').trim();
       if (first && last) {
         const k = m27Key(first, last);
-        if (k && !draftYearByKey.has(k)) draftYearByKey.set(k, year);
+        if (k && (!draftYearByKey.has(k) || year > (draftYearByKey.get(k) ?? 0))) draftYearByKey.set(k, year);
       }
     }
   } catch { /* nflverse cache absent — year guard degrades to the 2015 cutoff */ }

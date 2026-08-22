@@ -28,7 +28,7 @@ function writeM27DraftClass(originalBuffer, prospects, header) {
 
   for (let i = 0; i < n; i++) {
     const blockStart = dataStart + i * M27_BLOCK_SIZE;
-    writeM27AttributeData(buf, blockStart + M27_ATTRIBUTE_OFFSET, prospects[i]);
+    writeM27AttributeData(buf, blockStart + M27_ATTRIBUTE_OFFSET, prospects[i], i);
     writeM27VisualJSON(buf, blockStart, prospects[i]);
   }
 
@@ -37,8 +37,13 @@ function writeM27DraftClass(originalBuffer, prospects, header) {
     const blockStart = dataStart + i * M27_BLOCK_SIZE;
     buf.fill(0, blockStart, blockStart + M27_BLOCK_SIZE);
   }
+  // Header prospect count (U16 @0x42). The template carries the game's own 389;
+  // the game honours this field, so it must match what we actually wrote.
+  buf.writeUInt16LE(n & 0xffff, HEADER_COUNT_OFFSET);
   return buf;
 }
+
+const HEADER_COUNT_OFFSET = 0x42;
 
 function writeAscii(buf, off, str, len) {
   buf.write(String(str ?? '').slice(0, len).padEnd(len, '\0'), off, len, 'ascii');
@@ -46,7 +51,7 @@ function writeAscii(buf, off, str, len) {
 
 /** Write one prospect's 244-byte attribute section (fresh, not template-merged —
  *  every field we don't write stays zero, matching the game's random classes). */
-function writeM27AttributeData(buffer, offset, prospect) {
+function writeM27AttributeData(buffer, offset, prospect, blockIndex = 0) {
   buffer.fill(0, offset, offset + M27_ATTRIBUTE_SIZE);
 
   writeAscii(buffer, offset + M27_FIELDS.firstName.off, prospect.firstName, M27_FIELDS.firstName.len);
@@ -60,12 +65,27 @@ function writeM27AttributeData(buffer, offset, prospect) {
   if (prospect.position !== undefined) buffer[offset + M27_FIELDS.position.off] = prospect.position & 0xff;
   if (prospect.archetype !== undefined) buffer[offset + M27_FIELDS.archetype.off] = prospect.archetype & 0xff;
   if (prospect.jerseyNum !== undefined) buffer[offset + M27_FIELDS.jerseyNum.off] = prospect.jerseyNum & 0xff;
-  if (prospect.draftPick != null) buffer[offset + M27_FIELDS.draftPick.off] = prospect.draftPick & 0xff;
+  // Draft pick (U16): drafted players carry their within-round pick; undrafted
+  // players carry their block index - exactly what the game's own classes do.
+  const undrafted = prospect.draftRound == null || prospect.draftRound >= 63;
+  const pick = undrafted ? (blockIndex | 0) : Math.max(0, prospect.draftPick | 0);
+  buffer.writeUInt16LE(pick & 0xffff, offset + M27_FIELDS.draftPick.off);
   if (prospect.draftRound != null) buffer[offset + M27_FIELDS.draftRound.off] = prospect.draftRound & 0xff;
   if (prospect.overall != null) buffer[offset + M27_FIELDS.overall.off] = Math.max(0, Math.min(99, prospect.overall));
   if (prospect.devTrait !== undefined) buffer[offset + M27_FIELDS.devTrait.off] = prospect.devTrait & 0xff;
   if (prospect.commentaryId !== undefined) buffer.writeUInt16LE(prospect.commentaryId & 0xffff, offset + M27_FIELDS.commentaryId.off);
   if (prospect.PID !== undefined) buffer.writeUInt16LE(prospect.PID & 0xffff, offset + M27_FIELDS.PID.off);
+
+  // Fields the game fills on every prospect and copies verbatim into the franchise.
+  buffer[offset + M27_FIELDS.const6b.off] = M27_FIELDS.const6b.value;
+  buffer[offset + M27_FIELDS.const7d.off] = M27_FIELDS.const7d.value;
+  if (prospect.birthdate != null) buffer.writeUInt16LE(prospect.birthdate & 0xffff, offset + M27_FIELDS.birthdate.off);
+  if (prospect.personalityRating != null) buffer[offset + M27_FIELDS.personalityRating.off] = Math.max(0, Math.min(99, prospect.personalityRating | 0));
+  if (prospect.bodyTypeId != null) buffer[offset + M27_FIELDS.bodyTypeId.off] = prospect.bodyTypeId & 0x03;
+  if (prospect.qbStyle != null) buffer[offset + M27_FIELDS.qbStyle.off] = prospect.qbStyle & 0xff;
+  if (prospect.focus != null) buffer[offset + M27_FIELDS.focus.off] = prospect.focus & 0x03;
+  if (prospect.hidden87 != null) buffer[offset + M27_FIELDS.hidden87.off] = prospect.hidden87 & 0xff;
+  if (prospect.hidden9c != null) buffer[offset + M27_FIELDS.hidden9c.off] = prospect.hidden9c & 0xff;
 
   // Ratings (M26 order, +4 offsets)
   for (const [key, off] of Object.entries(M27_RATINGS)) {
