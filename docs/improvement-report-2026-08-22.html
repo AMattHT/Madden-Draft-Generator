@@ -85,7 +85,7 @@
 <div class="wrap">
   <div class="eyebrow">Madden 26 / 27 · Draft Class Generator</div>
   <h1>Where the generator can get better</h1>
-  <p class="lede">An audit of the realism of generated classes, the Madden 27 path, reliability, and the editing workflow — with evidence from the code, the cached data, and the real game files. One item was built and shipped during the audit.</p>
+  <p class="lede">An audit of the realism of generated classes, the Madden 27 path, reliability, and the editing workflow — with evidence from the code, the cached data, and the real game files — followed, the same day, by the implementation of all seven roadmap steps.</p>
   <div class="meta">
     <span>22 Aug 2026</span>
     <span>Verified against: M26 + M27 templates, 5 game-generated M26 classes, 4 game-generated M27 classes, the M27 career save</span>
@@ -93,11 +93,26 @@
   </div>
 
   <div class="board">
-    <div class="tile done"><div class="n">1</div><div class="l">Shipped today</div></div>
-    <div class="tile crit"><div class="n">2</div><div class="l">M27 binary bugs confirmed</div></div>
-    <div class="tile high"><div class="n">16</div><div class="l">Quick wins (&lt; 1 day)</div></div>
-    <div class="tile acc"><div class="n">7</div><div class="l">Themes, ranked by value</div></div>
+    <div class="tile done"><div class="n">71</div><div class="l">Commits landed</div></div>
+    <div class="tile done"><div class="n">91</div><div class="l">Tests, all green</div></div>
+    <div class="tile acc"><div class="n">7/7</div><div class="l">Roadmap steps done</div></div>
+    <div class="tile high"><div class="n">3</div><div class="l">Need an in-game check</div></div>
   </div>
+
+  <h2>Status — implemented 22 Aug 2026</h2>
+  <p>Everything below was built the same day the audit was written, in the suggested order, each step committed with tests. Read the themes as a record of <em>what was wrong and what was done about it</em>.</p>
+  <div class="tbl"><table>
+    <tr><th>Step</th><th>Done</th><th>Evidence</th></tr>
+    <tr><td>1 · Secure &amp; harden</td><td>Committed the six weeks of work; async routes can no longer kill the API; debug log gated; stale dev ports freed automatically; test runner + CI</td><td><code>npm test</code> 91/91, GitHub Actions workflow</td></tr>
+    <tr><td>2 · M27 correctness</td><td>Header count at 0x42; PID/commentary offsets fixed; birthdate, PersonalityRating, Focus, QB style, body-type enum, hidden bytes, U16 picks; 5 persona slots; face map decontaminated; gear allowlist; M27-PORT.md rewritten</td><td><code>verify-m27</code> PASS; new classes <code>CAREERDRAFT-2003V2 / 1987V2 / 1965V2</code> in both Saves folders</td></tr>
+    <tr><td>3 · Rating realism</td><td>2025 ranking fixed; calibrated attribute model (slopes, spread, range, per game); position-relative combine; exact recompute; OL formula corrected; QB archetype per game; hindsight slider; auto strength</td><td>corr(OVR, injury) 0.89 → ~0; Ward/Hunter/Carter 84/83/81; 98%+ exact recompute</td></tr>
+    <tr><td>4 · Cohort coverage</td><td>Depth-chart slots, pre-2001 DB split, heavy DEs → DT, LT/RT · LG/RG · FS/SS balanced, deficit-based fillers, AFL loader + 1960 reconstruction, 1967–69 one draft, 40 UDFA careers, caliber-based truncation with a UI chip, era builds, hometown repair, jersey numbers</td><td>1995/2003/2015 match Madden's full position mix; Warner 78 XF, Gates 83 XF</td></tr>
+    <tr><td>5 · Likeness</td><td>Greyscale portraits carry no evidence; era skin-tone prior; ambiguous legends resolve light; Wikipedia URLs sanitised; era pads/sleeves/spats/mouthpiece with M26 slot removal; persona from the game's rookies; per-game generic-head catalogs with correct portrait ids</td><td>Unitas/Starr/Graham no longer tone 7; tone-2 pool 4 → 33 heads</td></tr>
+    <tr><td>6 · Workflow</td><td>Edit keys fixed (+ migration); undo/redo; clear/export/import edits; live "game shows N"; Escape guard; era gear in the Auto tile; Variant re-roll; real backend status; contrast + dialog a11y; atomic Save-to-Saves with .bak</td><td>—</td></tr>
+    <tr><td>7 · Franchise on M27</td><td>Version threading + cross-game guard; verified writes; M27 contract-table cap scaling; position-aware trait pass with Hidden protection; advance-the-roster tool</td><td><code>verify:franchise</code> 22/22 on both autosaves</td></tr>
+    <tr><td>8 · Hygiene</td><td>Dead vendor modules removed; probes archived; data refresh; health fingerprint drives cache invalidation; 5.4 GB dead photo cache gone; README rewritten</td><td>cache 5.5 GB → 214 MB</td></tr>
+  </table></div>
+  <p><strong>Needs your eyes in-game</strong> (cannot be verified from files): (1) import <code>CAREERDRAFT-2003V2</code> on M27 — do all 402 show, and do generic rookies have portraits now; (2) the 1965V2 class on M27 — how the mapped vintage shells (Riddell TK → AirXP) and no-sleeve look read; (3) whether M26 legend face ids render in M27 (still disabled; a 5-player test export settles it). <strong>Deferred</strong>: direct class injection into a save (needs that same in-game loop). <strong>Defaults chosen for the open questions</strong>: hindsight stays at 1 (career outcome) unless you move the slider; M27 class size stays 402 with the header written correctly; the CSV CommID column is no longer written (surname map instead).</p>
 
   <h2>The short version</h2>
   <p>The engine is in good shape: both <code>.mdc</code> layouts round-trip against real game files, generation is deterministic, and the class <em>shape</em> (mean 66, max 84, dev-trait rates) reproduces Madden's own. The problems are in <strong>what gets written into the file</strong>, not the file format.</p>
