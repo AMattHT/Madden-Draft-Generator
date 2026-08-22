@@ -7,6 +7,7 @@ import { POS_NAMES, groupForId } from '../constants';
 import { MetaStrip } from './MetaStrip';
 import { DraftOptions } from './DraftOptions';
 import { ExportMenu } from './ExportMenu';
+import type { EditTools } from './ExportMenu';
 import { Toolbar } from './Toolbar';
 import { PlayerTable } from './PlayerTable';
 import { ProfileModal } from './ProfileModal';
@@ -24,6 +25,7 @@ export function ClassView({
   onEdit,
   onGearEdit,
   onResetPlayer,
+  editTools,
   archetypeOptions,
   mode,
   focusPlayer,
@@ -40,6 +42,7 @@ export function ClassView({
   onEdit: (id: number, field: string, value: number | string) => void;
   onGearEdit: (id: number, slot: string, asset: string) => void;
   onResetPlayer: (id: number) => void;
+  editTools?: EditTools;
   archetypeOptions: Record<string, ArchetypeOption[]>;
   mode: 'madden' | 'retro';
   focusPlayer: string | null;
@@ -212,6 +215,7 @@ export function ClassView({
             rows={effRows}
             draftOpts={draftOpts}
             gameVersion={data.gameVersion ?? 'm26'}
+            editTools={editTools}
           />
         </div>
       </header>

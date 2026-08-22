@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
 import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
+import { OVRWeightsCalculator } from '../services/OVRWeightsCalculator';
+import { reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
 import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
@@ -62,6 +64,29 @@ r.get('/draft/:year/generated', async (req, res) => {
 /** Custom class generation: All-Time Greats source and/or generation modifiers
  *  (strength / studs / generational). Not cached server-side; the client caches by
  *  its own key. */
+/**
+ * What the game will show for an edited prospect. Madden recomputes the overall
+ * from the attributes on import, and a bare overall/position/archetype edit makes
+ * the export re-solve the skill attributes (applyEdits) - so the profile asks here
+ * for the reconciled attributes and the game's overall instead of guessing.
+ */
+r.post('/draft/recompute', (req, res) => {
+  const b = (req.body ?? {}) as { gameVersion?: string; positionId?: number; archetype?: number; overall?: number; ratings?: Record<string, number>; reconcile?: boolean };
+  const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
+  const posId = Number(b.positionId) || 0;
+  const archetype = Number(b.archetype) || 0;
+  const ratings: Record<string, number> = {};
+  for (const [k, v] of Object.entries(b.ratings ?? {})) ratings[k] = Math.max(0, Math.min(99, Number(v) || 0));
+  const before = OVRWeightsCalculator.computeOverall(posId, archetype, ratings, gameVersion);
+  let reconciled: Record<string, number> | null = null;
+  if (b.reconcile && b.overall != null) {
+    reconciled = { ...ratings };
+    reconcileToTarget(reconciled, posId, archetype, Number(b.overall), gameVersion);
+  }
+  const after = reconciled ? OVRWeightsCalculator.computeOverall(posId, archetype, reconciled, gameVersion) : before;
+  res.json({ gameOverall: after, beforeReconcile: before, reconciled });
+});
+
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
     source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;

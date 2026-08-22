@@ -36,7 +36,7 @@ function PersonaEditor({
     const onDown = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setAdding(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setAdding(false);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setAdding(false); } };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -217,8 +217,15 @@ export function ProfileModal({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onClose(); return; }
-      // ←/→ step through the board's players — but never while typing in a
+      // Escape closes the innermost layer only: a nested editor (equipment /
+      // appearance / persona picker) handles its own Escape; the profile stays.
+      if (e.key === 'Escape') {
+        if (gearOpen || appearOpen) return;
+        if ((e.target as HTMLElement | null)?.closest('[data-nested-editor]')) return;
+        onClose();
+        return;
+      }
+      // <- / -> step through the board's players - but never while typing in a
       // field or while the equipment builder has focus.
       if (gearOpen || appearOpen || !onNavigate) return;
       const t = e.target as HTMLElement;
@@ -239,12 +246,31 @@ export function ProfileModal({
   const currentCollegeId =
     typeof patch.college === 'number' ? patch.college : colleges.find((c) => c.name === row.college)?.id ?? 0;
 
+
   const overall = Number(patch.overall ?? row.overall);
   const dev = Number(patch.devTrait ?? row.devTrait);
   const posId = Number(patch.position ?? row.positionId);
   const archetype = Number(patch.archetype ?? row.archetype);
   const posName = POS_NAMES[posId] ?? row.position;
   const edited = Object.keys(patch).length > 0;
+
+  // "What the game will show": after any edit, ask the server for Madden's
+  // recomputed overall (and, when overall/position/archetype changed, the
+  // attributes the export re-solves) - debounced so slider drags don't spam it.
+  const [gameView, setGameView] = useState<{ overall: number | null; reconciled: Record<string, number> | null } | null>(null);
+  useEffect(() => {
+    if (!edited) { setGameView(null); return; }
+    const ratings: Record<string, number> = {};
+    for (const k of Object.keys(row.ratings)) ratings[k] = eff(k);
+    const reconcile = 'overall' in patch || 'position' in patch || 'archetype' in patch;
+    const t = setTimeout(() => {
+      api.recompute({ gameVersion, positionId: posId, archetype, overall, ratings, reconcile })
+        .then((r) => setGameView({ overall: r.gameOverall, reconciled: r.reconciled }))
+        .catch(() => setGameView(null));
+    }, 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patch, row.id, posId, archetype, overall, gameVersion]);
 
   // Reset is destructive (clears rating + bio edits) — two-step inline confirm.
   const [confirmReset, setConfirmReset] = useState(false);
@@ -317,6 +343,16 @@ export function ProfileModal({
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{posName}</span>
               <RatingChip ovr={overall} size="sm" />
+              {gameView && gameView.overall != null && gameView.overall !== overall && (
+                <span
+                  className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
+                  title={gameView.reconciled
+                    ? 'Madden recomputes the overall from the attributes on import; the export re-solves the skill attributes to land on your overall, and this is where it lands.'
+                    : 'Madden recomputes the overall from the attributes on import; with these attributes it will show this.'}
+                >
+                  game shows {gameView.overall}
+                </span>
+              )}
               <DevBadge dev={dev} />
               {archName && <span className="text-xs text-neutral-500">{archName}</span>}
               {row.frontSeven && row.frontSeven.role && (

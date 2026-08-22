@@ -50,6 +50,10 @@ export default function App() {
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
   const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
+  const editKeyRef = useRef<{ year: number; league: string } | null>(null);
+  const editsRef = useRef<ClassEdits>({});
+  const gearRef = useRef<GearEdits>({});
+  const historyRef = useRef<{ past: Array<{ edits: ClassEdits; gear: GearEdits }>; future: Array<{ edits: ClassEdits; gear: GearEdits }> }>({ past: [], future: [] });
   const reqRef = useRef(0); // guards against a slow earlier response clobbering a newer selection
 
   const effLeague = useCallback(
@@ -111,8 +115,16 @@ export default function App() {
             setCachedYears((prev) => new Set(prev).add(year));
           }
         }
-        setEdits(await cache.editsGet(ekYear, league));
-        setGearEdits(await cache.gearEditsGet(ekYear, league));
+        // Edits are keyed by the class actually shown (Greats classes use a pseudo
+        // year / decade label), so every later save must use this same key.
+        editKeyRef.current = { year: ekYear, league };
+        historyRef.current = { past: [], future: [] };
+        const loadedEdits = await cache.editsGet(ekYear, league);
+        const loadedGear = await cache.gearEditsGet(ekYear, league);
+        editsRef.current = loadedEdits;
+        gearRef.current = loadedGear;
+        setEdits(loadedEdits);
+        setGearEdits(loadedGear);
       } catch (e) {
         if (req !== reqRef.current) return;
         setError((e as Error).message);
@@ -224,49 +236,129 @@ export default function App() {
     [selected, select, mode]
   );
 
+  // Persist both edit maps under the loaded class's key and remember the previous
+  // state for undo (Ctrl+Z / Ctrl+Shift+Z). Snapshots are small (sparse maps).
+  const commitEdits = useCallback((nextEdits: ClassEdits, nextGear: GearEdits, record = true) => {
+    const key = editKeyRef.current;
+    if (record) {
+      const h = historyRef.current;
+      h.past = [...h.past.slice(-49), { edits: editsRef.current, gear: gearRef.current }];
+      h.future = [];
+    }
+    editsRef.current = nextEdits;
+    gearRef.current = nextGear;
+    setEdits(nextEdits);
+    setGearEdits(nextGear);
+    if (key) {
+      cache.editsSet(key.year, key.league, nextEdits);
+      cache.gearEditsSet(key.year, key.league, nextGear);
+    }
+  }, []);
+
   const setEdit = useCallback(
     (id: number, fieldName: string, value: number | string) => {
-      setEdits((prev) => {
-        const next = { ...prev, [id]: { ...(prev[id] || {}), [fieldName]: value } };
-        if (selected != null) cache.editsSet(selected, effLeague(selected), next);
-        return next;
-      });
+      const prev = editsRef.current;
+      commitEdits({ ...prev, [id]: { ...(prev[id] || {}), [fieldName]: value } }, gearRef.current);
     },
-    [selected, effLeague]
+    [commitEdits]
   );
 
   const setGearEdit = useCallback(
     (id: number, slot: string, asset: string) => {
-      setGearEdits((prev) => {
-        const player = { ...(prev[id] || {}) };
-        if (asset) player[slot] = asset;
-        else delete player[slot]; // empty = revert to era default
-        const next = { ...prev, [id]: player };
-        if (!Object.keys(player).length) delete next[id];
-        if (selected != null) cache.gearEditsSet(selected, effLeague(selected), next);
-        return next;
-      });
+      const prev = gearRef.current;
+      const player = { ...(prev[id] || {}) };
+      if (asset) player[slot] = asset;
+      else delete player[slot]; // empty = revert to era default
+      const next = { ...prev, [id]: player };
+      if (!Object.keys(player).length) delete next[id];
+      commitEdits(editsRef.current, next);
     },
-    [selected, effLeague]
+    [commitEdits]
   );
 
   const resetPlayer = useCallback(
     (id: number) => {
-      setEdits((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        if (selected != null) cache.editsSet(selected, effLeague(selected), next);
-        return next;
-      });
-      setGearEdits((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        if (selected != null) cache.gearEditsSet(selected, effLeague(selected), next);
-        return next;
-      });
+      const e = { ...editsRef.current };
+      delete e[id];
+      const g = { ...gearRef.current };
+      delete g[id];
+      commitEdits(e, g);
     },
-    [selected, effLeague]
+    [commitEdits]
   );
+
+  const undoEdit = useCallback(() => {
+    const h = historyRef.current;
+    const snap = h.past.pop();
+    if (!snap) return;
+    h.future.push({ edits: editsRef.current, gear: gearRef.current });
+    commitEdits(snap.edits, snap.gear, false);
+  }, [commitEdits]);
+
+  const redoEdit = useCallback(() => {
+    const h = historyRef.current;
+    const snap = h.future.pop();
+    if (!snap) return;
+    h.past.push({ edits: editsRef.current, gear: gearRef.current });
+    commitEdits(snap.edits, snap.gear, false);
+  }, [commitEdits]);
+
+  const clearAllEdits = useCallback(() => commitEdits({}, {}), [commitEdits]);
+
+  /** Edits as a portable JSON document (validated on import against the class). */
+  const exportEdits = useCallback(() => {
+    if (!data) return null;
+    const names: Record<number, string> = {};
+    for (const r of data.rows) if (editsRef.current[r.id] || gearRef.current[r.id]) names[r.id] = `${r.firstName} ${r.lastName}`;
+    return { format: 'draft-class-edits/1', year: data.year, league: data.league, gameVersion: data.gameVersion ?? 'm26', exportedAt: new Date().toISOString(), names, edits: editsRef.current, gearEdits: gearRef.current };
+  }, [data]);
+
+  const importEdits = useCallback((doc: { format?: string; year?: number; league?: string; edits?: ClassEdits; gearEdits?: GearEdits; names?: Record<number, string> }): string | null => {
+    if (!data) return 'No class loaded';
+    if (doc.format !== 'draft-class-edits/1') return 'Not an edits file';
+    if (doc.year !== data.year || doc.league !== data.league) return `These edits are for ${doc.year} ${doc.league}, not ${data.year} ${data.league}`;
+    // Names guard: a pick whose name changed (different cache version) is skipped.
+    const byId = new Map(data.rows.map((r) => [r.id, `${r.firstName} ${r.lastName}`]));
+    const edits: ClassEdits = {}, gear: GearEdits = {};
+    let skipped = 0;
+    for (const [idStr, patch] of Object.entries(doc.edits ?? {})) {
+      const id = Number(idStr);
+      if (doc.names?.[id] && byId.get(id) !== doc.names[id]) { skipped++; continue; }
+      edits[id] = patch;
+    }
+    for (const [idStr, patch] of Object.entries(doc.gearEdits ?? {})) {
+      const id = Number(idStr);
+      if (doc.names?.[id] && byId.get(id) !== doc.names[id]) { skipped++; continue; }
+      gear[id] = patch;
+    }
+    commitEdits({ ...editsRef.current, ...edits }, { ...gearRef.current, ...gear });
+    return skipped ? `Imported; ${skipped} entries skipped (player names did not match)` : null;
+  }, [data, commitEdits]);
+
+  // One-time migration: All-Time edits used to be saved under the real-year key
+  // shape (edits:0_NFL) while being loaded from edits:0_all-time, so they were lost.
+  useEffect(() => {
+    (async () => {
+      const [oldE, newE] = await Promise.all([cache.editsGet(0, 'NFL'), cache.editsGet(0, 'all-time')]);
+      if (Object.keys(oldE).length && !Object.keys(newE).length) { await cache.editsSet(0, 'all-time', oldE); await cache.editsDel(0, 'NFL'); }
+      const [oldG, newG] = await Promise.all([cache.gearEditsGet(0, 'NFL'), cache.gearEditsGet(0, 'all-time')]);
+      if (Object.keys(oldG).length && !Object.keys(newG).length) { await cache.gearEditsSet(0, 'all-time', oldG); await cache.gearEditsDel(0, 'NFL'); }
+    })().catch(() => {});
+  }, []);
+
+  // Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z (or Ctrl+Y) redo, unless typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key.toLowerCase() === 'z' && e.shiftKey) { e.preventDefault(); redoEdit(); }
+      else if (e.key.toLowerCase() === 'z') { e.preventDefault(); undoEdit(); }
+      else if (e.key.toLowerCase() === 'y') { e.preventDefault(); redoEdit(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [undoEdit, redoEdit]);
 
   // Once the available years are known, load the saved range (or default to full span).
   useEffect(() => {
@@ -382,6 +474,7 @@ export default function App() {
               onEdit={setEdit}
               onGearEdit={setGearEdit}
               onResetPlayer={resetPlayer}
+              editTools={{ undo: undoEdit, redo: redoEdit, clearAll: clearAllEdits, exportEdits, importEdits }}
               archetypeOptions={archetypeOptions}
               mode={mode}
               focusPlayer={focusPlayer}

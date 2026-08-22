@@ -13,6 +13,15 @@ type Msg = { ok: boolean; text: string } | null;
  * manual file move), Frosty portrait build, CSV. Results show as a bottom-right
  * toast instead of eating layout space.
  */
+/** Edit-history and transfer tools supplied by App (undo/redo/clear/export/import). */
+export interface EditTools {
+  undo: () => void;
+  redo: () => void;
+  clearAll: () => void;
+  exportEdits: () => Record<string, unknown> | null;
+  importEdits: (doc: Record<string, unknown>) => string | null;
+}
+
 export function ExportMenu({
   year,
   league,
@@ -24,6 +33,7 @@ export function ExportMenu({
   rows,
   draftOpts,
   gameVersion = 'm26',
+  editTools,
 }: {
   year: number;
   league: string;
@@ -35,7 +45,34 @@ export function ExportMenu({
   rows: PlayerRow[];
   draftOpts: DraftOpts;
   gameVersion?: GameVersion;
+  editTools?: EditTools;
 }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  function downloadEditsJson() {
+    const doc = editTools?.exportEdits();
+    if (!doc) return;
+    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DraftClass_${year}_${league}_edits.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setMsg({ ok: true, text: `Exported ${editedCount} edited players to DraftClass_${year}_${league}_edits.json.` });
+  }
+
+  async function importEditsFile(file: File) {
+    try {
+      const doc = JSON.parse(await file.text());
+      const warn = editTools?.importEdits(doc);
+      setMsg(warn ? { ok: true, text: warn } : { ok: true, text: `Imported edits from ${file.name}.` });
+    } catch (e) {
+      setMsg({ ok: false, text: `Import failed: ${(e as Error).message}` });
+    }
+  }
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<'mdc' | 'saves' | 'portraits' | null>(null);
   const [msg, setMsg] = useState<Msg>(null);
@@ -187,6 +224,24 @@ export function ExportMenu({
           >
             <span>Export CSV (spreadsheet)</span>
           </button>
+          {editTools && (
+            <>
+              <div className="my-1 border-t border-border" />
+              <div className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-wider text-muted">Edits</div>
+              <button onClick={() => { setOpen(false); editTools.undo(); }} className={item} title="Ctrl+Z"><span>Undo last edit</span><span className="text-neutral-500">Ctrl+Z</span></button>
+              <button onClick={() => { setOpen(false); editTools.redo(); }} className={item} title="Ctrl+Shift+Z"><span>Redo</span><span className="text-neutral-500">Ctrl+Shift+Z</span></button>
+              <button onClick={() => { setOpen(false); downloadEditsJson(); }} disabled={!editedCount} className={item}><span>Export edits (.json)</span><span className="tabular-nums text-neutral-500">{editedCount}</span></button>
+              <button onClick={() => { setOpen(false); fileRef.current?.click(); }} className={item}><span>Import edits (.json)</span></button>
+              <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importEditsFile(f); e.target.value = ''; }} />
+              <button
+                onClick={() => { setOpen(false); if (editedCount && window.confirm(`Clear all ${editedCount} edited players for ${year} ${league}? Undo (Ctrl+Z) can bring them back until you reload.`)) editTools.clearAll(); }}
+                disabled={!editedCount}
+                className={`${item} text-red-300`}
+              >
+                <span>Clear all edits for this class</span>
+              </button>
+            </>
+          )}
         </div>
       )}
 
