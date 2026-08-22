@@ -140,31 +140,30 @@ function jerseyFor(group: string, rand: () => number, year = 2000): number {
   return ranges[0][0];
 }
 
-/** Madden 26 body type (Heavy / Muscular / Thin / Standard) from position group +
- *  weight, mirroring the template's build distribution: OL & big DT are Heavy, the
- *  back seven & specialists are Thin, RB/TE/EDGE/LB are Muscular, QB/WR are Standard.
- *  Weight refines the borderline groups (a 300 lb DT is Heavy, a lighter one Muscular). */
-function bodyTypeFor(group: string, weight: number | null): 'Heavy' | 'Muscular' | 'Thin' | 'Standard' {
+/** Body type (Standard / Thin / Muscular / Heavy) the way the games assign it,
+ *  fitted to 3,566 prospects from M26 + M27's own generated classes
+ *  (scripts/probes/probe-builds.js). Highlights: WR/CB/S are always Standard,
+ *  K/P/LS always Thin, EDGE always Muscular, DT/G/C always Heavy, tackles turn
+ *  Heavy around 305-325 lb, TEs are never Heavy (Muscular only when light), and
+ *  QBs are Heavy only at ~300 lb. Where the game mixes two types at one weight
+ *  the split is reproduced with the seeded `rand`. */
+export function bodyTypeFor(posName: string, weight: number | null, rand: () => number): 'Heavy' | 'Muscular' | 'Thin' | 'Standard' {
   const w = weight ?? 0;
-  switch (group) {
-    case 'OL':
-      return w && w < 285 ? 'Muscular' : 'Heavy';
-    case 'IDL':
-      return w >= 300 ? 'Heavy' : 'Muscular';
-    case 'EDGE':
-      return w >= 275 ? 'Heavy' : 'Muscular';
-    case 'TE':
-      return w >= 262 ? 'Heavy' : 'Muscular';
-    case 'RB':
-    case 'LB':
-      return 'Muscular';
-    case 'S':
-      return w >= 212 ? 'Muscular' : 'Thin';
-    case 'CB':
-    case 'K':
-      return 'Thin';
-    default:
-      return 'Standard'; // QB, WR, P, LS
+  const r = rand();
+  switch (posName) {
+    case 'QB': return w >= 290 ? 'Heavy' : r < 0.2 ? 'Thin' : 'Standard';
+    case 'HB': return w >= 220 && r < 0.8 ? 'Muscular' : 'Standard';
+    case 'FB': return r < 0.6 ? 'Muscular' : 'Standard';
+    case 'WR': case 'CB': case 'FS': case 'SS': return 'Standard';
+    case 'TE': return w < 245 ? (r < 0.55 ? 'Muscular' : 'Standard') : w < 260 ? (r < 0.22 ? 'Muscular' : 'Standard') : 'Standard';
+    case 'LT': case 'RT': return w < 305 ? 'Muscular' : w < 325 ? (r < 0.55 ? 'Heavy' : 'Muscular') : 'Heavy';
+    case 'LG': case 'RG': case 'C': case 'DT': return 'Heavy';
+    case 'LEDG': case 'REDG': return 'Muscular';
+    case 'SAM': return w < 230 ? (r < 0.45 ? 'Muscular' : 'Standard') : 'Muscular';
+    case 'MIKE': return w < 235 && r < 0.15 ? 'Standard' : 'Muscular';
+    case 'WILL': return w < 230 ? (r < 0.4 ? 'Muscular' : 'Standard') : w < 240 ? (r < 0.65 ? 'Muscular' : 'Standard') : 'Muscular';
+    case 'K': case 'P': case 'LS': return 'Thin';
+    default: return 'Standard';
   }
 }
 
@@ -222,7 +221,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.weight = weight;
   const group = PositionMapper.groupFromId(posId);
   prospect.jerseyNum = (player.jersey || null) ?? (career?.jersey || null) ?? jerseyFor(group, rand, player.draftYear); // 0 = unknown in the source
-  prospect.bodyType = bodyTypeFor(group, weight); // Madden build, else inherits the donor block's
+  prospect.bodyType = bodyTypeFor(posName, weight, rand); // the game's build mix for the position/weight
   prospect.draftable = 1;
   prospect.draftRound = player.draftRound ?? 63; // 63 = UDFA
   prospect.draftPick = withinRoundPick(player.draftPick);
