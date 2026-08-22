@@ -1,6 +1,8 @@
 import { MdcService, MdcProspect } from './MdcService';
 import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
+import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
+export { RATING_KEYS } from './AttributeModel';
 import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
 import { PositionMapper } from './PositionMapper';
@@ -59,79 +61,6 @@ function devFromCaliber(caliber: number, player: BaselinePlayer): number {
   else if (caliber >= 80) dev = 1;
   const slotCap = round <= 1 ? 3 : round <= 3 ? 2 : round <= 5 ? 1 : caliber >= 82 ? 1 : 0;
   return Math.min(dev, slotCap);
-}
-
-/** Rating fields M26Writer reads (and that exist on parsed donor prospects). */
-export const RATING_KEYS = [
-  'speed', 'acceleration', 'agility', 'strength', 'awareness', 'jumping', 'stamina',
-  'changeOfDirection', 'toughness', 'injury', 'carrying', 'ballCarrierVision', 'breakTackle',
-  'trucking', 'stiffArm', 'spinMove', 'jukeMove', 'catching', 'catchInTraffic', 'spectacularCatch',
-  'shortRouteRunning', 'mediumRouteRunning', 'deepRouteRunning', 'release', 'throwPower',
-  'throwAccuracyShort', 'throwAccuracyMid', 'throwAccuracyDeep', 'throwOnTheRun', 'throwUnderPressure',
-  'playAction', 'breakSack', 'passBlock', 'passBlockPower', 'passBlockFinesse', 'runBlock',
-  'runBlockPower', 'runBlockFinesse', 'leadBlock', 'impactBlocking', 'tackle', 'hitPower',
-  'powerMoves', 'finesseMoves', 'blockShedding', 'pursuit', 'playRecognition', 'manCoverage',
-  'zoneCoverage', 'pressCoverage', 'kickPower', 'kickAccuracy', 'kickReturn', 'longSnap',
-];
-
-/** Attributes that come from a player's athleticism (combine + archetype baseline),
- *  NOT from career caliber — so they're never pumped by the OVR delta and never moved
- *  by the OVR reconciliation. Physical traits (a highly-rated MIKE isn't a 99-speed
- *  sprinter) plus the QB signature arm (a good QB isn't automatically a 99 cannon). */
-const FIXED_ATTRS = new Set([
-  'speed', 'acceleration', 'agility', 'changeOfDirection', 'jumping', 'strength', 'throwPower',
-]);
-
-function clampRating(v: number): number {
-  return Math.max(1, Math.min(99, Math.round(v)));
-}
-
-/** Piecewise-linear interpolation over [x, rating] anchors (x ascending). */
-function interpRating(anchors: [number, number][], x: number): number {
-  if (x <= anchors[0][0]) return anchors[0][1];
-  const last = anchors[anchors.length - 1];
-  if (x >= last[0]) return last[1];
-  for (let i = 1; i < anchors.length; i++) {
-    const [x1, y1] = anchors[i - 1];
-    const [x2, y2] = anchors[i];
-    if (x <= x2) return y1 + ((y2 - y1) * (x - x1)) / (x2 - x1);
-  }
-  return last[1];
-}
-
-// Combine metric -> Madden rating anchors (time-based metrics: lower time = higher rating).
-const A_FORTY: [number, number][] = [[4.24, 99], [4.35, 96], [4.45, 92], [4.55, 87], [4.65, 81], [4.75, 74], [4.85, 66], [4.95, 58], [5.1, 48], [5.5, 34]];
-const A_BENCH: [number, number][] = [[0, 50], [8, 58], [14, 64], [19, 70], [24, 76], [29, 82], [34, 88], [39, 93], [45, 99]];
-const A_VERT: [number, number][] = [[24, 52], [28, 60], [31, 68], [34, 76], [37, 84], [40, 91], [43, 96], [46, 99]];
-const A_BROAD: [number, number][] = [[100, 52], [108, 60], [114, 68], [120, 76], [126, 84], [132, 91], [138, 96], [144, 99]];
-const A_CONE: [number, number][] = [[6.4, 99], [6.6, 94], [6.8, 89], [7.0, 83], [7.2, 76], [7.4, 68], [7.6, 60], [7.9, 50], [8.3, 40]];
-const A_SHUTTLE: [number, number][] = [[3.9, 99], [4.0, 95], [4.1, 90], [4.2, 84], [4.3, 78], [4.4, 71], [4.5, 63], [4.7, 52], [4.9, 42]];
-
-/** Athletic ratings derived from real combine testing (overrides archetype defaults). */
-function combineAttrs(c: CombineMeasurements): Record<string, number> {
-  const out: Record<string, number> = {};
-  if (c.forty != null) {
-    const spd = clampRating(interpRating(A_FORTY, c.forty));
-    out.speed = spd;
-    // Acceleration is short-area burst, not top-end speed: blend the 40 with the
-    // explosion/quickness drills so ACC diverges from SPD (a fast but stiff player
-    // accelerates worse than an explosive one; a springy player, better).
-    const bursts: number[] = [];
-    if (c.vertical != null) bursts.push(interpRating(A_VERT, c.vertical));
-    if (c.broad != null) bursts.push(interpRating(A_BROAD, c.broad));
-    if (c.shuttle != null) bursts.push(interpRating(A_SHUTTLE, c.shuttle));
-    if (c.cone != null) bursts.push(interpRating(A_CONE, c.cone));
-    out.acceleration = bursts.length
-      ? clampRating(0.55 * spd + 0.45 * (bursts.reduce((s, v) => s + v, 0) / bursts.length))
-      : spd;
-  }
-  if (c.bench != null) out.strength = clampRating(interpRating(A_BENCH, c.bench));
-  if (c.vertical != null) out.jumping = clampRating(interpRating(A_VERT, c.vertical));
-  else if (c.broad != null) out.jumping = clampRating(interpRating(A_BROAD, c.broad));
-  if (c.cone != null) out.agility = clampRating(interpRating(A_CONE, c.cone));
-  if (c.shuttle != null) out.changeOfDirection = clampRating(interpRating(A_SHUTTLE, c.shuttle));
-  else if (c.cone != null && out.agility != null) out.changeOfDirection = out.agility;
-  return out;
 }
 
 function withinRoundPick(overallPick: number | null): number {
@@ -203,47 +132,14 @@ function bodyTypeFor(group: string, weight: number | null): 'Heavy' | 'Muscular'
   }
 }
 
-/** Madden RECOMPUTES a prospect's Overall from its archetype-weighted attributes on
- *  import (it discards our OVR byte). Shift only the learnable/skill attributes so
- *  that recompute lands on `target`, leaving physical + signature traits (FIXED_ATTRS)
- *  and the athletic combine values untouched. A uniform weighted shift preserves the
- *  archetype's relative attribute profile; clamping is absorbed by re-solving. */
-function reconcileToTarget(prospect: MdcProspect, posId: number, archetype: number, target: number): void {
-  const entry = OVRWeightsCalculator.ovrEntryFor(posId, archetype);
-  if (!entry || !entry.sumWeight) return;
-  const { desiredLow: DL, desiredHigh: DH, sumWeight, weights } = entry;
-  const requiredSum = (DL + (target / 99) * (DH - DL)) * sumWeight; // Σ(attr·w) target
-  const free = Object.keys(weights).filter((a) => !FIXED_ATTRS.has(a));
-  if (!free.length) return;
-
-  for (let iter = 0; iter < 8; iter++) {
-    let sum = 0;
-    for (const [a, w] of Object.entries(weights)) sum += (Number(prospect[a]) || 0) * w;
-    if (Math.round(((sum / sumWeight - DL) / (DH - DL)) * 99) === target) break;
-    const deficit = requiredSum - sum;
-    let movableW = 0; // weight of free attrs with headroom in the needed direction
-    for (const a of free) {
-      const v = Number(prospect[a]) || 0;
-      if (deficit > 0 ? v < 99 : v > 1) movableW += weights[a];
-    }
-    if (movableW === 0) break; // fully clamped — accept the closest reachable OVR
-    const shift = deficit / movableW;
-    for (const a of free) {
-      const v = Number(prospect[a]) || 0;
-      if (deficit > 0 ? v >= 99 : v <= 1) continue;
-      prospect[a] = clampRating(v + shift);
-    }
-  }
-}
-
 /** Convert a ranked player into an M26 prospect: attributes come from Madden's
  *  real per-position profile shifted to the assigned OVR (with small seeded
  *  per-player variance); bio from real data or Madden norms; plus likeness +
  *  era gear. */
-function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | 'm27' = 'm26'): { prospect: MdcProspect; kind: LikenessKind } {
+function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | 'm27' = 'm26', mode: GenMode = 'madden'): { prospect: MdcProspect; kind: LikenessKind } {
   const { player, index, posId, overall, devTrait } = it;
   const posName = PositionMapper.name(posId);
-  const profile = CalibrationService.positionProfile(posName);
+  const profile = CalibrationService.positionProfile(posName, gameVersion);
   const rand = seededRng(`${player.firstName}|${player.lastName}|${player.draftYear}|${index}`);
 
   // Bio first (real measurements when we have them, else Madden per-position
@@ -257,27 +153,21 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // else the closest Madden height/weight profile.
   const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, player.draftPick);
   const archetype = ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
-  const { attrs, ovrMean } = CalibrationService.archetypeAttrs(posName, archetype);
+  const { attrs, ovrMean } = CalibrationService.archetypeAttrs(posName, archetype, gameVersion);
 
   const prospect: MdcProspect = {};
-  const delta = overall - ovrMean;
-  for (const k of RATING_KEYS) {
-    const base = attrs[k] ?? profile.attrs[k] ?? 55;
-    const variance = Math.round((rand() - 0.5) * 6);
-    // Physical + signature traits (FIXED_ATTRS) stay at the athletic baseline — they
-    // don't scale with career caliber. Everything else starts from the archetype
-    // profile shifted toward OVR, then gets reconciled to the exact target below.
-    prospect[k] = clampRating(FIXED_ATTRS.has(k) ? base + variance : base + delta + variance);
-  }
-  // Real combine testing overrides the measured athletic attributes (speed from the
-  // 40, acceleration from short-area burst, strength/jumping/agility/COD from drills).
-  if (player.combine) {
-    for (const [k, v] of Object.entries(combineAttrs(player.combine))) prospect[k] = v;
-  }
+  // Attributes from Madden's own per-position relationships (slope vs overall,
+  // spread, range), combine testing scored within the position, then reconciled so
+  // the game's on-import OVR recompute equals the OVR we intend (it ignores the
+  // OVR byte). Career-retrospective mode is uncapped (legends can exceed the
+  // rookie range).
+  const generated = generateAttributes({
+    posId, profile, archAttrs: attrs, archOvrMean: ovrMean, overall, rand,
+    combine: player.combine, uncapped: mode === 'retro',
+  });
+  Object.assign(prospect, generated);
   prospect.archetype = archetype;
-  // Calibrate the learnable attributes so Madden's on-import OVR recompute equals the
-  // OVR we intend (Madden ignores the OVR byte and recomputes from these attributes).
-  reconcileToTarget(prospect, posId, archetype, overall);
+  reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
 
   // Identity.
   prospect.firstName = player.firstName || 'Player';
@@ -287,7 +177,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   const home = parseHometown(player.homeState);
   prospect.homeState = home.state;
   prospect.homeTown = home.town;
-  prospect.age = player.age ?? CalibrationService.sampleAge(rand);
+  prospect.age = player.age ?? CalibrationService.sampleAge(rand, gameVersion);
   prospect.heightInches = heightInches;
   prospect.weight = weight;
   const group = PositionMapper.groupFromId(posId);
@@ -408,7 +298,7 @@ const EDIT_CLAMP: Record<string, [number, number]> = {
  *  so a bare OVR/position/archetype change must reshape the skill attributes to match). */
 const RECONCILE_TRIGGERS = new Set(['overall', 'position', 'archetype']);
 
-export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits): void {
+export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits, gameVersion: 'm26' | 'm27' = 'm26'): void {
   if (!edits) return;
   for (const [pickStr, patch] of Object.entries(edits)) {
     const p = prospects[Number(pickStr) - 1];
@@ -470,7 +360,7 @@ export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits): void {
     // in-game recompute matches the edited OVR — then re-apply any explicit rating edits
     // from this patch so a hand-tuned rating still wins over the reconciliation.
     if (Object.keys(patch).some((k) => RECONCILE_TRIGGERS.has(k))) {
-      reconcileToTarget(p, Number(p.position), Number(p.archetype), Number(p.overall));
+      reconcileToTarget(p as Record<string, number>, Number(p.position), Number(p.archetype), Number(p.overall), gameVersion);
       for (const [k, raw] of Object.entries(patch)) {
         if (!RATING_KEYS.includes(k)) continue;
         const v = Number(raw);
@@ -576,9 +466,9 @@ export const DraftClassBuilder = {
         .sort((a, b) => b.caliber - a.caliber)
         .forEach((it, rank) => {
           const topFrac = (rank + 0.5) / N; // 0 = best player in the class
-          const base = CalibrationService.ovrAtPercentile(1 - topFrac);
+          const base = CalibrationService.ovrAtPercentile(1 - topFrac, gameVersion);
           it.overall = Math.min(capMax, Math.round(base * strength));
-          it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(topFrac);
+          it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(topFrac, gameVersion);
           if (rank < studs) {
             it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
             it.devTrait = Math.max(it.devTrait, 2);
@@ -590,7 +480,7 @@ export const DraftClassBuilder = {
         });
     }
 
-    const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion));
+    const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion, mode));
     const likeness: LikenessStats = {
       asset: built.filter((b) => b.kind === 'asset').length,
       generic: built.filter((b) => b.kind === 'generic').length,
@@ -687,7 +577,7 @@ export const DraftClassBuilder = {
    *  The M27 writer zeroes unused blocks itself, so no neutralize pass is needed. */
   buildMdc27(players: BaselinePlayer[], edits?: ClassEdits, mode: GenMode = 'madden', gearEdits?: GearEdits, opts: GenOptions = {}): BuildResult {
     const { prospects, truncated, dropped, likeness } = this.buildProspects(players, mode, opts, 'm27');
-    applyEdits(prospects, edits);
+    applyEdits(prospects, edits, 'm27');
     applyGearEdits(prospects, gearEdits);
     const capped = players.slice(0, LOGICAL_CAPACITY);
     prospects.forEach((p, i) => {

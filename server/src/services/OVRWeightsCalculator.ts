@@ -79,10 +79,38 @@ function loadEntries(): OvrEntry[] {
 
 const cache = new Map<string, OvrEntry | null>();
 
+export type GameVersion = 'm26' | 'm27';
+
+/** Corrections fitted from the game's own generated classes where ovrweights.json
+ *  disagrees with the overall the game actually computes (the offensive-line
+ *  archetypes ran 0-5 points low). See scripts/fit-ovrweights.py. */
+interface Override { pos: string; archetype: string; weights: Record<string, number>; desiredLow: number; desiredHigh: number }
+const overrideCache: Partial<Record<GameVersion, Record<string, Override>>> = {};
+function overridesFor(version: GameVersion): Record<string, Override> {
+  const hit = overrideCache[version];
+  if (hit) return hit;
+  let out: Record<string, Override> = {};
+  try {
+    const raw = LookupService.rawJson(version === 'm27' ? 'ovrweights-overrides-m27.json' : 'ovrweights-overrides.json') as { overrides?: Record<string, Override> };
+    out = raw?.overrides ?? {};
+  } catch { /* no overrides file */ }
+  overrideCache[version] = out;
+  return out;
+}
+
+function applyOverride(e: OvrEntry, version: GameVersion): OvrEntry {
+  const suffix = norm(e.archetype.replace(new RegExp(`^${e.pos}_?`, 'i'), ''));
+  const o = overridesFor(version)[`${e.pos}:${suffix}`];
+  if (!o) return e;
+  const weights = Object.keys(o.weights).length ? o.weights : e.weights;
+  const sumWeight = Object.values(weights).reduce((s, w) => s + w, 0);
+  return { ...e, weights, sumWeight, desiredLow: o.desiredLow, desiredHigh: o.desiredHigh };
+}
+
 /** Resolve the ovrweights entry for a Madden (positionId, archetypeId). Matched by
  *  the archetype's suffix name within the position's ovrweights bucket. */
-export function ovrEntryFor(posId: number, archetypeId: number): OvrEntry | null {
-  const key = `${posId}:${archetypeId}`;
+export function ovrEntryFor(posId: number, archetypeId: number, version: GameVersion = 'm26'): OvrEntry | null {
+  const key = `${version}:${posId}:${archetypeId}`;
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
 
@@ -98,13 +126,14 @@ export function ovrEntryFor(posId: number, archetypeId: number): OvrEntry | null
       (suffix ? pool.find((e) => suffixOf(e).includes(suffix) || suffix.includes(suffixOf(e))) : null) ||
       pool[0];
   }
+  if (chosen) chosen = applyOverride(chosen, version);
   cache.set(key, chosen);
   return chosen;
 }
 
 /** Madden's recomputed Overall for a prospect's attributes at (position, archetype). */
-export function computeOverall(posId: number, archetypeId: number, attrs: Record<string, number>): number | null {
-  const entry = ovrEntryFor(posId, archetypeId);
+export function computeOverall(posId: number, archetypeId: number, attrs: Record<string, number>, version: GameVersion = 'm26'): number | null {
+  const entry = ovrEntryFor(posId, archetypeId, version);
   if (!entry || !entry.sumWeight) return null;
   let sum = 0;
   for (const [attr, w] of Object.entries(entry.weights)) sum += (Number(attrs[attr]) || 0) * w;

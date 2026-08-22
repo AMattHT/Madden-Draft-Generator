@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { CACHE_DIR } from '../config/paths';
 import { parseCsvFile, normalizeName } from '../util/csv';
+import { PositionMapper } from './PositionMapper';
 
 /**
  * NFL Combine measurements + testing numbers from nflverse (combine.csv, 2000+).
@@ -28,6 +29,7 @@ interface RawRow {
   draft_year: string;
   season: string;
   player_name: string;
+  pos: string;
   ht: string;
   wt: string;
   forty: string;
@@ -52,6 +54,10 @@ const htInches = (s: string | undefined): number | null => {
 
 let byKey: Map<string, CombineData> | null = null;
 let loading: Promise<void> | null = null;
+// rating group -> drill -> ascending sorted values (for within-position percentiles)
+let drillsByGroup: Map<string, Record<string, number[]>> | null = null;
+const DRILLS = ['forty', 'bench', 'vertical', 'broad', 'cone', 'shuttle'] as const;
+const LOWER_IS_BETTER = new Set(['forty', 'cone', 'shuttle']);
 
 async function ensureLoaded(): Promise<void> {
   if (byKey) return;
@@ -66,9 +72,16 @@ async function ensureLoaded(): Promise<void> {
       }
       const rows = parseCsvFile<RawRow>(CACHE_FILE);
       const map = new Map<string, CombineData>();
+      const drills = new Map<string, Record<string, number[]>>();
       for (const r of rows) {
         const name = normalizeName(r.player_name);
         if (!name) continue;
+        // Per-position-group drill distributions (all combine years).
+        const group = PositionMapper.groupFromLabel(r.pos);
+        const g = drills.get(group) ?? Object.fromEntries(DRILLS.map((d) => [d, [] as number[]]));
+        const vals: Record<string, number | null> = { forty: num(r.forty), bench: num(r.bench), vertical: num(r.vertical), broad: num(r.broad_jump), cone: num(r.cone), shuttle: num(r.shuttle) };
+        for (const d of DRILLS) if (vals[d] != null) g[d].push(vals[d] as number);
+        drills.set(group, g);
         const data: CombineData = {
           heightInches: htInches(r.ht),
           weight: num(r.wt) != null ? Math.round(num(r.wt)!) : null,
@@ -86,6 +99,8 @@ async function ensureLoaded(): Promise<void> {
         if (season) map.set(`${name}|${season}`, data);
       }
       byKey = map;
+      for (const g of drills.values()) for (const d of DRILLS) g[d].sort((a, b) => a - b);
+      drillsByGroup = drills;
     })().catch((e) => {
       loading = null;
       throw e;
@@ -95,6 +110,22 @@ async function ensureLoaded(): Promise<void> {
 }
 
 export const CombineService = {
+  /**
+   * Where a drill result sits among combine participants of the same position
+   * group (0 = worst, 1 = best; time drills inverted). Null until the combine
+   * file is loaded or when the group has fewer than 20 results.
+   */
+  drillPercentile(group: string, drill: string, value: number): number | null {
+    const g = drillsByGroup?.get(group) ?? drillsByGroup?.get('WR');
+    const arr = g?.[drill];
+    if (!arr || arr.length < 20) return null;
+    // binary search for the count of values <= value
+    let lo = 0, hi = arr.length;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (arr[mid] <= value) lo = mid + 1; else hi = mid; }
+    const below = lo / arr.length;
+    return LOWER_IS_BETTER.has(drill) ? 1 - below : below;
+  },
+
   /** Combine data for a player by name + draft year, or undefined. Empty on failure. */
   async get(firstName: string, lastName: string, draftYear: number): Promise<CombineData | undefined> {
     try {

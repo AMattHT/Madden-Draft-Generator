@@ -1,0 +1,130 @@
+{
+ "_source": "fit from 1556 game-generated m27 prospects (scripts/fit-ovrweights.py)",
+ "overrides": {
+  "C:agile": {
+   "pos": "C",
+   "archetype": "agile",
+   "weights": {
+    "acceleration": 0.261,
+    "agility": 0.553,
+    "awareness": 2.265,
+    "impactBlocking": 0.407,
+    "leadBlock": 0.721,
+    "passBlock": 0.917,
+    "runBlockFinesse": 2.651,
+    "runBlock": 1.564,
+    "strength": 0.662
+   },
+   "desiredLow": 31.338,
+   "desiredHigh": 93.944,
+   "n": 16,
+   "fitExact": 10,
+   "storedExact": 0
+  },
+  "C:power": {
+   "pos": "C",
+   "archetype": "power",
+   "weights": {
+    "acceleration": 0.034,
+    "agility": 0.832,
+    "awareness": 0.34,
+    "impactBlocking": 0.364,
+    "leadBlock": 0.387,
+    "passBlockPower": 1.009,
+    "passBlock": 0.778,
+    "runBlockPower": 2.096,
+    "runBlock": 2.445,
+    "speed": 0.442,
+    "strength": 1.273
+   },
+   "desiredLow": 32.461,
+   "desiredHigh": 92.559,
+   "n": 12,
+   "fitExact": 12,
+   "storedExact": 0
+  },
+  "G:agile": {
+   "pos": "G",
+   "archetype": "agile",
+   "weights": {
+    "acceleration": 0.616,
+    "agility": 0.756,
+    "awareness": 1.322,
+    "impactBlocking": 0.659,
+    "leadBlock": 0.562,
+    "passBlockFinesse": 0.874,
+    "passBlock": 0.241,
+    "runBlockFinesse": 2.342,
+    "runBlock": 1.152,
+    "strength": 1.476
+   },
+   "desiredLow": 31.573,
+   "desiredHigh": 93.849,
+   "n": 30,
+   "fitExact": 21,
+   "storedExact": 0
+  },
+  "G:power": {
+   "pos": "G",
+   "archetype": "power",
+   "weights": {
+    "acceleration": 0.109,
+    "agility": 0.445,
+    "awareness": 1.413,
+    "impactBlocking": 0.844,
+    "leadBlock": 0.724,
+    "passBlockPower": 0.9,
+    "runBlockPower": 3.206,
+    "runBlock": 0.722,
+    "speed": 0.549,
+    "strength": 1.088
+   },
+   "desiredLow": 31.583,
+   "desiredHigh": 93.324,
+   "n": 47,
+   "fitExact": 24,
+   "storedExact": 12
+  },
+  "OT:agile": {
+   "pos": "OT",
+   "archetype": "agile",
+   "weights": {
+    "agility": 0.005,
+    "awareness": 1.071,
+    "impactBlocking": 0.477,
+    "leadBlock": 0.161,
+    "passBlockFinesse": 0.681,
+    "passBlock": 1.885,
+    "runBlockFinesse": 2.425,
+    "runBlock": 1.273,
+    "speed": 0.39,
+    "strength": 1.633
+   },
+   "desiredLow": 30.195,
+   "desiredHigh": 94.563,
+   "n": 57,
+   "fitExact": 31,
+   "storedExact": 3
+  },
+  "OT:power": {
+   "pos": "OT",
+   "archetype": "power",
+   "weights": {
+    "acceleration": 0.279,
+    "agility": 0.894,
+    "awareness": 2.114,
+    "impactBlocking": 0.679,
+    "passBlockPower": 0.777,
+    "runBlockPower": 2.081,
+    "runBlock": 1.7,
+    "speed": 0.01,
+    "strength": 1.466
+   },
+   "desiredLow": 25.769,
+   "desiredHigh": 94.789,
+   "n": 47,
+   "fitExact": 29,
+   "storedExact": 1
+  }
+ }
+}
