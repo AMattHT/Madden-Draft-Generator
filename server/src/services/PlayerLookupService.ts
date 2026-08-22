@@ -50,6 +50,23 @@ function toInt(s: string | undefined): number | null {
   return Number.isNaN(n) ? null : n;
 }
 
+/** Round column: plain integers, plus the 1960 AFL rows written as "AFL 1" (and the
+ *  pick column's "ALF 1" typo). Returns the number after the league tag. */
+function toRound(s: string | undefined): number | null {
+  if (!s) return null;
+  const m = /^\s*(?:AFL|ALF|NFL)\s*(\d+)/i.exec(s);
+  if (m) return parseInt(m[1], 10);
+  return toInt(s);
+}
+
+/** The first common draft was 1967: rows still tagged "AFL" in 1967-69 are the same
+ *  single draft as the NFL rows, so they belong to the one league view. */
+function normalizeLeague(raw: string, draftYear: number): string {
+  if (!raw) return 'NFL';
+  if (raw.toUpperCase() === 'AFL' && draftYear >= 1967) return 'NFL';
+  return raw;
+}
+
 function toFloat(s: string | undefined): number | null {
   if (s === undefined || s === null || s.trim() === '') return null;
   const n = parseFloat(s);
@@ -101,11 +118,11 @@ function load(): void {
       lastName: cleanName(row['Last Name']),
       college: (row['College/Univ'] || '').trim(),
       draftYear,
-      draftRound: toInt(row.Round),
-      draftPick: toInt(row.Pick),
+      draftRound: toRound(row.Round),
+      draftPick: /^\s*(?:AFL|ALF)/i.test(row.Pick || '') ? null : toInt(row.Pick),
       position: (row.Position || '').trim(),
       jersey: toInt(row.Jersey),
-      league: rawLeague || 'NFL',
+      league: normalizeLeague(rawLeague, draftYear),
       isHOF: String(row.isHOF).trim().toUpperCase() === 'TRUE' || rawName.includes('‡'),
       photoId: toInt(row.PhotoID),
       playerAssetsId: (row['Player Assets ID'] || '').trim() || null,
@@ -150,6 +167,42 @@ function load(): void {
     if (!byYear.has(p.draftYear)) byYear.set(p.draftYear, []);
     byYear.get(p.draftYear)!.push(p);
   }
+  reconstructUnorderedDrafts();
+}
+
+/**
+ * The 1960 AFL draft (a positional/territorial selection) carries no order in the
+ * source: every draftee reads round 1, no pick. Without an order they all sort
+ * behind the NFL's 20 rounds and get truncated. Reconstruct a plausible order from
+ * career greatness - 12 per "round" so the AFL board interleaves with the NFL's.
+ */
+function reconstructUnorderedDrafts(): void {
+  for (const [year, list] of byYear!) {
+    const byLeague = new Map<string, BaselinePlayer[]>();
+    for (const p of list) {
+      if (p.draftRound == null) continue;
+      const k = p.league.toUpperCase();
+      if (!byLeague.has(k)) byLeague.set(k, []);
+      byLeague.get(k)!.push(p);
+    }
+    for (const ps of byLeague.values()) {
+      const rounds = new Set(ps.map((p) => p.draftRound));
+      const picks = ps.filter((p) => p.draftPick != null).length;
+      if (ps.length < 40 || rounds.size > 1 || picks > ps.length / 4) continue; // real order exists
+      const ranked = [...ps].sort((a, b) => greatness(b) - greatness(a) || a.lastName.localeCompare(b.lastName));
+      ranked.forEach((p, i) => {
+        p.draftRound = Math.floor(i / 12) + 1;
+        p.draftPick = i + 1;
+      });
+      void year;
+    }
+  }
+}
+
+/** Career greatness: wAV plus weighted accolades and a Hall-of-Fame bonus (shared by
+ *  the All-Time Greats class and the 1960 AFL order reconstruction). */
+function greatness(p: BaselinePlayer): number {
+  return (p.wav ?? 0) + 6 * (p.allPro1 ?? 0) + 3 * (p.proBowls ?? 0) + (p.isHOF ? 40 : 0) + 2 * (p.seasonsStarted ?? 0);
 }
 
 /** Rough notability used to pick which of several same-named players a shared

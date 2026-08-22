@@ -21,7 +21,7 @@ export interface DraftOpts {
 export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false };
 export const isCustomDraft = (o: DraftOpts) => o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational;
 
-const isMergeEra = (y: number) => y >= 1960 && y <= 1969;
+const isMergeEra = (y: number) => y >= 1960 && y <= 1966; // 1967-69: one common draft
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
 export type GenMode = 'madden' | 'retro';
 

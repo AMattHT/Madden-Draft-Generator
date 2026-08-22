@@ -43,7 +43,7 @@ r.get('/draft/years', (_req, res) => {
 r.get('/draft/:year/generated', async (req, res) => {
   const year = parseInt(req.params.year, 10);
   if (Number.isNaN(year)) return res.status(400).json({ error: 'invalid year' });
-  const isMergeEra = year >= 1960 && year <= 1969;
+  const isMergeEra = year >= 1960 && year <= 1966; // separate AFL and NFL drafts; 1967-69 were one common draft
   const league = (req.query.league as string) || (isMergeEra ? 'combined' : 'NFL');
   const mode: 'madden' | 'retro' = req.query.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = req.query.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -87,7 +87,7 @@ r.post('/draft/custom', async (req, res) => {
 
   const year = parseInt(String(b.year), 10);
   if (Number.isNaN(year)) return res.status(400).json({ error: 'invalid year' });
-  const isMergeEra = year >= 1960 && year <= 1969;
+  const isMergeEra = year >= 1960 && year <= 1966; // separate AFL and NFL drafts; 1967-69 were one common draft
   const league = b.league || (isMergeEra ? 'combined' : 'NFL');
   const { players, enrich, generatedCount } = await enrichedClass(year, league, { fill: true });
   if (!players.length) return res.status(404).json({ error: `no players for ${year}` });
@@ -105,7 +105,7 @@ r.get('/draft/:year', (req, res) => {
   if (Number.isNaN(year)) {
     return res.status(400).json({ error: 'invalid year' });
   }
-  const isMergeEra = year >= 1960 && year <= 1969;
+  const isMergeEra = year >= 1960 && year <= 1966; // separate AFL and NFL drafts; 1967-69 were one common draft
   const league = (req.query.league as string) || (isMergeEra ? 'combined' : 'NFL');
   const prospects = PlayerLookupService.byYear(year, league);
   const drafted = prospects.filter((p) => p.draftRound != null).length;

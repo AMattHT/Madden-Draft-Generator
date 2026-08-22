@@ -68,7 +68,7 @@ export function YearPicker({
     setQuery('');
   };
 
-  const selectedMerge = selected != null && selected >= 1960 && selected <= 1969;
+  const selectedMerge = selected != null && selected >= 1960 && selected <= 1966;
 
   return (
     <div ref={rootRef} className="relative">
@@ -178,7 +178,7 @@ export function YearPicker({
                   </div>
                   <div className="grid grid-cols-4 gap-2 px-2.5 pb-2 pt-1">
                     {ys.map((y) => {
-                      const merge = y >= 1960 && y <= 1969;
+                      const merge = y >= 1960 && y <= 1966;
                       const active = selected === y;
                       const isCached = cached.has(y);
                       return (
