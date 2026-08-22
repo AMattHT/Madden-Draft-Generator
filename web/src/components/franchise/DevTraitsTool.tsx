@@ -71,7 +71,7 @@ export function DevTraitsTool({ save, onWrote }: { save: string; onWrote?: () =>
               <div key={t} className="rounded-md border border-border/60 bg-surface-0 px-2 py-1.5">
                 <div className="text-[10px] uppercase tracking-wide text-muted">{t}</div>
                 <div className="tabular-nums">
-                  <span className="text-neutral-500">{result.before[t]}</span>
+                  <span className="text-muted">{result.before[t]}</span>
                   <span className="text-neutral-600"> → </span>
                   <span className="text-green-300">{result.after[t]}</span>
                 </div>
@@ -92,10 +92,10 @@ export function DevTraitsTool({ save, onWrote }: { save: string; onWrote?: () =>
                 <tbody>
                   {result.notable.map((u, i) => (
                     <tr key={i} className="border-t border-border/50">
-                      <td className="px-2 py-1 text-neutral-100">{u.name} <span className="text-neutral-500">· {u.team}</span></td>
+                      <td className="px-2 py-1 text-neutral-100">{u.name} <span className="text-muted">· {u.team}</span></td>
                       <td className="px-2 py-1 text-neutral-300">{u.position}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{u.overall}</td>
-                      <td className="px-2 py-1"><span className="text-neutral-500">{u.from}</span> → <span className="text-green-300">{u.to}</span></td>
+                      <td className="px-2 py-1"><span className="text-muted">{u.from}</span> → <span className="text-green-300">{u.to}</span></td>
                     </tr>
                   ))}
                 </tbody>

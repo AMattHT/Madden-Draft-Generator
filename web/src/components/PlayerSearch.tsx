@@ -91,7 +91,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
         <div className="absolute left-0 top-full z-50 mt-2 w-[26rem] max-w-[90vw] overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
           <div className="border-b border-border p-3">
             <div className="relative">
-              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                 <Icon path={ICONS.search} className="h-4 w-4" />
               </span>
               <input
@@ -114,12 +114,12 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
                 role="combobox"
                 aria-expanded={results.length > 0}
                 aria-activedescendant={results.length ? `ps-${activeIdx}` : undefined}
-                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-neutral-500 hover:text-neutral-200"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-neutral-200"
                   aria-label="Clear"
                 >
                   <Icon path={ICONS.close} className="h-3.5 w-3.5" />
@@ -129,12 +129,12 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
           </div>
 
           <div ref={listRef} className="max-h-[60vh] overflow-auto py-1">
-            {loading && <div className="px-4 py-6 text-center text-xs text-neutral-500">Searching…</div>}
+            {loading && <div className="px-4 py-6 text-center text-xs text-muted">Searching…</div>}
             {!loading && query.trim() && results.length === 0 && (
-              <div className="px-4 py-6 text-center text-xs text-neutral-500">No player matches “{query}”.</div>
+              <div className="px-4 py-6 text-center text-xs text-muted">No player matches “{query}”.</div>
             )}
             {!loading && !query.trim() && (
-              <div className="px-4 py-6 text-center text-xs text-neutral-500">
+              <div className="px-4 py-6 text-center text-xs text-muted">
                 Type a name to find their draft class.
               </div>
             )}
@@ -154,7 +154,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
                   <span className="block truncate text-sm font-medium text-neutral-100">
                     {p.firstName} {p.lastName}
                   </span>
-                  <span className="block truncate text-[11px] text-neutral-500">
+                  <span className="block truncate text-[11px] text-muted">
                     {p.position || '—'} · {p.college || '—'}
                     {p.league && p.league !== 'NFL' ? ` · ${p.league}` : ''}
                     {p.draftRound ? ` · Rd ${p.draftRound}${p.draftPick ? `, Pk ${p.draftPick}` : ''}` : ' · undrafted'}

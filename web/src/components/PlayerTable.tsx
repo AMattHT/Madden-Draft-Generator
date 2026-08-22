@@ -11,7 +11,7 @@ function wavTag(source: string): { label: string; cls: string; title: string } {
   if (source === 'actual') return { label: 'A', cls: 'text-info', title: 'actual career wAV' };
   if (source === 'preset')
     return { label: 'EA', cls: 'text-gold', title: "EA's official rookie rating — no career wAV yet" };
-  return { label: 'P', cls: 'text-neutral-500', title: 'predicted from draft slot / era' };
+  return { label: 'P', cls: 'text-muted', title: 'predicted from draft slot / era' };
 }
 
 function SortTh({
@@ -151,7 +151,7 @@ export function PlayerTable({
                     : 'hover:bg-surface-2/70'
               }`}
             >
-              <td className="px-3 py-1.5 text-right text-xs tabular-nums text-neutral-500">{r.pick}</td>
+              <td className="px-3 py-1.5 text-right text-xs tabular-nums text-muted">{r.pick}</td>
               <td className="px-3 py-1.5">
                 <span className="flex items-center justify-center">
                   <TeamLogo team={r.team} size="sm" />
@@ -199,7 +199,7 @@ export function PlayerTable({
         })}
         {rows.length === 0 && (
           <tr>
-            <td colSpan={8} className="px-3 py-16 text-center text-neutral-500">
+            <td colSpan={8} className="px-3 py-16 text-center text-muted">
               <div className="text-sm">No players match the current filter.</div>
             </td>
           </tr>

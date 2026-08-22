@@ -19,10 +19,11 @@ export interface DraftOpts {
   generational: boolean; // force a can't-miss #1
   hindsight: number; // 0 = draft-day board (by slot), 1 = career outcome
   autoStrength: boolean; // scale the curve by how good the class really was
+  variant: number; // 0 = canonical class; N re-rolls faces/gear/attribute noise
 }
-export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false, hindsight: 1, autoStrength: false };
+export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false, hindsight: 1, autoStrength: false, variant: 0 };
 export const isCustomDraft = (o: DraftOpts) =>
-  o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational || (o.hindsight ?? 1) !== 1 || !!o.autoStrength;
+  o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational || (o.hindsight ?? 1) !== 1 || !!o.autoStrength || (o.variant ?? 0) !== 0;
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1966; // 1967-69: one common draft
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -51,6 +52,16 @@ export default function App() {
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
   const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
   const editKeyRef = useRef<{ year: number; league: string } | null>(null);
+  // Backend liveness: poll /api/health every 15 s (the dot used to mirror the
+  // last request's error state, which said "connected" with the server down).
+  const [connected, setConnected] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    const ping = () => fetch('/api/health', { cache: 'no-store' }).then((r) => alive && setConnected(r.ok)).catch(() => alive && setConnected(false));
+    ping();
+    const t = setInterval(ping, 15000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
   const editsRef = useRef<ClassEdits>({});
   const gearRef = useRef<GearEdits>({});
   const historyRef = useRef<{ past: Array<{ edits: ClassEdits; gear: GearEdits }>; future: Array<{ edits: ClassEdits; gear: GearEdits }> }>({ past: [], future: [] });
@@ -89,7 +100,7 @@ export default function App() {
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
-            hindsight: opts.hindsight, autoStrength: opts.autoStrength,
+            hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant,
             gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;
@@ -403,7 +414,7 @@ export default function App() {
         showLeague={selected != null && isMergeEra(selected)}
         league={selected != null ? effLeague(selected) : 'NFL'}
         onSetLeague={changeLeague}
-        connected={!error}
+        connected={connected && !error}
         years={years}
         selected={selected}
         onSelectYear={(y) => {
@@ -450,7 +461,7 @@ export default function App() {
             </div>
           )}
           {!data && !error && (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-neutral-500">
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-muted">
               {busy ? (
                 <>
                   <span className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-700 border-t-primary" />
@@ -482,6 +493,8 @@ export default function App() {
               decades={[...new Set(years.map((y) => Math.floor(y / 10) * 10))].sort((a, b) => a - b)}
               onApplyDraftOpts={applyDraftOpts}
               onRefresh={() => selected != null && select(selected, true)}
+              onVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: (draftOpts.variant ?? 0) + 1 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
+              onResetVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: 0 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
             />
           )}
             </>

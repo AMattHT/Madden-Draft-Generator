@@ -148,7 +148,7 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
                     <input value={abbr} maxLength={8} onChange={(e) => setAbbr(e.target.value.toUpperCase())} className={inputCls} />
                   </Field>
                 </div>
-                <p className="mt-2 text-[11px] text-neutral-500">
+                <p className="mt-2 text-[11px] text-muted">
                   Colors below are approximate defaults for each name (Madden's exact per-name values aren't stored in save data) — tweak freely.
                 </p>
               </>

@@ -208,7 +208,7 @@ function DonorBar({
     <div className="border-b border-border px-5 py-2.5">
       <div className="flex items-center gap-2">
         <div className="relative w-72">
-          <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+          <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
             <Icon path={ICONS.search} className="h-4 w-4" />
           </span>
           <input
@@ -216,12 +216,12 @@ function DonorBar({
             onChange={(e) => { setQuery(e.target.value); setDonor(null); setApplied(false); }}
             onFocus={() => (results.length || status === 'empty' || status === 'error') && setOpen(true)}
             placeholder="Search a current Madden player… (Mahomes, Jefferson)"
-            className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
           />
           {open && (
             <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-md border border-border-strong bg-surface-1 shadow-xl">
               {status === 'loading' && (
-                <div className="px-3 py-2 text-xs text-neutral-500">Searching current roster…</div>
+                <div className="px-3 py-2 text-xs text-muted">Searching current roster…</div>
               )}
               {status === 'error' && (
                 <div className="px-3 py-2 text-xs text-amber-300">Couldn’t reach the gear database. Is the API on :5174?</div>
@@ -266,7 +266,7 @@ function DonorBar({
             </button>
             <button
               onClick={() => { setDonor(null); setApplied(false); }}
-              className="rounded-md p-1 text-neutral-500 hover:bg-surface-2 hover:text-neutral-200"
+              className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200"
               aria-label="Clear donor"
             >
               <Icon path={ICONS.close} className="h-4 w-4" />
@@ -307,7 +307,7 @@ function DonorBar({
             }
           }}
           placeholder="or paste an image URL (Wikipedia, nfl.com, direct .jpg)…"
-          className="min-w-0 flex-1 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+          className="min-w-0 flex-1 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
         />
         <button
           onClick={() => photoUrl.trim() && runPhoto({ imageUrl: photoUrl.trim() })}
@@ -318,7 +318,7 @@ function DonorBar({
         </button>
       </div>
       {donor && summaryItems.length > 0 && (
-        <div className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-neutral-500">
+        <div className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-muted">
           {summaryItems.join(' · ')}
         </div>
       )}
@@ -345,6 +345,7 @@ export function GearEditor({
   gameVersion = 'm26',
   year,
   positionId,
+  autoGear = {},
 }: {
   playerName: string;
   options: Record<string, GearOption[]>;
@@ -354,6 +355,8 @@ export function GearEditor({
   gameVersion?: 'm26' | 'm27';
   year: number;
   positionId: number;
+  /** What "Auto" resolves to for this prospect (editor slot -> asset). */
+  autoGear?: Record<string, string>;
 }) {
   const [active, setActive] = useState('helmet');
   const [query, setQuery] = useState('');
@@ -401,7 +404,12 @@ export function GearEditor({
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Equipment builder for ${playerName}`}
+        tabIndex={-1}
+        ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
+        className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
@@ -409,7 +417,7 @@ export function GearEditor({
             <div className="text-sm font-bold tracking-tight text-neutral-100">Equipment Builder</div>
             <div className="text-[11px] text-muted">{playerName} {gameVersion === 'm27' && <span className="ml-1 rounded bg-legend/20 px-1 text-[9px] text-legend-light">M27</span>}</div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-neutral-500 hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
         </div>
@@ -427,7 +435,7 @@ export function GearEditor({
                   <button
                     onClick={() => setActive(g.slots[0].slot)}
                     className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-[11px] font-semibold uppercase tracking-wide transition-colors ${
-                      open ? 'text-neutral-100' : 'text-neutral-500 hover:text-neutral-300'
+                      open ? 'text-neutral-100' : 'text-muted hover:text-neutral-300'
                     }`}
                   >
                     <span className="flex items-center gap-1.5">
@@ -464,14 +472,14 @@ export function GearEditor({
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex items-center gap-2 border-b border-border p-3">
               <div className="relative flex-1">
-                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                   <Icon path={ICONS.search} className="h-4 w-4" />
                 </span>
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={`Search ${activeLabel.toLowerCase()}…`}
-                  className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+                  className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                 />
               </div>
 
@@ -519,8 +527,23 @@ export function GearEditor({
                   current === '' ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
                 }`}
               >
-                <span className="grid h-14 w-14 place-items-center rounded text-[10px] font-semibold uppercase text-neutral-500">Auto</span>
-                <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-400">Era default</span>
+                {(() => {
+                  const auto = autoGear[active];
+                  const opt = auto ? items.find((o) => o.value === auto) : undefined;
+                  const img = opt?.image ?? (auto ? `/api/gear-image/${auto}` : undefined);
+                  return (
+                    <>
+                      {auto && img ? (
+                        <img src={img} alt="" className="h-14 w-14 rounded object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
+                      ) : (
+                        <span className="grid h-14 w-14 place-items-center rounded text-[10px] font-semibold uppercase text-muted">Auto</span>
+                      )}
+                      <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-400" title={auto ? `Era default for ${year}: ${auto}` : 'Era default'}>
+                        {auto ? `Auto: ${opt?.label ?? auto.replace(/^Gear\w*?_/, '')}` : 'Era default'}
+                      </span>
+                    </>
+                  );
+                })()}
               </button>
               {filtered.map((o) => (
                 <button
@@ -534,12 +557,12 @@ export function GearEditor({
                   <GearThumb src={o.image} />
                   <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-300">{o.label}</span>
                   {o.compatibility && active === 'facemask' && (
-                    <span className="text-[8px] text-neutral-500">{o.compatibility}</span>
+                    <span className="text-[8px] text-muted">{o.compatibility}</span>
                   )}
                 </button>
               ))}
               {filtered.length === 0 && (
-                <div className="col-span-full py-10 text-center text-xs text-neutral-500">No gear matches “{query}”.</div>
+                <div className="col-span-full py-10 text-center text-xs text-muted">No gear matches “{query}”.</div>
               )}
             </div>
           </div>
@@ -548,7 +571,7 @@ export function GearEditor({
         {/* "Wearing" strip: every overridden slot as a clickable thumb + reset all. */}
         {Object.keys(gearPatch).length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto border-t border-border px-3 py-2">
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">
               Wearing ({Object.keys(gearPatch).length})
             </span>
             {Object.entries(gearPatch).map(([slot, asset]) => {
@@ -581,7 +604,7 @@ export function GearEditor({
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-border px-5 py-2.5 text-[11px] text-neutral-500">
+        <div className="flex items-center justify-between border-t border-border px-5 py-2.5 text-[11px] text-muted">
           <span>
             Picks are written when you save. 
             {gameVersion === 'm27' 

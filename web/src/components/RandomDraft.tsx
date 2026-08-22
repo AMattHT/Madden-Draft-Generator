@@ -69,14 +69,14 @@ export function RandomDraft({
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
-        <span className="text-neutral-500">to</span>
+        <span className="text-muted">to</span>
         <select value={to} onChange={(e) => onSetRange(Math.min(from, Number(e.target.value)), Number(e.target.value))} className={selectCls}>
           {sorted.filter((y) => y >= from).map((y) => (
             <option key={y} value={y}>{y}</option>
           ))}
         </select>
         {(from !== sorted[0] || to !== sorted[sorted.length - 1]) && (
-          <button onClick={() => onSetRange(sorted[0], sorted[sorted.length - 1])} className="text-[11px] text-neutral-500 hover:text-neutral-200">
+          <button onClick={() => onSetRange(sorted[0], sorted[sorted.length - 1])} className="text-[11px] text-muted hover:text-neutral-200">
             full range
           </button>
         )}
@@ -112,7 +112,7 @@ export function RandomDraft({
         <div className="mt-4 border-t border-border/60 pt-3">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Used ({usedList.length})</span>
-            <button onClick={onClear} className="text-[11px] text-neutral-500 hover:text-red-300">
+            <button onClick={onClear} className="text-[11px] text-muted hover:text-red-300">
               Reset — make all pickable again
             </button>
           </div>
@@ -125,7 +125,7 @@ export function RandomDraft({
                 className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-medium tabular-nums text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100"
               >
                 {y}
-                <Icon path={ICONS.x} className="h-3 w-3 text-neutral-500" />
+                <Icon path={ICONS.x} className="h-3 w-3 text-muted" />
               </button>
             ))}
           </div>

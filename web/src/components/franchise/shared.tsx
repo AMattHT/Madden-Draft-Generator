@@ -18,7 +18,7 @@ export function Field({ label, children, hint }: { label: string; children: Reac
     <label className="flex flex-col gap-1">
       <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
       {children}
-      {hint && <span className="text-[10px] text-neutral-500">{hint}</span>}
+      {hint && <span className="text-[10px] text-muted">{hint}</span>}
     </label>
   );
 }

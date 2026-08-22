@@ -46,7 +46,7 @@ function TierKey() {
                 <span className={`inline-block h-3 w-3 rounded ${i.c}`} />
                 <span className="text-xs">
                   <b className="tabular-nums text-neutral-200">{i.t}</b>{' '}
-                  <span className="text-neutral-500">{i.d}</span>
+                  <span className="text-muted">{i.d}</span>
                 </span>
               </div>
             ))}

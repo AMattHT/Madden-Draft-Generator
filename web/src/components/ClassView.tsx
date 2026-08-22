@@ -19,6 +19,8 @@ export function ClassView({
   data,
   source,
   onRefresh,
+  onVariant,
+  onResetVariant,
   busy,
   edits,
   gearEdits,
@@ -36,6 +38,8 @@ export function ClassView({
   data: GeneratedClass;
   source: 'cache' | 'live';
   onRefresh: () => void;
+  onVariant?: () => void;
+  onResetVariant?: () => void;
   busy: boolean;
   edits: ClassEdits;
   gearEdits: GearEdits;
@@ -204,6 +208,19 @@ export function ClassView({
             <Icon path={ICONS.refresh} className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} />
             {busy ? 'Refreshing…' : 'Rebuild'}
           </button>
+          {onVariant && (
+            <button
+              onClick={onVariant}
+              disabled={busy}
+              title="Re-roll every seeded choice (faces, gear, attribute noise, persona) - same players, same order, same overalls. Rebuild alone regenerates the identical class."
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100 disabled:opacity-50"
+            >
+              Variant{draftOpts.variant ? ` #${draftOpts.variant}` : ''}
+              {draftOpts.variant ? (
+                <span role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); onResetVariant?.(); }} onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onResetVariant?.(); } }} className="ml-1 text-muted hover:text-neutral-200" title="Back to the canonical class">×</span>
+              ) : null}
+            </button>
+          )}
           <ExportMenu
             year={data.year}
             league={data.league}

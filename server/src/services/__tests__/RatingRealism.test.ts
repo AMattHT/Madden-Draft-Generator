@@ -67,3 +67,14 @@ test('auto strength lifts a famous class (1983) above a weak one (2013)', async 
   assert.ok(t83 > t13, `1983 top ${t83} vs 2013 top ${t13}`);
   assert.ok(t83 >= 86 && t83 <= 92, `1983 top ${t83}`);
 });
+
+test('a variant re-rolls faces/gear/noise but keeps the players, order and overalls', async () => {
+  const { players } = await enrichedClass(1990, 'NFL', { fill: true });
+  const a = DraftClassBuilder.preview(players, 'madden', { variant: 0 }).rows;
+  const b = DraftClassBuilder.preview(players, 'madden', { variant: 3 }).rows;
+  assert.deepEqual(b.map((r) => `${r.lastName}:${r.overall}:${r.position}`), a.map((r) => `${r.lastName}:${r.overall}:${r.position}`));
+  const facesChanged = a.filter((r, i) => r.genericHead && r.genericHead !== b[i].genericHead).length;
+  const gearChanged = a.filter((r, i) => JSON.stringify(r.gear) !== JSON.stringify(b[i].gear)).length;
+  assert.ok(facesChanged > 50, `faces changed: ${facesChanged}`);
+  assert.ok(gearChanged > 50, `gear changed: ${gearChanged}`);
+});

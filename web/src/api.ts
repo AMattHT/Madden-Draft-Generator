@@ -323,6 +323,7 @@ export const api = {
     generational?: boolean;
     hindsight?: number;
     autoStrength?: boolean;
+    variant?: number;
     gameVersion?: GameVersion;
   }) =>
     fetch('/api/draft/custom', {
@@ -341,7 +342,7 @@ export const api = {
     edits?: ClassEdits,
     mode?: string,
     gearEdits?: GearEdits,
-    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean },
+    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean; variant?: number },
     gameVersion: GameVersion = 'm26'
   ) {
     const res = await fetch('/api/export/mdc', {
@@ -378,7 +379,7 @@ export const api = {
     edits: ClassEdits | undefined,
     mode: string | undefined,
     gearEdits: GearEdits | undefined,
-    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean },
+    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean; variant?: number },
     gameVersion: GameVersion = 'm26'
   ): Promise<SaveMdcResult> {
     const res = await fetch('/api/export/mdc', {

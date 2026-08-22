@@ -215,7 +215,7 @@ export function ExportMenu({
             title={likeness.customPortrait === 0 ? 'No players in this class need a custom photo' : 'Download PFR/Wikipedia headshots for players without a Madden portrait'}
           >
             <span>{busy === 'portraits' ? 'Downloading…' : 'PFR/Wiki 2D portraits'}</span>
-            <span className="tabular-nums text-neutral-500">{likeness.customPortrait} eligible</span>
+            <span className="tabular-nums text-muted">{likeness.customPortrait} eligible</span>
           </button>
           <button
             onClick={() => { setOpen(false); downloadCsv(); }}
@@ -228,9 +228,9 @@ export function ExportMenu({
             <>
               <div className="my-1 border-t border-border" />
               <div className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-wider text-muted">Edits</div>
-              <button onClick={() => { setOpen(false); editTools.undo(); }} className={item} title="Ctrl+Z"><span>Undo last edit</span><span className="text-neutral-500">Ctrl+Z</span></button>
-              <button onClick={() => { setOpen(false); editTools.redo(); }} className={item} title="Ctrl+Shift+Z"><span>Redo</span><span className="text-neutral-500">Ctrl+Shift+Z</span></button>
-              <button onClick={() => { setOpen(false); downloadEditsJson(); }} disabled={!editedCount} className={item}><span>Export edits (.json)</span><span className="tabular-nums text-neutral-500">{editedCount}</span></button>
+              <button onClick={() => { setOpen(false); editTools.undo(); }} className={item} title="Ctrl+Z"><span>Undo last edit</span><span className="text-muted">Ctrl+Z</span></button>
+              <button onClick={() => { setOpen(false); editTools.redo(); }} className={item} title="Ctrl+Shift+Z"><span>Redo</span><span className="text-muted">Ctrl+Shift+Z</span></button>
+              <button onClick={() => { setOpen(false); downloadEditsJson(); }} disabled={!editedCount} className={item}><span>Export edits (.json)</span><span className="tabular-nums text-muted">{editedCount}</span></button>
               <button onClick={() => { setOpen(false); fileRef.current?.click(); }} className={item}><span>Import edits (.json)</span></button>
               <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importEditsFile(f); e.target.value = ''; }} />
               <button
@@ -254,7 +254,7 @@ export function ExportMenu({
         >
           <div className="flex items-start gap-3">
             <span className="min-w-0 break-words">{msg.text}</span>
-            <button onClick={() => setMsg(null)} className="shrink-0 rounded p-0.5 text-neutral-500 hover:text-neutral-200" aria-label="Dismiss">
+            <button onClick={() => setMsg(null)} className="shrink-0 rounded p-0.5 text-muted hover:text-neutral-200" aria-label="Dismiss">
               <Icon path={ICONS.close} className="h-3.5 w-3.5" />
             </button>
           </div>

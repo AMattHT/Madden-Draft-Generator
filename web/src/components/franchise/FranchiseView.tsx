@@ -86,7 +86,7 @@ export function FranchiseView(props: {
               </optgroup>
             )}
           </select>
-          {savesDir && <span className="hidden text-[11px] text-neutral-500 lg:inline">from {savesDir}</span>}
+          {savesDir && <span className="hidden text-[11px] text-muted lg:inline">from {savesDir}</span>}
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">

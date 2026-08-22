@@ -78,7 +78,7 @@ export function YearPicker({
         aria-expanded={open}
         className="flex items-center gap-2.5 rounded-lg border border-border-strong bg-surface-2 py-1.5 pl-3 pr-2.5 text-left transition-colors hover:bg-surface-3 focus:border-primary focus:outline-none"
       >
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">Draft</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Draft</span>
         <span className="flex items-baseline gap-1.5">
           <span className="text-lg font-bold tabular-nums leading-none text-neutral-100">
             {selected ?? '—'}
@@ -89,7 +89,7 @@ export function YearPicker({
         </span>
         <Icon
           path={ICONS.chevronDown}
-          className={`h-4 w-4 text-neutral-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -100,12 +100,12 @@ export function YearPicker({
               <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
                 Choose a draft year
               </span>
-              <span className="text-[11px] tabular-nums text-neutral-500">
+              <span className="text-[11px] tabular-nums text-muted">
                 {years.length ? `${years.length} classes` : 'loading…'}
               </span>
             </div>
             <div className="relative">
-              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+              <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                 <Icon path={ICONS.search} className="h-4 w-4" />
               </span>
               <input
@@ -117,12 +117,12 @@ export function YearPicker({
                 }}
                 inputMode="numeric"
                 placeholder="Jump to year…"
-                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm tabular-nums text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm tabular-nums text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-neutral-500 hover:text-neutral-200"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-neutral-200"
                   aria-label="Clear"
                 >
                   <Icon path={ICONS.close} className="h-3.5 w-3.5" />
@@ -133,14 +133,14 @@ export function YearPicker({
 
           <div className="max-h-[60vh] overflow-auto py-1">
             {decades.length === 0 && (
-              <div className="px-4 py-8 text-center text-xs text-neutral-500">
+              <div className="px-4 py-8 text-center text-xs text-muted">
                 No year matches “{query}”.
               </div>
             )}
             {!q && recent.length > 0 && (
               <section className="mb-1">
                 <div className="sticky top-0 z-10 border-b border-border/60 bg-surface-1 px-4 py-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
                     Recent
                   </span>
                 </div>
@@ -166,7 +166,7 @@ export function YearPicker({
               return (
                 <section key={d} className="mb-1">
                   <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-surface-1 px-4 py-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
                       {d}s
                     </span>
                     {cachedInDecade > 0 && (

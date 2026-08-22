@@ -190,13 +190,13 @@ export function TopBar({
         {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} />}
         {draft && showLeague && (
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-500 md:inline">League</span>
+            <span className="hidden text-[11px] uppercase tracking-wider text-muted md:inline">League</span>
             <LeagueToggle league={league} onSetLeague={onSetLeague} />
           </div>
         )}
         {draft && (
           <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] uppercase tracking-wider text-neutral-500 md:inline">Rating lens</span>
+            <span className="hidden text-[11px] uppercase tracking-wider text-muted md:inline">Rating lens</span>
             <ModeToggle mode={mode} onSetMode={onSetMode} />
           </div>
         )}

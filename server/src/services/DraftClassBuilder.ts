@@ -48,6 +48,10 @@ export interface GenOptions {
   /** Scale the class curve by how good the class actually was (top-32 caliber
    *  vs the 1970-2015 average), so 1983 tops out higher than 2013. */
   autoStrength?: boolean;
+  /** Variant seed: 0 = the canonical class; any other value re-rolls every
+   *  seeded choice (attribute noise, faces, gear, persona, builds) while the
+   *  player list, order and overalls stay the same. */
+  variant?: number;
 }
 
 /** Reference: mean top-32 caliber of a draft class, 1970-2015 (lazily computed). */
@@ -167,11 +171,12 @@ function bodyTypeFor(group: string, weight: number | null): 'Heavy' | 'Muscular'
  *  real per-position profile shifted to the assigned OVR (with small seeded
  *  per-player variance); bio from real data or Madden norms; plus likeness +
  *  era gear. */
-function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | 'm27' = 'm26', mode: GenMode = 'madden'): { prospect: MdcProspect; kind: LikenessKind } {
+function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | 'm27' = 'm26', mode: GenMode = 'madden', variant = 0): { prospect: MdcProspect; kind: LikenessKind } {
   const { player, index, posId, overall, devTrait } = it;
   const posName = PositionMapper.name(posId);
   const profile = CalibrationService.positionProfile(posName, gameVersion);
-  const rand = seededRng(`${player.firstName}|${player.lastName}|${player.draftYear}|${index}`);
+  const v = variant ? `|v${variant}` : '';
+  const rand = seededRng(`${player.firstName}|${player.lastName}|${player.draftYear}|${index}${v}`);
 
   // Bio first (real measurements when we have them, else Madden per-position
   // norms) — the physical build decides the archetype, the way Madden does it.
@@ -208,7 +213,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.lastName = player.lastName || '';
   prospect.position = posId;
   prospect.college = LookupService.collegeId(player.college);
-  const home = HometownService.resolve(player.homeState, player.draftYear, `${player.firstName}|${player.lastName}|${index}`);
+  const home = HometownService.resolve(player.homeState, player.draftYear, `${player.firstName}|${player.lastName}|${index}${v}`);
   prospect.homeState = home.state;
   prospect.homeTown = home.town;
   prospect.age = player.age ?? CalibrationService.sampleAge(rand, gameVersion);
@@ -228,8 +233,8 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // are not in M27 — writing them produces the empty NFL-shield silhouette.
   const m27Face = gameVersion === 'm27' ? LikenessService.m27FaceFor(player.firstName, player.lastName, player.draftYear) : null;
   const like = m27Face
-    ? { peps: m27Face.assetName, kind: 'asset' as LikenessKind, skinTone: LikenessService.assign(player, index, gameVersion).skinTone }
-    : LikenessService.assign(player, index, gameVersion);
+    ? { peps: m27Face.assetName, kind: 'asset' as LikenessKind, skinTone: LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion).skinTone }
+    : LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion);
   prospect.PEPS = like.peps;
   // Menu portrait. M26: custom-portrait slot, else the generic head's PID, else the
   // real photo id. M27: a year-matched M27 scan's own PID; generic heads get their
@@ -245,7 +250,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // Era-appropriate gear (vintage helmet/cleats/gloves, no visor pre-1990).
   // gameVersion selects the verified M27 equipment vocabulary for M27 exports.
   const vis: Record<string, unknown> = {
-    loadouts: [EraGearService.loadout(player.draftYear, posId, `${player.firstName}|${player.lastName}|${index}`, gameVersion, player.observedGear)],
+    loadouts: [EraGearService.loadout(player.draftYear, posId, `${player.firstName}|${player.lastName}|${index}${v}`, gameVersion, player.observedGear)],
   };
   if (like.kind === 'generic' && /^gen_/i.test(like.peps)) {
     vis.genericHeadName = like.peps;
@@ -307,7 +312,27 @@ export interface PreviewRow {
   persona?: string[]; // M27 persona DNA trait names (only set when gameVersion='m27')
   /** Why an LB-labeled player landed at edge vs SAM/MIKE/WILL (null for non-LB sources). */
   frontSeven?: { role: string | null; reason: string; scheme: string | null; team: string | null; sackRate: number | null } | null;
+  /** The era-default equipment this prospect will export with (editor slot -> asset),
+   *  so the UI can show what "Auto" means before the class is in the game. */
+  gear?: Record<string, string>;
   ratings: Record<string, number>;
+}
+
+/** Flatten a prospect's PlayerOnField loadout into editor slots (helmet, gloveLeft, ...). */
+function gearSlots(prospect: MdcProspect): Record<string, string> {
+  const out: Record<string, string> = {};
+  const vis = prospect.visuals as { loadouts?: Array<{ loadoutType?: string; loadoutElements?: Array<{ slotType?: string; itemAssetName: string; remove?: boolean }> }> } | undefined;
+  const lo = vis?.loadouts?.find((l) => l.loadoutType === 'PlayerOnField');
+  if (!lo?.loadoutElements) return out;
+  const slotOfType = new Map<string, string>();
+  for (const [slot, types] of Object.entries(GEAR_SLOT_TYPES)) for (const t of types) slotOfType.set(t, slot);
+  for (const el of lo.loadoutElements) {
+    if (el.remove || !el.itemAssetName) continue;
+    if (!el.slotType && /^GearFaceMask_/i.test(el.itemAssetName)) { out.facemask = el.itemAssetName; continue; }
+    const slot = el.slotType ? slotOfType.get(el.slotType) : undefined;
+    if (slot) out[slot] = el.itemAssetName;
+  }
+  return out;
 }
 
 export interface PreviewResult {
@@ -561,7 +586,7 @@ export const DraftClassBuilder = {
         });
     }
 
-    const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion, mode));
+    const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion, mode, opts.variant ?? 0));
     const likeness: LikenessStats = {
       asset: built.filter((b) => b.kind === 'asset').length,
       generic: built.filter((b) => b.kind === 'generic').length,
@@ -633,6 +658,7 @@ export const DraftClassBuilder = {
         frontSeven: base.frontSeven
           ? { role: base.frontSeven.role, reason: base.frontSeven.reason, scheme: base.frontSeven.scheme, team: base.frontSeven.team, sackRate: base.frontSeven.sackRate }
           : null,
+        gear: gearSlots(p),
         ratings,
       };
     });
@@ -666,13 +692,13 @@ export const DraftClassBuilder = {
       const posId = Number(p.position) || 0;
       if (!p.personaDNA) {
         // explicit user edit wins
-        p.personaDNA = PersonaService.dnaFor(`${p.firstName}|${p.lastName}`, PositionMapper.groupFromId(posId), Number(p.overall) || 0, Number(p.devTrait) || 0);
+        p.personaDNA = PersonaService.dnaFor(`${p.firstName}|${p.lastName}${opts.variant ? `|v${opts.variant}` : ''}`, PositionMapper.groupFromId(posId), Number(p.overall) || 0, Number(p.devTrait) || 0);
       }
       // Birthdate, PersonalityRating, Focus, QB style, body-type enum, hidden bytes,
       // generic-head portrait PID — everything the game fills and reads back verbatim.
       const base = capped[i];
       const career = base ? NflverseCareerService.get(base.firstName, base.lastName, base.draftYear, base.draftPick) : null;
-      assignM27Fields(p, { birthDate: career?.birthDate ?? null }, `${p.firstName}|${p.lastName}|${i}`);
+      assignM27Fields(p, { birthDate: career?.birthDate ?? null }, `${p.firstName}|${p.lastName}|${i}${opts.variant ? `|v${opts.variant}` : ''}`);
     });
     const template = Mdc27Service.loadTemplate();
     const buffer = Mdc27Service.write(prospects, template);

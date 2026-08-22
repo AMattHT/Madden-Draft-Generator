@@ -117,7 +117,12 @@ export function AppearanceEditor({
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Appearance editor"
+        tabIndex={-1}
+        ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
+        className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
@@ -130,7 +135,7 @@ export function AppearanceEditor({
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-neutral-500 hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
         </div>
@@ -156,7 +161,7 @@ export function AppearanceEditor({
             ))}
             {tab === 'generic' && (
               <div className="mt-2 space-y-0.5 border-t border-border pt-2">
-                <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">Skin tone</div>
+                <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">Skin tone</div>
                 {TONES.map((t) => {
                   const n = (heads[String(t)] ?? []).length;
                   if (!n && t === 8) return null;
@@ -169,7 +174,7 @@ export function AppearanceEditor({
                       }`}
                     >
                       <span>Tone {t}</span>
-                      <span className="tabular-nums text-[10px] text-neutral-500">{n}</span>
+                      <span className="tabular-nums text-[10px] text-muted">{n}</span>
                     </button>
                   );
                 })}
@@ -181,14 +186,14 @@ export function AppearanceEditor({
             {tab !== 'body' && (
               <div className="flex items-center gap-2 border-b border-border p-3">
                 <div className="relative flex-1">
-                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                     <Icon path={ICONS.search} className="h-4 w-4" />
                   </span>
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={tab === 'scans' ? `Search ${scanLabel.toLowerCase()}…` : `Search tone ${tone} heads…`}
-                    className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+                    className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
@@ -213,7 +218,7 @@ export function AppearanceEditor({
                   );
                 })}
                 {genFiltered.length === 0 && (
-                  <div className="col-span-full py-10 text-center text-xs text-neutral-500">No heads in this tone.</div>
+                  <div className="col-span-full py-10 text-center text-xs text-muted">No heads in this tone.</div>
                 )}
               </div>
             )}
@@ -237,7 +242,7 @@ export function AppearanceEditor({
                   );
                 })}
                 {scanFiltered.length === 0 && (
-                  <div className="col-span-full py-10 text-center text-xs text-neutral-500">
+                  <div className="col-span-full py-10 text-center text-xs text-muted">
                     {q.length < 2 ? `No ${scanLabel.toLowerCase()} loaded.` : `No scans match “${query}”.`}
                   </div>
                 )}
@@ -263,7 +268,7 @@ export function AppearanceEditor({
         </div>
 
         <div className="flex items-center gap-3 border-t border-border px-4 py-2">
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-neutral-500">Wearing</span>
+          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">Wearing</span>
           <div className="min-w-0 flex-1 truncate text-[11px] text-neutral-400">
             {usingScan ? (
               <>Scan <span className="text-neutral-200">{currentAsset}</span></>

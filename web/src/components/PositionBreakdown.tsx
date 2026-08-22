@@ -49,7 +49,7 @@ export function PositionBreakdown({
             }`}
           >
             <span>{g}</span>
-            <span className={`tabular-nums ${on ? 'text-white/80' : 'text-neutral-500'}`}>{counts[g]}</span>
+            <span className={`tabular-nums ${on ? 'text-white/80' : 'text-muted'}`}>{counts[g]}</span>
           </button>
         );
       })}

@@ -26,19 +26,19 @@ export function Toolbar({
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-2.5 border-b border-border bg-surface-1 px-4 py-3">
       <div className="relative">
-        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500">
+        <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
           <Icon path={ICONS.search} className="h-4 w-4" />
         </span>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search players…"
-          className="w-56 rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+          className="w-56 rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
         />
         {search && (
           <button
             onClick={() => setSearch('')}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-neutral-500 hover:text-neutral-200"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-neutral-200"
             aria-label="Clear search"
           >
             <Icon path={ICONS.close} className="h-3.5 w-3.5" />
@@ -70,7 +70,7 @@ export function Toolbar({
         <option value="face">Sort: Face</option>
       </select>
 
-      <span className="ml-auto text-xs tabular-nums text-neutral-500">
+      <span className="ml-auto text-xs tabular-nums text-muted">
         <span className="font-semibold text-neutral-300">{shown}</span> of {total}
       </span>
     </div>

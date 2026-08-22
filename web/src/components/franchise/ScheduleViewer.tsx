@@ -48,7 +48,7 @@ export function ScheduleViewer({ save }: { save: string }) {
                     <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                       {wk.games.map((g, i) => (
                         <div key={i} className="flex items-center justify-between rounded px-2 py-1 text-sm odd:bg-black/10">
-                          <span className="text-neutral-200">{g.away || '—'} <span className="text-neutral-500">@</span> {g.home || '—'}</span>
+                          <span className="text-neutral-200">{g.away || '—'} <span className="text-muted">@</span> {g.home || '—'}</span>
                           <span className="text-xs tabular-nums">
                             {g.played
                               ? <span className="font-semibold text-green-300">{g.awayScore}–{g.homeScore}</span>

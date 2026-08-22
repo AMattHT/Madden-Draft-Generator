@@ -22,7 +22,7 @@ export function RatingChip({ ovr, size = 'md' }: { ovr: number; size?: 'sm' | 'm
 }
 
 const DEV = [
-  { label: 'Normal', short: '—', cls: 'text-neutral-500', pill: '' },
+  { label: 'Normal', short: '—', cls: 'text-muted', pill: '' },
   { label: 'Star', short: 'Star', cls: 'text-primary-light', pill: 'bg-primary/15 text-primary-light ring-1 ring-primary/30' },
   { label: 'Superstar', short: 'Superstar', cls: 'text-pink-400', pill: 'bg-pink-500/15 text-pink-300 ring-1 ring-pink-500/30' },
   { label: 'X-Factor', short: 'X-Factor', cls: 'text-legend-light', pill: 'bg-legend/20 text-legend-light ring-1 ring-legend/40' },
@@ -30,7 +30,7 @@ const DEV = [
 
 export function DevBadge({ dev }: { dev: number }) {
   const d = DEV[dev] || DEV[0];
-  if (dev <= 0) return <span className="text-xs text-neutral-500">—</span>;
+  if (dev <= 0) return <span className="text-xs text-muted">—</span>;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.pill}`}>
       {dev === 3 && <span aria-hidden>✦</span>}
@@ -53,7 +53,7 @@ export function FaceTag({ face }: { face: string }) {
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-neutral-500">
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted">
       <span className="h-1.5 w-1.5 rounded-full ring-1 ring-neutral-600" /> Generic
     </span>
   );
@@ -94,7 +94,7 @@ export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' |
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [team?.logo]);
   const dim = size === 'sm' ? 'h-5 w-5' : 'h-6 w-6';
-  if (!team) return <span className="text-xs text-neutral-500">—</span>;
+  if (!team) return <span className="text-xs text-muted">—</span>;
   if (team.logo && !broken) {
     return (
       <img

@@ -107,12 +107,12 @@ export function CapResetTool({ save, onWrote }: { save: string; onWrote?: () => 
                   <tr key={t.name} className="border-t border-border/50">
                     <td className="px-3 py-1.5 font-medium text-neutral-100">{t.name}</td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      <span className="text-neutral-500">{fmtM(t.before.deadMoneyM)}</span>
+                      <span className="text-muted">{fmtM(t.before.deadMoneyM)}</span>
                       <span className="text-neutral-600"> → </span>
                       <span className="text-green-300">{fmtM(t.after.deadMoneyM)}</span>
                     </td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
-                      <span className="text-neutral-500">{fmtM(t.before.capRoomM)}</span>
+                      <span className="text-muted">{fmtM(t.before.capRoomM)}</span>
                       <span className="text-neutral-600"> → </span>
                       <span className="text-neutral-100">{fmtM(t.after.capRoomM)}</span>
                     </td>

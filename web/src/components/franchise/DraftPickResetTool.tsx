@@ -74,7 +74,7 @@ export function DraftPickResetTool({ save, onWrote }: { save: string; onWrote?: 
                       <td className="px-2 py-1 text-neutral-300">{yearOffsetLabel(p.yearOffset)}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{p.round}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{p.pickNumber || '—'}</td>
-                      <td className="px-2 py-1"><span className="text-neutral-500">{p.fromTeam || '—'}</span> → <span className="text-green-300">{p.toTeam || '—'}</span></td>
+                      <td className="px-2 py-1"><span className="text-muted">{p.fromTeam || '—'}</span> → <span className="text-green-300">{p.toTeam || '—'}</span></td>
                     </tr>
                   ))}
                 </tbody>

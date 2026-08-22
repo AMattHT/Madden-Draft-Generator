@@ -29,6 +29,7 @@ export interface PlayerRow {
   persona?: string[]; // M27 persona DNA trait names (only present when gameVersion='m27')
   /** Why an LB-labeled source player landed at edge vs SAM/MIKE/WILL (null when not an LB source). */
   frontSeven?: FrontSevenInfo | null;
+  gear?: Record<string, string>; // era-default equipment (editor slot -> asset) the export writes
   ratings: Record<string, number>; // full editable attribute set
 }
 

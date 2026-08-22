@@ -150,7 +150,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
       )}
 
       {players.length === 0 ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center text-neutral-500">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 text-center text-muted">
           <div className="text-sm">{save ? 'Load the roster to edit any player’s ratings, position, age, and dev trait.' : 'Pick a save above first.'}</div>
           <div className="text-xs text-neutral-700">Edits write a new <code className="rounded bg-black/30 px-1">CAREER-…-ROSTER</code> file; your original is untouched.</div>
         </div>
@@ -192,7 +192,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
           {/* editor */}
           <div className="min-h-0 overflow-auto rounded-lg border border-border bg-surface-1">
             {!sel ? (
-              <div className="flex h-full items-center justify-center p-4 text-sm text-neutral-500">Select a player to edit</div>
+              <div className="flex h-full items-center justify-center p-4 text-sm text-muted">Select a player to edit</div>
             ) : (
               <>
                 <div className="sticky top-0 z-10 border-b border-border bg-surface-1 px-4 py-3">
@@ -242,7 +242,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
                     <button type="button" onClick={() => setGearOpen(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3">
                       <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit gear
                     </button>
-                    <div className="truncate text-[10px] text-neutral-500">
+                    <div className="truncate text-[10px] text-muted">
                       Helmet: {gearOpts.helmet?.find((o) => o.value === gearPatch.helmet)?.label ?? gearPatch.helmet ?? '—'} · Facemask: {gearOpts.facemask?.find((o) => o.value === gearPatch.facemask)?.label ?? gearPatch.facemask ?? '—'}
                     </div>
                   </div>
@@ -250,7 +250,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
                   <div className="mt-4 space-y-3">
                     {ATTR_GROUPS.map((g) => (
                       <div key={g.title}>
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">{g.title}</div>
+                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">{g.title}</div>
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
                           {g.keys.filter((k) => sel.ratings[k] !== undefined).map((k) => (
                             <label key={k} className="flex items-center justify-between gap-2">

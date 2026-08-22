@@ -58,7 +58,7 @@ function PersonaEditor({
 
   return (
     <div ref={wrapRef} className="relative mt-1.5 flex flex-wrap items-center gap-1" title="M27 Persona DNA — written into the export (5 slots max)">
-      <span className="text-[9px] font-semibold uppercase tracking-wider text-neutral-500">DNA</span>
+      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">DNA</span>
       {ids.map((id) => (
         <span
           key={id}
@@ -98,7 +98,7 @@ function PersonaEditor({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter traits…"
-              className="w-full rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 placeholder:text-neutral-500 focus:border-primary focus:outline-none"
+              className="w-full rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
             />
           </div>
           <div className="max-h-52 overflow-auto py-1">
@@ -115,7 +115,7 @@ function PersonaEditor({
                 {t.name}
               </button>
             ))}
-            {available.length === 0 && <div className="px-3 py-3 text-center text-[11px] text-neutral-500">No matching traits.</div>}
+            {available.length === 0 && <div className="px-3 py-3 text-center text-[11px] text-muted">No matching traits.</div>}
           </div>
         </div>
       )}
@@ -317,7 +317,12 @@ export function ProfileModal({
     <>
     <div className="fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/60 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-border-strong bg-surface-1 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${row.firstName} ${row.lastName} profile`}
+        tabIndex={-1}
+        ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
+        className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 border-b border-border bg-surface-1/95 backdrop-blur-sm">
@@ -354,7 +359,7 @@ export function ProfileModal({
                 </span>
               )}
               <DevBadge dev={dev} />
-              {archName && <span className="text-xs text-neutral-500">{archName}</span>}
+              {archName && <span className="text-xs text-muted">{archName}</span>}
               {row.frontSeven && row.frontSeven.role && (
                 <span
                   title={frontSevenTitle(row.frontSeven)}
@@ -364,7 +369,7 @@ export function ProfileModal({
                 </span>
               )}
             </div>
-            <div className="mt-1.5 text-xs text-neutral-500">
+            <div className="mt-1.5 text-xs text-muted">
               {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
               {row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
@@ -396,7 +401,7 @@ export function ProfileModal({
           )}
           <button
             onClick={onClose}
-            className="shrink-0 rounded-md p-1 text-neutral-500 transition-colors hover:bg-surface-2 hover:text-neutral-200"
+            className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-surface-2 hover:text-neutral-200"
             aria-label="Close"
           >
             <Icon path={ICONS.close} className="h-5 w-5" />
@@ -430,7 +435,7 @@ export function ProfileModal({
             data={keyAttrsForPosition(posId).map(([k, label]) => ({ label, value: eff(k) }))}
             color={tierColor(overall)}
           />
-          <p className="mt-1 text-center text-[11px] text-neutral-500">
+          <p className="mt-1 text-center text-[11px] text-muted">
             Signature {posName} attributes — dashed gold ring = elite (90+)
           </p>
         </div>
@@ -448,13 +453,13 @@ export function ProfileModal({
             ];
             return (
               <div className="border-b border-border px-5 py-3">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
-                  NFL Combine <span className="text-neutral-500">· drives speed / strength / jump / agility</span>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                  NFL Combine <span className="text-muted">· drives speed / strength / jump / agility</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                   {metrics.map(([label, val, unit]) => (
                     <div key={label} className="rounded-md bg-surface-2 px-1.5 py-1.5 text-center">
-                      <div className="text-[9px] uppercase tracking-wide text-neutral-500">{label}</div>
+                      <div className="text-[9px] uppercase tracking-wide text-muted">{label}</div>
                       <div className="text-sm font-semibold tabular-nums text-neutral-100">
                         {val != null ? `${val}${unit}` : '—'}
                       </div>
@@ -528,7 +533,7 @@ export function ProfileModal({
         </div>
 
         <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Bio</div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Bio</div>
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               First name
@@ -552,7 +557,7 @@ export function ProfileModal({
             </label>
           </div>
           <label className="block text-xs text-neutral-400">
-            College <span className="text-neutral-500">(only Madden‑recognized schools)</span>
+            College <span className="text-muted">(only Madden‑recognized schools)</span>
             <select
               value={currentCollegeId}
               onChange={(e) => onEdit('college', parseInt(e.target.value, 10))}
@@ -604,8 +609,8 @@ export function ProfileModal({
 
           <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
-              Appearance <span className="font-medium normal-case tracking-normal text-neutral-500">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+              Appearance <span className="font-medium normal-case tracking-normal text-muted">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
             <button
               onClick={() => setAppearOpen(true)}
@@ -641,7 +646,7 @@ export function ProfileModal({
 
         <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Equipment</div>
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Equipment</div>
             <button
               onClick={() => setGearOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3"
@@ -656,7 +661,7 @@ export function ProfileModal({
                 return (
                   <span key={slot} className="inline-flex items-center gap-1.5 rounded-md bg-surface-2 px-2 py-1 text-[11px] text-neutral-300 ring-1 ring-border-strong">
                     {opt?.image && <img src={opt.image} alt="" className="h-4 w-4 object-contain" />}
-                    <span className="text-neutral-500">
+                    <span className="text-muted">
                       {slot.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())}:
                     </span>{' '}
                     {opt?.label ?? val}
@@ -665,14 +670,14 @@ export function ProfileModal({
               })}
             </div>
           ) : (
-            <p className="text-[11px] text-neutral-500">Auto — era-appropriate gear ({year}). Click “Edit equipment” to customize.</p>
+            <p className="text-[11px] text-muted">Auto — era-appropriate gear ({year}). Click “Edit equipment” to customize.</p>
           )}
         </div>
 
         <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
             <div key={g.title}>
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">{g.title}</div>
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">{g.title}</div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {g.keys.map((k) => (
                   <div key={k} className="flex items-center justify-between gap-2">
@@ -686,7 +691,7 @@ export function ProfileModal({
         </div>
 
         <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
-          <span className="text-[11px] text-neutral-500">Edits save automatically &amp; apply to the .mdc export.</span>
+          <span className="text-[11px] text-muted">Edits save automatically &amp; apply to the .mdc export.</span>
           <button
             onClick={() => {
               if (confirmReset) {
@@ -736,6 +741,7 @@ export function ProfileModal({
         gameVersion={gameVersion}
         year={year}
         positionId={row.positionId}
+        autoGear={row.gear ?? {}}
       />
     )}
     </>

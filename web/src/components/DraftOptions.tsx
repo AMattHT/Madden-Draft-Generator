@@ -19,7 +19,7 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
     setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength);
   }, [opts]);
 
-  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength };
+  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength, variant: opts.variant ?? 0 };
   const hindsightLabel = hindsight <= 0.05 ? 'Draft day' : hindsight >= 0.95 ? 'Career outcome' : `${Math.round(hindsight * 100)}% outcome`;
   const dirty = JSON.stringify(next) !== JSON.stringify(opts);
   const strengthLabel = strength < 0.95 ? 'Weaker' : strength > 1.05 ? 'Stronger' : 'Normal';
@@ -79,11 +79,11 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
           {busy ? 'Generating…' : 'Generate'}
         </button>
         {JSON.stringify(opts) !== JSON.stringify(DEFAULT_DRAFT_OPTS) && (
-          <button onClick={() => onApply(DEFAULT_DRAFT_OPTS)} disabled={busy} className="text-xs text-neutral-500 hover:text-neutral-200">
+          <button onClick={() => onApply(DEFAULT_DRAFT_OPTS)} disabled={busy} className="text-xs text-muted hover:text-neutral-200">
             Reset to normal
           </button>
         )}
-        <span className="ml-auto text-[11px] text-neutral-500">
+        <span className="ml-auto text-[11px] text-muted">
           {source === 'alltime' ? 'Best players in history, one class'
             : source === 'decade' ? `Greatest players drafted in the ${decade}s`
             : 'Modifiers apply to the selected year'}

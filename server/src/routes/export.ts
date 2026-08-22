@@ -27,6 +27,7 @@ r.post('/export/mdc', async (req, res) => {
     generational: !!req.body?.generational,
     hindsight: req.body?.hindsight != null && req.body?.hindsight !== '' ? Math.max(0, Math.min(1, Number(req.body.hindsight))) : 1,
     autoStrength: !!req.body?.autoStrength,
+    variant: Math.max(0, Math.round(Number(req.body?.variant) || 0)),
   };
 
   let players; let filename: string;
