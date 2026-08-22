@@ -17,9 +17,12 @@ export interface DraftOpts {
   strength: number; // OVR curve multiplier (1 = normal)
   studs: number; // guaranteed first-round-caliber prospects
   generational: boolean; // force a can't-miss #1
+  hindsight: number; // 0 = draft-day board (by slot), 1 = career outcome
+  autoStrength: boolean; // scale the curve by how good the class really was
 }
-export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false };
-export const isCustomDraft = (o: DraftOpts) => o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational;
+export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false, hindsight: 1, autoStrength: false };
+export const isCustomDraft = (o: DraftOpts) =>
+  o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational || (o.hindsight ?? 1) !== 1 || !!o.autoStrength;
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1966; // 1967-69: one common draft
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -82,6 +85,7 @@ export default function App() {
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
+            hindsight: opts.hindsight, autoStrength: opts.autoStrength,
             gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;

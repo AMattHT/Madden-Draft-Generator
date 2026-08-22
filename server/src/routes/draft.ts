@@ -65,7 +65,7 @@ r.get('/draft/:year/generated', async (req, res) => {
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
     source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;
-    strength?: number; studs?: number; generational?: boolean; gameVersion?: string;
+    strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean;
   };
   const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -73,6 +73,8 @@ r.post('/draft/custom', async (req, res) => {
     strength: Number(b.strength) > 0 ? Number(b.strength) : 1,
     studs: Math.max(0, Math.round(Number(b.studs) || 0)),
     generational: !!b.generational,
+    hindsight: b.hindsight != null && b.hindsight !== '' ? Math.max(0, Math.min(1, Number(b.hindsight))) : 1,
+    autoStrength: !!b.autoStrength,
   };
 
   if (b.source === 'alltime' || b.source === 'decade') {

@@ -173,6 +173,13 @@ export const RatingService = {
     return clamp(overall);
   },
 
+  /** Draft-day caliber: what the slot alone says (used by the hindsight blend). */
+  slotCaliber(player: BaselinePlayer, m26PosId: number): number {
+    const group = PositionMapper.groupFromId(m26PosId);
+    const anchors = ANCHORS[group] ?? ANCHORS.WR;
+    return clamp(interp(anchors, predictedWavFromSlot(player.draftRound, player.draftPick)));
+  },
+
   /** Career wAV a draft slot is expected to produce (Chase Stuart power law). */
   slotExpectation(round: number | null, pick: number | null): number {
     return predictedWavFromSlot(round, pick);

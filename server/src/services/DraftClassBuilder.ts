@@ -3,6 +3,7 @@ import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
 import { EraBioService } from './EraBioService';
+import { PlayerLookupService } from './PlayerLookupService';
 import { HometownService } from './HometownService';
 export { RATING_KEYS } from './AttributeModel';
 import { PersonaService } from './PersonaService';
@@ -40,6 +41,28 @@ export interface GenOptions {
   strength?: number;
   studs?: number;
   generational?: boolean;
+  /** 0 = rate like draft day (by slot: the #1 pick leads, Brady is a 6th-rounder),
+   *  1 = rate by career outcome (default). Dev traits always carry the outcome,
+   *  so a hidden gem keeps his Superstar trait on a draft-day board. */
+  hindsight?: number;
+  /** Scale the class curve by how good the class actually was (top-32 caliber
+   *  vs the 1970-2015 average), so 1983 tops out higher than 2013. */
+  autoStrength?: boolean;
+}
+
+/** Reference: mean top-32 caliber of a draft class, 1970-2015 (lazily computed). */
+let refTop32: number | null = null;
+function referenceTop32(): number {
+  if (refTop32 != null) return refTop32;
+  const sums: number[] = [];
+  for (let y = 1970; y <= 2015; y++) {
+    const ps = PlayerLookupService.byYear(y, 'combined');
+    if (ps.length < 100) continue;
+    const cals = ps.map((p) => RatingService.caliber(p, PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight))).sort((a, b) => b - a).slice(0, 32);
+    sums.push(cals.reduce((a, b) => a + b, 0) / cals.length);
+  }
+  refTop32 = sums.length ? sums.reduce((a, b) => a + b, 0) / sums.length : 80;
+  return refTop32;
 }
 
 /** Elite = career wAV >= 90, or a Hall of Famer whose own career corroborates it
@@ -502,17 +525,31 @@ export const DraftClassBuilder = {
       // Madden-realistic: rank by caliber, then map each rank to Madden's
       // empirical OVR curve + dev-trait rates (real Madden class shape).
       const N = items.length || 1;
-      const strength = opts.strength && opts.strength > 0 ? opts.strength : 1;
+      let strength = opts.strength && opts.strength > 0 ? opts.strength : 1;
+      if (opts.autoStrength) {
+        // How good was this class really? Top-32 caliber against the 1970-2015 norm,
+        // damped to a +-15% curve multiplier.
+        const top = [...items].map((it) => it.caliber).sort((a, b) => b - a).slice(0, 32);
+        const mean = top.reduce((a, b) => a + b, 0) / Math.max(1, top.length);
+        strength *= Math.max(0.85, Math.min(1.15, 1 + 0.6 * (mean / referenceTop32() - 1)));
+      }
       const studs = Math.max(0, Math.round(opts.studs ?? 0));
       // A stronger class raises the ceiling above the usual realistic 85 cap.
       const capMax = Math.round(85 + Math.max(0, strength - 1) * 40);
+      const hindsight = Math.max(0, Math.min(1, opts.hindsight ?? 1));
+      // Dev traits always follow the true outcome (rank by caliber)...
+      const outcomeRank = new Map<RankedItem, number>();
+      [...items].sort((a, b) => b.caliber - a.caliber).forEach((it, rank) => outcomeRank.set(it, rank));
+      // ...while the overall order blends outcome with what the draft slot said.
+      const boardScore = (it: RankedItem) => hindsight * it.caliber + (1 - hindsight) * RatingService.slotCaliber(it.player, it.posId);
       [...items]
-        .sort((a, b) => b.caliber - a.caliber)
+        .sort((a, b) => boardScore(b) - boardScore(a))
         .forEach((it, rank) => {
-          const topFrac = (rank + 0.5) / N; // 0 = best player in the class
+          const topFrac = (rank + 0.5) / N; // 0 = best player on the board
+          const outcomeFrac = ((outcomeRank.get(it) ?? rank) + 0.5) / N;
           const base = CalibrationService.ovrAtPercentile(1 - topFrac, gameVersion);
           it.overall = Math.min(capMax, Math.round(base * strength));
-          it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(topFrac, gameVersion);
+          it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(outcomeFrac, gameVersion);
           if (rank < studs) {
             it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
             it.devTrait = Math.max(it.devTrait, 2);

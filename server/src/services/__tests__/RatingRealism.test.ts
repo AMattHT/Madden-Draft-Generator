@@ -45,3 +45,25 @@ test('when a year has more than 402 players, the weakest undrafted are dropped, 
   // order preserved: pick 1 still leads the board
   assert.equal(pv.rows[0].draftPick, 1);
 });
+
+test('hindsight 0 orders the 2000 class like draft day (Courtney Brown over Brady); hindsight 1 by career', async () => {
+  const { players } = await enrichedClass(2000, 'NFL', { fill: true });
+  const byName = (rows: { lastName: string; firstName: string; overall: number }[], last: string, first?: string) => rows.find((r) => r.lastName === last && (!first || r.firstName === first))!.overall;
+  const board = DraftClassBuilder.preview(players, 'madden', { hindsight: 0 }).rows;
+  assert.ok(byName(board, 'Brown', 'Courtney') > byName(board, 'Brady', 'Tom'), 'draft-day board: #1 pick rates above pick 199');
+  const career = DraftClassBuilder.preview(players, 'madden', { hindsight: 1 }).rows;
+  assert.ok(byName(career, 'Brady', 'Tom') > byName(career, 'Brown', 'Courtney'), 'career board: Brady rates above Brown');
+  // a hidden gem keeps his dev trait even on the draft-day board
+  assert.ok(board.find((r) => r.lastName === 'Brady' && r.firstName === 'Tom')!.devTrait >= 2, 'Brady keeps a high dev trait at hindsight 0');
+});
+
+test('auto strength lifts a famous class (1983) above a weak one (2013)', async () => {
+  const top = async (year: number) => {
+    const { players } = await enrichedClass(year, 'NFL', { fill: true });
+    const rows = DraftClassBuilder.preview(players, 'madden', { autoStrength: true }).rows;
+    return Math.max(...rows.map((r) => r.overall));
+  };
+  const t83 = await top(1983), t13 = await top(2013);
+  assert.ok(t83 > t13, `1983 top ${t83} vs 2013 top ${t13}`);
+  assert.ok(t83 >= 86 && t83 <= 92, `1983 top ${t83}`);
+});

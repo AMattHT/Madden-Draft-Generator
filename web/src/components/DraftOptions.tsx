@@ -11,12 +11,16 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
   const [strength, setStrength] = useState(opts.strength);
   const [studs, setStuds] = useState(opts.studs);
   const [generational, setGenerational] = useState(opts.generational);
+  const [hindsight, setHindsight] = useState(opts.hindsight ?? 1);
+  const [autoStrength, setAutoStrength] = useState(!!opts.autoStrength);
 
   useEffect(() => {
     setSource(opts.source); setDecade(opts.decade); setStrength(opts.strength); setStuds(opts.studs); setGenerational(opts.generational);
+    setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength);
   }, [opts]);
 
-  const next: DraftOpts = { source, decade, strength, studs, generational };
+  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength };
+  const hindsightLabel = hindsight <= 0.05 ? 'Draft day' : hindsight >= 0.95 ? 'Career outcome' : `${Math.round(hindsight * 100)}% outcome`;
   const dirty = JSON.stringify(next) !== JSON.stringify(opts);
   const strengthLabel = strength < 0.95 ? 'Weaker' : strength > 1.05 ? 'Stronger' : 'Normal';
 
@@ -25,7 +29,7 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
 
   return (
     <div className="rounded-lg border border-border bg-surface-1 p-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="flex flex-col gap-1.5">
           <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Source</span>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -44,8 +48,17 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Class strength — <span className="text-neutral-300">{strengthLabel}</span></span>
-          <input type="range" min={0.7} max={1.3} step={0.05} value={strength} onChange={(e) => setStrength(Number(e.target.value))} className="w-full accent-primary" />
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Class strength — <span className="text-neutral-300">{autoStrength ? 'Auto' : strengthLabel}</span></span>
+          <input type="range" min={0.7} max={1.3} step={0.05} value={strength} disabled={autoStrength} onChange={(e) => setStrength(Number(e.target.value))} className="w-full accent-primary disabled:opacity-40" />
+          <label className="flex items-center gap-2 text-xs text-neutral-300" title="Scale the curve by how good the class really was (top-32 caliber vs the 1970-2015 norm): 1983 tops out higher than 2013">
+            <input type="checkbox" checked={autoStrength} onChange={(e) => setAutoStrength(e.target.checked)} />
+            Auto from the class's real strength
+          </label>
+        </div>
+
+        <div className="flex flex-col gap-1.5" title="0 = the board scouts saw on draft day (the #1 pick leads, Brady is a 6th-rounder); 1 = how careers turned out. Dev traits always follow the outcome, so hidden gems keep their Superstar trait.">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Hindsight — <span className="text-neutral-300">{hindsightLabel}</span></span>
+          <input type="range" min={0} max={1} step={0.1} value={hindsight} onChange={(e) => setHindsight(Number(e.target.value))} className="w-full accent-primary" />
         </div>
 
         <label className="flex flex-col gap-1.5">

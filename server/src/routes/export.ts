@@ -25,6 +25,8 @@ r.post('/export/mdc', async (req, res) => {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
     studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
     generational: !!req.body?.generational,
+    hindsight: req.body?.hindsight != null && req.body?.hindsight !== '' ? Math.max(0, Math.min(1, Number(req.body.hindsight))) : 1,
+    autoStrength: !!req.body?.autoStrength,
   };
 
   let players; let filename: string;
