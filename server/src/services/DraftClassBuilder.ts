@@ -2,6 +2,8 @@ import { MdcService, MdcProspect } from './MdcService';
 import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
+import { EraBioService } from './EraBioService';
+import { HometownService } from './HometownService';
 export { RATING_KEYS } from './AttributeModel';
 import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
@@ -81,27 +83,33 @@ interface RankedItem {
 
 /** Split the CSV "Home State" (really a "City, State" hometown) into a Madden
  *  state id + a city string. Falls back gracefully for state-only or city-only. */
-function parseHometown(raw: string | null | undefined): { state: number; town: string } {
-  if (!raw) return { state: 0, town: '' };
-  const s = raw.trim();
-  const ci = s.lastIndexOf(',');
-  if (ci >= 0) {
-    return { state: LookupService.stateId(s.slice(ci + 1)) ?? 0, town: s.slice(0, ci).trim() };
-  }
-  const asState = LookupService.stateId(s);
-  return asState != null ? { state: asState, town: '' } : { state: 0, town: s };
-}
 
-// Position-appropriate jersey number ranges (used only when the CSV has none, so
-// pre-2005 players get a plausible number instead of everyone exporting as 0).
-const JERSEY_RANGES: Record<string, [number, number]> = {
-  QB: [1, 19], RB: [20, 39], WR: [10, 19], TE: [80, 89], OL: [60, 79],
-  EDGE: [90, 99], IDL: [90, 99], LB: [40, 59], CB: [20, 39], S: [20, 39],
-  K: [1, 9], P: [1, 9], LS: [40, 49],
+// Position-appropriate jersey number pools (used only when no real number is known).
+// Era matters: the NFL only standardised numbering in 1973 (before that receivers
+// wore 20s-40s, linebackers 30s-80s), 90s went to defenders from the mid-80s, and
+// 2021 opened single digits to skill players.
+const JERSEY_POOLS: Record<string, Array<[number, number]>> = {
+  QB: [[1, 19]], RB: [[20, 39]], WR: [[10, 19], [80, 89]], TE: [[80, 89]], OL: [[60, 79]],
+  EDGE: [[90, 99], [50, 59]], IDL: [[90, 99], [70, 79]], LB: [[50, 59], [90, 99]], CB: [[20, 39]], S: [[20, 39]],
+  K: [[1, 9]], P: [[1, 9]], LS: [[40, 49]],
 };
-function jerseyFor(group: string, rand: () => number): number {
-  const [lo, hi] = JERSEY_RANGES[group] ?? [1, 99];
-  return lo + Math.floor(rand() * (hi - lo + 1));
+const JERSEY_POOLS_PRE1973: Record<string, Array<[number, number]>> = {
+  ...JERSEY_POOLS,
+  WR: [[20, 49], [80, 89]], TE: [[80, 89], [40, 49]], EDGE: [[70, 89]], IDL: [[70, 79]], LB: [[50, 69], [30, 39]],
+  RB: [[20, 49]], CB: [[20, 49]], S: [[20, 49]],
+};
+function jerseyFor(group: string, rand: () => number, year = 2000): number {
+  const pools = year < 1973 ? JERSEY_POOLS_PRE1973 : year < 1986 && (group === 'EDGE' || group === 'IDL' || group === 'LB') ? JERSEY_POOLS_PRE1973 : JERSEY_POOLS;
+  let ranges = pools[group] ?? [[1, 99]];
+  if (year >= 2021 && (group === 'RB' || group === 'WR' || group === 'CB' || group === 'S' || group === 'LB')) ranges = [[1, 9], ...ranges];
+  const total = ranges.reduce((s, [lo, hi]) => s + (hi - lo + 1), 0);
+  let x = Math.floor(rand() * total);
+  for (const [lo, hi] of ranges) {
+    const n = hi - lo + 1;
+    if (x < n) return lo + x;
+    x -= n;
+  }
+  return ranges[0][0];
 }
 
 /** Madden 26 body type (Heavy / Muscular / Thin / Standard) from position group +
@@ -144,8 +152,11 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
 
   // Bio first (real measurements when we have them, else Madden per-position
   // norms) — the physical build decides the archetype, the way Madden does it.
-  const heightInches = player.heightInches ?? Math.round(profile.htMean + (rand() * 2 - 1) * profile.htStd);
-  const weight = Math.max(160, player.weight ?? Math.round(profile.wtMean + (rand() * 2 - 1) * profile.wtStd));
+  // Missing measurements come from the player's own era, not today's norms (a 1952
+  // tackle is ~235 lb, not 318).
+  const eraBuild = player.heightInches == null || player.weight == null ? EraBioService.sample(player.draftYear, PositionMapper.groupFromId(posId), rand, gameVersion) : null;
+  const heightInches = player.heightInches ?? eraBuild!.heightInches;
+  const weight = Math.max(150, player.weight ?? eraBuild!.weight);
 
   // Archetype from the real build (heavy back -> Power, lean end -> Speed Rusher),
   // then attributes from THAT archetype's profile so ratings match the role.
@@ -174,14 +185,14 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.lastName = player.lastName || '';
   prospect.position = posId;
   prospect.college = LookupService.collegeId(player.college);
-  const home = parseHometown(player.homeState);
+  const home = HometownService.resolve(player.homeState, player.draftYear, `${player.firstName}|${player.lastName}|${index}`);
   prospect.homeState = home.state;
   prospect.homeTown = home.town;
   prospect.age = player.age ?? CalibrationService.sampleAge(rand, gameVersion);
   prospect.heightInches = heightInches;
   prospect.weight = weight;
   const group = PositionMapper.groupFromId(posId);
-  prospect.jerseyNum = player.jersey ?? jerseyFor(group, rand);
+  prospect.jerseyNum = (player.jersey || null) ?? (career?.jersey || null) ?? jerseyFor(group, rand, player.draftYear); // 0 = unknown in the source
   prospect.bodyType = bodyTypeFor(group, weight); // Madden build, else inherits the donor block's
   prospect.draftable = 1;
   prospect.draftRound = player.draftRound ?? 63; // 63 = UDFA
