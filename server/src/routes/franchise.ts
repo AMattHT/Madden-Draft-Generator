@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions, FaTrimOptions, DraftPickResetOptions } from '../services/FranchiseService';
+import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions, FaTrimOptions, DraftPickResetOptions, AdvanceRosterOptions } from '../services/FranchiseService';
 
 const router = Router();
 
@@ -125,6 +125,17 @@ router.post('/franchise/relocate-rebrand', async (req: Request, res: Response) =
   if (!options || options.teamIndex == null) return res.status(400).json({ error: 'options.teamIndex required' });
   try {
     res.json(await FranchiseService.relocateRebrand(fileName, options, versionOf(req.body)));
+  } catch (e) {
+    res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Advance the roster N seasons: age, retire, regress, downgrade dev - writes CAREER-*-AGEDn. */
+router.post('/franchise/advance-roster', async (req: Request, res: Response) => {
+  const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: AdvanceRosterOptions };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  try {
+    res.json(await FranchiseService.advanceRoster(fileName, options ?? {}, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }

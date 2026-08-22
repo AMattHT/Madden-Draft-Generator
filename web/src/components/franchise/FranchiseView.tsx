@@ -5,6 +5,7 @@ import { RosterEditor } from '../RosterEditor';
 import { CapResetTool } from './CapResetTool';
 import { PlayerBulkTools } from './PlayerBulkTools';
 import { DevTraitsTool } from './DevTraitsTool';
+import { AdvanceRosterTool } from './AdvanceRosterTool';
 import { FaTrimTool } from './FaTrimTool';
 import { RelocationTool } from './RelocationTool';
 import { DraftPickResetTool } from './DraftPickResetTool';
@@ -131,6 +132,8 @@ export function FranchiseView(props: {
                 <PlayerBulkTools save={selected} onWrote={refresh} />
                 <div className="border-t border-border/60" />
                 <DevTraitsTool save={selected} onWrote={refresh} />
+                <div className="border-t border-border/60" />
+                <AdvanceRosterTool save={selected} onWrote={refresh} />
                 <div className="border-t border-border/60" />
                 <FaTrimTool save={selected} onWrote={refresh} />
               </>

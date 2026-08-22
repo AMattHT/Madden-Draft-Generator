@@ -185,6 +185,17 @@ export interface RelocateRebrandResult {
   skippedFields: string[];
 }
 
+export interface AdvanceRosterOptions {
+  years?: number; retire?: boolean; regress?: boolean; devDowngrade?: boolean; includeUnsigned?: boolean; dryRun?: boolean; outputName?: string;
+}
+export interface AdvanceRosterResult {
+  input: string; output: string; outputPath: string; dryRun: boolean; years: number;
+  playersConsidered: number; aged: number; retired: number; regressed: number; devDowngraded: number;
+  avgAgeBefore: number; avgAgeAfter: number; avgOvrBefore: number; avgOvrAfter: number;
+  retirements: Array<{ name: string; position: string; team: string; age: number; overall: number }>;
+  declines: Array<{ name: string; position: string; team: string; age: number; from: number; to: number }>;
+}
+
 export interface TraitRealismOptions {
   includeUnsigned?: boolean;
   xfactorCap?: number;
@@ -493,6 +504,19 @@ export const api = {
   },
 
   /** Realistic dev-trait pass. dryRun:true previews counts; else writes a new CAREER-*-TRAITS save. */
+  async franchiseAdvanceRoster(fileName: string, options: AdvanceRosterOptions): Promise<AdvanceRosterResult> {
+    const res = await fetch('/api/franchise/advance-roster', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, options, gameVersion: franchiseGameVersion }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
   async franchiseTraitRealism(fileName: string, options: TraitRealismOptions): Promise<TraitRealismResult> {
     const res = await fetch('/api/franchise/trait-realism', {
       method: 'POST',

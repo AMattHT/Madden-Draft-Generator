@@ -88,6 +88,15 @@ process.env.MADDEN27_SAVES_DIR = m27Dir;
       }
       return `Mahomes cap ${capB} -> ${capA}, ${(r as any).playersScaled} players`;
     });
+    await check('advance roster 5 seasons (written, re-opened)', async () => {
+      const r = await silence(() => FranchiseService.advanceRoster(save, { years: 5 }, version));
+      if (r.retired < 100) throw new Error(`only ${r.retired} retired`);
+      if (!(r.avgAgeAfter > r.avgAgeBefore + 3)) throw new Error(`avg age ${r.avgAgeBefore} -> ${r.avgAgeAfter}`);
+      const f = await reopen(r.output); const pt = await playerTable(f);
+      let retiredSeen = 0; for (const rec of pt.records) { if (rec.isEmpty) continue; try { if (String(rec.ContractStatus) === 'Retired') retiredSeen++; } catch { /* */ } }
+      if (retiredSeen < r.retired) throw new Error(`file shows ${retiredSeen} retired, tool said ${r.retired}`);
+      return `${r.retired} retired, ${r.regressed} declined, avg age ${r.avgAgeBefore} -> ${r.avgAgeAfter}, avg OVR ${r.avgOvrBefore} -> ${r.avgOvrAfter}`;
+    });
     await check('roster apply: overall 99 on one player (written, re-opened)', async () => {
       const list = await FranchiseService.franchisePlayers(save, version);
       const target = list.players.find((p) => p.overall && p.overall < 90)!;

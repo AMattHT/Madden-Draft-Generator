@@ -281,6 +281,36 @@ export interface TraitRealismOptions {
 
 export interface TraitTierCounts { Normal: number; Star: number; Superstar: number; XFactor: number; }
 
+export interface AdvanceRosterOptions {
+  years?: number;            // seasons to advance (default 1, max 10)
+  retire?: boolean;          // retire players past their position's age (default true)
+  regress?: boolean;         // decline overalls past the position's peak (default true)
+  devDowngrade?: boolean;    // drop dev tiers on aging stars (default true)
+  includeUnsigned?: boolean; // default false: Signed roster only
+  dryRun?: boolean;
+  outputName?: string;
+}
+export interface AdvanceRosterResult {
+  input: string; output: string; outputPath: string; dryRun: boolean; years: number;
+  playersConsidered: number; aged: number; retired: number; regressed: number; devDowngraded: number;
+  avgAgeBefore: number; avgAgeAfter: number; avgOvrBefore: number; avgOvrAfter: number;
+  retirements: Array<{ name: string; position: string; team: string; age: number; overall: number }>;
+  declines: Array<{ name: string; position: string; team: string; age: number; from: number; to: number }>;
+}
+
+/** Typical last season by position (NFL careers; QB/K/P last longest, backs shortest). */
+const RETIRE_AGE: Record<string, number> = {
+  QB: 38, K: 40, P: 40, LS: 38, HB: 31, RB: 31, FB: 32, WR: 33, TE: 34,
+  LT: 35, LG: 34, C: 35, RG: 34, RT: 35, LE: 33, RE: 33, LEDG: 33, REDG: 33, DT: 33,
+  LOLB: 33, ROLB: 33, MLB: 33, SAM: 33, MIKE: 33, WILL: 33, CB: 32, FS: 33, SS: 33,
+};
+/** Age after which overall starts to decline, by position. */
+const PEAK_AGE: Record<string, number> = {
+  QB: 34, K: 36, P: 36, LS: 35, HB: 27, RB: 27, FB: 29, WR: 30, TE: 30,
+  LT: 31, LG: 31, C: 32, RG: 31, RT: 31, LE: 30, RE: 30, LEDG: 30, REDG: 30, DT: 30,
+  LOLB: 30, ROLB: 30, MLB: 30, SAM: 30, MIKE: 30, WILL: 30, CB: 29, FS: 30, SS: 30,
+};
+
 export interface TraitUpgrade {
   name: string; position: string; team: string; overall: number; age: number;
   from: DevTier; to: DevTier;
@@ -987,6 +1017,124 @@ export const FranchiseService = {
     return {
       input: fileName, output: outputName, outputPath, dryRun,
       playersConsidered: considered, changed, before, after, byPosition, notable: notable.slice(0, 40),
+    };
+  },
+
+
+  /**
+   * Advance the roster N seasons without playing them: everyone ages, players past
+   * their position's typical last season retire (ContractStatus = Retired, so the
+   * game drops them), overalls decline past the position's peak, and aging stars
+   * lose dev tiers. Built for "replay an era" franchises: import a 1985 class into
+   * a roster that looks a decade older than the 2026 one.
+   */
+  async advanceRoster(fileName: string, opts: AdvanceRosterOptions = {}, gameVersion: GameVersion = 'm26'): Promise<AdvanceRosterResult> {
+    const dir = savesDir(gameVersion);
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const years = Math.max(1, Math.min(10, Math.round(opts.years ?? 1)));
+    const retire = opts.retire !== false, regress = opts.regress !== false, devDown = opts.devDowngrade !== false;
+    const dryRun = !!opts.dryRun;
+    const outputName = dryRun ? '' : outputNameFor(fileName, `AGED${years}`, opts.outputName);
+    const outputPath = dryRun ? '' : path.join(dir, outputName);
+    if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+    const file = await openSave(inputPath, gameVersion);
+
+    const teamMap = new Map<number, string>();
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
+    if (tt) {
+      await tt.readRecords();
+      for (const r of tt.records) {
+        if (r.isEmpty) continue;
+        let name = '', idx = -1;
+        try { name = String(r.DisplayName || ''); } catch { /* */ }
+        try { idx = num(r.TeamIndex); } catch { /* */ }
+        if (idx < 0 || idx >= 32 || PSEUDO_TEAMS.has(name) || teamMap.has(idx)) continue;
+        teamMap.set(idx, name);
+      }
+    }
+    const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
+    if (!pt) throw new Error('player table not found');
+    await pt.readRecords();
+
+    // Deterministic per-player jitter so two runs give the same roster.
+    const jitter = (seed: string) => { let h = 2166136261; for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
+    const DOWN: Record<string, string> = { XFactor: 'Superstar', Superstar: 'Star', Star: 'Normal', Normal: 'Normal' };
+
+    let considered = 0, aged = 0, retired = 0, regressed = 0, devDowngraded = 0;
+    let ageSumB = 0, ageSumA = 0, ovrSumB = 0, ovrSumA = 0, n = 0;
+    const retirements: AdvanceRosterResult['retirements'] = [];
+    const declines: AdvanceRosterResult['declines'] = [];
+    for (const r of pt.records) {
+      if (r.isEmpty) continue;
+      let status = ''; try { status = String(r.ContractStatus); } catch { /* */ }
+      if (status === 'Deleted' || status === 'None' || status === 'Retired') continue;
+      if (!opts.includeUnsigned && status !== 'Signed') continue;
+      considered++;
+      const age0 = num(r.Age), ovr0 = num(r.OverallRating);
+      let pos = ''; try { pos = String(r.Position ?? ''); } catch { /* */ }
+      let name = ''; try { name = `${String(r.FirstName ?? '')} ${String(r.LastName ?? '')}`.trim(); } catch { /* */ }
+      const team = teamMap.get(num(r.TeamIndex)) || status;
+      const age1 = age0 + years;
+      const key = `${name}|${pos}|${age0}`;
+      ageSumB += age0; ovrSumB += ovr0; n++;
+
+      // Retire: past the position's age, with a ramp (a 33-year-old HB almost surely, a 31 maybe).
+      const retireAge = RETIRE_AGE[pos] ?? 33;
+      if (retire && age1 >= retireAge) {
+        const over = age1 - retireAge;
+        const p = Math.min(1, 0.45 + 0.3 * over) - (ovr0 >= 90 ? 0.25 : ovr0 >= 85 ? 0.1 : 0); // elite players hang on
+        if (jitter(key + '|ret') < p) {
+          if (!dryRun) writeField(r, 'ContractStatus', 'Retired', true);
+          retired++;
+          retirements.push({ name, position: pos, team, age: age1, overall: ovr0 });
+          ageSumA += age1; ovrSumA += ovr0;
+          continue;
+        }
+      }
+      // Age
+      if (!dryRun) { writeField(r, 'Age', Math.min(50, age1)); const yp = num(r.YearsPro); writeField(r, 'YearsPro', yp + years); }
+      aged++;
+      // Regress past the peak: ~1.5 overall per season beyond it (a touch more for backs).
+      let ovr1 = ovr0;
+      if (regress) {
+        const peak = PEAK_AGE[pos] ?? 30;
+        const seasonsPast = Math.max(0, age1 - Math.max(peak, age0)) + (age0 > peak ? Math.min(years, age0 - peak) * 0 : 0);
+        const yearsPastPeak = Math.max(0, age1 - peak) - Math.max(0, age0 - peak);
+        const rate = pos === 'HB' || pos === 'RB' ? 2 : pos === 'QB' || pos === 'K' || pos === 'P' ? 1 : 1.5;
+        const drop = Math.round(yearsPastPeak * rate + (yearsPastPeak ? (jitter(key + '|reg') - 0.5) * 2 : 0));
+        void seasonsPast;
+        if (drop > 0) {
+          ovr1 = Math.max(45, ovr0 - drop);
+          if (!dryRun) writeField(r, 'OverallRating', ovr1);
+          regressed++;
+          if (ovr0 - ovr1 >= 3) declines.push({ name, position: pos, team, age: age1, from: ovr0, to: ovr1 });
+        }
+      }
+      // Dev tier: an aging star loses a tier per ~3 seasons past 30.
+      if (devDown && age1 >= 31) {
+        let cur = ''; try { cur = DEV_LABEL[String(r.TraitDevelopment)] ?? ''; } catch { /* */ }
+        if (cur && cur !== 'Normal') {
+          const steps = Math.floor((age1 - 28) / 3) - Math.floor((age0 - 28) / 3);
+          let next = cur;
+          for (let i = 0; i < steps; i++) next = DOWN[next] ?? next;
+          if (next !== cur) {
+            if (!dryRun) writeField(r, 'TraitDevelopment', DEV_ENUM[next]);
+            devDowngraded++;
+          }
+        }
+      }
+      ageSumA += age1; ovrSumA += ovr1;
+    }
+    retirements.sort((a, b) => b.overall - a.overall);
+    declines.sort((a, b) => (b.from - b.to) - (a.from - a.to));
+    if (!dryRun) await file.save(outputPath, {});
+    return {
+      input: fileName, output: outputName, outputPath, dryRun, years,
+      playersConsidered: considered, aged, retired, regressed, devDowngraded,
+      avgAgeBefore: n ? +(ageSumB / n).toFixed(1) : 0, avgAgeAfter: n ? +(ageSumA / n).toFixed(1) : 0,
+      avgOvrBefore: n ? +(ovrSumB / n).toFixed(1) : 0, avgOvrAfter: n ? +(ovrSumA / n).toFixed(1) : 0,
+      retirements: retirements.slice(0, 60), declines: declines.slice(0, 60),
     };
   },
 
