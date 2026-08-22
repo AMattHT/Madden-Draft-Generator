@@ -273,6 +273,10 @@ export interface TraitRealismOptions {
   superstarCap?: number;     // default 72 (~2/team)
   dryRun?: boolean;          // compute + report counts, do NOT write a file
   outputName?: string;
+  /** Position-aware (default true): X-Factor / Superstar quotas per position follow
+   *  the save's own census, so an 89 guard is a Star while an 89 edge is a
+   *  Superstar, the way EA rates them. false = pure overall thresholds. */
+  positionAware?: boolean;
 }
 
 export interface TraitTierCounts { Normal: number; Star: number; Superstar: number; XFactor: number; }
@@ -898,7 +902,7 @@ export const FranchiseService = {
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
 
-    interface Work { rec: any; ovr: number; age: number; pos: string; team: string; name: string; cur: DevTier; want: DevTier; }
+    interface Work { rec: any; ovr: number; age: number; pos: string; team: string; name: string; cur: DevTier; want: DevTier; hidden: boolean; }
     const work: Work[] = [];
     const before: TraitTierCounts = { Normal: 0, Star: 0, Superstar: 0, XFactor: 0 };
     let considered = 0;
@@ -913,9 +917,10 @@ export const FranchiseService = {
       const ovr = num(r.OverallRating);
       const age = num(r.Age);
       let cur: DevTier = 'Normal';
-      try { cur = (DEV_LABEL[String(r.TraitDevelopment)] as DevTier) || 'Normal'; } catch { /* */ }
-      before[cur]++;
-
+      let rawDev = '';
+      try { rawDev = String(r.TraitDevelopment); cur = (DEV_LABEL[rawDev] as DevTier) || 'Normal'; } catch { /* */ }
+      const hidden = rawDev === 'Hidden'; // M27: an undisclosed trait - never touch it
+      if (!hidden) before[cur]++;
       // Threshold pass -> desired tier (age nudges up-and-comers, downgrades declining vets).
       let want: DevTier = 'Normal';
       if (ovr >= 92) want = 'XFactor';
@@ -924,16 +929,36 @@ export const FranchiseService = {
       else if (ovr >= 80) want = age <= 25 ? 'Star' : 'Normal';
       else if (ovr >= 76) want = age <= 23 ? 'Star' : 'Normal';
       else want = 'Normal';
-
+      // Age ceiling: a 34-year-old is not a developing Superstar.
+      if (age >= 35 && ovr < 95) want = want === 'Normal' ? 'Normal' : 'Star';
+      else if (age >= 33 && want === 'Superstar') want = 'Star';
       let name = '', pos = '';
       try { name = `${String(r.FirstName ?? '')} ${String(r.LastName ?? '')}`.trim(); } catch { /* */ }
       try { pos = String(r.Position ?? ''); } catch { /* */ }
-      work.push({ rec: r, ovr, age, pos, team: teamMap.get(num(r.TeamIndex)) || status, name, cur, want });
+      if (hidden) want = cur; // protected
+      work.push({ rec: r, ovr, age, pos, team: teamMap.get(num(r.TeamIndex)) || status, name, cur, want, hidden });
     }
-
+    // Position-aware quotas: EA hands X-Factors/Superstars to some positions far
+    // more than others (QB/WR/edge yes, guards/kickers almost never). Use the save's
+    // own census per position as the quota, then fill it with the best players at
+    // that position; anyone over the quota drops a tier.
+    if (opts.positionAware !== false) {
+      for (const tier of ['XFactor', 'Superstar'] as DevTier[]) {
+        const to: DevTier = tier === 'XFactor' ? 'Superstar' : 'Star';
+        const census = new Map<string, number>();
+        for (const w of work) if (w.cur === tier && !w.hidden) census.set(w.pos, (census.get(w.pos) ?? 0) + 1);
+        const byPos = new Map<string, Work[]>();
+        for (const w of work) if (w.want === tier && !w.hidden) byPos.set(w.pos, [...(byPos.get(w.pos) ?? []), w]);
+        for (const [pos, pool] of byPos) {
+          const quota = Math.max(census.get(pos) ?? 0, pool.some((w) => w.ovr >= 95) ? 1 : 0);
+          pool.sort((a, b) => b.ovr - a.ovr || a.age - b.age);
+          for (let i = quota; i < pool.length; i++) pool[i].want = to;
+        }
+      }
+    }
     // Enforce league caps: demote lowest-OVR (older first) over the limit.
     const demote = (tier: DevTier, cap: number, to: DevTier) => {
-      const pool = work.filter((w) => w.want === tier).sort((a, b) => a.ovr - b.ovr || b.age - a.age);
+      const pool = work.filter((w) => w.want === tier && !w.hidden).sort((a, b) => a.ovr - b.ovr || b.age - a.age);
       for (let i = 0; i < pool.length - cap; i++) pool[i].want = to;
     };
     demote('XFactor', xCap, 'Superstar');
@@ -945,6 +970,7 @@ export const FranchiseService = {
     let changed = 0;
 
     for (const w of work) {
+      if (w.hidden) continue;
       after[w.want]++;
       (byPosition[w.pos] ??= { Normal: 0, Star: 0, Superstar: 0, XFactor: 0 })[w.want]++;
       if (w.want !== w.cur) {
