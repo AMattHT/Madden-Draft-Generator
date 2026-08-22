@@ -77,7 +77,10 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   if (age != null) out.age = age;
   if (race != null) out.race = race;
   if (nv) {
-    if (out.wav == null && nv.wav != null) {
+    // A current-year rookie's nflverse w_av is one season (or a 0 placeholder):
+    // not a career signal. Leave those on the draft-slot estimate.
+    const currentRookie = p.draftYear >= new Date().getFullYear() - 1;
+    if (out.wav == null && nv.wav != null && !currentRookie) {
       out.wav = nv.wav;
       out.wavSource = 'actual';
     }

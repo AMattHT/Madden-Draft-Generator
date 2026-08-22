@@ -23,9 +23,13 @@ const ANCHORS: Record<string, Anchor[]> = {
   LB: [[5, 55], [15, 64], [30, 71], [55, 79], [85, 85], [120, 91], [160, 99]],
   CB: [[5, 55], [15, 64], [30, 72], [55, 79], [85, 86], [120, 92], [160, 99]],
   S: [[5, 55], [15, 64], [30, 72], [55, 80], [80, 86], [110, 91], [150, 99]],
-  K: [[5, 60], [20, 70], [45, 78], [70, 84], [100, 90]],
-  P: [[5, 60], [20, 70], [45, 78], [70, 84], [100, 90]],
-  LS: [[0, 60], [4, 68], [8, 72]],
+  // Specialists start at the same floor as everyone else (a 60 floor put every
+  // rookie K/P/LS above the real first-rounders of a class with no career data).
+  // At equal wAV a specialist never out-rates a position player (their AV
+  // accrues far slower, so a 3-wAV long snapper is a fringe rookie, not a starter).
+  K: [[2, 50], [8, 57], [20, 68], [45, 78], [70, 84], [100, 90]],
+  P: [[2, 50], [8, 57], [20, 68], [45, 78], [70, 84], [100, 90]],
+  LS: [[0, 48], [3, 53], [6, 60], [9, 66]],
 };
 
 function interp(anchors: Anchor[], x: number): number {
@@ -99,8 +103,28 @@ function hasCareerSignal(p: BaselinePlayer): boolean {
  *  floor: the source isHOF flag is name-matched and collides across same-named
  *  players — e.g. all three "Jim Brown"s read TRUE — so flooring by it would
  *  inflate scrubs. Real stars are lifted by the accolade/career backfill instead.) */
+/** Seasons the career aggregates describe (0 when unknown). */
+function careerSeasons(p: BaselinePlayer): number {
+  return p.careerFrom != null && p.careerTo != null && p.careerTo >= p.careerFrom ? p.careerTo - p.careerFrom + 1 : 0;
+}
+
+/** Completed (or at least well-established) career: enough seasons, or accolades. */
+function careerIsMature(p: BaselinePlayer): boolean {
+  return careerSeasons(p) >= 3 || (p.proBowls ?? 0) > 0 || (p.allPro1 ?? 0) > 0 || (p.seasonsStarted ?? 0) >= 3;
+}
+
 function estimateWav(p: BaselinePlayer): number {
-  const est = hasCareerSignal(p) ? careerWavEstimate(p) : predictedWavFromSlot(p.draftRound, p.draftPick);
+  const slot = predictedWavFromSlot(p.draftRound, p.draftPick);
+  let est: number;
+  if (!hasCareerSignal(p)) est = slot;
+  else if (careerIsMature(p)) est = careerWavEstimate(p);
+  else {
+    // A one- or two-season career says little yet (a 2025 first-rounder has a
+    // single season on file): blend toward the draft-slot expectation.
+    const seasons = Math.max(careerSeasons(p), p.seasonsStarted ?? 0, 1);
+    const w = seasons / (seasons + 3);
+    est = w * careerWavEstimate(p) + (1 - w) * slot;
+  }
   // isHOF is now trustworthy (resolved to the true owner in dedupSharedAssets, and
   // set from the '‡' marker in the loader), so a HOF floor is safe again: an
   // enshrined player never rates below a solid starter even when career/accolade
