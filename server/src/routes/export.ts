@@ -61,8 +61,15 @@ r.post('/export/mdc', async (req, res) => {
     const dir = gameVersion === 'm27' ? M27_SAVES_DIR : FranchiseService.savesDir();
     if (!fs.existsSync(dir)) return res.status(400).json({ error: `Madden Saves folder not found: ${dir}` });
     const outPath = path.join(dir, filename);
-    fs.writeFileSync(outPath, buffer);
-    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness });
+    // Never leave a half-written class in the Saves folder: write a temp file
+    // next to it and rename over the target; keep the previous export as .bak
+    // (the game ignores files with an extension) and say that we overwrote.
+    const overwrote = fs.existsSync(outPath);
+    const tmp = `${outPath}.tmp-${process.pid}`;
+    fs.writeFileSync(tmp, buffer);
+    if (overwrote) fs.copyFileSync(outPath, `${outPath}.bak`);
+    fs.renameSync(tmp, outPath);
+    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness, overwrote, backup: overwrote ? `${outPath}.bak` : null });
   }
 
   res.setHeader('Content-Type', 'application/octet-stream');

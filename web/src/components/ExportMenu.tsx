@@ -148,9 +148,10 @@ export function ExportMenu({
     setMsg(null);
     try {
       const r = await api.saveMdcToSaves(year, league, edits, mode, gearEdits, draftOpts, gameVersion);
+      const ow = (r as { overwrote?: boolean }).overwrote;
       setMsg({
         ok: true,
-        text: `Saved ${r.filename} (${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}) to your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder. In Madden: Franchise → Choose Draft Class → it’s already there.`,
+        text: `Saved ${r.filename} (${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}) to your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder${ow ? ' — replaced the previous export (kept as .bak)' : ''}. In Madden: Franchise → Choose Draft Class → it’s already there.`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Save to Madden Saves failed: ${(e as Error).message}` });
