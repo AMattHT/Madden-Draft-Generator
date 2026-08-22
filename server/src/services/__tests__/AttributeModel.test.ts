@@ -73,3 +73,34 @@ test('Tom Brady is not a Scrambler (career rush totals normalised per game)', sk
   assert.ok(brady, 'Brady in the 2000 class');
   assert.notEqual(brady.archetypeName, 'Scrambler', `Brady archetype: ${brady.archetypeName}`);
 });
+
+test('no other archetype for the position scores above the written overall (Madden re-picks the best)', skipWithoutData, async () => {
+  const { CalibrationService } = await import('../CalibrationService');
+  const { PositionMapper } = await import('../PositionMapper');
+  for (const version of ['m26', 'm27'] as const) {
+    const { players } = await enrichedClass(2003, 'NFL', { fill: true });
+    const r = DraftClassBuilder.preview(players, 'madden', {}, version).rows;
+    const offenders: string[] = [];
+    for (const x of r) {
+      const dist = CalibrationService.positionProfile(PositionMapper.name(x.positionId), version).archetypeDist || {};
+      for (const id of Object.keys(dist).map(Number)) {
+        if (id === x.archetype) continue;
+        const o = OVRWeightsCalculator.computeOverall(x.positionId, id, x.ratings, version);
+        if (o != null && o > x.overall) offenders.push(`${version} ${x.lastName} ${x.position} ${x.archetypeName} ${x.overall} -> #${id} ${o}`);
+      }
+    }
+    assert.deepEqual(offenders.slice(0, 10), [], `${offenders.length} prospects would be re-rated up by a rival archetype`);
+  }
+});
+
+test('Kevin Williams (2003) is written at the overall the game will show', skipWithoutData, async () => {
+  const { players } = await enrichedClass(2003, 'NFL', { fill: true });
+  const r = DraftClassBuilder.preview(players, 'madden', {}, 'm27').rows;
+  const kw = r.find((x) => x.firstName === 'Kevin' && x.lastName === 'Williams' && x.position === 'DT')!;
+  assert.ok(kw, 'Kevin Williams in the 2003 class');
+  assert.ok(kw.overall <= 86, `rookie cap: ${kw.overall}`);
+  for (const id of [43, 44, 45, 46]) {
+    const o = OVRWeightsCalculator.computeOverall(12, id, kw.ratings, 'm27');
+    assert.ok(o == null || o <= kw.overall, `archetype #${id} scores ${o} > ${kw.overall}`);
+  }
+});

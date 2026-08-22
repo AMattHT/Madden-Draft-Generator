@@ -1,5 +1,5 @@
 import { CombineMeasurements } from '../types/player';
-import { AttrStat, PosProfile } from './CalibrationService';
+import { AttrStat, CalibrationService, PosProfile } from './CalibrationService';
 import { CombineService } from './CombineService';
 import { OVRWeightsCalculator } from './OVRWeightsCalculator';
 import { PositionMapper } from './PositionMapper';
@@ -155,6 +155,82 @@ export function generateAttributes(input: GenerateInput): Record<string, number>
  * weighted shift, then single-point nudges on the heaviest movable attribute.
  */
 export function reconcileToTarget(attrs: Record<string, number>, posId: number, archetype: number, target: number, version: 'm26' | 'm27' = 'm26'): void {
+  reconcileArchetype(attrs, posId, archetype, target, version);
+  // Madden does not trust the archetype byte either: it scores the attributes under
+  // every archetype valid for the position and keeps the highest. A rival formula
+  // scoring above the target lifts the overall on import (Kevin Williams 2003: 85 as
+  // a Speed Rusher, 89 as a Power Rusher — the game showed 89). Lower the attributes
+  // each rival weights more than ours until none beats the target, then re-solve.
+  const rivals = eligibleArchetypes(posId, version).filter((a) => a !== archetype);
+  for (let round = 0; round < 6 && rivals.length; round++) {
+    let moved = false;
+    for (const rival of rivals) {
+      const score = OVRWeightsCalculator.computeOverall(posId, rival, attrs, version);
+      if (score == null || score <= target) continue;
+      capRival(attrs, posId, archetype, rival, target, version);
+      moved = true;
+    }
+    if (!moved) break;
+    reconcileArchetype(attrs, posId, archetype, target, version, rivals);
+  }
+}
+
+/** The overall Madden will show: the best score over every archetype valid for
+ *  the position (the game re-derives the archetype from the attributes). */
+export function gameOverall(attrs: Record<string, number>, posId: number, archetype: number, version: 'm26' | 'm27' = 'm26'): { overall: number | null; archetype: number } {
+  let best = OVRWeightsCalculator.computeOverall(posId, archetype, attrs, version);
+  let bestArch = archetype;
+  for (const a of eligibleArchetypes(posId, version)) {
+    if (a === archetype) continue;
+    const o = OVRWeightsCalculator.computeOverall(posId, a, attrs, version);
+    if (o != null && (best == null || o > best)) { best = o; bestArch = a; }
+  }
+  return { overall: best, archetype: bestArch };
+}
+
+/** Archetype ids the game considers for a position: the ones its own generated
+ *  classes use (calibration archetypeDist). Ovrweights carries DE-style rushers for
+ *  OLB too, but the game never assigns those to a SAM/WILL. */
+function eligibleArchetypes(posId: number, version: 'm26' | 'm27'): number[] {
+  const prof = CalibrationService.positionProfile(PositionMapper.name(posId), version);
+  return Object.keys(prof?.archetypeDist ?? {}).map(Number).filter((n) => Number.isFinite(n));
+}
+
+/** Bring `rival`'s recompute down to `target` by lowering the skill attributes it
+ *  weights more heavily than `archetype` does (so our own score moves least). */
+function capRival(attrs: Record<string, number>, posId: number, archetype: number, rival: number, target: number, version: 'm26' | 'm27'): void {
+  const re = OVRWeightsCalculator.ovrEntryFor(posId, rival, version);
+  const own = OVRWeightsCalculator.ovrEntryFor(posId, archetype, version);
+  if (!re || !re.sumWeight) return;
+  const ownW = own?.weights ?? {};
+  const lean = (a: string) => re.weights[a] - (ownW[a] ?? 0);
+  let movable = Object.keys(re.weights).filter((a) => !FIXED_ATTRS.has(a) && lean(a) > 0);
+  if (!movable.length) movable = Object.keys(re.weights).filter((a) => !FIXED_ATTRS.has(a));
+  if (!movable.length) return;
+  const score = () => OVRWeightsCalculator.computeOverall(posId, rival, attrs, version) ?? target;
+  // Weighted shift to just under the rounding edge of target+1.
+  const requiredSum = (re.desiredLow + ((target + 0.45) / 99) * (re.desiredHigh - re.desiredLow)) * re.sumWeight;
+  for (let iter = 0; iter < 4 && score() > target; iter++) {
+    let sum = 0;
+    for (const [a, w] of Object.entries(re.weights)) sum += (Number(attrs[a]) || 0) * w;
+    const deficit = requiredSum - sum; // negative: we must come down
+    if (deficit >= 0) break;
+    const live = movable.filter((a) => (Number(attrs[a]) || 0) > 1);
+    const movableW = live.reduce((s, a) => s + re.weights[a], 0);
+    if (!movableW) break;
+    const shift = deficit / movableW;
+    for (const a of live) attrs[a] = clampRating((Number(attrs[a]) || 0) + shift);
+  }
+  // Integer pass on the attribute that hurts our own score least per rival point.
+  const byLean = [...movable].sort((a, b) => lean(b) - lean(a));
+  for (let i = 0; i < 40 && score() > target; i++) {
+    const pick = byLean.find((a) => attrs[a] > 1);
+    if (!pick) break;
+    attrs[pick] -= 1;
+  }
+}
+
+function reconcileArchetype(attrs: Record<string, number>, posId: number, archetype: number, target: number, version: 'm26' | 'm27', rivals: number[] = []): void {
   const entry = OVRWeightsCalculator.ovrEntryFor(posId, archetype, version);
   if (!entry || !entry.sumWeight) return;
   const { desiredLow: DL, desiredHigh: DH, sumWeight, weights } = entry;
@@ -184,13 +260,22 @@ export function reconcileToTarget(attrs: Record<string, number>, posId: number, 
 
   // Integer pass: rounding leaves ~20% of prospects one point off; nudge the
   // heaviest free attribute that can still move until the recompute is exact.
+  // When raising, skip a nudge that would push a rival archetype above the target
+  // (the game would then re-rate the prospect up under that archetype).
   const byWeight = [...free].sort((a, b) => weights[b] - weights[a]);
+  const rivalOver = () => rivals.some((r) => (OVRWeightsCalculator.computeOverall(posId, r, attrs, version) ?? -1) > target);
   for (let i = 0; i < 40; i++) {
     const cur = current();
     if (cur === target) break;
     const up = cur < target;
-    const pick = byWeight.find((a) => (up ? attrs[a] < 99 : attrs[a] > 1));
-    if (!pick) break;
-    attrs[pick] += up ? 1 : -1;
+    let done = false;
+    for (const a of byWeight) {
+      if (up ? attrs[a] >= 99 : attrs[a] <= 1) continue;
+      attrs[a] += up ? 1 : -1;
+      if (up && rivals.length && rivalOver()) { attrs[a] -= 1; continue; }
+      done = true;
+      break;
+    }
+    if (!done) break;
   }
 }

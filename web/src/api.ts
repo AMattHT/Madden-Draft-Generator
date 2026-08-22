@@ -264,7 +264,7 @@ export const api = {
   /** The overall Madden will compute (and the attributes the export will write) for an edited prospect. */
   recompute: (body: { gameVersion: GameVersion; positionId: number; archetype: number; overall: number; ratings: Record<string, number>; reconcile: boolean }) =>
     fetch('/api/draft/recompute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      .then((r) => r.json() as Promise<{ gameOverall: number | null; beforeReconcile: number | null; reconciled: Record<string, number> | null }>),
+      .then((r) => r.json() as Promise<{ gameOverall: number | null; gameArchetype?: number; beforeReconcile: number | null; reconciled: Record<string, number> | null }>),
   genericHeads: (gameVersion: GameVersion = 'm26') => jget<Record<string, string[]>>(`/api/lookups/generic-heads?gameVersion=${gameVersion}`),
 
   /** Real face-scan catalog for the target game (M26 vs M27). */

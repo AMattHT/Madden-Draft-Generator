@@ -2,8 +2,7 @@ import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
 import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
 import { DbPositionService } from '../services/DbPositionService';
-import { OVRWeightsCalculator } from '../services/OVRWeightsCalculator';
-import { reconcileToTarget } from '../services/AttributeModel';
+import { gameOverall, reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
 import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
@@ -81,14 +80,16 @@ r.post('/draft/recompute', (req, res) => {
   const archetype = Number(b.archetype) || 0;
   const ratings: Record<string, number> = {};
   for (const [k, v] of Object.entries(b.ratings ?? {})) ratings[k] = Math.max(0, Math.min(99, Number(v) || 0));
-  const before = OVRWeightsCalculator.computeOverall(posId, archetype, ratings, gameVersion);
+  const before = gameOverall(ratings, posId, archetype, gameVersion);
   let reconciled: Record<string, number> | null = null;
   if (b.reconcile && b.overall != null) {
     reconciled = { ...ratings };
     reconcileToTarget(reconciled, posId, archetype, Number(b.overall), gameVersion);
   }
-  const after = reconciled ? OVRWeightsCalculator.computeOverall(posId, archetype, reconciled, gameVersion) : before;
-  res.json({ gameOverall: after, beforeReconcile: before, reconciled });
+  const after = reconciled ? gameOverall(reconciled, posId, archetype, gameVersion) : before;
+  // gameArchetype: the archetype the game will label the prospect with (may differ
+  // from the one set when another formula scores the same attributes higher).
+  res.json({ gameOverall: after.overall, gameArchetype: after.archetype, beforeReconcile: before.overall, reconciled });
 });
 
 r.post('/draft/custom', async (req, res) => {
