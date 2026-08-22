@@ -98,6 +98,7 @@ export interface GeneratedClass {
   likeness: LikenessStats;
   count: number;
   generatedCount?: number; // filler generics added to pad to a full class
+  degraded?: boolean; // built before the backend's data caches were ready (not cached client-side)
   dropped?: string[]; // players that did not fit (years with more than 402 rows)
   fetchedAt?: number; // stamped client-side when pulled
   _v?: number; // cache schema/logic version (see cache.ts)

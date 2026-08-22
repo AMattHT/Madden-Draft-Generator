@@ -16,6 +16,13 @@ process.on('uncaughtException', (err) => {
 const app = createApp();
 getDb(); // initialize the cache database + schema
 
+// Warm the depth-chart position caches (3 s from disk; minutes on a fresh clone
+// while the nflverse CSVs download). Until they are ready, generated classes are
+// flagged degraded so the browser does not cache them as final.
+import('./services/DbPositionService').then(({ DbPositionService }) =>
+  DbPositionService.ensureBuilt().then(() => console.log('[server] depth-chart position caches ready')).catch((e) => console.warn('[server] depth-chart caches unavailable:', (e as Error).message))
+);
+
 const server = app.listen(PORT, HOST, () => {
   console.log(`[server] Draft Class Generator API on http://${HOST}:${PORT}`);
 });

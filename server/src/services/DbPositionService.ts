@@ -113,6 +113,12 @@ async function build(): Promise<void> {
 }
 
 export const DbPositionService = {
+  /** True once the depth-chart caches are in memory (classes built before that
+   *  have uncorrected DB/OL slots and must not be cached as final). */
+  isReady(): boolean {
+    return !!(map && slotMap);
+  },
+
   /** Build (or load) the caches synchronously-awaitable, for scripts and warm-up. */
   async ensureBuilt(): Promise<void> {
     if (map && slotMap) return;

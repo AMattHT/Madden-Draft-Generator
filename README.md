@@ -1,121 +1,106 @@
-# Madden 26 NFL Draft Class Generator
+# Madden 26 / 27 NFL Draft Class Generator
 
-Generate importable Madden 26 draft classes (`.mdc`) from real NFL draft history
-(1936–2026), with player ratings derived from Pro-Football-Reference **weighted
-Approximate Value (wAV)**. AFL+NFL drafts are merged for 1960–1969, veteran free
-agents can be injected, and players are cached.
+Generate importable Madden 26 **and Madden 27** draft classes (`CAREERDRAFT-*`) from real NFL draft
+history (1936–2026), rated from Pro-Football-Reference **weighted Approximate Value (wAV)** and
+calibrated against the games' own generated classes. AFL and NFL drafts are merged for 1960–66,
+undrafted stars get their careers, players get era-correct builds, faces, gear and (M27) persona DNA.
+A set of franchise-save tools (cap reset, dev traits, aging, relocation, roster editing) rounds it out.
 
-This is a **React web app + local Node backend** (a pure browser app can't scrape
-PFR through Cloudflare/CORS or write the `.mdc` binary — that needs Node). It
-reuses the proven `.mdc` engine, rating logic, lookups, and template from the
-sibling **Madden Editor Suite**.
+React web app + local Node backend. Run `npm run dev`, open **http://localhost:5173**.
 
-## Status
+## What it does
 
 | Area | State |
-|------|-------|
-| `.mdc` read/write engine (vendored, plain Node) | ✅ working, round-trip verified |
-| Backend skeleton: Express + SQLite cache + lookups | ✅ working |
-| Local-baseline draft classes 1936–2026 (offline) | ✅ working (`ALL_PLAYER_LOOKUP.csv`, 31,883 players) |
-| AFL/NFL combined years (1960–69) | ✅ merged (dedup of dual-drafted players: TODO) |
-| wAV → Overall + dev trait | ✅ first cut (per-position anchor tables) |
-| Attribute spread | ✅ donor-based (template's real prospects as position donors, shifted to target OVR) — full reconciliation engine: TODO |
-| `.mdc` export + asset linking (PID/PEPS/CommID) + 402 cap | ✅ working, verified |
-| Player likeness (real face asset / portrait, else race-appropriate generic) | ✅ working — Bo Jackson → `jacksonBo_9877`, Namath → real portrait; no-data players (e.g. Ernie Davis) get a generic face |
-| Era-appropriate gear (helmet/cleats/gloves/visor by year + position) | ✅ working — 1965 → Riddell TK, **no visor**, taped hands; 2003 → Revolution, Nike Diamond Turf |
-| Era-typical extras (wrist tape/bands, elbow pads, towel + position, neck rolls, socks, sleeves, eye black) | ✅ working — per-era/position weighted pools; 1965 OL → max wrist tape + elbow pads + cowboy collar; 80s–90s skill → sweatbands + back towel |
-| **Copy real player gear** (full loadout from the actual M26 roster) | ✅ working — `scripts/extract-real-gear.ts` pulls 2,998 real players' complete loadouts from a franchise save into `data/real-player-gear.json`; Equipment Builder has a "Copy look from a real player…" search (towel position, helmet/facemask, sleeves, pads — all slots) |
-| Custom photo portraits via Frosty (real headshots for no-face players) | ✅ working — downloads Wiki/PFR photos, face-crops to PLPO-named PNGs + manifest for Frosty import; `.mdc` points each prospect at the recycled slot. 2,432 candidate players across 83 years |
-| **React web app** (`web/`) — browse years, wAV-rated table, export, IndexedDB cache | ✅ working — run `npm run dev` from the project root (starts both), open `http://localhost:5173` |
-| Madden-calibrated distributions (from real Madden random classes) | ✅ working — `madden-calibration.json` (OVR curve, dev rates 74/21/3.5/1.1, per-position attr/bio norms from 2,010 real prospects); our classes now match Madden's bell (mean ~66, max 84) with wAV ordering the top. Recalibrate: drop `CAREERDRAFT-*` files in the Saves dir, run `node scripts/build-calibration.js` |
-| Rating modes: **Realistic** (Madden-capped 84) vs **Career** (retrospective, uncapped) | ✅ working — toggle in the class header; Career rates players by how good they actually turned out (2003: Kevin Williams 98, Polamalu 96) |
-| Archetypes assigned by real build | ✅ working — heavy back → Power, lean back → Elusive/Receiving, big WR → Physical, lean end → Speed Rusher; ratings then match the archetype |
-| Player profiles + attribute editing + real photos | ✅ working — click a player → slide-over with real photo (backend image proxy), bio, a position-aware **radar chart** of signature attributes (shows how elite they are; live-updates), and all 54 editable attributes (+ OVR / dev trait / position / **archetype** — sampled per-player from Madden's real per-position mix); edits persist in IndexedDB and apply to the `.mdc` export |
-| Live PFR/Wikipedia/nflverse scraping + dedup | ⏳ TODO (Task 3) |
-| wAV reconciliation via OVRWeightsCalculator | ⏳ TODO (Task 4) |
-| Free-agent injection | ⏳ TODO (Task 5) |
-| React frontend | ⏳ TODO (Task 6) |
+|---|---|
+| `.mdc` engines | M26 (4296-byte blocks, zstd visuals) and M27 (5876-byte blocks, uncompressed visuals, persona DNA, header prospect count) — round-trip verified against the games' own files |
+| Player pool | 32k rows 1936–2026 (`ALL_PLAYER_LOOKUP.csv`) + nflverse draft picks / players / combine / depth charts + curated careers for undrafted stars (`udfa_careers.json`) |
+| Ratings | **Realistic** mode maps career caliber onto Madden's empirical rookie curve (mean 66, max 84–86) with a **hindsight** slider (draft-day board ↔ career outcome) and **auto class strength**; **Career** mode rates how players actually turned out. Attributes follow each position's slope/spread from the real classes; combine drills are scored within position; the overall Madden recomputes on import equals the one written |
+| Positions | 3-4 OLB pass rushers become LEDG/REDG (PFF → sack rate → team scheme table → interceptions); SAM/MIKE/WILL, LT/RT, LG/RG, FS/SS balanced to Madden's own mix around real depth-chart slots |
+| Likeness | Real face scans per game, generic heads from each game's own head set with correct portrait ids, skin tone from portraits/Wikipedia with an era prior, era-correct helmets/cleats/gloves/pads/sleeves (M27 asset allowlist), announcer ids by surname |
+| M27 extras | Persona DNA sampled from the game's rookies, PersonalityRating, Focus, QB style, birthdate, body-type enum — everything the game reads back verbatim |
+| Franchise tools | Work on M26 **and** M27 saves (a save from the other game is refused): cap reset (M27 contract table aware), heal injuries / dev traits, position-aware trait realism, **advance the roster N seasons** (age, retire, decline), free-agent trim, draft-pick reset, relocation/rebrand, schedule viewer, per-player roster editor |
+| Editing | Every attribute / bio / face / gear / persona editable; undo/redo; export/import edits as JSON; "game shows N" live recompute; Variant re-rolls; Save straight into the Madden Saves folder (atomic, keeps a `.bak`) |
+| Tests | `npm test` (91 tests incl. golden classes), `npm run verify` (export round-trips), `npm run verify:franchise` (every franchise tool on copies of both autosaves) |
 
-Full plan: `C:\Users\amatthews\.claude\plans\i-am-wanting-to-proud-puppy.md`.
+The full audit that drove the last round of work is in
+[`docs/improvement-report-2026-08-22.html`](docs/improvement-report-2026-08-22.html); the M27 binary
+field map is in [`../M27-PORT.md`](../M27-PORT.md).
 
 ## Run
 
-You can now start **both the backend and frontend with a single command** from the project root:
-
 ```bash
-npm run dev
+npm install                     # root: concurrently
+cd server && npm install && cd ..
+cd web && npm install && cd ..
+npm run dev                     # backend (tsx watch, :5174) + Vite (:5173); frees stale dev ports first
 ```
 
-This uses `concurrently` to run:
+First run downloads the nflverse datasets into `server/cache/` (a few minutes) and builds the
+depth-chart position caches; classes generated before that finishes are flagged *degraded* and not
+cached by the browser. Refresh the data later with `npm run data:refresh` (30-day max age).
 
-- `npm run dev:server` → backend (tsx watch) 
-- `npm run dev:web` → Vite frontend 
+Export: class header → **Export → Save to Madden Saves** (writes `CAREERDRAFT-<year>DRAFT` into the
+right game's Saves folder), then in Madden: Franchise → Choose Draft Class.
 
-Colored output with prefixes (SERVER / WEB) is provided automatically.
+## Scripts (server/)
 
-You can also control them individually:
-
-```bash
-npm run dev:server
-npm run dev:web
-```
-
-### First time / one-time setup
-
-```bash
-# Install root tools (concurrently)
-npm install
-
-# Install dependencies for each package (one time)
-cd server && npm install
-cd ../web && npm install
-cd ..
-```
-
-The web UI will be at **http://localhost:5173**.
-The API will be at **http://localhost:5174**.
-
-### Verify the engine and export (no server needed)
-
-```bash
-npm run smoke:mdc                 # round-trip the template through the .mdc engine
-node scripts/verify-export.js 2003   # build + write a real .mdc for a year, re-parse, assert
-node scripts/verify-export.js 1965   # AFL/NFL combined
-```
-
-Generated files land in `server/cache/exports/`. Import in Madden 26:
-**Franchise → Choose Draft Class → Import Local File**.
+| Command | What |
+|---|---|
+| `npm test` | unit + golden tests (`CI_SKIP_DATA=1` skips the ones that need the nflverse cache) |
+| `npm run verify` | `verify-export.js 2003 / 1965` + `verify-m27.js` — build, write, re-parse |
+| `npm run verify:franchise` | every franchise tool against temp copies of the M26 and M27 autosaves |
+| `npm run data:refresh [-- --force]` | refresh nflverse CSVs older than 30 days |
+| `npm run data:depth` | rebuild the depth-chart position caches |
+| `npx tsx scripts/report-front-seven.ts 1980-1989 [--counts]` | audit edge-vs-off-ball verdicts, or position counts vs Madden |
+| `node scripts/build-calibration.js [m26\|m27]` | rebuild `madden-calibration[-m27].json` from game-generated classes in the Saves folders |
+| `npx tsx scripts/build-m27-field-stats.ts` | mine M27 field distributions, surname → announcer ids, rookie persona mix |
+| `npx tsx scripts/build-generic-heads.ts` | per-game generic-head catalogs + portrait ids |
+| `python scripts/fit-ovrweights.py [m26\|m27]` | refit overall-formula overrides where `ovrweights.json` disagrees with the game |
+| `npx tsx scripts/build-skintone.ts` | rebuild portrait-derived skin tones |
+| `scripts/probes/` | one-off investigations kept for reference |
 
 ## API
 
 | Method | Path | Notes |
-|--------|------|-------|
-| GET | `/api/health` | liveness |
-| GET | `/api/template/info` | engine + template sanity |
-| GET | `/api/lookups` / `/api/lookups/:name` | `position`, `college`, `state`, `archetype`, or `*.json` |
-| GET | `/api/draft/years` | all draft years present locally |
-| GET | `/api/draft/:year?league=NFL\|AFL\|combined` | baseline draft class |
-| GET | `/api/gear/players?q=` / `/api/gear/players/:id` | search real NFL players' extracted loadouts / fetch one full loadout |
-| POST | `/api/export/mdc` `{ year, league }` | download a generated `.mdc` |
-| POST | `/api/export/portraits/:year` `?league&limit` | build a Frosty custom-portrait folder (downloads real photos) |
+|---|---|---|
+| GET | `/api/health` | liveness + generator fingerprint (browser cache key) |
+| GET | `/api/draft/years` | draft years present locally |
+| GET | `/api/draft/:year/generated?league&mode&gameVersion` | generated class preview (rows, likeness, dropped, degraded) |
+| POST | `/api/draft/custom` | All-Time / decade classes and modifiers (strength, studs, generational, hindsight, autoStrength, variant) |
+| POST | `/api/draft/recompute` | Madden's recomputed overall (+ re-solved attributes) for an edited prospect |
+| POST | `/api/export/mdc` | build the `.mdc` (download, or `saveToSaves: true`) |
+| POST | `/api/export/portraits/:year` | Frosty custom-portrait folder from real photos |
+| GET | `/api/lookups/:name`, `/api/lookups/generic-heads?gameVersion` | lookups; per-game generic heads |
+| GET/POST | `/api/franchise/*` | list, cap-reset, player-edit, players, roster-apply, teams, trait-realism, trim-free-agents, reset-draft-picks, schedule, relocate-rebrand, advance-roster — all take `gameVersion` |
+| GET | `/api/gear/players?q=` | real players' extracted loadouts ("copy look") |
 
 ## Architecture
 
 ```
 server/
   src/
-    vendor/draft-class/   # vendored M26Parser/M26Writer (.mdc) — 4296/offset model
-    services/             # MdcService, LookupService, PlayerLookupService,
-                          # PositionMapper, RatingService, DraftClassBuilder
-    routes/               # health, lookups, draft, export
-    db/                   # better-sqlite3 cache (schema.sql)
-    config/paths.ts
-  data/                   # lookups, formulas, CAREERDRAFT-2026Template (copied from Editor Suite)
-  scripts/                # smoke-mdc, probe-m26parser, verify-export
-web/                      # React app (Vite+TS+Tailwind): browse years, wAV ratings, export .mdc, IndexedDB cache
+    app.ts / server.ts        # express app (async errors -> 500), localhost bind, warm-up
+    vendor/draft-class/       # M26Parser/Writer, M27Parser/Writer (see README there)
+    services/
+      PlayerLookupService     # CSV load, dedup, AFL reconstruction, photo-URL sanitising
+      DraftEnrichment         # positions (FrontSevenService, depth charts), combine, skin tone
+      RatingService           # wAV -> caliber; slot expectation
+      DraftClassBuilder       # ranking (hindsight/strength), builds, faces, gear, M27 fields
+      AttributeModel          # calibrated attribute generation + exact OVR reconcile
+      CalibrationService      # per-game calibration (madden-calibration[-m27].json)
+      EraBioService / HometownService / EraGearService / LikenessService / PersonaService
+      FranchiseService        # madden-franchise tools, version-aware, verified writes
+    routes/                   # health, lookups, draft, export, media, portrait, players, franchise, gear
+  data/lookups/               # calibration, schemes, field stats, head catalogs, UDFA careers, ...
+  data/Templates/             # CAREERDRAFT-2026Template, CAREERDRAFT-2027Template
+  scripts/                    # build/verify/refresh scripts (+ probes/)
+web/                          # React (Vite + TS + Tailwind): board, profile editor, franchise tools
 ```
 
-### Key gotcha
-M26 `.mdc` uses the **4296-byte / offset-based** block model — use
-`M26Parser`/`M26Writer`, NOT the legacy 4322-byte `DraftClassParser`. See the
-`mdc-m26-format-gotcha` note.
+### Key gotchas
+- M26 `.mdc` uses the **4296-byte / offset-based** block model (`M26Parser`/`M26Writer`); the
+  legacy 4322-byte parser was removed.
+- M27: the header U16 at `0x42` is the prospect count and the game honours it; `0x94` is the
+  portrait PID, `0x9e` the announcer surname id. See `M27-PORT.md`.
+- Madden recomputes a prospect's overall from the attributes on import; the OVR byte is ignored.
+  The builder reconciles the skill attributes so the recompute lands exactly.

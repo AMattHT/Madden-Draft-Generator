@@ -122,7 +122,7 @@ export default function App() {
             if (req !== reqRef.current) return;
             live.fetchedAt = Date.now();
             live.gameVersion = useVersion;
-            await cache.set(live, cacheMode);
+            if (!live.degraded) await cache.set(live, cacheMode); // a first-run class is not final
             setData(live);
             setSource('live');
             setCachedYears((prev) => new Set(prev).add(year));

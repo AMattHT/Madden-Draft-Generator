@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
 import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
+import { DbPositionService } from '../services/DbPositionService';
 import { OVRWeightsCalculator } from '../services/OVRWeightsCalculator';
 import { reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
@@ -58,7 +59,10 @@ r.get('/draft/:year/generated', async (req, res) => {
 
   const preview = DraftClassBuilder.preview(players, mode, {}, gameVersion);
   await attachTeams(preview, year, enrich);
-  return res.json({ year, league, mode, gameVersion, generatedCount, ...preview });
+  // Degraded until the depth-chart caches are built (first run): positions for
+  // 2001+ DBs/OL are uncorrected, so the client must not cache this as final.
+  const degraded = !DbPositionService.isReady();
+  return res.json({ year, league, mode, gameVersion, generatedCount, degraded, ...preview });
 });
 
 /** Custom class generation: All-Time Greats source and/or generation modifiers
