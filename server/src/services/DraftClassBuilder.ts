@@ -228,21 +228,19 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.overall = overall;
   prospect.devTrait = devTrait;
 
-  // Likeness: real face asset when the *target game* has one, else a generic.
-  // M27 only gets M27-native scans (2015+). M26 legend ids (TestaverdeVinny_19980)
-  // are not in M27 — writing them produces the empty NFL-shield silhouette.
-  const m27Face = gameVersion === 'm27' ? LikenessService.m27FaceFor(player.firstName, player.lastName, player.draftYear) : null;
-  const like = m27Face
-    ? { peps: m27Face.assetName, kind: 'asset' as LikenessKind, skinTone: LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion).skinTone }
-    : LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion);
+  // Likeness: the real head when the *target game* ships it (legend scans decoded
+  // from the game's bundle tables, roster cranium heads, recent lookup ids), else a
+  // generic. An asset the game lacks would render as the empty NFL-shield silhouette.
+  const real = LikenessService.realFace(player, gameVersion);
+  const like = LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion);
   prospect.PEPS = like.peps;
   // Menu portrait. M26: custom-portrait slot, else the generic head's PID, else the
-  // real photo id. M27: a year-matched M27 scan's own PID; generic heads get their
-  // fixed PID in assignM27Fields (0x94 is a pure function of genericHeadName in the
-  // game's files); M26 legend ids are not valid M27 PIDs, so those stay 0.
+  // real head's portrait id. M27: the real head's own portrait id (legends keep the
+  // lookup PhotoID — the id space is shared between the games); generic heads get
+  // their fixed PID in assignM27Fields (0x94 is a pure function of genericHeadName).
   prospect.PID = gameVersion === 'm27'
-    ? (m27Face?.portraitPid || 0)
-    : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps, 'm26') ?? 0) : (player.photoId ?? 0)));
+    ? (real?.portraitPid || 0)
+    : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps, 'm26') ?? 0) : (real?.portraitPid || player.photoId || 0)));
   // Announcer name call: the game keys this by SURNAME (same id space in both games,
   // mined from the real files). The CSV CommID column is a different id space.
   prospect.commentaryId = commentaryIdFor(player.lastName);
@@ -297,6 +295,10 @@ export interface PreviewRow {
   wav: number | null;
   wavSource: string;
   face: 'asset' | 'generic' | 'photo';
+  /** Where a real head came from: 'bundle' (scan in the game files), 'roster',
+   *  'legend-portrait', 'preset' (shader preset only — pending in-game check),
+   *  'lookup'/'lookup-recent'/'m26-roster' (carried over, unverified). */
+  faceSource: string | null;
   skinTone: number; // 1-8, for the face picker's per-tone pool
   genericHead: string | null; // current generic head code (gen_*), null if a real asset
   college: string;
@@ -640,6 +642,7 @@ export const DraftClassBuilder = {
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         wavSource: base.wavSource,
         face,
+        faceSource: face === 'asset' ? (LikenessService.realFace(base, gameVersion)?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
         genericHead: peps.startsWith('gen_') ? String(p.PEPS) : null,
         college: base.college,

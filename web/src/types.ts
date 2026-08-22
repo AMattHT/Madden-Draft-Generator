@@ -14,6 +14,7 @@ export interface PlayerRow {
   wav: number | null;
   wavSource: string; // 'actual' | 'predicted' | 'preset'
   face: 'asset' | 'generic' | 'photo';
+  faceSource?: string | null; // real-head provenance: bundle | roster | legend-portrait | preset | lookup…
   skinTone?: number; // 1-8, for the face picker's per-tone pool
   genericHead?: string | null; // current generic head code (gen_*), null if a real asset
   college: string;

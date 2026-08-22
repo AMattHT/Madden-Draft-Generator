@@ -14,9 +14,9 @@ React web app + local Node backend. Run `npm run dev`, open **http://localhost:5
 |---|---|
 | `.mdc` engines | M26 (4296-byte blocks, zstd visuals) and M27 (5876-byte blocks, uncompressed visuals, persona DNA, header prospect count) — round-trip verified against the games' own files |
 | Player pool | 32k rows 1936–2026 (`ALL_PLAYER_LOOKUP.csv`) + nflverse draft picks / players / combine / depth charts + curated careers for undrafted stars (`udfa_careers.json`) |
-| Ratings | **Realistic** mode maps career caliber onto Madden's empirical rookie curve (mean 66, max 84–86) with a **hindsight** slider (draft-day board ↔ career outcome) and **auto class strength**; **Career** mode rates how players actually turned out. Attributes follow each position's slope/spread from the real classes; combine drills are scored within position; the overall Madden recomputes on import equals the one written |
+| Ratings | **Realistic** mode maps career caliber onto Madden's empirical rookie curve (mean 66, max 84–86) with a **hindsight** slider (draft-day board ↔ career outcome) and **auto class strength**; **Career** mode rates how players actually turned out. Attributes follow each position's slope/spread from the real classes; combine drills are scored within position; the overall Madden recomputes on import equals the one written — under *every* archetype the game could pick, since Madden re-derives the archetype from the attributes (a Speed Rusher whose attributes score higher as a Power Rusher is shown as the latter) |
 | Positions | 3-4 OLB pass rushers become LEDG/REDG (PFF → sack rate → team scheme table → interceptions); SAM/MIKE/WILL, LT/RT, LG/RG, FS/SS balanced to Madden's own mix around real depth-chart slots |
-| Likeness | Real face scans per game, generic heads from each game's own head set with correct portrait ids, skin tone from portraits/Wikipedia with an era prior, era-correct helmets/cleats/gloves/pads/sleeves (M27 asset allowlist), announcer ids by surname |
+| Likeness | Real heads only when the target game can render them: a per-game catalog decoded from the games' own Frostbite bundle tables (1,339 unique scans in M27 incl. legends like Polamalu) + the career roster + legend portraits; same-name collisions (a 1989 DJ Johnson vs the 2023 one) rejected; generic heads from each game's own head set with correct portrait ids; skin tone from portraits/Wikipedia with an era prior; era-correct gear (M27 asset allowlist); announcer ids by surname |
 | M27 extras | Persona DNA sampled from the game's rookies, PersonalityRating, Focus, QB style, birthdate, body-type enum — everything the game reads back verbatim |
 | Franchise tools | Work on M26 **and** M27 saves (a save from the other game is refused): cap reset (M27 contract table aware), heal injuries / dev traits, position-aware trait realism, **advance the roster N seasons** (age, retire, decline), free-agent trim, draft-pick reset, relocation/rebrand, schedule viewer, per-player roster editor |
 | Editing | Every attribute / bio / face / gear / persona editable; undo/redo; export/import edits as JSON; "game shows N" live recompute; Variant re-rolls; Save straight into the Madden Saves folder (atomic, keeps a `.bak`) |
@@ -55,6 +55,7 @@ right game's Saves folder), then in Madden: Franchise → Choose Draft Class.
 | `node scripts/build-calibration.js [m26\|m27]` | rebuild `madden-calibration[-m27].json` from game-generated classes in the Saves folders |
 | `npx tsx scripts/build-m27-field-stats.ts` | mine M27 field distributions, surname → announcer ids, rookie persona mix |
 | `npx tsx scripts/build-generic-heads.ts` | per-game generic-head catalogs + portrait ids |
+| `npx tsx scripts/build-face-catalogs.ts` | per-game real-head catalogs (`face-assets-by-game.json`): decodes the Huffman-coded bundle names in each game's `Data/Win32/*.toc`, merges the newest career autosave's `PLYR_ASSETNAME`/`PLYR_PORTRAIT` and the lookup's casing/PhotoID; env `MADDEN26_DIR`, `MADDEN27_DIR` |
 | `python scripts/fit-ovrweights.py [m26\|m27]` | refit overall-formula overrides where `ovrweights.json` disagrees with the game |
 | `npx tsx scripts/build-skintone.ts` | rebuild portrait-derived skin tones |
 | `scripts/probes/` | one-off investigations kept for reference |
@@ -102,5 +103,11 @@ web/                          # React (Vite + TS + Tailwind): board, profile edi
   legacy 4322-byte parser was removed.
 - M27: the header U16 at `0x42` is the prospect count and the game honours it; `0x94` is the
   portrait PID, `0x9e` the announcer surname id. See `M27-PORT.md`.
-- Madden recomputes a prospect's overall from the attributes on import; the OVR byte is ignored.
-  The builder reconciles the skill attributes so the recompute lands exactly.
+- Madden recomputes a prospect's overall from the attributes on import; the OVR byte is ignored,
+  and so is the archetype byte — the game keeps whichever of the position's archetypes scores
+  highest. The builder reconciles the skill attributes so the chosen archetype lands exactly and
+  no rival archetype scores above it.
+- A real-head asset the game does not ship renders as the empty NFL-shield silhouette. M26 scan
+  bundles all survived into M27 (1,275 of 1,276) but M27 dropped most retired players' portraits
+  from disk, so pre-2019 heads that are neither scans nor legends stay generic on M27 unless
+  `MADDEN27_TRUST_M26_HEADS=1`; `MADDEN_PRESET_HEADS=0` turns off the ~280 preset-only legacy heads.

@@ -25,21 +25,55 @@ interface FaceEntry {
 let byTone: Map<number, string[]> | null = null;
 let pidByCode: Map<string, number> | null = null;
 
-/** M27 real-face map: normalized "first last" -> M27 asset name + portrait PID
- *  (from data/lookups/m27-face-assets.json, extracted from an M27 career save).
- *  Covers current-era NFL players only. */
-interface M27Face { assetName: string; portraitPid: number; genericHead: string | null }
-let m27Faces: Map<string, M27Face> | null = null;
-let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
-function loadM27Faces(): Map<string, M27Face> {
-  if (m27Faces) return m27Faces;
-  m27Faces = new Map();
+/** Per-game real-face catalogs (data/lookups/face-assets-by-game.json, built by
+ *  scripts/build-face-catalogs.ts): every head asset the installed game can render —
+ *  unique scans decoded from the game's own bundle tables (this is where legends
+ *  like polamaluTroy_16548 live) plus the career roster's cranium heads — with the
+ *  asset name in the game's casing and its menu-portrait id. */
+export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number }
+interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string> }
+const catalogs: Partial<Record<'m26' | 'm27', FaceCatalog>> = {};
+function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
+  const hit = catalogs[version];
+  if (hit) return hit;
+  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set() };
   try {
-    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-face-assets.json'), 'utf8'));
-    for (const [k, v] of Object.entries(raw.players ?? {})) m27Faces.set(k, v as M27Face);
-  } catch { /* map absent — M27 face override simply no-ops */ }
-  return m27Faces;
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'face-assets-by-game.json'), 'utf8'));
+    const v = raw?.[version] ?? {};
+    for (const [k, e] of Object.entries(v.assets ?? {})) cat.assets.set(k, e as RealFace);
+    for (const [k, a] of Object.entries(v.byName ?? {})) cat.byName.set(k, a as string);
+    for (const k of (v.legendPortraits ?? []) as string[]) cat.legendPortraits.add(k);
+  } catch { /* catalog absent — M27 falls back to the save-only map, M26 to the lookup */ }
+  if (version === 'm27' && cat.assets.size === 0) {
+    // Older data file: the save-only extract (current players, no legends).
+    try {
+      const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-face-assets.json'), 'utf8'));
+      for (const [name, v] of Object.entries(raw.players ?? {})) {
+        const e = v as { assetName: string; portraitPid: number; genericHead: string | null };
+        const [first, ...rest] = name.split(' ');
+        cat.assets.set(e.assetName.toLowerCase(), { ...e, first, last: rest.join(' '), source: 'roster' });
+        cat.byName.set(name, e.assetName.toLowerCase());
+      }
+    } catch { /* nothing */ }
+  }
+  catalogs[version] = cat;
+  return cat;
 }
+/** Lookup assets newer than this are accepted for M27 even when absent from the
+ *  catalog: the catalog's roster half comes from an advanced franchise save that
+ *  has already cut players, and current players' heads carry over between the two
+ *  games (their portrait ids match 1,044 of 1,055 times). */
+const M27_TRUST_LOOKUP_FROM = 2019;
+/** ~280 legacy scan dirs (baughsammy, williamskevin, randlejohn_12183) hold only
+ *  shader presets, no head bundle. Whether the game still renders them is an
+ *  in-game question; set MADDEN_PRESET_HEADS=0 to fall back to generics for them. */
+const ACCEPT_PRESET_HEADS = process.env.MADDEN_PRESET_HEADS !== '0';
+/** Retired pre-2019 players with an EA id but no scan (AmukamaraPrince_10766): M26
+ *  still ships their portraits, M27 dropped them from disk, so their heads may be
+ *  gone too. Off by default for M27 (generic head); MADDEN27_TRUST_M26_HEADS=1 to
+ *  try them in-game. */
+const M27_TRUST_ALL_M26_HEADS = process.env.MADDEN27_TRUST_M26_HEADS === '1';
+let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
 const m27Key = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
 
 /** nflverse draft year by the same name key as the M27 face map. */
@@ -188,29 +222,94 @@ export const LikenessService = {
     return other || pidByCode!.get(code) || null;
   },
 
-  /** M27-native real face only when this is the same person — name match AND
-   *  draft year within 1 of the face owner's nflverse year. A 1987 Cornelius
-   *  Bennett must not receive a current Bennett's scan or a recycled portrait PID. */
-  m27FaceFor(firstName: string, lastName: string, draftYear?: number): M27Face | null {
-    const face = loadM27Faces().get(m27Key(firstName, lastName)) ?? null;
-    if (!face) return null;
-    const ownerYear = loadDraftYears().get(m27Key(firstName, lastName));
-    if (draftYear != null && ownerYear != null) {
-      return Math.abs(draftYear - ownerYear) <= 1 ? face : null;
+  /** The real head this player gets in `version`, or null for a generic.
+   *   1. the lookup's asset id, when that game ships it (scan bundle or roster);
+   *   2. a roster player of the same name whose draft year matches within a year
+   *      (covers players the lookup has no asset for — rookies, name variants);
+   *   3. M27 only: a recent lookup asset (>= 2019) the advanced autosave no longer
+   *      lists — heads carry over between games;
+   *   4. M26 only: any lookup asset (the lookup was built from M26's own files). */
+  realFace(player: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear' | 'playerAssetsId' | 'photoId'>, version: 'm26' | 'm27'): RealFace | null {
+    const cat = catalogFor(version);
+    const asset = (player.playerAssetsId || '').trim();
+    const hasAsset = !!asset && !/^gen_/i.test(asset);
+    const key = m27Key(player.firstName, player.lastName);
+    if (hasAsset) {
+      const hit = cat.assets.get(asset.toLowerCase());
+      if (hit) {
+        // A roster head belongs to a CURRENT player. The lookup pairs some old rows
+        // with a namesake's id (1989 DJ Johnson -> JohnsonDJ_22983): same name,
+        // wrong person — only accept it when the draft years agree.
+        if (/roster/.test(hit.source) && !this.sameEra(key, player.draftYear)) return null;
+        if (ACCEPT_PRESET_HEADS || !/preset/.test(hit.source)) {
+          return { ...hit, assetName: hit.assetName || asset, portraitPid: hit.portraitPid || player.photoId || 0 };
+        }
+      }
     }
-    // No owner year on file: keep the old modern-era guard (blocks historical collisions).
-    if (draftYear != null && draftYear < 2015) return null;
-    return face;
+    const byName = cat.byName.get(key);
+    if (byName) {
+      const face = cat.assets.get(byName);
+      // A catalog entry that knows its owner's draft year (lookup-matched scans)
+      // is checked against it directly; roster heads fall back to nflverse.
+      const same = face?.draftYear
+        ? player.draftYear == null || Math.abs(player.draftYear - face.draftYear) <= 1
+        : this.sameEra(key, player.draftYear);
+      if (face && same) return face;
+    }
+    if (hasAsset) {
+      const own = { assetName: asset, portraitPid: player.photoId || 0, genericHead: null, first: player.firstName, last: player.lastName };
+      // MUT legends added since the cranium pipeline have no scan bundle, only a
+      // legends portrait; the portrait proves the game knows the player.
+      if (this.hasLegendPortrait(player.firstName, player.lastName, version)) return { ...own, source: 'legend-portrait' };
+      // M26: the lookup was built from M26's own files, so keep the id — unless a
+      // modern namesake exists and the draft years disagree (that id is his).
+      if (version === 'm26' && this.sameEra(key, player.draftYear, true)) return { ...own, source: 'lookup' };
+      // M27 kept 1,275 of M26's 1,276 scan bundles, so heads carry over between
+      // the games: a head on the M26 roster (a 2025 player, now maybe retired
+      // and gone from the advanced M27 autosave) is still in M27.
+      if (version === 'm27') {
+        const prev = catalogFor('m26').assets.get(asset.toLowerCase());
+        if (prev && /roster/.test(prev.source) && this.sameEra(key, player.draftYear, true)) return { ...own, portraitPid: prev.portraitPid || own.portraitPid, source: 'm26-roster' };
+      }
+      if ((player.draftYear ?? 0) >= M27_TRUST_LOOKUP_FROM) return { ...own, source: 'lookup-recent' };
+      if (version === 'm27' && M27_TRUST_ALL_M26_HEADS && this.sameEra(key, player.draftYear, true)) return { ...own, source: 'm26-lookup' };
+    }
+    return null;
+  },
+
+  /** Does the game ship a legends portrait for this player (plpo_legends_<name>)? */
+  hasLegendPortrait(firstName: string, lastName: string, version: 'm26' | 'm27'): boolean {
+    const lp = catalogFor(version).legendPortraits;
+    if (!lp.size) return false;
+    const f = firstName.toLowerCase().replace(/[^a-z]/g, '');
+    const l = lastName.toLowerCase().replace(/[^a-z]/g, '');
+    return lp.has(l + f) || lp.has(f + l);
+  },
+
+  /** A roster scan belongs to a CURRENT player; a 1987 Cornelius Bennett must not
+   *  receive a current Bennett's head. Same name + draft year within 1 = same person. */
+  sameEra(nameKey: string, draftYear?: number, unknownOk = false): boolean {
+    const ownerYear = loadDraftYears().get(nameKey);
+    if (draftYear != null && ownerYear != null) return Math.abs(draftYear - ownerYear) <= 1;
+    if (unknownOk) return true;
+    if (draftYear != null && draftYear < 2015) return false;
+    return true;
+  },
+
+  /** @deprecated use realFace(player, 'm27') */
+  m27FaceFor(firstName: string, lastName: string, draftYear?: number): { assetName: string; portraitPid: number; genericHead: string | null } | null {
+    return this.realFace({ firstName, lastName, draftYear: draftYear ?? 0, playerAssetsId: null, photoId: null }, 'm27');
   },
 
   /** Real 3D face-scan catalog for the target game (M26 lookup assets vs M27 save extract). */
   faceScans(gameVersion: 'm26' | 'm27'): Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> {
     const title = (s: string) => s.replace(/\w/g, (c) => c.toUpperCase());
     if (gameVersion === 'm27') {
-      return [...loadM27Faces().entries()]
-        .map(([name, v]) => ({
+      return [...catalogFor('m27').assets.values()]
+        .filter((v) => v.first && v.last)
+        .map((v) => ({
           id: v.assetName,
-          name: title(name),
+          name: `${v.first} ${v.last}`,
           asset: v.assetName,
           portraitPid: v.portraitPid || undefined,
           image: v.portraitPid ? `/api/portrait/pid/${v.portraitPid}` : undefined,
@@ -244,15 +343,13 @@ export const LikenessService = {
   },
 
   /** Assign a face for a player. `index` keeps generic picks reproducible.
-   *  M27 only accepts assets that exist in that game (m27-face-assets / m27FaceFor).
-   *  M26 legend ids like TestaverdeVinny_19980 resolve to an empty silhouette in M27. */
+   *  A real head only when the target game can render it (see realFace); an asset
+   *  the game lacks would show as the empty NFL-shield silhouette. */
   assign(player: BaselinePlayer, index: number, gameVersion: 'm26' | 'm27' = 'm26'): Likeness {
     load();
     const tone = raceToSkinTone(player.race);
-    const asset = (player.playerAssetsId || '').trim();
-    if (gameVersion !== 'm27' && asset && !/^gen_/i.test(asset)) {
-      return { peps: asset, kind: 'asset', skinTone: tone };
-    }
+    const real = this.realFace(player, gameVersion);
+    if (real) return { peps: real.assetName, kind: 'asset', skinTone: tone };
     const pools = poolsFor(gameVersion);
     let pool = pools.get(tone);
     if (!pool || pool.length === 0) {

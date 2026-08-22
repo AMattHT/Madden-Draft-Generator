@@ -13,6 +13,16 @@ import type { FaceScan } from '../types';
  * plus an add picker. Writes a comma-separated id list into the player's edit
  * patch ('personaDNA'), which the export maps into the draft binary's 5 slots.
  */
+/** Provenance of a real head, for the face card. */
+function faceSourceLabel(src?: string | null): string {
+  if (!src) return '';
+  if (/bundle/.test(src)) return ' · scan in game files';
+  if (/roster/.test(src)) return ' · on the game roster';
+  if (src === 'legend-portrait') return ' · legend';
+  if (/preset/.test(src)) return ' · preset only (check in-game)';
+  return ' · carried over (unverified)';
+}
+
 function PersonaEditor({
   generated,
   patch,
@@ -257,7 +267,7 @@ export function ProfileModal({
   // "What the game will show": after any edit, ask the server for Madden's
   // recomputed overall (and, when overall/position/archetype changed, the
   // attributes the export re-solves) - debounced so slider drags don't spam it.
-  const [gameView, setGameView] = useState<{ overall: number | null; reconciled: Record<string, number> | null } | null>(null);
+  const [gameView, setGameView] = useState<{ overall: number | null; archetype?: number; reconciled: Record<string, number> | null } | null>(null);
   useEffect(() => {
     if (!edited) { setGameView(null); return; }
     const ratings: Record<string, number> = {};
@@ -265,7 +275,7 @@ export function ProfileModal({
     const reconcile = 'overall' in patch || 'position' in patch || 'archetype' in patch;
     const t = setTimeout(() => {
       api.recompute({ gameVersion, positionId: posId, archetype, overall, ratings, reconcile })
-        .then((r) => setGameView({ overall: r.gameOverall, reconciled: r.reconciled }))
+        .then((r) => setGameView({ overall: r.gameOverall, archetype: r.gameArchetype, reconciled: r.reconciled }))
         .catch(() => setGameView(null));
     }, 250);
     return () => clearTimeout(t);
@@ -348,14 +358,15 @@ export function ProfileModal({
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{posName}</span>
               <RatingChip ovr={overall} size="sm" />
-              {gameView && gameView.overall != null && gameView.overall !== overall && (
+              {gameView && gameView.overall != null && (gameView.overall !== overall || (gameView.archetype != null && gameView.archetype !== archetype)) && (
                 <span
                   className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
                   title={gameView.reconciled
-                    ? 'Madden recomputes the overall from the attributes on import; the export re-solves the skill attributes to land on your overall, and this is where it lands.'
-                    : 'Madden recomputes the overall from the attributes on import; with these attributes it will show this.'}
+                    ? 'Madden recomputes the overall from the attributes on import (under whichever of its archetypes scores highest); the export re-solves the skill attributes to land on your overall, and this is where it lands.'
+                    : 'Madden recomputes the overall from the attributes on import, under whichever of its archetypes scores highest; with these attributes it will show this.'}
                 >
                   game shows {gameView.overall}
+                  {gameView.archetype != null && gameView.archetype !== archetype && ` as ${archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}`}
                 </span>
               )}
               <DevBadge dev={dev} />
@@ -636,7 +647,7 @@ export function ProfileModal({
                   : curFace
                     ? curFace
                     : row.face === 'asset'
-                      ? 'Real face asset'
+                      ? `Real face asset${faceSourceLabel(row.faceSource)}`
                       : 'Generated generic'}
               </div>
               <div>Tone {faceTone} · {effStr('bodyType', row.bodyType || 'Standard')}</div>

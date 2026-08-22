@@ -66,6 +66,7 @@ function build() {
       wav: null,
       wavSource: 'preset', // EA's official rookie rating — no career wAV yet
       face: faceOf(p),
+      faceSource: null,
       skinTone: tone,
       genericHead: gh,
       college: LookupService.idToName('college', Number(p.college)) || '',
