@@ -1,41 +1,33 @@
-import express, { NextFunction, Request, Response } from 'express';
-import cors from 'cors';
 import { PORT } from './config/paths';
 import { getDb } from './db';
-import health from './routes/health';
-import lookups from './routes/lookups';
-import draft from './routes/draft';
-import exportRoutes from './routes/export';
-import media from './routes/media';
-import portrait from './routes/portrait';
-import players from './routes/players';
-import franchise from './routes/franchise';
-import gear from './routes/gear';
+import { createApp } from './app';
 
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+const HOST = process.env.HOST || '127.0.0.1';
 
-app.use('/api', health);
-app.use('/api', lookups);
-app.use('/api', draft);
-app.use('/api', exportRoutes);
-app.use('/api', media);
-app.use('/api', portrait);
-app.use('/api', players);
-app.use('/api', franchise);
-app.use('/api', gear);
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[server] error:', err);
-  res.status(500).json({ error: err.message });
+// Last-resort guards: log instead of dying on a stray rejection (Node 24 exits by
+// default), and say something useful when the port is taken.
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] unhandled rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[server] uncaught exception:', err);
 });
 
+const app = createApp();
 getDb(); // initialize the cache database + schema
 
-app.listen(PORT, () => {
-  console.log(`[server] Draft Class Generator API on http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`[server] Draft Class Generator API on http://${HOST}:${PORT}`);
+});
+server.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(
+      `[server] port ${PORT} is already in use — an earlier dev server is probably still running.\n` +
+        `         Find it with: netstat -ano | findstr :${PORT}   then: taskkill /PID <pid> /F`
+    );
+    process.exit(1);
+  }
+  throw err;
 });
 
 export default app;

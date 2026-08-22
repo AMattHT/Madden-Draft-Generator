@@ -635,7 +635,8 @@ prospect.visuals exists: ${!!prospect.visuals}
 prospect.visuals.genericHeadName: ${prospect.visuals?.genericHeadName}
 existing visuals.genericHeadName: ${visuals.genericHeadName}
 `;
-  if (process.env.M26_DEBUG) fs.appendFileSync(logFile, logMsg);
+  const dlog = (m) => { if (process.env.M26_DEBUG) { try { fs.appendFileSync(logFile, m); } catch (_) { /* ignore */ } } };
+  dlog(logMsg);
 
   console.log(`[M26Writer] PEPS check - prospect.PEPS: ${prospect.PEPS}`);
   console.log(`[M26Writer] PEPS check - prospect.visuals exists: ${!!prospect.visuals}`);
@@ -662,10 +663,10 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
 
   if (prospect.PEPS) {
     console.log(`[M26Writer] Using prospect.PEPS: ${newPEPS}`);
-    fs.appendFileSync(logFile, `Using prospect.PEPS: ${newPEPS}\n`);
+    dlog(`Using prospect.PEPS: ${newPEPS}\n`);
   } else if (prospect.visuals?.genericHeadName) {
     console.log(`[M26Writer] Falling back to visuals.genericHeadName: ${newPEPS}`);
-    fs.appendFileSync(logFile, `Falling back to visuals.genericHeadName: ${newPEPS}\n`);
+    dlog(`Falling back to visuals.genericHeadName: ${newPEPS}\n`);
   }
 
   if (newPEPS !== undefined && newPEPS !== null && typeof newPEPS === 'string') {
@@ -677,7 +678,7 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
     if (isGenericAsset) {
       // Generic face - update genericHeadName in visuals JSON
       console.log(`[M26Writer] ✓ UPDATING genericHeadName (generic): ${visuals.genericHeadName} -> ${newPEPS}`);
-      fs.appendFileSync(logFile, `✓ UPDATING genericHeadName (generic): ${visuals.genericHeadName} -> ${newPEPS}\n`);
+      dlog(`✓ UPDATING genericHeadName (generic): ${visuals.genericHeadName} -> ${newPEPS}\n`);
       visuals.genericHeadName = newPEPS;
       updated = true;
 
@@ -687,18 +688,18 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
       // Setting genericHead causes face mismatch issues
       if (visuals.genericHead !== undefined) {
         console.log(`[M26Writer] Removing genericHead from visuals (was ${visuals.genericHead})`);
-        fs.appendFileSync(logFile, `Removing genericHead from visuals (was ${visuals.genericHead})\n`);
+        dlog(`Removing genericHead from visuals (was ${visuals.genericHead})\n`);
         delete visuals.genericHead;
       }
     } else {
       // Real player asset - goes to BINARY field, keep genericHeadName as fallback
       console.log(`[M26Writer] ✓ Real asset "${newPEPS}" written to binary field, keeping genericHeadName: ${visuals.genericHeadName}`);
-      fs.appendFileSync(logFile, `✓ Real asset "${newPEPS}" written to binary field, keeping genericHeadName: ${visuals.genericHeadName}\n`);
+      dlog(`✓ Real asset "${newPEPS}" written to binary field, keeping genericHeadName: ${visuals.genericHeadName}\n`);
       // Don't modify visuals JSON for real assets - they go to binary field only
     }
   } else {
     console.log(`[M26Writer] ✗ NO PEPS VALUE TO UPDATE (newPEPS is ${newPEPS})`);
-    fs.appendFileSync(logFile, `✗ NO PEPS VALUE TO UPDATE (newPEPS is ${newPEPS})\n`);
+    dlog(`✗ NO PEPS VALUE TO UPDATE (newPEPS is ${newPEPS})\n`);
   }
 
   if (prospect.bodyType !== undefined && prospect.bodyType !== null) {
@@ -875,10 +876,10 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
 
   const availableSpace = paddingEnd - jsonStartIndex;
 
-  fs.appendFileSync(logFile, `Old JSON length: ${jsonEnd - jsonStartIndex}\n`);
-  fs.appendFileSync(logFile, `Padding bytes: ${paddingEnd - jsonEnd}\n`);
-  fs.appendFileSync(logFile, `Total available space: ${availableSpace}\n`);
-  fs.appendFileSync(logFile, `New JSON length: ${newJsonBuffer.length}\n`);
+  dlog(`Old JSON length: ${jsonEnd - jsonStartIndex}\n`);
+  dlog(`Padding bytes: ${paddingEnd - jsonEnd}\n`);
+  dlog(`Total available space: ${availableSpace}\n`);
+  dlog(`New JSON length: ${newJsonBuffer.length}\n`);
 
   console.log(`[M26Writer] Old JSON: ${jsonEnd - jsonStartIndex} bytes, Padding: ${paddingEnd - jsonEnd} bytes, Total available: ${availableSpace}`);
   console.log(`[M26Writer] New JSON length: ${newJsonBuffer.length}`);
@@ -901,7 +902,7 @@ existing visuals.genericHeadName: ${visuals.genericHeadName}
   }
 
   console.log(`[M26Writer] ✓ Successfully wrote updated JSON`);
-  fs.appendFileSync(logFile, `✓ Successfully wrote ${newJsonBuffer.length} bytes, padded ${paddingEnd - (jsonStartIndex + newJsonBuffer.length)} bytes with zeros\n`);
+  dlog(`✓ Successfully wrote ${newJsonBuffer.length} bytes, padded ${paddingEnd - (jsonStartIndex + newJsonBuffer.length)} bytes with zeros\n`);
 }
 
 module.exports = {
