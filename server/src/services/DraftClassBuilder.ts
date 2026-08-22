@@ -593,7 +593,8 @@ export const DraftClassBuilder = {
         ? PersonaService.dnaFor(
             `${p.firstName}|${p.lastName}`,
             PositionMapper.groupFromId(Number(p.position) || 0),
-            Number(p.overall) || 0
+            Number(p.overall) || 0,
+            Number(p.devTrait) || 0
           ).map(PersonaService.name)
         : undefined;
       return {
@@ -665,7 +666,7 @@ export const DraftClassBuilder = {
       const posId = Number(p.position) || 0;
       if (!p.personaDNA) {
         // explicit user edit wins
-        p.personaDNA = PersonaService.dnaFor(`${p.firstName}|${p.lastName}`, PositionMapper.groupFromId(posId), Number(p.overall) || 0);
+        p.personaDNA = PersonaService.dnaFor(`${p.firstName}|${p.lastName}`, PositionMapper.groupFromId(posId), Number(p.overall) || 0, Number(p.devTrait) || 0);
       }
       // Birthdate, PersonalityRating, Focus, QB style, body-type enum, hidden bytes,
       // generic-head portrait PID — everything the game fills and reads back verbatim.

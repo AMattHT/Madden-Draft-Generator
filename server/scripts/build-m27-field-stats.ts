@@ -21,6 +21,7 @@ import os from 'os';
 import path from 'path';
 import { LOOKUPS_DIR, M27_SAVES_DIR } from '../src/config/paths';
 import { FranchiseService } from '../src/services/FranchiseService';
+import { PositionMapper } from '../src/services/PositionMapper';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const M27 = require('../src/vendor/draft-class/M27Parser');
@@ -68,6 +69,11 @@ async function main() {
   const hidden87: Record<string, number> = {};
   const hidden9c: Record<string, number> = {};
   const bodyTypeEnum: Record<string, Record<string, number>> = {};
+  // Persona DNA of the game's rookies: trait id counts per rating group, and per
+  // dev trait, plus which trait sits in slot 0 (the game's rookies always carry 5).
+  const personaByGroup: Record<string, Record<string, number>> = {};
+  const personaByDev: Record<string, Record<string, number>> = {};
+  const personaSlot0: Record<string, number> = {};
   let m27Files = 0, m26Files = 0, m27Rookies = 0;
 
   // --- M27 draft classes (game-generated only for stats; all files for names) ---
@@ -96,6 +102,14 @@ async function main() {
         hidden9c[a[0x9c]] = (hidden9c[a[0x9c]] ?? 0) + 1;
         const bt = String(p.visuals?.bodyType ?? 'Standard');
         (bodyTypeEnum[bt] ??= {})[a[0x91]] = (bodyTypeEnum[bt][a[0x91]] ?? 0) + 1;
+        const group = PositionMapper.groupFromId(a[0x4e]);
+        const dev = String(a[0x90]);
+        const dna: number[] = p.personaDNA ?? [];
+        dna.forEach((id: number, slot: number) => {
+          (personaByGroup[group] ??= {})[id] = (personaByGroup[group][id] ?? 0) + 1;
+          (personaByDev[dev] ??= {})[id] = (personaByDev[dev][id] ?? 0) + 1;
+          if (slot === 0) personaSlot0[id] = (personaSlot0[id] ?? 0) + 1;
+        });
       }
     }
   }
@@ -155,6 +169,7 @@ async function main() {
     headPid: resolve(headPid),
     personality: Object.fromEntries(Object.entries(personality).map(([p, s]) => [p, { ...finish(s), slopeVsOvr: slope(personalityByOvr[p].xs, personalityByOvr[p].ys) }])),
     focus, qbStyle, hidden87, hidden9c, bodyTypeEnum,
+    personaByGroup, personaByDev, personaSlot0,
   };
   const dest = path.join(LOOKUPS_DIR, 'm27-field-stats.json');
   fs.writeFileSync(dest, JSON.stringify(out, null, 1));

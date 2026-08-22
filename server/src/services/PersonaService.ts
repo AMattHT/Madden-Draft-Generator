@@ -78,12 +78,43 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
+/** The game's own rookie trait frequencies per rating group / dev tier (from the
+ *  generated TEST classes, scripts/build-m27-field-stats.ts). Null if not built. */
+interface RookiePersona { byGroup: Record<string, Record<string, number>>; byDev: Record<string, Record<string, number>> }
+let rookieCache: RookiePersona | null | undefined;
+function rookieFreq(): RookiePersona | null {
+  if (rookieCache !== undefined) return rookieCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-field-stats.json'), 'utf8'));
+    rookieCache = raw.personaByGroup && Object.keys(raw.personaByGroup).length ? { byGroup: raw.personaByGroup, byDev: raw.personaByDev ?? {} } : null;
+  } catch {
+    rookieCache = null;
+  }
+  return rookieCache;
+}
+
 /** Weighted reservoir-free pick of `n` unique trait ids. */
-function pickTraits(h: number, n: number, tilt: number[]): number[] {
-  const freq = freqById();
+function pickTraits(h: number, n: number, tilt: number[], group?: string, dev?: number): number[] {
   const weight = new Map<number, number>();
-  for (const [id, f] of Object.entries(freq)) weight.set(Number(id), f);
-  for (const t of tilt) weight.set(t, (weight.get(t) ?? 10) * 3); // 3x tilt
+  const rookie = rookieFreq();
+  const groupKey = group === 'K' || group === 'P' || group === 'LS' ? 'KP' : group;
+  const byGroup = rookie && (rookie.byGroup[group ?? ''] ?? rookie.byGroup[groupKey ?? ''] ?? (groupKey === 'KP' ? rookie.byGroup.K : undefined));
+  if (byGroup) {
+    // Rookie mix for the position (70%) blended with the dev-tier mix (30%).
+    const byDev = dev != null ? rookie!.byDev[String(dev)] : undefined;
+    const gTotal = Object.values(byGroup).reduce((a, b) => a + b, 0) || 1;
+    const dTotal = byDev ? Object.values(byDev).reduce((a, b) => a + b, 0) || 1 : 1;
+    const ids = new Set([...Object.keys(byGroup), ...Object.keys(byDev ?? {})].map(Number));
+    for (const id of ids) {
+      if (id === DNA.Invalid) continue;
+      const w = 0.7 * ((byGroup[id] ?? 0) / gTotal) + (byDev ? 0.3 * ((byDev[id] ?? 0) / dTotal) : 0);
+      if (w > 0) weight.set(id, Math.round(w * 10000));
+    }
+  } else {
+    const freq = freqById();
+    for (const [id, f] of Object.entries(freq)) weight.set(Number(id), f);
+    for (const t of tilt) weight.set(t, (weight.get(t) ?? 10) * 3); // 3x tilt
+  }
   const out: number[] = [];
   let state = h >>> 0;
   for (let k = 0; k < n; k++) {
@@ -107,12 +138,13 @@ export const PersonaService = {
    * 0xca). Count scales with caliber — elite ~5, mid 4–5, fringe 3–4; ~2.6%
    * carry none, matching the real league census.
    */
-  dnaFor(seedKey: string, group: string, _overall: number): number[] {
+  dnaFor(seedKey: string, group: string, _overall: number, devTrait = 0): number[] {
     const h = hash(seedKey);
     // The game's own generated rookies carry exactly five traits (1,555 of 1,556
     // across the TEST classes); the 3-5 / sometimes-none pattern belongs to the
-    // veteran census, not to draft prospects.
-    return pickTraits(h, 5, TILT[group] ?? []);
+    // veteran census, not to draft prospects. Frequencies come from those rookies
+    // per position group and dev tier (TILT is only the fallback without the file).
+    return pickTraits(h, 5, TILT[group] ?? [], group, devTrait);
   },
 
   /** Display name for a trait id (UI). */
