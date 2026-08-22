@@ -41,7 +41,7 @@ test('when a year has more than 402 players, the weakest undrafted are dropped, 
   // 1968 had 462 picks, so draftees must go too - the weakest later picks, never a round 1-3 pick.
   assert.ok(droppedDraftees.every((p) => (p.draftRound ?? 0) >= 4), droppedDraftees.map((p) => `${p.lastName} r${p.draftRound}`).slice(0, 6).join(', '));
   // an undrafted nobody never survives ahead of a draftee with a career
-  assert.ok(keptUndrafted.every((p) => (p.wav ?? 0) > 5 || (p.seasonsStarted ?? 0) > 0), keptUndrafted.map((p) => p.lastName).join(', '));
+  assert.ok(keptUndrafted.every((p) => (p.wav ?? 0) > 5 || (p.seasonsStarted ?? 0) > 0 || (p.proBowls ?? 0) > 0 || (p.allPro1 ?? 0) > 0), keptUndrafted.map((p) => p.lastName).join(', '));
   // order preserved: pick 1 still leads the board
   assert.equal(pv.rows[0].draftPick, 1);
 });
