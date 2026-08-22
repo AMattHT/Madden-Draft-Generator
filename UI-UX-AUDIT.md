@@ -1,0 +1,111 @@
+# UI/UX Audit — Draft Class Generator
+
+Date: 2026-08-05 · Method: full code review of all views/components against `web/PRODUCT.md` principles.
+(Live screenshot pass still pending — needs the browser open with the WebBridge extension.)
+
+**Status 2026-08-05: all four P1 items implemented** (profile prev/next + ←/→ keys; header
+ExportMenu with "Save to Madden Saves" — verified writing `CAREERDRAFT-2003DRAFT` into the
+real Saves folder; StatsBar/WavLegend/ExportBar collapsed into MetaStrip + header export;
+roving-tabindex keyboard nav on the board with focus return). **All five P2 items implemented**
+(PlayerSearch ↑/↓+Enter with aria combobox semantics; sticky section jump-nav in the profile;
+two-step inline confirm on Reset player; informational text bumped from neutral-600 →
+neutral-500 for WCAG AA; franchise save picker grouped Your saves vs Generated).
+**All P3 items implemented** (face picker now shows the actual generic-head portrait via
+`/api/portrait/generic-head/:code` — code → portrait PID → plpo sprite crop; Equipment Builder
+has a "Wearing" summary strip with clickable thumbs + Reset-all-to-era-default; Ctrl/Cmd+K
+opens player search; table search/pos/sort persist per class in IndexedDB; sortable column
+headers; YearPicker "Recent" row). The audit list is complete.
+
+Scoring: **P1** = changes daily workflow · **P2** = clarity/polish · **P3** = nice-to-have.
+
+---
+
+## P1 — Workflow changers
+
+### 1. No prev/next player navigation in the profile editor
+The core loop is *scan board → edit prospect → next prospect*. Today: open profile → close →
+find and click the next row → reopen. For a 400-player board that's the single biggest friction
+in the tool.
+**Fix:** `‹ ›` arrows in the `ProfileModal` header stepping through the *filtered* row order,
+plus `←`/`→` keyboard support (when no input is focused). The modal already receives the row;
+lift `selectedId` navigation into `ClassView` so it respects the current filter/sort.
+
+### 2. Export is buried and can't write to the Saves folder
+`Download .mdc` — the terminal action of the whole app — sits in a card below the stats,
+mid-page under `xl` breakpoints. After download the user must manually move the file to
+`Documents\Madden NFL 26\Saves`… but the backend already knows that path (`FranchiseService.savesDir`).
+**Fix:** (a) move the export action into the class header next to Rebuild, or a sticky
+bottom-right action bar; (b) add a **"Save directly to Madden Saves"** checkbox — the server
+writes `CAREERDRAFT-{year}DRAFT` into the Saves dir instead of a browser download. Removes the
+most error-prone step of the workflow (wrong folder, wrong filename).
+
+### 3. The board starts ~450–500px down the page
+`ClassView` stacks: class header → StatsBar (5 cells) → PositionBreakdown →
+WavLegend + ExportBar row → *then* the table. PRODUCT.md: "the prospect table and its ratings
+are the point" — yet it's the last thing on the page.
+**Fix:** collapse to two slim strips: (a) header row with title/pills + Rebuild + Export;
+(b) one meta row combining StatsBar values inline (Prospects 402 · Avg 66 · XF/SS/Star dots ·
+faces) + position chips. WavLegend's OVR-tier key becomes a `?` popover at the OVR column
+header — its content is reference, not something you re-read every visit.
+
+### 4. No keyboard navigation on the board
+Rows are `<tr onClick>` — not focusable, no arrow-key movement, Enter doesn't open. PRODUCT.md
+requires "full keyboard reach for the table rows".
+**Fix:** roving `tabIndex` on rows, `↑`/`↓` to move a highlight, `Enter` opens the profile,
+`Esc` closes (already global). Pairs naturally with #1's arrows.
+
+---
+
+## P2 — Clarity & polish
+
+### 5. PlayerSearch results need keyboard support
+Debounced search works, but results are click-only. Add `↑`/`↓` + `Enter` to jump to the
+highlighted player's class (mirrors YearPicker's Enter-to-top-match).
+
+### 6. ProfileModal is one long scroll with no navigation
+Radar → combine → ratings → bio → equipment → 54 attributes → footer. The 54-attribute grid
+(the most-used section) is last. **Fix:** sticky mini section-nav (Profile · Ratings · Bio ·
+Equipment · Attributes) or collapse attribute groups into accordions that remember state.
+
+### 7. "Reset player" is one click with no undo
+Wipes rating + gear edits instantly. **Fix:** confirm inline ("Reset? This clears N edits —
+confirm") or an undo snackbar. No modal dialog needed.
+
+### 8. Contrast: a few spots fall below WCAG AA
+`text-neutral-600` (#52525b) on `surface-1` (#121317) ≈ 3.4:1 — used for empty states,
+helper text, the footer note in ProfileModal, "No gear matches". PRODUCT.md explicitly bans
+muted-gray-on-charcoal. **Fix:** bump these to `text-neutral-500` (#71717a ≈ 4.6:1) minimum.
+
+### 9. Franchise save picker mixes our generated outputs with real saves
+`-CAPRESET`, `-PLAYERS`, etc. clutter the dropdown (default selection already skips them).
+**Fix:** group the list — "Your saves" vs "Generated by this tool (N)" collapsed optgroup.
+
+---
+
+## P3 — Nice-to-have
+
+### 10. Face picker says "no preview available"
+The portrait cache already holds generic-head PNGs (`cache/portraits/*/plpo_generic_*.png`).
+Serve them like gear thumbnails and show the selected head.
+
+### 11. GearEditor: running loadout summary
+With ~30 slots, you lose track of what's set. The per-group count badges help; add a bottom
+strip of thumbnails for set slots (or a "wearing" summary column) + **"Reset all to era
+default"** button.
+
+### 12. Small power-ups
+- `Ctrl/Cmd+K` focuses global player search
+- Persist table search/pos/sort per class in IndexedDB
+- Sort by clicking column headers (keep the dropdown for parity)
+- YearPicker: "recent" row of the last ~5 viewed classes
+
+---
+
+## What's already good (keep)
+- YearPicker popover (decade grouping, cached dots, AFL badges, Enter-to-jump) — exemplary.
+- Provenance everywhere: cache/live pills, wAV A/P/EA tags, edited dots, mode lens pill.
+- Rating/dev/face color semantics always paired with text — survives grayscale.
+- `prefers-reduced-motion` handled globally; focus-visible rings present.
+- Random no-repeat draw with undo + range — genuinely well-designed.
+- PRODUCT.md itself: the audit above is against it, and most findings are "more of what it
+  already asks for", not new direction.

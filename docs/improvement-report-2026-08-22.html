@@ -1,0 +1,333 @@
+<title>Draft Class Generator Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --ground: #f4f5f8; --panel: #ffffff; --panel-2: #eceef3; --line: #d7dae2; --line-strong: #b9bec9;
+    --ink: #15171c; --muted: #5b6270; --accent: #1c4fd6; --accent-ink: #ffffff; --accent-soft: #e3eaff;
+    --done: #15803d; --done-soft: #dcfce7; --high: #b45309; --high-soft: #fef3c7; --crit: #b91c1c; --crit-soft: #fee2e2;
+    --med: #4b5563; --med-soft: #e5e7eb; --gold: #a16207;
+    --display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+    --body: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #121317; --panel: #191b20; --panel-2: #21242b; --line: #262931; --line-strong: #363a44;
+      --ink: #edeef1; --muted: #9aa0ac; --accent: #6f9bff; --accent-ink: #0a0b0d; --accent-soft: #1a2742;
+      --done: #4ade80; --done-soft: #12301f; --high: #fbbf24; --high-soft: #3a2a08; --crit: #f87171; --crit-soft: #3b1414;
+      --med: #b4bac6; --med-soft: #2a2e37; --gold: #f5c518;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #121317; --panel: #191b20; --panel-2: #21242b; --line: #262931; --line-strong: #363a44;
+    --ink: #edeef1; --muted: #9aa0ac; --accent: #6f9bff; --accent-ink: #0a0b0d; --accent-soft: #1a2742;
+    --done: #4ade80; --done-soft: #12301f; --high: #fbbf24; --high-soft: #3a2a08; --crit: #f87171; --crit-soft: #3b1414;
+    --med: #b4bac6; --med-soft: #2a2e37; --gold: #f5c518;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+  .wrap { max-width: 76ch; margin: 0 auto; padding: 40px 24px 96px; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.05; margin: 0; }
+  h1 { font-size: 46px; font-weight: 700; letter-spacing: 0.005em; }
+  h2 { font-size: 30px; font-weight: 600; margin-top: 56px; padding-top: 18px; border-top: 2px solid var(--line-strong); }
+  h3 { font-size: 21px; font-weight: 600; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); }
+  .eyebrow { font-family: var(--display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 13px; color: var(--muted); }
+  .lede { font-size: 19px; color: var(--muted); margin-top: 12px; max-width: 64ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 14px; color: var(--muted); }
+  code, .mono { font-family: var(--mono); font-size: 0.86em; }
+  code { background: var(--panel-2); padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; overflow-x: auto; font-family: var(--mono); font-size: 14px; line-height: 1.5; margin: 12px 0 18px; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 28px 0 8px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; }
+  .tile .n { font-family: var(--display); font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .l { font-size: 13px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--display); font-weight: 600; }
+  .tile.done .n { color: var(--done); } .tile.crit .n { color: var(--crit); } .tile.high .n { color: var(--high); } .tile.acc .n { color: var(--accent); }
+
+  .chip { display: inline-block; font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 3px; line-height: 1.5; vertical-align: middle; }
+  .chip.done { background: var(--done-soft); color: var(--done); }
+  .chip.crit { background: var(--crit-soft); color: var(--crit); }
+  .chip.high { background: var(--high-soft); color: var(--high); }
+  .chip.med { background: var(--med-soft); color: var(--med); }
+  .chip.fx { background: var(--accent-soft); color: var(--accent); }
+
+  .item { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 18px; margin: 12px 0; }
+  .item .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .item h3 { flex: 1 1 auto; min-width: 60%; display: flex; align-items: baseline; gap: 10px; }
+  .item h3::before { content: ""; flex: 0 0 auto; width: 9px; height: 9px; border-radius: 2px; background: var(--med); transform: translateY(-1px); }
+  .item.crit h3::before { background: var(--crit); } .item.high h3::before { background: var(--high); } .item.done h3::before { background: var(--done); }
+  .item .ev { font-size: 15px; color: var(--muted); margin: 6px 0; }
+  .item .ev code { font-size: 0.9em; }
+  .item .fix { font-size: 16px; margin: 6px 0 0; }
+  .item .fix b { font-family: var(--display); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 13px; color: var(--accent); margin-right: 6px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; margin: 12px 0 18px; background: var(--panel); }
+  th, td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--display); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-size: 13px; color: var(--muted); background: var(--panel-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; }
+
+  .why { font-size: 16px; color: var(--muted); margin: 10px 0 14px; max-width: 66ch; }
+  ol.road { padding-left: 0; list-style: none; counter-reset: step; margin: 14px 0 0; }
+  ol.road li { position: relative; padding: 10px 0 10px 56px; border-bottom: 1px solid var(--line); counter-increment: step; }
+  ol.road li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 40px; font-family: var(--display); font-size: 28px; font-weight: 700; color: var(--accent); text-align: right; font-variant-numeric: tabular-nums; }
+  ol.road li b { font-family: var(--display); font-weight: 600; font-size: 18px; }
+  ul.q { padding-left: 20px; } ul.q li { margin: 8px 0; }
+  .note { background: var(--accent-soft); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; margin: 18px 0; font-size: 16px; }
+  @media (prefers-reduced-motion: no-preference) { .item { transition: border-color .15s; } .item:hover { border-color: var(--line-strong); } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Madden 26 / 27 · Draft Class Generator</div>
+  <h1>Where the generator can get better</h1>
+  <p class="lede">An audit of the realism of generated classes, the Madden 27 path, reliability, and the editing workflow — with evidence from the code, the cached data, and the real game files. One item was built and shipped during the audit.</p>
+  <div class="meta">
+    <span>22 Aug 2026</span>
+    <span>Verified against: M26 + M27 templates, 5 game-generated M26 classes, 4 game-generated M27 classes, the M27 career save</span>
+    <span>Runtime check: tsc clean (server + web), smoke:mdc 402/402, verify-export 2003 + 1965 pass, verify-m27 18/18</span>
+  </div>
+
+  <div class="board">
+    <div class="tile done"><div class="n">1</div><div class="l">Shipped today</div></div>
+    <div class="tile crit"><div class="n">2</div><div class="l">M27 binary bugs confirmed</div></div>
+    <div class="tile high"><div class="n">16</div><div class="l">Quick wins (&lt; 1 day)</div></div>
+    <div class="tile acc"><div class="n">7</div><div class="l">Themes, ranked by value</div></div>
+  </div>
+
+  <h2>The short version</h2>
+  <p>The engine is in good shape: both <code>.mdc</code> layouts round-trip against real game files, generation is deterministic, and the class <em>shape</em> (mean 66, max 84, dev-trait rates) reproduces Madden's own. The problems are in <strong>what gets written into the file</strong>, not the file format.</p>
+  <p>Three things stand out. First, <strong>who is good</strong>: the 2025 class ranks a long snapper and two kickers as its top X-Factors while Cam Ward and Travis Hunter sit at 67 Normal; combine numbers are mapped without regard to position (a 41-speed left tackle); injury and toughness rise with overall. Second, <strong>Madden 27 correctness</strong>: the writer never updates the header's prospect count (the game's own classes say 389; the tool writes 402 under that header), and the portrait-PID and commentary-ID offsets are swapped — which is why generic M27 rookies have no portrait. Third, <strong>nothing protects the work</strong>: six weeks including the entire M27 port are uncommitted, there were no tests until today, and one async route exception can take the API down.</p>
+
+  <h2>Shipped during the audit</h2>
+  <div class="item done">
+    <div class="head"><h3>3-4 outside linebackers are edge rushers now</h3><span class="chip done">Done</span><span class="chip fx">36 tests</span></div>
+    <p class="ev">The source CSV lumps ~all linebackers into "MLB" and the only disambiguator (nflverse <code>pff_position</code>) had 0% coverage for 1970s–80s rookies, so Tippett, Swilling, Greg Lloyd and the whole 3-4 era landed at SAM/MIKE/WILL with linebacker attribute profiles.</p>
+    <p class="fix"><b>Built</b> a scheme table (<code>data/lookups/defensive-schemes.json</code>, 60 franchise eras, editable), a classifier (PFF → sack rate → team scheme → interceptions → nflverse text), pinned roles honoured by a balancer that targets Madden's real 30/40/30 SAM/MIKE/WILL mix, a profile badge showing <em>why</em>, and <code>scripts/report-front-seven.ts</code> for auditing any year. Found and fixed a name-collision bug on the way (1993's two Chad Browns overwrote each other's careers — 20 such pairs).</p>
+    <div class="tbl"><table>
+      <tr><th>Class</th><th class="num">LEDG</th><th class="num">REDG</th><th class="num">SAM</th><th class="num">MIKE</th><th class="num">WILL</th></tr>
+      <tr><td>1975 (generated)</td><td class="num">16</td><td class="num">15</td><td class="num">14</td><td class="num">18</td><td class="num">14</td></tr>
+      <tr><td>1985 (generated)</td><td class="num">18</td><td class="num">17</td><td class="num">13</td><td class="num">18</td><td class="num">13</td></tr>
+      <tr><td>2003 (generated)</td><td class="num">19</td><td class="num">19</td><td class="num">13</td><td class="num">17</td><td class="num">13</td></tr>
+      <tr><td>Madden's own classes (avg of 5)</td><td class="num">18</td><td class="num">18</td><td class="num">12</td><td class="num">16</td><td class="num">12</td></tr>
+    </table></div>
+    <p class="ev">Still open from this work: nine scheme eras are tagged "medium confidence" (Raiders 1972–94, Dolphins 1971–95, Packers 1980–91, Cardinals 1981–93, Bengals 1980–93, Lions 1985–93, Chargers 1986–91, Falcons 1983–93, Patriots 2019–) — edit the JSON if you know better. 1974–79 draftees depend on nflverse <code>draft_team</code>, which covers only ~200 LB/DE rows for that decade.</p>
+  </div>
+
+  <h2>1 · Rating realism — who is good, how good, and why</h2>
+  <p class="why">This decides whether a historical class is fun to draft. The class shape is right; the ordering and the attribute profiles inside it are not.</p>
+
+  <div class="item crit">
+    <div class="head"><h3>2025 class is mis-ranked: LS/K/P are the top X-Factors</h3><span class="chip crit">Critical</span><span class="chip med">Small</span></div>
+    <p class="ev">Reproduced: Julian Ashby (LS, pick 251) 84 OVR X-Factor, two kickers 81/79, four undrafted K/P at 78 Superstar; Cam Ward / Travis Hunter / Abdul Carter / Mason Graham 67 OVR Normal. Cause: <code>careerTo</code> backfill at <code>DraftEnrichment.ts:85</code> makes one-season rookies look like completed careers, then <code>careerWavEstimate</code> plus the K/P/LS anchor floors (<code>RatingService.ts:26-28</code>, which start at 60) push specialists above everyone.</p>
+    <p class="fix"><b>Fix</b> Use <code>careerWavEstimate</code> only when seasons ≥ 3 or Pro Bowls/All-Pros &gt; 0, else the draft-slot prior; blend short careers with the slot prior (w = seasons/(seasons+3)) instead of the hard 1.5× boost; normalise K/P/LS floors to 55; stop stamping current-year rookies' nflverse wAV as "actual".</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Combine numbers map without regard to position</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">One 40/bench/vert/cone table (<code>DraftClassBuilder.ts:102-134</code>) is applied to every position: a 5.2-second left tackle gets 41 speed where Madden's floor for LT is ~56; speed/strength/agility are <code>FIXED_ATTRS</code>, so the reconciler then inflates skill attributes to hit the target overall.</p>
+    <p class="fix"><b>Fix</b> Score each drill as a percentile <em>within the position</em> (nflverse combine.csv) and place it on that position's Madden attribute distribution; emit per-position min/max from the calibration build.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Injury, toughness and stamina rise with overall</h3><span class="chip high">High</span><span class="chip med">Small</span></div>
+    <p class="ev"><code>DraftClassBuilder.ts:262-269</code> adds the OVR delta to every non-fixed attribute; <code>reconcileToTarget</code> only touches weighted attributes, so off-position ones keep the full shift. Regenerated 2000 class: corr(OVR, injury) = 0.89. In Madden's own classes it is ≈ 0.</p>
+    <p class="fix"><b>Fix</b> Three attribute classes: fixed physicals; OVR-driven = only attributes with non-zero weight in the prospect's <code>ovrweights</code> entry; everything else sampled around the position mean.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Almost no RT/RG, and pre-2001 almost no safeties</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">Lookup counts: LT 3,139 vs RT 79; LG 2,468 vs RG 88; SS+FS+S 504 vs CB 3,865. <code>PositionMapper</code> maps OT/T → LT and G/OG → LG and only edges and LBs are balanced (the LB half was fixed today).</p>
+    <p class="fix"><b>Fix</b> Add <code>balanceCohort([LT,RT])</code> and <code>([LG,RG])</code> (side is cosmetic, same rating group); read <code>depth_position</code> from the depth charts for 2001+ DBs; split pre-2001 "CB" rows CB vs S by build. Also: DT is under-represented (18–34 per class vs Madden's 42).</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Undrafted and supplemental stars rate at the floor</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">4,201 "UD" rows; 2 have wAV. Kurt Warner, Warren Moon, John Randle, Romo, Gates, Welker, Priest Holmes, Vinatieri, Bosworth — all rated as scrubs.</p>
+    <p class="fix"><b>Fix</b> One-time backfill: join UD rows to nflverse <code>players.csv</code> for the PFR id, fetch career AV/PB/AP/seasons into <code>udfa_careers.json</code>; minimum viable: grow the <code>MANUAL</code> map with ~40 famous UDFAs.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>The 1960 AFL draft parses as entirely undrafted</h3><span class="chip high">High</span><span class="chip med">Small</span></div>
+    <p class="ev">230 rows have Round "AFL 1" / Pick "ALF 1" (sic); <code>toInt</code> returns null, so 1960 AFL has 0 rounds and Bob Talamini (wAV 62) sits at index 428. 1967–69 are mislabeled "AFL" after the common draft began.</p>
+    <p class="fix"><b>Fix</b> Accept "AFL n" in the loader, fix the "ALF" typo, relabel 1967–69 as common draft.</p>
+  </div>
+
+  <div class="item">
+    <div class="head"><h3>Realistic mode is pure hindsight with a fixed class shape</h3><span class="chip med">Medium</span><span class="chip med">Medium</span><span class="chip fx">Your call</span></div>
+    <p class="ev"><code>DraftClassBuilder.ts:559-583</code> ranks by career outcome and maps rank to one curve: Tom Brady (pick 199) is the top QB of 2000 at 83 X-Factor; 1983 = 2000 = 2013 in strength. CPU teams draft by how careers turned out.</p>
+    <p class="fix"><b>Option</b> A "hindsight" slider blending slot-expected wAV with actual wAV for the OVR rank (dev trait keeps carrying the true outcome), plus auto-scaled class strength from the class's top-32 summed wAV. Some users want the known-outcome board; make it a choice.</p>
+  </div>
+
+  <div class="item">
+    <div class="head"><h3>Smaller rating items</h3><span class="chip med">Medium</span></div>
+    <p class="fix"><b>QB archetype</b> raw career rush totals tag Brady/Roethlisberger/Matt Ryan as Scramblers (<code>ArchetypeService.ts:189</code>) — normalise per game. <b>Variance</b> flat ±3 on every attribute; calibration stores means only — emit per-position std/min/max. <b>OVR recompute</b> disagrees with Madden for OT Power/Agile, C, LS, CB Slot (264 mismatches over 2,010 real prospects) — regress true DesiredLow/High and add an integer pass. <b>Era-blind bio</b> 1950 LT = 78 in / 318 lb from M26 norms; hometown state defaults to Alabama (id 0) for ~66% of players.</p>
+  </div>
+
+  <h2>2 · Madden 27 correctness</h2>
+  <p class="why">The app defaults to M27, but the M27 path drops prospects, writes two ids to each other's offsets, zeroes fields the game reads, and the franchise tools are M26-only.</p>
+
+  <div class="item crit">
+    <div class="head"><h3>Header prospect count at <span class="mono">0x42</span> is never written</h3><span class="chip crit">Critical</span><span class="chip med">Tiny</span><span class="chip done">Verified</span></div>
+    <p class="ev">Checked directly: <code>u16@0x42</code> = 389 in the M27 template, all four game-generated TEST classes <em>and</em> the tool's own 2003/1987 exports; = 402 in every M26 file. The game's own M27 classes fill exactly 389 of 455 blocks (224 drafted + 165 UDFA). The tool writes 402 prospects under a header that says 389, so picks 390–402 are most likely ignored on import.</p>
+    <p class="fix"><b>Fix</b> <code>buf.writeUInt16LE(prospectCount, 0x42)</code> in <code>M27Writer.writeM27DraftClass</code> (assert it in the M26 writer too), then decide the M27 class size deliberately and confirm with one in-game import. Also: the "455-slot URFA pool" in M27-PORT.md is wrong — the game uses 389.</p>
+  </div>
+
+  <div class="item crit">
+    <div class="head"><h3>Portrait PID and commentary ID are swapped (<span class="mono">0x94</span> / <span class="mono">0x9e</span>)</h3><span class="chip crit">Critical</span><span class="chip med">Tiny</span><span class="chip done">Verified</span></div>
+    <p class="ev">In the game's TEST1 class every generic head maps to exactly one value at <code>0x94</code> (196/196 — <code>gen_2_H_GM_004</code> → 4196 = <code>plpo_generic_2_H_GM_004</code>) and every surname to exactly one value at <code>0x9e</code> (338/338). <code>M27Parser.js:37-38</code> has them the other way round (commentary at 0x94 "tentative", PID at 0x9e). This is why generic M27 rookies import with no portrait and why the PID=0 workaround exists.</p>
+    <p class="fix"><b>Fix</b> Swap the two entries in <code>M27_FIELDS</code> and <code>M27Writer.js:67-68</code>; delete the PID=0 workaround at <code>DraftClassBuilder.ts:309-315</code>; build a head → PID table from the game classes; build <code>surname-commentary.json</code> from the career save so announcers call names in both games.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Fields the game reads verbatim are written as zero</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">Cross-referencing TEST3 rookies with their Player rows: <code>0x48</code> = birthdate (390/390; encoding <code>(day&lt;&lt;11)|((month-1)&lt;&lt;7)|(year-1940)</code>), <code>0x70</code> = PersonalityRating (never 0 in game classes), <code>0x96</code> = QB style, <code>0xf2</code> = Focus, <code>0x6b</code> = 127 constant, <code>0x7d</code> = 1. M27-PORT.md calls Focus "game-derived"; it is copied from the file.</p>
+    <p class="fix"><b>Fix</b> Add these to the field map: birthdate from nflverse (clamp pre-1940), PersonalityRating sampled from the game distribution, Focus by archetype with the observed 55/8/8/29 mix, QB style by archetype, the two constants.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Persona DNA is calibrated on veterans, not rookies</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">Over 1,556 game-generated rookies: slot count is 5 in 1,555 of them, WinAtAllCosts appears on 24 (so the "filtered out" note is wrong), ten traits never occur for rookies. The tool writes 3–5 slots from veteran frequencies.</p>
+    <p class="fix"><b>Fix</b> <code>scripts/build-m27-rookie-persona.js</code> deriving per-position-group and per-dev-tier frequencies from the TEST files; fill 5 slots.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>M27 gear and faces drift</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev"><code>EraGearService.ts:448</code> calls <code>helmetPool()</code> and never reads <code>era.helmet</code>, so the M27 helmet pools are dead and 1980–2007 classes write <code>GearHelmet_Standard</code>/<code>Schutt</code>, which M27 doesn't have. The M27 allowlist path (<code>GearOptionsService.ts:236</code>) never loads. <code>m27-face-assets.json</code> contains 7 entries written by the tool's own earlier import (Witten, Gates, Polamalu, Romo, Suggs…), and the year guard takes the first same-name row.</p>
+    <p class="fix"><b>Fix</b> Move <code>m27-game-gear-assets.json</code> under <code>data/lookups</code> and generate the M27 pools from it; map vintage shells to the oldest surviving M27 asset; rebuild the face map from a clean save keyed by name + draft year; run the 5-player test that settles whether M26 legend face ids render in M27.</p>
+  </div>
+
+  <div class="item high">
+    <div class="head"><h3>Franchise tab is M26-only while the app defaults to M27</h3><span class="chip high">High</span><span class="chip med">Large</span></div>
+    <p class="ev"><code>FranchiseService.savesDir()</code> hard-codes <code>Madden NFL 26/Saves</code>; no route accepts a game version; cap scaling is a silent no-op on M27's new contract model (guarantees, void years).</p>
+    <p class="fix"><b>Fix</b> Thread <code>gameVersion</code> through FranchiseView → api → routes → service; refuse a save whose <code>gameYear</code> doesn't match; add an M27 cap branch via the Contract ref. Also: <code>madden-franchise</code>'s record proxy accepts unknown field names silently, so tool "counts" are attempts, not verified writes — validate against the table schema and count via <code>field.isChanged</code>.</p>
+  </div>
+
+  <h2>3 · Likeness and presentation</h2>
+  <p class="why">What you see on the board and in cutscenes.</p>
+  <div class="item high">
+    <div class="head"><h3>Greyscale legend portraits classify as dark skin</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev"><code>pid_skintone.json</code>: Unitas → 7, Bart Starr → 7, Otto Graham → 7, Sammy Baugh → 7 (all Race = 1 in both CSVs). Near-neutral RGB makes the ITA angle meaningless. Separately, the position prior discards real photo evidence for white skill players (Csonka, Largent), and the prior itself is modern demographics applied to 1936–1945 classes.</p>
+    <p class="fix"><b>Fix</b> Detect low-chroma face boxes and mark them "greyscale" so the waterfall falls through to the CSV race or a colour photo; make the prior a per-decade curve; trust a derived tone when the skin-pixel pass had enough pixels.</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>Wikipedia photo URLs are name-only matched</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">453 of 5,861 URLs are SVG icons; 271 URLs are shared across draft years covering 1,126 rows (1942's Bruce Smith gets the Virginia Tech DE's photo). These feed portraits, skin tone and gear observation.</p>
+    <p class="fix"><b>Fix</b> Drop SVG/icon URLs and cross-year-shared URLs at load; validate hits against draft year/position from the infobox.</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>Vintage M26 classes inherit 2026 accessories</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev"><code>EraGearService.loadoutElements</code> writes helmet, facemask, shoes, gloves, visor and the era extras only; arm sleeves, spats, mouthpiece, shoulder-pad size and knee/thigh pads come from the 2026 donor.</p>
+    <p class="fix"><b>Fix</b> Extend the era extras with pads (large pre-2000), no sleeves before ~2000, no spats before ~2010, no mouthpiece before ~1995, and emit explicit None assets for M26 so donor slots are overwritten.</p>
+  </div>
+  <div class="item">
+    <div class="head"><h3>Smaller presentation items</h3><span class="chip med">Medium</span></div>
+    <p class="fix"><b>Generic heads</b> light tones collapse to 4 faces (tone 2 has 36 heads but the "true generic" filter keeps 4) — raise the threshold. <b>Announcers</b> <code>PLYR_COMMENT</code> is a surname-keyed id; exports leave it 0 for most players and the CSV CommID is in a different id space.</p>
+  </div>
+
+  <h2>4 · Reliability and verification</h2>
+  <div class="item crit">
+    <div class="head"><h3>Six weeks of work, including the entire M27 port, is uncommitted</h3><span class="chip crit">Critical</span><span class="chip med">Small</span></div>
+    <p class="ev">HEAD is 2026-07-09; 96 dirty files (49 modified, 47 untracked) including the root <code>package.json</code> that <code>npm run dev</code> needs, the M27 template, M27 parser/writer, persona/archetype services. A fresh clone cannot run.</p>
+    <p class="fix"><b>Fix</b> Commit now in logical chunks; decide LFS vs a download step for the 2.7 MB template and 2.9 MB gear JSON. Today's classifier work adds to the pile.</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>One export-side exception kills the API</h3><span class="chip high">High</span><span class="chip med">Small</span></div>
+    <p class="ev">Express 4 + Node 24: an async handler throw exits the process despite the error middleware (reproduced). <code>routes/draft.ts</code> and <code>routes/export.ts</code> have async handlers with no try/catch; no <code>unhandledRejection</code> hook.</p>
+    <p class="fix"><b>Fix</b> An <code>asyncHandler</code> wrapper, process-level rejection loggers, <code>server.on('error')</code> with an EADDRINUSE message, bind to 127.0.0.1 and restrict CORS to the Vite origin (the franchise routes write into your Saves folder).</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>No tests, CI or linter (until today)</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">Today added <code>node --test</code> via tsx with 36 tests for the classifier, scheme lookup, career loader and LB balancer. Nothing yet covers the export pipeline; <code>verify-export.js</code> builds from the raw lookup, not <code>enrichedClass()</code>, so it doesn't exercise what the UI exports.</p>
+    <p class="fix"><b>Fix</b> Golden-file tests building 2003/1965/2025 through <code>enrichedClass</code> + <code>buildMdc</code>/<code>buildMdc27</code> asserting round-trip, header count, <code>computeOverall === overall</code>, top-5 picks in the top 40, no K/P/LS in the top 50; a GitHub Actions typecheck + test job.</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>Silent truncation at 402 drops real draftees</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">16 years exceed 402 via <code>byYear</code> (1960: 495, 1968: 488, 1970: 472…) and the cut is by draft order with no UI feedback.</p>
+    <p class="fix"><b>Fix</b> Return <code>dropped[]</code> from preview and show an "N players didn't fit" chip; cut by lowest caliber rather than draft order.</p>
+  </div>
+  <div class="item">
+    <div class="head"><h3>Smaller reliability items</h3><span class="chip med">Medium</span></div>
+    <p class="fix"><b>Dev server</b> on Windows, Ctrl-C leaves Vite orphaned on 5173 and the next <code>npm run dev</code> fails with "port in use" and kills the healthy server (<code>concurrently -k</code>) — add a <code>kill-port 5173</code> pre-step or <code>tree-kill</code>. <b>Debug log</b> <code>M26Writer.js</code> appends to a 6.9 MB log on every export regardless of <code>M26_DEBUG</code> (M26 export 1.1 s vs 0.03 s for M27). <b>Save-to-Saves</b> overwrites with no backup and no temp+rename. <b>Caches</b> nflverse CSVs never refresh (dated 30 Jun); 2.1 GB of full-resolution photos are kept but never read again; JSON caches are rewritten non-atomically per lookup.</p>
+  </div>
+
+  <h2>5 · Editing workflow</h2>
+  <div class="item high">
+    <div class="head"><h3>Edits on All-Time / Decade classes persist under the wrong key</h3><span class="chip high">High</span><span class="chip med">Small</span></div>
+    <p class="ev"><code>App.tsx:62-63</code> loads with <code>editsGet(ekYear, league)</code> but <code>setEdit</code>/<code>setGearEdit</code>/<code>resetPlayer</code> save with <code>editsSet(selected, effLeague(selected))</code>: edits are lost on reload and can clobber the real year's edits.</p>
+    <p class="fix"><b>Fix</b> Store the resolved edit key with the loaded class; one-time migration of <code>edits:0_NFL</code>.</p>
+  </div>
+  <div class="item high">
+    <div class="head"><h3>No "what the game will show" feedback after edits</h3><span class="chip high">High</span><span class="chip med">Medium</span></div>
+    <p class="ev">Export re-solves skill attributes when overall/position/archetype change (<code>RECONCILE_TRIGGERS</code>), but the profile and radar show pre-reconciliation values.</p>
+    <p class="fix"><b>Fix</b> Expose <code>ovrweights</code> to the web app and show "Overall 84 · game will show 82" live, with a diff marker on shifted attributes.</p>
+  </div>
+  <div class="item">
+    <div class="head"><h3>Smaller workflow items</h3><span class="chip med">Medium</span></div>
+    <p class="fix"><b>Escape</b> inside the Equipment Builder / Appearance Editor closes the whole profile (<code>ProfileModal.tsx:198-211</code>). <b>No undo</b>, no clear-all, no edit export/import; edits are shared across M26/M27 without validation. <b>Era gear</b> is invisible until in-game — include the resolved loadout in preview rows. <b>Fun levers</b> a variant seed for Rebuild (today it's byte-identical), bulk edit on the current filter, custom prospects, a Career-vs-Realistic compare overlay. <b>Contrast</b> <code>text-neutral-500</code> is 3.9:1 on the dark surfaces, below AA.</p>
+  </div>
+
+  <h2>6 · Franchise feature opportunities</h2>
+  <div class="item high">
+    <div class="head"><h3>Era-aware age / retire / progression pass</h3><span class="chip high">High</span><span class="chip med">Large</span></div>
+    <p class="ev">With classes for 1936–2026, the missing half of a "replay an era" franchise is roster aging. The Player table exposes Age, YearsPro, OverallRating, TraitDevelopment and a Retired contract status (7 in M26, 8 in M27).</p>
+    <p class="fix"><b>Build</b> "Advance roster N years": age/YearsPro += N, per-position age curves derived from the save's own veterans, retire past position-specific ages, optional dev downgrade; preview the before/after OVR distribution like the trait tool does.</p>
+  </div>
+  <div class="item">
+    <div class="head"><h3>Inject a generated class directly into a save</h3><span class="chip med">Medium</span><span class="chip med">Large</span></div>
+    <p class="ev">Both saves hold the upcoming class as <code>ContractStatus = Draft</code> rows on TeamIndex 32. Feasibility of rewriting them (plus CharacterVisuals and DNA) is unverified.</p>
+    <p class="fix"><b>Prototype</b> one-for-one mapping of prospects onto Draft rows and check the in-game board.</p>
+  </div>
+
+  <h2>7 · Docs and hygiene</h2>
+  <div class="item">
+    <div class="head"><h3>Docs contradict the files</h3><span class="chip med">Medium</span><span class="chip med">Small</span></div>
+    <p class="fix"><b>M27-PORT.md</b> says 455 blocks/URFA pool (game uses 389), 0xa0–0xc9 reserved (the writer puts the face asset there), Focus game-derived (it's copied). <b>README</b> status rows list "React frontend: TODO" for a shipped app. <b>Vendored engine</b> still exports the legacy 4322-byte parser the README warns against; 38 probe scripts carry personal paths. <b>Cache version</b> is a hand-bumped constant — have <code>/api/health</code> return a generator fingerprint instead.</p>
+  </div>
+
+  <h2>Quick wins (under a day each)</h2>
+  <div class="tbl"><table>
+    <tr><th>#</th><th>Change</th><th>Where</th></tr>
+    <tr><td class="num">1</td><td>Commit the working tree in logical chunks</td><td><code>draft-class-generator/</code></td></tr>
+    <tr><td class="num">2</td><td>Write the prospect count as U16 at 0x42; assert it in the M26 writer</td><td><code>M27Writer.js</code></td></tr>
+    <tr><td class="num">3</td><td>Swap PID (0x94) and commentaryId (0x9e); drop the PID=0 workaround</td><td><code>M27Parser.js:37-38</code>, <code>DraftClassBuilder.ts:309</code></td></tr>
+    <tr><td class="num">4</td><td>Build surname → commentary id map from the career save; set it for both games</td><td>new lookup + writers</td></tr>
+    <tr><td class="num">5</td><td>Fix the 2025 ranking (career-estimate gate, slot blend, K/P/LS floors)</td><td><code>RatingService.ts</code>, <code>DraftEnrichment.ts:78-85</code></td></tr>
+    <tr><td class="num">6</td><td>Balance LT/RT and LG/RG cohorts</td><td><code>DraftClassBuilder.ts:542</code></td></tr>
+    <tr><td class="num">7</td><td>Accept "AFL n" rounds; fix "ALF 1"; relabel 1967–69</td><td><code>PlayerLookupService.ts:47</code></td></tr>
+    <tr><td class="num">8</td><td>Fix the All-Time/Decade edits key with a one-time migration</td><td><code>App.tsx:62,227-260</code></td></tr>
+    <tr><td class="num">9</td><td>Move the Escape guard after the nested-editor check</td><td><code>ProfileModal.tsx:198</code></td></tr>
+    <tr><td class="num">10</td><td>Load the M27 gear allowlist from <code>data/lookups</code>; make helmetPool read <code>era.helmet</code></td><td><code>GearOptionsService.ts:236</code>, <code>EraGearService.ts:448</code></td></tr>
+    <tr><td class="num">11</td><td>Write birthdate, PersonalityRating, Focus, QB style and the two constants</td><td><code>M27_FIELDS</code></td></tr>
+    <tr><td class="num">12</td><td>Filter the 7 tool-written entries out of <code>m27-face-assets.json</code>; key by name + year</td><td><code>LikenessService.ts</code></td></tr>
+    <tr><td class="num">13</td><td>Drop SVG/icon and cross-year-shared Wikipedia URLs at load</td><td><code>PlayerLookupService.ts:120</code></td></tr>
+    <tr><td class="num">14</td><td>asyncHandler + process guards + 127.0.0.1 bind + CORS origin</td><td><code>server.ts</code>, routes</td></tr>
+    <tr><td class="num">15</td><td>Gate the M26Writer debug log behind <code>M26_DEBUG</code>; delete the 6.9 MB log</td><td><code>M26Writer.js:630-904</code></td></tr>
+    <tr><td class="num">16</td><td>Thread gameVersion to the franchise routes; refuse mismatched saves</td><td><code>FranchiseService.ts:97</code></td></tr>
+  </table></div>
+
+  <h2>Suggested order</h2>
+  <ol class="road">
+    <li><b>Secure and harden</b> — commit everything; asyncHandler and process guards; gate the debug log; golden-file export tests on top of today's test runner; a CI typecheck + test job.</li>
+    <li><b>M27 binary correctness in one pass</b> — 0x42 header count, PID/commentary swap, surname commentary map, the verbatim fields, face-map decontamination, gear allowlist. Import one 2003 and one 1987 class and read the Draft rows back. Rewrite the M27-PORT.md field map.</li>
+    <li><b>Rating realism, round 1</b> — 2025/2026 ranking fix; per-attribute std/min/max in the calibration build (plus an M27 variant from the TEST files); the three-class attribute model; position-relative combine mapping; QB archetype normalisation; reconcile integer pass.</li>
+    <li><b>Cohort coverage</b> — RT/RG and CB/S balancing; AFL loader fix; UDFA career backfill; truncation by caliber with a dropped-players chip; era-aware height/weight and jersey numbers.</li>
+    <li><b>Likeness</b> — greyscale detector and per-decade skin-tone prior; Wikipedia URL sanitisation; M26 era accessories; rookie persona table; generic-head pool expansion.</li>
+    <li><b>Workflow</b> — edits-key fix; Escape guard; live "game OVR" preview; undo / clear / export-import; era gear in the Auto tile; contrast and dialog a11y; variant seed for Rebuild.</li>
+    <li><b>Franchise on M27</b> — gameVersion threading and guard; contract-aware cap reset; schema-validated writes with a verify script; then the aging/retire pass and the class-injection prototype.</li>
+  </ol>
+
+  <h2>Decisions only you can make</h2>
+  <ul class="q">
+    <li><strong>Hindsight.</strong> Realistic mode ranks by career outcome (Brady is the #1 QB of 2000). Keep that as the product behaviour, or add a slider / draft-board noise so the CPU can "miss"?</li>
+    <li><strong>M27 class size.</strong> Follow the game (389 = 224 drafted + 165 UDFA), keep 402, or push toward the 455 physical blocks? Anything above 389 needs one in-game import test after the 0x42 fix.</li>
+    <li><strong>Legend faces in M27.</strong> The code comment says M26 legend ids render as a silhouette; M27-PORT.md says they work; no in-game result is recorded. A 5-player test export settles it.</li>
+    <li><strong>CSV CommID.</strong> It's in a different id space from the game's surname commentary ids. Do you know its origin? If not, it can be replaced by the surname map.</li>
+  </ul>
+
+  <div class="note">Everything built today lives under <code>server/src/services/</code> (SchemeService, FrontSevenClassifier, FrontSevenService), <code>server/data/lookups/defensive-schemes.json</code>, <code>server/scripts/report-front-seven.ts</code>, and the profile badge in <code>web/src/components/ProfileModal.tsx</code>. Run <code>npm test</code> in <code>server/</code> (36 tests) and <code>npx tsx scripts/report-front-seven.ts 1980-1989</code> to audit any decade.</div>
+</div>

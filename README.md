@@ -23,8 +23,10 @@ sibling **Madden Editor Suite**.
 | `.mdc` export + asset linking (PID/PEPS/CommID) + 402 cap | ✅ working, verified |
 | Player likeness (real face asset / portrait, else race-appropriate generic) | ✅ working — Bo Jackson → `jacksonBo_9877`, Namath → real portrait; no-data players (e.g. Ernie Davis) get a generic face |
 | Era-appropriate gear (helmet/cleats/gloves/visor by year + position) | ✅ working — 1965 → Riddell TK, **no visor**, taped hands; 2003 → Revolution, Nike Diamond Turf |
+| Era-typical extras (wrist tape/bands, elbow pads, towel + position, neck rolls, socks, sleeves, eye black) | ✅ working — per-era/position weighted pools; 1965 OL → max wrist tape + elbow pads + cowboy collar; 80s–90s skill → sweatbands + back towel |
+| **Copy real player gear** (full loadout from the actual M26 roster) | ✅ working — `scripts/extract-real-gear.ts` pulls 2,998 real players' complete loadouts from a franchise save into `data/real-player-gear.json`; Equipment Builder has a "Copy look from a real player…" search (towel position, helmet/facemask, sleeves, pads — all slots) |
 | Custom photo portraits via Frosty (real headshots for no-face players) | ✅ working — downloads Wiki/PFR photos, face-crops to PLPO-named PNGs + manifest for Frosty import; `.mdc` points each prospect at the recycled slot. 2,432 candidate players across 83 years |
-| **React web app** (`web/`) — browse years, wAV-rated table, export, IndexedDB cache | ✅ working — run `npm run dev` in both `server/` and `web/`, open `http://localhost:5173` |
+| **React web app** (`web/`) — browse years, wAV-rated table, export, IndexedDB cache | ✅ working — run `npm run dev` from the project root (starts both), open `http://localhost:5173` |
 | Madden-calibrated distributions (from real Madden random classes) | ✅ working — `madden-calibration.json` (OVR curve, dev rates 74/21/3.5/1.1, per-position attr/bio norms from 2,010 real prospects); our classes now match Madden's bell (mean ~66, max 84) with wAV ordering the top. Recalibrate: drop `CAREERDRAFT-*` files in the Saves dir, run `node scripts/build-calibration.js` |
 | Rating modes: **Realistic** (Madden-capped 84) vs **Career** (retrospective, uncapped) | ✅ working — toggle in the class header; Career rates players by how good they actually turned out (2003: Kevin Williams 98, Polamalu 96) |
 | Archetypes assigned by real build | ✅ working — heavy back → Power, lean back → Elusive/Receiving, big WR → Physical, lean end → Speed Rusher; ratings then match the archetype |
@@ -38,11 +40,40 @@ Full plan: `C:\Users\amatthews\.claude\plans\i-am-wanting-to-proud-puppy.md`.
 
 ## Run
 
+You can now start **both the backend and frontend with a single command** from the project root:
+
 ```bash
-cd server
-npm install              # one time
-npm run dev              # starts API on http://localhost:5174 (tsx watch)
+npm run dev
 ```
+
+This uses `concurrently` to run:
+
+- `npm run dev:server` → backend (tsx watch) 
+- `npm run dev:web` → Vite frontend 
+
+Colored output with prefixes (SERVER / WEB) is provided automatically.
+
+You can also control them individually:
+
+```bash
+npm run dev:server
+npm run dev:web
+```
+
+### First time / one-time setup
+
+```bash
+# Install root tools (concurrently)
+npm install
+
+# Install dependencies for each package (one time)
+cd server && npm install
+cd ../web && npm install
+cd ..
+```
+
+The web UI will be at **http://localhost:5173**.
+The API will be at **http://localhost:5174**.
 
 ### Verify the engine and export (no server needed)
 
@@ -64,6 +95,7 @@ Generated files land in `server/cache/exports/`. Import in Madden 26:
 | GET | `/api/lookups` / `/api/lookups/:name` | `position`, `college`, `state`, `archetype`, or `*.json` |
 | GET | `/api/draft/years` | all draft years present locally |
 | GET | `/api/draft/:year?league=NFL\|AFL\|combined` | baseline draft class |
+| GET | `/api/gear/players?q=` / `/api/gear/players/:id` | search real NFL players' extracted loadouts / fetch one full loadout |
 | POST | `/api/export/mdc` `{ year, league }` | download a generated `.mdc` |
 | POST | `/api/export/portraits/:year` `?league&limit` | build a Frosty custom-portrait folder (downloads real photos) |
 
