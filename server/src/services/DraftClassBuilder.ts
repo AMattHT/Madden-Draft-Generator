@@ -435,6 +435,14 @@ export const DraftClassBuilder = {
     // so round-robin each to an even split — deterministic, so preview == export.
     let posIds = capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
     posIds = PositionMapper.balanceCohort(posIds, [10, 11]); // LEDG / REDG (side is cosmetic — same build)
+    // Offensive-line sides and safeties: the source lumps tackles as "T"/"OT" (-> LT)
+    // and guards as "G" (-> LG), and pre-2001 safeties are split by build. Balance
+    // toward Madden's own mix (LT 20 / RT 16, LG 13 / RG 13, FS 16 / SS 16 per
+    // class) around the players whose slot came from real data.
+    const lockedSlot = capped.map((p) => !!p.positionLocked);
+    posIds = PositionMapper.balanceCohortQuota(posIds, { 5: 0.55, 9: 0.45 }, lockedSlot);
+    posIds = PositionMapper.balanceCohortQuota(posIds, { 6: 0.5, 8: 0.5 }, lockedSlot);
+    posIds = PositionMapper.balanceCohortQuota(posIds, { 17: 0.5, 18: 0.5 }, lockedSlot);
     // SAM/MIKE/WILL by build, but leave pinned 'backers alone: curated overrides (Ray
     // Lewis, Lavonte David…) and front-seven verdicts (3-4 inside backer -> MIKE,
     // coverage backer -> WILL, 4-3 blitzer -> SAM).

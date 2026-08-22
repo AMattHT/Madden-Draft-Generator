@@ -44,6 +44,8 @@ export interface BaselinePlayer {
 
   /** Front-seven verdict for LB-labeled players (edge vs SAM/MIKE/WILL) and why. */
   frontSeven?: FrontSevenInfo | null;
+  /** Position slot came from real data (curation / depth chart): cohort balancing leaves it. */
+  positionLocked?: boolean;
 
   source: string; // origin of this record (local, pfr, nflverse, wikipedia, ...)
 }

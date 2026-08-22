@@ -33,7 +33,12 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // (LEDG/REDG) and off-ball backers get a pinned SAM/MIKE/WILL where the career
   // signals (sacks, interceptions, scheme, PFF) support it.
   const f7 = LB_BUCKET.test(p.position.trim()) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
-  const label = curated ?? e?.positionLabel ?? f7?.label ?? null;
+  // Pre-2001 defensive backs: no depth charts, so split corner vs safety by build.
+  const dbSplit = !curated && !e?.positionLabel && p.draftYear < 2001 ? PositionMapper.dbByBuild(p.position, p.weight, p.draftYear) : null;
+  const label = curated ?? e?.positionLabel ?? f7?.label ?? dbSplit ?? null;
+  // A slot that came from real data (curation or a depth chart) must survive the
+  // class-level cohort balancing.
+  const positionLocked = !!(curated || e?.positionLabel);
 
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear);
@@ -70,6 +75,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   }
   const out: BaselinePlayer = { ...p };
   if (label) out.position = label;
+  if (positionLocked) out.positionLocked = true;
   if (f7?.frontSeven) out.frontSeven = f7.frontSeven;
   if (c) out.combine = { forty: c.forty, bench: c.bench, vertical: c.vertical, broad: c.broad, cone: c.cone, shuttle: c.shuttle };
   if (height != null) out.heightInches = height;
@@ -118,7 +124,7 @@ export async function enrichedClass(
     baseline.map((p) => enrichOne(p, enrich.size && p.draftPick != null ? enrich.get(p.draftPick) : undefined))
   );
   // Pad to a full Madden-sized class with generated undrafted generics.
-  const fillers = opts.fill ? GenericFillerService.build(year, real.length) : [];
+  const fillers = opts.fill ? GenericFillerService.build(year, real) : [];
   return { players: [...real, ...fillers], enrich, generatedCount: fillers.length };
 }
 

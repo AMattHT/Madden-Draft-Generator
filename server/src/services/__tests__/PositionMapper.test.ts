@@ -43,3 +43,31 @@ test('locked SAM/WILL reduce those quotas; ids outside 13-15 pass through', () =
   assert.equal(out[6], SAM);
   assert.equal(count(out, MIKE), 2);
 });
+
+test('balanceCohortQuota splits unlocked members toward the requested shares, honouring locks', () => {
+  const LT = 5, RT = 9;
+  const ids = [LT, LT, LT, LT, LT, LT, LT, LT, LT, LT]; // 10 tackles, all arriving as LT
+  const out = PositionMapper.balanceCohortQuota(ids, { [LT]: 0.55, [RT]: 0.45 });
+  assert.equal(count(out, LT), 6);
+  assert.equal(count(out, RT), 4);
+  // with 4 locked RTs already, the 6 unlocked should all stay LT (target 5.5 -> 6 LT)
+  const ids2 = [RT, RT, RT, RT, LT, LT, LT, LT, LT, LT];
+  const locked = [true, true, true, true, false, false, false, false, false, false];
+  const out2 = PositionMapper.balanceCohortQuota(ids2, { [LT]: 0.55, [RT]: 0.45 }, locked);
+  assert.deepEqual(out2.slice(0, 4), [RT, RT, RT, RT]);
+  assert.equal(count(out2, LT), 6);
+});
+
+test('pre-2001 defensive backs split corner vs safety by build (no depth charts exist)', () => {
+  assert.equal(PositionMapper.dbByBuild('CB', 185, 1985), 'CB');
+  assert.equal(PositionMapper.dbByBuild('DB', 203, 1985), 'FS');
+  assert.equal(PositionMapper.dbByBuild('DB', 212, 1985), 'SS');
+  assert.equal(PositionMapper.dbByBuild('S', 198, 1975), 'FS'); // a generic safety label is never a corner
+  assert.equal(PositionMapper.dbByBuild('CB', 198, 1995), 'CB'); // 1990s corners run heavier
+  assert.equal(PositionMapper.dbByBuild('WR', 200, 1985), null); // not a DB label
+});
+
+test('a 290+ lb defensive end is an interior lineman in Madden terms (3-4 five-technique)', () => {
+  assert.equal(PositionMapper.resolve('Calais', 'Campbell', 'DE', 300), 12);
+  assert.notEqual(PositionMapper.resolve('Dwight', 'Freeney', 'DE', 268), 12);
+});

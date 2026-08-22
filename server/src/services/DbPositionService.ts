@@ -29,16 +29,29 @@ const depthUrl = (y: number) =>
 interface RawDepth {
   gsis_id: string;
   position: string;
+  depth_position?: string;
 }
+/** Depth-chart slots worth pinning: offensive-line sides and centre, safeties and
+ *  corners, interior line. (Linebacker and edge slots are left to the front-seven
+ *  classifier, special-teams slots are ignored.) */
+const SLOT_LABEL: Record<string, string> = {
+  LT: 'LT', LG: 'LG', C: 'C', RG: 'RG', RT: 'RT',
+  SS: 'SS', FS: 'FS', LCB: 'CB', RCB: 'CB', CB: 'CB', NB: 'CB',
+  DT: 'DT', NT: 'DT', LDT: 'DT', RDT: 'DT',
+};
+let slotMap: Map<string, string> | null = null;
+const SLOT_CACHE = path.join(CACHE_DIR, 'nflverse_slot_positions.json');
 
 let map: Map<string, DbPos> | null = null;
 let building = false;
 
 function loadFromDisk(): boolean {
-  if (!fs.existsSync(RESULT_CACHE)) return false;
+  if (!fs.existsSync(RESULT_CACHE) || !fs.existsSync(SLOT_CACHE)) return false;
   try {
     const obj = JSON.parse(fs.readFileSync(RESULT_CACHE, 'utf8')) as Record<string, DbPos>;
     map = new Map(Object.entries(obj));
+    const slots = JSON.parse(fs.readFileSync(SLOT_CACHE, 'utf8')) as Record<string, string>;
+    slotMap = new Map(Object.entries(slots));
     return true;
   } catch {
     return false;
@@ -63,18 +76,33 @@ async function fetchYear(year: number): Promise<RawDepth[] | null> {
 async function build(): Promise<void> {
   // gsis -> tally of DB slots seen across all weeks/seasons.
   const tally = new Map<string, Record<DbPos, number>>();
+  const slotTally = new Map<string, Record<string, number>>();
   for (let year = FIRST_YEAR; year <= LAST_YEAR; year++) {
     const rows = await fetchYear(year);
     if (!rows) continue;
     for (const row of rows) {
       const gsis = (row.gsis_id || '').trim();
+      if (!gsis) continue;
       const pos = (row.position || '').trim().toUpperCase() as DbPos;
-      if (!gsis || !DB_SLOTS.has(pos)) continue;
-      const t = tally.get(gsis) ?? { SS: 0, FS: 0, CB: 0 };
-      t[pos]++;
-      tally.set(gsis, t);
+      if (DB_SLOTS.has(pos)) {
+        const t = tally.get(gsis) ?? { SS: 0, FS: 0, CB: 0 };
+        t[pos]++;
+        tally.set(gsis, t);
+      }
+      const slot = SLOT_LABEL[(row.depth_position || '').trim().toUpperCase()];
+      if (slot) {
+        const st = slotTally.get(gsis) ?? {};
+        st[slot] = (st[slot] || 0) + 1;
+        slotTally.set(gsis, st);
+      }
     }
   }
+  const slots = new Map<string, string>();
+  for (const [gsis, st] of slotTally) {
+    slots.set(gsis, Object.keys(st).reduce((a, b) => (st[b] > st[a] ? b : a)));
+  }
+  fs.writeFileSync(SLOT_CACHE, JSON.stringify(Object.fromEntries(slots)));
+  slotMap = slots;
   const result = new Map<string, DbPos>();
   for (const [gsis, t] of tally) {
     const best = (Object.keys(t) as DbPos[]).reduce((a, b) => (t[b] > t[a] ? b : a));
@@ -85,6 +113,16 @@ async function build(): Promise<void> {
 }
 
 export const DbPositionService = {
+  /** Build (or load) the caches synchronously-awaitable, for scripts and warm-up. */
+  async ensureBuilt(): Promise<void> {
+    if (map && slotMap) return;
+    if (loadFromDisk()) return;
+    if (!building) {
+      building = true;
+      try { await build(); } finally { building = false; }
+    }
+  },
+
   /**
    * Depth-chart SS/FS/CB for a player, or undefined if not yet built or not
    * covered. Kicks off the (cached, background) build on first use.
@@ -103,5 +141,12 @@ export const DbPositionService = {
       return undefined;
     }
     return map.get(gsis);
+  },
+
+  /** Most common depth-chart slot for a player (LT/LG/C/RG/RT/SS/FS/CB/DT), or
+   *  undefined when not built or never charted in one of those slots. */
+  slot(gsis: string | undefined): string | undefined {
+    if (!gsis || !slotMap) return undefined;
+    return slotMap.get(gsis);
   },
 };

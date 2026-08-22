@@ -151,6 +151,9 @@ export const PositionMapper = {
     const override = this.overrideId(first, last);
     if (override != null) return override;
     const k = key(label);
+    // A 290+ lb "end" is a 3-4 five-technique: an interior lineman in Madden terms
+    // (Calais Campbell, Cam Heyward, Justin Smith are DTs in the game).
+    if ((k === 'DE' || k === 'LE' || k === 'RE' || k === 'E' || k === 'DEFENSIVEEND' || k === 'LDE' || k === 'RDE') && weight != null && weight >= 290) return 12;
     if (k === 'DE' || k === 'E' || k === 'EDGE' || k === 'DEFENSIVEEND') return sideSplit(first, last, 10, 11);
     if (k === 'OLB' || k === 'OUTSIDELINEBACKER') {
       if (weight != null) return weight >= 235 ? 13 : 15; // heavier -> SAM, leaner -> WILL
@@ -229,6 +232,75 @@ export const PositionMapper = {
       out[i] = r < alloc[WILL] ? WILL : r < alloc[WILL] + alloc[MIKE] ? MIKE : SAM; // lightest .. heaviest
     });
     return out;
+  },
+
+  /**
+   * Distribute the UNLOCKED members of a cosmetic cohort toward target shares
+   * (e.g. { LT: 0.55, RT: 0.45 }), counting locked members against their share
+   * first. Unlocked members are assigned in draft order, round-robin weighted by
+   * the remaining quota, so the result is deterministic. Ids outside the cohort
+   * pass through untouched.
+   */
+  balanceCohortQuota(ids: number[], shares: Record<number, number>, locked?: boolean[]): number[] {
+    const members = Object.keys(shares).map(Number);
+    const set = new Set(members);
+    const cohort = ids.map((_, i) => i).filter((i) => set.has(ids[i]));
+    const free = cohort.filter((i) => !locked?.[i]);
+    const out = ids.slice();
+    if (!free.length) return out;
+    const N = cohort.length;
+    const totalShare = members.reduce((s, m) => s + shares[m], 0) || 1;
+    const need: Record<number, number> = {};
+    for (const m of members) {
+      const target = (N * shares[m]) / totalShare;
+      const have = cohort.filter((i) => locked?.[i] && ids[i] === m).length;
+      need[m] = Math.max(0, target - have);
+    }
+    // Largest-remainder allocation of the free slots to the members' remaining needs.
+    const U = free.length;
+    const needSum = members.reduce((s, m) => s + need[m], 0) || 1;
+    const alloc: Record<number, number> = {};
+    let used = 0;
+    const frac: Array<[number, number]> = [];
+    for (const m of members) {
+      const raw = (need[m] / needSum) * U;
+      alloc[m] = Math.floor(raw);
+      used += alloc[m];
+      frac.push([m, raw - alloc[m]]);
+    }
+    frac.sort((a, b) => b[1] - a[1]);
+    for (let k = 0; used < U; k = (k + 1) % frac.length) { alloc[frac[k][0]]++; used++; }
+    // Interleave by draft order: each free slot takes the member with the largest
+    // remaining allocation relative to its share (keeps both sides spread down the board).
+    const remaining = { ...alloc };
+    for (const i of free) {
+      let best = members[0], bestScore = -Infinity;
+      for (const m of members) {
+        const score = remaining[m] / Math.max(1e-9, shares[m]);
+        if (remaining[m] > 0 && score > bestScore) { best = m; bestScore = score; }
+      }
+      out[i] = best;
+      remaining[best]--;
+    }
+    return out;
+  },
+
+  /**
+   * Corner vs safety for a defensive back by build, for eras with no depth charts
+   * (pre-2001). Safeties run heavier than corners: ~196 lb was the line before
+   * 1990, ~200 lb after; the biggest safeties are strong safeties. Returns
+   * null for a non-DB label.
+   */
+  dbByBuild(label: string | null | undefined, weight: number | null | undefined, draftYear: number): 'CB' | 'FS' | 'SS' | null {
+    const k = key(label);
+    const safetyLabel = k === 'S' || k === 'SAF' || k === 'SAFETY' || k === 'FS' || k === 'SS' || k === 'DS';
+    const dbLabel = k === 'CB' || k === 'DB' || k === 'CORNERBACK' || k === 'CORNER' || k === 'CCB';
+    if (!safetyLabel && !dbLabel) return null;
+    if (k === 'FS' || k === 'SS') return k;
+    const cornerMax = draftYear < 1990 ? 195 : 199;
+    if (dbLabel && (weight == null || weight <= cornerMax)) return 'CB';
+    const w = weight ?? 200;
+    return w >= 207 ? 'SS' : 'FS';
   },
 
   /** M26 position id -> coarse rating/dedup group. */

@@ -26,9 +26,9 @@ async function counts(ys: number[]): Promise<void> {
       const n = PositionMapper.name(Number(p.position));
       c[n] = (c[n] || 0) + 1;
     }
-    console.log(`${year}: LEDG ${pad(c.LEDG || 0)} REDG ${pad(c.REDG || 0)} | SAM ${pad(c.SAM || 0)} MIKE ${pad(c.MIKE || 0)} WILL ${pad(c.WILL || 0)} | DT ${pad(c.DT || 0)}  (n=${prospects.length})`);
+    console.log(`${year}: LEDG ${pad(c.LEDG || 0)} REDG ${pad(c.REDG || 0)} | SAM ${pad(c.SAM || 0)} MIKE ${pad(c.MIKE || 0)} WILL ${pad(c.WILL || 0)} | DT ${pad(c.DT || 0)} | LT ${pad(c.LT || 0)} LG ${pad(c.LG || 0)} C ${pad(c.C || 0)} RG ${pad(c.RG || 0)} RT ${pad(c.RT || 0)} | CB ${pad(c.CB || 0)} FS ${pad(c.FS || 0)} SS ${pad(c.SS || 0)}  (n=${prospects.length})`);
   }
-  console.log('Madden (avg of 5 real M26 classes): LEDG  18 REDG  18 | SAM  12 MIKE  16 WILL  12 | DT  42');
+  console.log('Madden (avg of 5 real M26 classes): LEDG  18 REDG  18 | SAM  12 MIKE  16 WILL  12 | DT  42 | LT  20 LG  13 C  10 RG  13 RT  16 | CB  40 FS  16 SS  16');
 }
 
 const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;

@@ -1,5 +1,7 @@
 import { BaselinePlayer } from '../types/player';
 import { PlayerLookupService } from './PlayerLookupService';
+import { CalibrationService } from './CalibrationService';
+import { PositionMapper } from './PositionMapper';
 import { SkinToneService } from './SkinToneService';
 import { seededRng } from '../util/rng';
 
@@ -16,33 +18,57 @@ import { seededRng } from '../util/rng';
 // A full Madden draft class fills all logical blocks (see DraftClassBuilder).
 export const FULL_CLASS_SIZE = 402;
 
-// Rough positional makeup of a class (raw labels PositionMapper understands),
-// weighted so the mix looks like a real draft (lots of OL/WR/DB, few QB/K/P).
-const POSITION_WEIGHTS: Array<[string, number]> = [
-  ['WR', 11], ['CB', 9], ['LT', 4], ['LG', 4], ['C', 3], ['RG', 4], ['RT', 4],
-  ['DE', 7], ['DT', 6], ['OLB', 5], ['MLB', 5], ['FS', 4], ['SS', 4],
-  ['HB', 6], ['TE', 5], ['QB', 4], ['FB', 1], ['K', 1], ['P', 1], ['LS', 1],
-];
+// Raw label to generate for each Madden position the class may be short of.
+const FILL_LABEL: Record<string, string> = {
+  QB: 'QB', HB: 'HB', FB: 'FB', WR: 'WR', TE: 'TE', LT: 'LT', LG: 'LG', C: 'C', RG: 'RG', RT: 'RT',
+  LEDG: 'DE', REDG: 'DE', DT: 'DT', SAM: 'OLB', MIKE: 'MLB', WILL: 'OLB', CB: 'CB', FS: 'FS', SS: 'SS', K: 'K', P: 'P', LS: 'LS',
+};
 
-function weightedPick<T>(pairs: Array<[T, number]>, roll: number): T {
-  const total = pairs.reduce((s, [, w]) => s + w, 0);
-  let x = roll * total;
-  for (const [val, w] of pairs) {
-    if ((x -= w) < 0) return val;
+/** Madden's per-class count for each position (calibration perClass). */
+function maddenTargets(): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const name of Object.keys(FILL_LABEL)) {
+    const prof = CalibrationService.positionProfile(name) as { perClass?: number };
+    out[name] = prof.perClass ?? 10;
   }
-  return pairs[pairs.length - 1][0];
+  return out;
+}
+
+/** Positions for `need` fillers: repeatedly the position with the biggest shortfall
+ *  against Madden's per-class count (ties by draft-board commonness). */
+function deficitPositions(existing: Array<{ position: string; firstName: string; lastName: string; weight?: number | null }>, need: number): string[] {
+  const have: Record<string, number> = {};
+  for (const p of existing) {
+    const name = PositionMapper.name(PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight ?? null));
+    have[name] = (have[name] || 0) + 1;
+  }
+  const targets = maddenTargets();
+  const total = Object.values(targets).reduce((s, v) => s + v, 0) || 1;
+  const scale = Math.max(1, (existing.length + need) / total);
+  const out: string[] = [];
+  for (let i = 0; i < need; i++) {
+    let best = 'WR', bestGap = -Infinity;
+    for (const [name, t] of Object.entries(targets)) {
+      const gap = t * scale - (have[name] || 0);
+      if (gap > bestGap) { best = name; bestGap = gap; }
+    }
+    have[best] = (have[best] || 0) + 1;
+    out.push(FILL_LABEL[best]);
+  }
+  return out;
 }
 
 export const GenericFillerService = {
   /** Generate `target - existingCount` undrafted generic prospects for a year. */
-  build(year: number, existingCount: number, target = FULL_CLASS_SIZE): BaselinePlayer[] {
-    const need = Math.max(0, target - existingCount);
+  build(year: number, existing: BaselinePlayer[], target = FULL_CLASS_SIZE): BaselinePlayer[] {
+    const need = Math.max(0, target - existing.length);
+    const positions = deficitPositions(existing, need);
     if (need === 0) return [];
     const { first, last } = PlayerLookupService.namePool();
     const out: BaselinePlayer[] = [];
     for (let i = 0; i < need; i++) {
       const rand = seededRng(`filler|${year}|${i}`);
-      const position = weightedPick(POSITION_WEIGHTS, rand());
+      const position = positions[i];
       const race = SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`);
       const firstName = first[Math.floor(rand() * first.length)] || 'Draft';
       const lastName = last[Math.floor(rand() * last.length)] || 'Prospect';

@@ -303,8 +303,9 @@ export const TeamService = {
       // Prefer depth-chart SS/FS/CB (the only real SS-vs-FS signal); otherwise
       // fall back to the coarse roster position (FS explicit, S/SAF -> SS default).
       const depthPos = DbPositionService.get(gsis);
+      const slot = DbPositionService.slot(gsis); // LT/LG/C/RG/RT/SS/FS/CB/DT from the charts
       const rosterPos = gsis ? posByGsis?.get(gsis) : undefined;
-      const positionLabel = depthPos ?? (rosterPos && DB_POSITIONS.has(rosterPos) ? rosterPos : null);
+      const positionLabel = slot ?? depthPos ?? (rosterPos && DB_POSITIONS.has(rosterPos) ? rosterPos : null);
       const bio = gsis ? bioByGsis?.get(gsis) : undefined;
       const realAge = age ?? (bio?.birthYear ? year - bio.birthYear : null);
       out.set(pick, { team, positionLabel, age: realAge, heightInches: bio?.heightInches ?? null, weight: bio?.weight ?? null });
