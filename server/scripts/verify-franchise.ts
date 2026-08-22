@@ -68,6 +68,26 @@ process.env.MADDEN27_SAVES_DIR = m27Dir;
       await reopen(r.output);
       return `${r.teams?.length ?? '?'} teams, output ${r.output}`;
     });
+    await check('cap reset with 50% salary scale (contracts really halved)', async () => {
+      const r = await silence(() => FranchiseService.capReset(save, { salaryScale: 0.5, outputName: 'CAREER-SCALETEST' }, version));
+      if (!(r as any).playersScaled || (r as any).playersScaled < 1000) throw new Error(`playersScaled ${(r as any).playersScaled}`);
+      const before = await madden.create(path.join(dir, save), { autoParse: true });
+      const after = await reopen('CAREER-SCALETEST');
+      const ptB = await playerTable(before), ptA = await playerTable(after);
+      const i = ptB.records.findIndex((x: any) => !x.isEmpty && x.LastName === 'Mahomes');
+      if (i < 0) throw new Error('no Mahomes');
+      const capB = Number(ptB.records[i].PLYR_CAPSALARY), capA = Number(ptA.records[i].PLYR_CAPSALARY);
+      if (!(capA > 0 && capA <= capB * 0.55 && capA >= capB * 0.45)) throw new Error(`cap salary ${capB} -> ${capA}`);
+      if (version === 'm27') {
+        const ct = after.getTableByName('PlayerContract'); await ct.readRecords();
+        const ref = ptA.records[i].getReferenceDataByKey('Contract');
+        const ctB = before.getTableByName('PlayerContract'); await ctB.readRecords();
+        const sB = Number(ctB.records[ref.rowNumber].SalaryYear0), sA = Number(ct.records[ref.rowNumber].SalaryYear0);
+        if (!(sA > 0 && sA <= sB * 0.55 && sA >= sB * 0.45)) throw new Error(`SalaryYear0 ${sB} -> ${sA}`);
+        return `Mahomes cap ${capB} -> ${capA}, SalaryYear0 ${sB} -> ${sA}, ${(r as any).playersScaled} players`;
+      }
+      return `Mahomes cap ${capB} -> ${capA}, ${(r as any).playersScaled} players`;
+    });
     await check('roster apply: overall 99 on one player (written, re-opened)', async () => {
       const list = await FranchiseService.franchisePlayers(save, version);
       const target = list.players.find((p) => p.overall && p.overall < 90)!;

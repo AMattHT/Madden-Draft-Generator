@@ -506,20 +506,47 @@ export const FranchiseService = {
     }
 
     // EXPERIMENTAL: scale down player contracts (lowers each team's summed cap hits).
+    // M26 keeps the per-year salary/bonus arrays on the Player row; M27 moved them
+    // to a PlayerContract row reached through the player's Contract reference
+    // (SalaryYear0-9, BonusYear0-6, plus guarantees/void years we leave alone).
     let playersScaled = 0;
     if (scale != null) {
       const pt = file.getTableByName('Player');
       if (pt) {
         await pt.readRecords();
+        const contractTable = gameVersion === 'm27' ? file.getTableByName('PlayerContract') : null;
+        if (contractTable) await contractTable.readRecords();
+        const scaledContracts = new Set<number>();
         for (const r of pt.records) {
           if (r.isEmpty) continue;
-          if (num(r.ContractLength) <= 0) continue;
           let touched = false;
-          for (const f of [...CONTRACT_SALARY_FIELDS, ...CONTRACT_BONUS_FIELDS, 'PLYR_CAPSALARY']) {
-            try {
-              const v = num(r[f]);
-              if (v > 0 && writeField(r, f, Math.max(0, Math.round(v * scale)))) touched = true;
-            } catch { /* field absent/range */ }
+          if (contractTable) {
+            let status = '';
+            try { status = String(r.ContractStatus); } catch { /* */ }
+            if (status === 'Deleted' || status === 'None') continue;
+            let ref: { rowNumber?: number } | null = null;
+            try { ref = r.getReferenceDataByKey('Contract'); } catch { ref = null; }
+            const row = ref?.rowNumber != null ? contractTable.records[ref.rowNumber] : null;
+            if (row && !scaledContracts.has(ref!.rowNumber!)) {
+              scaledContracts.add(ref!.rowNumber!);
+              for (let i = 0; i <= 9; i++) {
+                for (const f of [`SalaryYear${i}`, `BonusYear${i}`]) {
+                  if (!row.fields?.[f]) continue;
+                  const v = num(row[f]);
+                  if (v > 0 && writeField(row, f, Math.max(0, Math.round(v * scale)))) touched = true;
+                }
+              }
+            }
+            const cap = num(r.PLYR_CAPSALARY);
+            if (cap > 0 && writeField(r, 'PLYR_CAPSALARY', Math.max(0, Math.round(cap * scale)))) touched = true;
+          } else {
+            if (num(r.ContractLength) <= 0) continue;
+            for (const f of [...CONTRACT_SALARY_FIELDS, ...CONTRACT_BONUS_FIELDS, 'PLYR_CAPSALARY']) {
+              try {
+                const v = num(r[f]);
+                if (v > 0 && writeField(r, f, Math.max(0, Math.round(v * scale)))) touched = true;
+              } catch { /* field absent/range */ }
+            }
           }
           if (touched) playersScaled++;
         }
