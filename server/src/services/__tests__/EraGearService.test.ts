@@ -72,3 +72,17 @@ test('the M26 writer removes a donor slot when the loadout carries a removal mar
   const slots = back.visuals.loadouts.flatMap((l: any) => l.loadoutElements || []).map((e: any) => e.slotType);
   assert.ok(!slots.includes('MouthWear'), `MouthWear still present: ${slots.join(',')}`);
 });
+
+test('generic-head pools are per game and use every head that game assigns (tone 2 is not four faces)', async () => {
+  const { LikenessService } = await import('../LikenessService');
+  const m26 = LikenessService.headsForTone(2, 'm26');
+  const m27 = LikenessService.headsForTone(2, 'm27');
+  assert.ok(m26.length >= 25, `M26 tone 2 pool has ${m26.length} heads`);
+  assert.ok(m27.length >= 20, `M27 tone 2 pool has ${m27.length} heads`);
+  assert.notDeepEqual(m26, m27, 'the two games do not share an identical pool');
+  assert.ok(m26.includes('gen_2_B_N_0010'), 'a head the game uses but the old lookup lacked is in the M26 pool');
+  // portrait ids come from each game's own pairing
+  assert.equal(LikenessService.genericPid('gen_2_H_GM_004', 'm27'), 4196);
+  assert.equal(LikenessService.genericPid('gen_2_H_BD_03', 'm26'), 4144);
+  assert.equal(LikenessService.genericPid('gen_2_B_N_0017', 'm26'), 3404); // the portrait table says 2794; the game says 3404
+});

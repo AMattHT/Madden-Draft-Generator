@@ -85,7 +85,7 @@ export function commentaryIdFor(lastName: string): number {
  *  PID for every head they both use). 0 when neither knows the head. */
 export function genericHeadPid(genericHeadName: string | null | undefined): number {
   if (!genericHeadName) return 0;
-  return load().headPid[genericHeadName] ?? LikenessService.genericPid(genericHeadName) ?? 0;
+  return load().headPid[genericHeadName] ?? LikenessService.genericPid(genericHeadName, 'm27') ?? 0;
 }
 
 export interface M27PlayerBits {

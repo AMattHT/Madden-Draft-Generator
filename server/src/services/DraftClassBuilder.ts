@@ -237,7 +237,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // game's files); M26 legend ids are not valid M27 PIDs, so those stay 0.
   prospect.PID = gameVersion === 'm27'
     ? (m27Face?.portraitPid || 0)
-    : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps) ?? 0) : (player.photoId ?? 0)));
+    : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps, 'm26') ?? 0) : (player.photoId ?? 0)));
   // Announcer name call: the game keys this by SURNAME (same id space in both games,
   // mined from the real files). The CSV CommID column is a different id space.
   prospect.commentaryId = commentaryIdFor(player.lastName);

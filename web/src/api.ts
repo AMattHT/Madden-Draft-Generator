@@ -248,7 +248,7 @@ export const api = {
   lookup: (name: string) => jget<{ id: number; name: string }[]>(`/api/lookups/${name}`),
 
   /** Generic draft-class head codes grouped by skin tone (1-8), for the face picker. */
-  genericHeads: () => jget<Record<string, string[]>>('/api/lookups/generic-heads'),
+  genericHeads: (gameVersion: GameVersion = 'm26') => jget<Record<string, string[]>>(`/api/lookups/generic-heads?gameVersion=${gameVersion}`),
 
   /** Real face-scan catalog for the target game (M26 vs M27). */
   faceScans: (gameVersion: 'm26' | 'm27' = 'm26') =>

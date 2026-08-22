@@ -97,6 +97,44 @@ function load(): void {
   for (const [tone, codes] of trueGen) {
     if (codes.length >= 3) byTone.set(tone, codes);
   }
+  // Madden 26 and 27 have different generic-head sets. Each game's own random
+  // classes are the authority for which gen_* heads it assigns AND the menu
+  // portrait it pairs with each (the validated lookup's pid column disagreed with
+  // the game on every head it shared). Pools are kept per game; the portrait
+  // table only backs up heads the game never showed us.
+  try {
+    const catalog = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'generic-heads-by-game.json'), 'utf8')) as { m26: Record<string, number>; m27: Record<string, number> };
+    const plpoPid = new Map<string, number>();
+    for (const r of parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'))) {
+      const name = (r.Portrait || '').trim();
+      const pid = parseInt(r.PID, 10);
+      if (name && !Number.isNaN(pid) && !plpoPid.has(name)) plpoPid.set(name, pid);
+    }
+    for (const version of ['m26', 'm27'] as const) {
+      const heads = catalog[version] ?? {};
+      const pools = new Map<number, string[]>();
+      const pids = new Map<string, number>();
+      for (const [code, pid] of Object.entries(heads)) {
+        if (!/^gen_\d/i.test(code)) continue;
+        const tone = toneFromCode(code);
+        if (!pools.has(tone)) pools.set(tone, []);
+        pools.get(tone)!.push(code);
+        pids.set(code, pid || plpoPid.get(`plpo_generic_${code.slice(4)}`) || 0);
+      }
+      // Tones the game showed too few heads for keep the validated lookup's pool.
+      for (const [tone, codes] of byTone!) if (!pools.has(tone) || pools.get(tone)!.length < 8) pools.set(tone, codes);
+      for (const codes of pools.values()) codes.sort();
+      byToneByVersion.set(version, pools);
+      pidByVersion.set(version, pids);
+    }
+  } catch { /* optional: both games fall back to the validated lookup pools */ }
+}
+
+const byToneByVersion = new Map<'m26' | 'm27', Map<number, string[]>>();
+const pidByVersion = new Map<'m26' | 'm27', Map<string, number>>();
+function poolsFor(version: 'm26' | 'm27'): Map<number, string[]> {
+  load();
+  return byToneByVersion.get(version) ?? byTone!;
 }
 
 function toneFromCode(code: string): number {
@@ -128,18 +166,26 @@ export interface Likeness {
 }
 
 export const LikenessService = {
+  /** Generic heads available for a skin tone in a game (that game's own usage). */
+  headsForTone(tone: number, version: 'm26' | 'm27' = 'm26'): string[] {
+    return [...(poolsFor(version).get(tone) ?? [])];
+  },
+
   /** Generic draft-class face codes grouped by skin tone (1-8), for the face picker. */
-  genericHeadsByTone(): Record<number, string[]> {
-    load();
+  genericHeadsByTone(version: 'm26' | 'm27' = 'm26'): Record<number, string[]> {
     const out: Record<number, string[]> = {};
-    for (const [tone, codes] of byTone!) out[tone] = [...codes].sort();
+    for (const [tone, codes] of poolsFor(version)) out[tone] = [...codes].sort();
     return out;
   },
 
   /** Portrait PID for a gen_* generic face code (for head previews), else null. */
-  genericPid(code: string): number | null {
+  genericPid(code: string, version: 'm26' | 'm27' = 'm26'): number | null {
     load();
-    return pidByCode!.get(code) ?? null;
+    const fromGame = pidByVersion.get(version)?.get(code);
+    if (fromGame) return fromGame;
+    // Not in this game's catalog: the other game's pairing, then the validated lookup.
+    const other = pidByVersion.get(version === 'm26' ? 'm27' : 'm26')?.get(code);
+    return other || pidByCode!.get(code) || null;
   },
 
   /** M27-native real face only when this is the same person — name match AND
@@ -207,13 +253,14 @@ export const LikenessService = {
     if (gameVersion !== 'm27' && asset && !/^gen_/i.test(asset)) {
       return { peps: asset, kind: 'asset', skinTone: tone };
     }
-    let pool = byTone!.get(tone);
+    const pools = poolsFor(gameVersion);
+    let pool = pools.get(tone);
     if (!pool || pool.length === 0) {
       // Nearest available tone, then any.
       for (let d = 1; d <= 7 && (!pool || pool.length === 0); d++) {
-        pool = byTone!.get(tone - d) || byTone!.get(tone + d);
+        pool = pools.get(tone - d) || pools.get(tone + d);
       }
-      pool = pool && pool.length ? pool : [...byTone!.values()][0];
+      pool = pool && pool.length ? pool : [...pools.values()][0];
     }
     const key = `${player.firstName}|${player.lastName}|${index}`;
     return { peps: pool[hash(key) % pool.length], kind: 'generic', skinTone: tone };

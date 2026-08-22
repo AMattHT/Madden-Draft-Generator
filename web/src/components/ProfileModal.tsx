@@ -205,8 +205,8 @@ export function ProfileModal({
   }, []);
 
   useEffect(() => {
-    api.genericHeads().then(setHeads).catch(() => {});
-  }, []);
+    api.genericHeads(gameVersion).then(setHeads).catch(() => {});
+  }, [gameVersion]);
   useEffect(() => {
     let alive = true;
     api.faceScans(gameVersion).then((s) => alive && setScans(s)).catch(() => {});

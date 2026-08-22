@@ -24,8 +24,8 @@ r.get('/lookups/equipment', (req, res) => {
 });
 
 /** Generic draft-class head codes grouped by skin tone, for the face picker. */
-r.get('/lookups/generic-heads', (_req, res) => {
-  res.json(LikenessService.genericHeadsByTone());
+r.get('/lookups/generic-heads', (req, res) => {
+  res.json(LikenessService.genericHeadsByTone(req.query.gameVersion === 'm27' ? 'm27' : 'm26'));
 });
 
 /** Real face-scan catalog for the target game (M26 assets vs M27 extract). */
