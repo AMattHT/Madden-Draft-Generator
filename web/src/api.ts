@@ -235,6 +235,8 @@ export interface FranchiseScheduleResult {
   input: string; seasonYear: number; currentStage: string; currentWeek: number; weeks: ScheduleWeek[];
 }
 
+let franchiseGameVersion: GameVersion = 'm26';
+
 export const api = {
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
@@ -399,15 +401,19 @@ export const api = {
       method: 'POST',
     }).then((r) => r.json()),
 
+  /** Which game's Saves folder the franchise tools read/write (set from the top bar). */
+  setFranchiseGameVersion(v: GameVersion) { franchiseGameVersion = v; },
+  franchiseGameVersion: () => franchiseGameVersion,
+
   /** CAREER franchise saves found in the local Madden Saves directory. */
-  franchiseList: () => jget<{ savesDir: string; franchises: FranchiseInfo[] }>('/api/franchise/list'),
+  franchiseList: () => jget<{ savesDir: string; gameVersion: GameVersion; franchises: FranchiseInfo[] }>(`/api/franchise/list?gameVersion=${franchiseGameVersion}`),
 
   /** Apply a salary-cap reset; writes a new CAREER-*-CAPRESET save (input untouched). */
   async franchiseCapReset(fileName: string, options: CapResetOptions): Promise<CapResetResult> {
     const res = await fetch('/api/franchise/cap-reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -421,7 +427,7 @@ export const api = {
     const res = await fetch('/api/franchise/player-edit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -435,7 +441,7 @@ export const api = {
     const res = await fetch('/api/franchise/players', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName }),
+      body: JSON.stringify({ fileName , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -449,7 +455,7 @@ export const api = {
     const res = await fetch('/api/franchise/roster-apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, edits }),
+      body: JSON.stringify({ fileName, edits , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -463,7 +469,7 @@ export const api = {
     const res = await fetch('/api/franchise/teams', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName }),
+      body: JSON.stringify({ fileName , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -477,7 +483,7 @@ export const api = {
     const res = await fetch('/api/franchise/relocate-rebrand', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -491,7 +497,7 @@ export const api = {
     const res = await fetch('/api/franchise/trait-realism', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -505,7 +511,7 @@ export const api = {
     const res = await fetch('/api/franchise/trim-free-agents', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -519,7 +525,7 @@ export const api = {
     const res = await fetch('/api/franchise/reset-draft-picks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName, options }),
+      body: JSON.stringify({ fileName, options , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -533,7 +539,7 @@ export const api = {
     const res = await fetch('/api/franchise/schedule', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileName }),
+      body: JSON.stringify({ fileName , gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

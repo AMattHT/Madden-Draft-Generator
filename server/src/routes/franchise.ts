@@ -3,10 +3,15 @@ import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, 
 
 const router = Router();
 
+/** 'm27' when the request says so, else 'm26'. Every franchise tool reads the
+ *  save from that game's folder and refuses a save from the other game. */
+const versionOf = (src: unknown): 'm26' | 'm27' => ((src as { gameVersion?: string } | undefined)?.gameVersion === 'm27' ? 'm27' : 'm26');
+
 /** List CAREER franchise saves found in the Madden Saves directory. */
-router.get('/franchise/list', (_req: Request, res: Response) => {
+router.get('/franchise/list', (req: Request, res: Response) => {
+  const gv = versionOf(req.query);
   try {
-    res.json({ savesDir: FranchiseService.savesDir(), franchises: FranchiseService.listFranchises() });
+    res.json({ savesDir: FranchiseService.savesDir(gv), gameVersion: gv, franchises: FranchiseService.listFranchises(gv) });
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -17,7 +22,7 @@ router.post('/franchise/cap-reset', async (req: Request, res: Response) => {
   const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: CapResetOptions };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    const result = await FranchiseService.capReset(fileName, options ?? {});
+    const result = await FranchiseService.capReset(fileName, options ?? {}, versionOf(req.body));
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
@@ -29,7 +34,7 @@ router.post('/franchise/player-edit', async (req: Request, res: Response) => {
   const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: PlayerEditOptions };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    const result = await FranchiseService.playerEdit(fileName, options ?? {});
+    const result = await FranchiseService.playerEdit(fileName, options ?? {}, versionOf(req.body));
     res.json(result);
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
@@ -41,7 +46,7 @@ router.post('/franchise/players', async (req: Request, res: Response) => {
   const { fileName } = (req.body ?? {}) as { fileName?: string };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.franchisePlayers(fileName));
+    res.json(await FranchiseService.franchisePlayers(fileName, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -52,7 +57,7 @@ router.post('/franchise/roster-apply', async (req: Request, res: Response) => {
   const { fileName, edits } = (req.body ?? {}) as { fileName?: string; edits?: Record<string, PlayerFieldEdit> };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.rosterApply(fileName, edits ?? {}));
+    res.json(await FranchiseService.rosterApply(fileName, edits ?? {}, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -63,7 +68,7 @@ router.post('/franchise/teams', async (req: Request, res: Response) => {
   const { fileName } = (req.body ?? {}) as { fileName?: string };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.franchiseTeams(fileName));
+    res.json(await FranchiseService.franchiseTeams(fileName, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -74,7 +79,7 @@ router.post('/franchise/trait-realism', async (req: Request, res: Response) => {
   const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: TraitRealismOptions };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.applyTraitRealism(fileName, options ?? {}));
+    res.json(await FranchiseService.applyTraitRealism(fileName, options ?? {}, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -85,7 +90,7 @@ router.post('/franchise/trim-free-agents', async (req: Request, res: Response) =
   const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: FaTrimOptions };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.trimFreeAgents(fileName, options ?? {}));
+    res.json(await FranchiseService.trimFreeAgents(fileName, options ?? {}, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -96,7 +101,7 @@ router.post('/franchise/reset-draft-picks', async (req: Request, res: Response) 
   const { fileName, options } = (req.body ?? {}) as { fileName?: string; options?: DraftPickResetOptions };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.resetDraftPicks(fileName, options ?? {}));
+    res.json(await FranchiseService.resetDraftPicks(fileName, options ?? {}, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -107,7 +112,7 @@ router.post('/franchise/schedule', async (req: Request, res: Response) => {
   const { fileName } = (req.body ?? {}) as { fileName?: string };
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   try {
-    res.json(await FranchiseService.franchiseSchedule(fileName));
+    res.json(await FranchiseService.franchiseSchedule(fileName, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }
@@ -119,7 +124,7 @@ router.post('/franchise/relocate-rebrand', async (req: Request, res: Response) =
   if (!fileName) return res.status(400).json({ error: 'fileName required' });
   if (!options || options.teamIndex == null) return res.status(400).json({ error: 'options.teamIndex required' });
   try {
-    res.json(await FranchiseService.relocateRebrand(fileName, options));
+    res.json(await FranchiseService.relocateRebrand(fileName, options, versionOf(req.body)));
   } catch (e) {
     res.status(500).json({ error: (e as Error).message });
   }

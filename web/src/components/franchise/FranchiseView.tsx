@@ -26,6 +26,7 @@ const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAN
 const fmtDate = (ms: number) => new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export function FranchiseView(props: {
+  gameVersion: 'm26' | 'm27';
   years: number[];
   usedYears: Set<number>;
   lastDrawn: number | null;
@@ -42,20 +43,27 @@ export function FranchiseView(props: {
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('cap');
 
+  // The franchise tools follow the top bar's game switch: M26 saves live in
+  // "Madden NFL 26\Saves", M27 in "Madden NFL 27\saves", and a save from the other
+  // game is refused by the server (different contract model / enums).
+  api.setFranchiseGameVersion(props.gameVersion);
+
   const refresh = useCallback(() => {
     api.franchiseList().then((r) => setFiles(r.franchises)).catch(() => {});
   }, []);
 
   useEffect(() => {
+    api.setFranchiseGameVersion(props.gameVersion);
+    setLoadErr(null);
     api.franchiseList()
       .then((r) => {
         setSavesDir(r.savesDir);
         setFiles(r.franchises);
         const def = r.franchises.find((f) => !OUTPUT_SUFFIX.test(f.name)) || r.franchises[0];
-        if (def) setSelected(def.name);
+        setSelected(def ? def.name : '');
       })
       .catch((e) => setLoadErr(e.message));
-  }, []);
+  }, [props.gameVersion]);
 
   const inputCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
 
@@ -86,6 +94,7 @@ export function FranchiseView(props: {
               </optgroup>
             )}
           </select>
+          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-300" title="Franchise tools follow the game switch in the top bar">Madden {props.gameVersion === 'm27' ? '27' : '26'}</span>
           {savesDir && <span className="hidden text-[11px] text-muted lg:inline">from {savesDir}</span>}
         </div>
 

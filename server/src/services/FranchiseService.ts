@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { M27_SAVES_DIR } from '../config/paths';
 import { GEAR_SLOT_TYPES } from './GearOptionsService';
 
 // madden-franchise is a CommonJS (.cjs) module; require it the way the vendored
@@ -94,8 +95,55 @@ export interface CapResetResult {
   teams: TeamCapChange[];
 }
 
-function savesDir(): string {
+export type GameVersion = 'm26' | 'm27';
+
+function savesDir(gameVersion: GameVersion = 'm26'): string {
+  if (gameVersion === 'm27') return M27_SAVES_DIR;
   return process.env.MADDEN_SAVES_DIR || path.join(os.homedir(), 'Documents', 'Madden NFL 26', 'Saves');
+}
+
+/** Open a franchise save and refuse one from the other game: the M27 contract
+ *  model and enums differ, so a tool written against one must not touch the other. */
+async function openSave(inputPath: string, gameVersion: GameVersion): Promise<any> {
+  const expected = gameVersion === 'm27' ? 27 : 26;
+  const file = await madden.create(inputPath, { autoParse: true });
+  const year = Number(file.gameYear) || null;
+  if (year && year !== expected) {
+    throw new Error(`${path.basename(inputPath)} is a Madden ${year} franchise; switch the game version to Madden ${year} to edit it`);
+  }
+  return file;
+}
+
+const missingFieldsSeen = new Set<string>();
+/**
+ * Write one record field, verified. madden-franchise's record proxy accepts ANY
+ * property name (a typo or a field renamed in M27 becomes a phantom property and
+ * the old code counted it as a successful edit). This checks the field exists in
+ * the table schema, writes it, and reports whether the stored value actually
+ * changed. Missing fields are skipped with a one-time warning (or thrown when
+ * `required`), so a tool never claims work it did not do.
+ */
+function writeField(rec: any, name: string, value: unknown, required = false): boolean {
+  const fields = rec?.fields as Record<string, any> | undefined;
+  const field = fields?.[name];
+  if (!field) {
+    if (required) throw new Error(`field ${name} does not exist in this save's schema`);
+    if (!missingFieldsSeen.has(name)) {
+      missingFieldsSeen.add(name);
+      console.warn(`[franchise] field ${name} not in this save's schema - skipped`);
+    }
+    return false;
+  }
+  let before: unknown;
+  try { before = field.value; } catch { before = undefined; }
+  try {
+    rec[name] = value;
+  } catch (e) {
+    throw new Error(`field ${name}: ${(e as Error).message}`);
+  }
+  let after: unknown;
+  try { after = field.value; } catch { after = value; }
+  return String(after) !== String(before);
 }
 
 /** A valid CAREER-* output name (so Madden lists it), derived from the input, never the input itself. */
@@ -385,8 +433,8 @@ export const FranchiseService = {
   savesDir,
 
   /** List CAREER franchise saves in the Madden Saves directory. */
-  listFranchises(): FranchiseFileInfo[] {
-    const dir = savesDir();
+  listFranchises(gameVersion: GameVersion = 'm26'): FranchiseFileInfo[] {
+    const dir = savesDir(gameVersion);
     if (!fs.existsSync(dir)) return [];
     return fs
       .readdirSync(dir)
@@ -399,8 +447,8 @@ export const FranchiseService = {
   },
 
   /** Apply a salary-cap reset to a franchise save, writing a NEW file (never the input). */
-  async capReset(fileName: string, opts: CapResetOptions = {}): Promise<CapResetResult> {
-    const dir = savesDir();
+  async capReset(fileName: string, opts: CapResetOptions = {}, gameVersion: GameVersion = 'm26'): Promise<CapResetResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
 
@@ -416,7 +464,7 @@ export const FranchiseService = {
     const outputPath = path.join(dir, outputName);
     if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const tt = await findTeamTable(file);
     if (!tt) throw new Error('team cap table not found in this franchise');
     await tt.readRecords();
@@ -470,7 +518,7 @@ export const FranchiseService = {
           for (const f of [...CONTRACT_SALARY_FIELDS, ...CONTRACT_BONUS_FIELDS, 'PLYR_CAPSALARY']) {
             try {
               const v = num(r[f]);
-              if (v > 0) { r[f] = Math.max(0, Math.round(v * scale)); touched = true; }
+              if (v > 0 && writeField(r, f, Math.max(0, Math.round(v * scale)))) touched = true;
             } catch { /* field absent/range */ }
           }
           if (touched) playersScaled++;
@@ -491,15 +539,15 @@ export const FranchiseService = {
 
   /** Bulk player edits over the franchise Player table (heal injuries, set dev traits).
    *  Direct field writes only — the same low-risk pattern as the cap reset. New file. */
-  async playerEdit(fileName: string, opts: PlayerEditOptions = {}): Promise<PlayerEditResult> {
-    const dir = savesDir();
+  async playerEdit(fileName: string, opts: PlayerEditOptions = {}, gameVersion: GameVersion = 'm26'): Promise<PlayerEditResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
     const outputName = outputNameFor(fileName, 'PLAYERS', opts.outputName);
     const outputPath = path.join(dir, outputName);
     if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
@@ -519,15 +567,13 @@ export const FranchiseService = {
         let wasInjured = false;
         try { if (String(r.InjuryStatus) !== 'Uninjured') wasInjured = true; } catch { /* */ }
         try { if (r.IsInjuredReserve) wasInjured = true; } catch { /* */ }
-        try { r.InjuryStatus = 'Uninjured'; } catch { /* */ }
-        try { r.IsInjuredReserve = false; } catch { /* */ }
-        for (const f of injuryZero) { try { r[f] = 0; } catch { /* */ } }
-        if (wasInjured) injuriesCleared++;
+        const healed = [writeField(r, 'InjuryStatus', 'Uninjured'), writeField(r, 'IsInjuredReserve', false), ...injuryZero.map((f) => writeField(r, f, 0))].some(Boolean);
+        if (wasInjured && healed) injuriesCleared++;
       }
 
       if (opts.setDev && devVal) {
         const inScope = opts.setDev.scope === 'all' || (opts.setDev.scope === 'rookies' && num(r.YearsPro) === 0);
-        if (inScope) { try { r.TraitDevelopment = devVal; devSet++; } catch { /* enum/range */ } }
+        if (inScope && writeField(r, 'TraitDevelopment', devVal)) devSet++;
       }
     }
 
@@ -537,11 +583,11 @@ export const FranchiseService = {
 
   /** Read every editable player from a franchise save (name, team, position, overall,
    *  age, dev, and the full attribute set) for the in-app roster editor. */
-  async franchisePlayers(fileName: string): Promise<FranchisePlayersResult> {
-    const dir = savesDir();
+  async franchisePlayers(fileName: string, gameVersion: GameVersion = 'm26'): Promise<FranchisePlayersResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
 
     const teamMap = new Map<number, string>();
     const teams: { index: number; name: string }[] = [];
@@ -601,15 +647,15 @@ export const FranchiseService = {
   },
 
   /** Apply per-player edits from the roster editor to a franchise save (new file). */
-  async rosterApply(fileName: string, edits: Record<string, PlayerFieldEdit>): Promise<RosterApplyResult> {
-    const dir = savesDir();
+  async rosterApply(fileName: string, edits: Record<string, PlayerFieldEdit>, gameVersion: GameVersion = 'm26'): Promise<RosterApplyResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
     const outputName = outputNameFor(fileName, 'ROSTER');
     const outputPath = path.join(dir, outputName);
     if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
@@ -622,21 +668,21 @@ export const FranchiseService = {
       const rec = pt.records[Number(idStr)];
       if (!rec || rec.isEmpty) continue;
       let touched = false;
-      if (e.overall != null) { try { rec.OverallRating = clamp99(e.overall); touched = true; } catch { /* */ } }
-      if (e.age != null) { try { rec.Age = Math.max(18, Math.min(50, Math.round(e.age))); touched = true; } catch { /* */ } }
-      if (e.jersey != null) { try { rec.JerseyNum = clamp99(e.jersey); touched = true; } catch { /* */ } }
-      if (e.position && FRANCHISE_POSITIONS.has(e.position)) { try { rec.Position = e.position; touched = true; } catch { /* */ } }
-      if (e.dev && DEV_ENUM[e.dev]) { try { rec.TraitDevelopment = DEV_ENUM[e.dev]; touched = true; } catch { /* */ } }
+      if (e.overall != null && writeField(rec, 'OverallRating', clamp99(e.overall))) touched = true;
+      if (e.age != null && writeField(rec, 'Age', Math.max(18, Math.min(50, Math.round(e.age))))) touched = true;
+      if (e.jersey != null && writeField(rec, 'JerseyNum', clamp99(e.jersey))) touched = true;
+      if (e.position && FRANCHISE_POSITIONS.has(e.position) && writeField(rec, 'Position', e.position)) touched = true;
+      if (e.dev && DEV_ENUM[e.dev] && writeField(rec, 'TraitDevelopment', DEV_ENUM[e.dev])) touched = true;
       if (e.ratings) {
         for (const [k, v] of Object.entries(e.ratings)) {
           if (!RATING_KEYS.includes(k) || v == null) continue;
-          try { rec[ratingField(k)] = clamp99(Number(v)); touched = true; } catch { /* */ }
+          if (writeField(rec, ratingField(k), clamp99(Number(v)))) touched = true;
         }
       }
       // Appearance: body type + generic head are direct fields; helmet/facemask live in
       // the CharacterVisuals loadout JSON (RawData table3 blob) — edit in place & rewrite.
-      if (e.bodyType && bodyTypes.has(e.bodyType)) { try { rec.CharacterBodyType = e.bodyType; touched = true; } catch { /* */ } }
-      if (e.genericHead && /^gen_\d/i.test(e.genericHead)) { try { rec.GenericHeadAssetName = e.genericHead; touched = true; } catch { /* */ } }
+      if (e.bodyType && bodyTypes.has(e.bodyType) && writeField(rec, 'CharacterBodyType', e.bodyType)) touched = true;
+      if (e.genericHead && /^gen_\d/i.test(e.genericHead) && writeField(rec, 'GenericHeadAssetName', e.genericHead)) touched = true;
       if (e.gear && cvt) {
         const cv = cvLoadout(file, cvt, rec);
         if (cv) {
@@ -667,11 +713,11 @@ export const FranchiseService = {
 
   /** Read each real team's editable identity (name, city, abbreviation, colors, logo)
    *  for the relocation/rebrand tool's team picker + before/after preview. Read-only. */
-  async franchiseTeams(fileName: string): Promise<FranchiseTeamsResult> {
-    const dir = savesDir();
+  async franchiseTeams(fileName: string, gameVersion: GameVersion = 'm26'): Promise<FranchiseTeamsResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
     if (!tt) throw new Error('team table not found');
     await tt.readRecords();
@@ -712,8 +758,8 @@ export const FranchiseService = {
    *  abbreviation, colors, logo). Direct scalar writes only — the same low-risk pattern
    *  as capReset; never touches TeamIndex or row order, so schedule/standings/stats/roster
    *  references (all by index/pointer) stay intact. Writes a NEW file. */
-  async relocateRebrand(fileName: string, opts: RelocateRebrandOptions): Promise<RelocateRebrandResult> {
-    const dir = savesDir();
+  async relocateRebrand(fileName: string, opts: RelocateRebrandOptions, gameVersion: GameVersion = 'm26'): Promise<RelocateRebrandResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
     if (opts.teamIndex == null || opts.teamIndex < 0 || opts.teamIndex >= 32) throw new Error('teamIndex (0..31) required');
@@ -724,7 +770,7 @@ export const FranchiseService = {
     const outputPath = path.join(dir, outputName);
     if (path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const tt = file.getTableByUniqueId(TEAM_TABLE_UID);
     if (!tt) throw new Error('team table not found');
     await tt.readRecords();
@@ -749,7 +795,8 @@ export const FranchiseService = {
       try {
         let before: string | number = '';
         try { before = typeof raw === 'number' ? num(target[field]) : String(target[field] ?? ''); } catch { /* */ }
-        target[field] = raw;
+        if (!(target.fields as Record<string, unknown> | undefined)?.[field]) { skipped.push(field); return; }
+        writeField(target, field, raw, true);
         if (typeof raw !== 'boolean' && String(before) !== String(raw)) changes.push({ field, before, after: raw });
       } catch { skipped.push(field); }
     };
@@ -789,8 +836,8 @@ export const FranchiseService = {
   /** Rewrite TraitDevelopment league-wide into a realistic scarcity pyramid (the base game
    *  gives nearly every 85+ an elevated trait). Signed roster only by default. dryRun previews
    *  counts without writing; otherwise writes a new CAREER-*-TRAITS file. */
-  async applyTraitRealism(fileName: string, opts: TraitRealismOptions = {}): Promise<TraitRealismResult> {
-    const dir = savesDir();
+  async applyTraitRealism(fileName: string, opts: TraitRealismOptions = {}, gameVersion: GameVersion = 'm26'): Promise<TraitRealismResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
 
@@ -803,7 +850,7 @@ export const FranchiseService = {
     const outputPath = dryRun ? '' : path.join(dir, outputName);
     if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
 
     // team-index -> name for readable notable[] entries
     const teamMap = new Map<number, string>();
@@ -876,7 +923,7 @@ export const FranchiseService = {
       if (w.want !== w.cur) {
         changed++;
         notable.push({ name: w.name, position: w.pos, team: w.team, overall: w.ovr, age: w.age, from: w.cur, to: w.want });
-        if (!dryRun) { try { w.rec.TraitDevelopment = DEV_ENUM[w.want]; } catch { /* enum/range */ } }
+        if (!dryRun) writeField(w.rec, 'TraitDevelopment', DEV_ENUM[w.want]);
       }
     }
 
@@ -891,11 +938,11 @@ export const FranchiseService = {
   },
 
   /** Read the full season schedule grouped by stage then week. Read-only — cannot corrupt. */
-  async franchiseSchedule(fileName: string): Promise<FranchiseScheduleResult> {
-    const dir = savesDir();
+  async franchiseSchedule(fileName: string, gameVersion: GameVersion = 'm26'): Promise<FranchiseScheduleResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
 
     // Team names indexed BY ROW NUMBER (schedule refs resolve to row number, NOT TeamIndex).
     const teamByRow: string[] = [];
@@ -970,8 +1017,8 @@ export const FranchiseService = {
    *  rows, never touches TeamIndex/contracts, never writes any other status. No pool counter to
    *  update — the game recomputes the FA pool from ContractStatus. dryRun previews without writing;
    *  else writes a new CAREER-*-FATRIM file. */
-  async trimFreeAgents(fileName: string, opts: FaTrimOptions = {}): Promise<FaTrimResult> {
-    const dir = savesDir();
+  async trimFreeAgents(fileName: string, opts: FaTrimOptions = {}, gameVersion: GameVersion = 'm26'): Promise<FaTrimResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
 
@@ -984,7 +1031,7 @@ export const FranchiseService = {
     const outputPath = dryRun ? '' : path.join(dir, outputName);
     if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
     const pt = file.getTableByUniqueId(PLAYER_TABLE_UID) || file.getTableByName('Player');
     if (!pt) throw new Error('player table not found');
     await pt.readRecords();
@@ -1019,7 +1066,7 @@ export const FranchiseService = {
 
     const victims = Array.from(victimSet).sort((a, b) => a.ovr - b.ovr);
     if (!dryRun) {
-      for (const v of victims) { try { v.rec.ContractStatus = 'Deleted'; } catch { /* enum/range */ } }
+      for (const v of victims) writeField(v.rec, 'ContractStatus', 'Deleted', true);
       await file.save(outputPath, {});
     }
 
@@ -1042,8 +1089,8 @@ export const FranchiseService = {
    *  Guards the all-zero NULL OriginalTeam. Leaves OriginalTeam/Round/PickNumber/YearOffset alone.
    *  dryRun previews; else writes a new CAREER-*-DRAFTPICKS file. On a save with no traded future
    *  picks this is a safe no-op (restored=0). */
-  async resetDraftPicks(fileName: string, opts: DraftPickResetOptions = {}): Promise<DraftPickResetResult> {
-    const dir = savesDir();
+  async resetDraftPicks(fileName: string, opts: DraftPickResetOptions = {}, gameVersion: GameVersion = 'm26'): Promise<DraftPickResetResult> {
+    const dir = savesDir(gameVersion);
     const inputPath = path.join(dir, fileName);
     if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
 
@@ -1052,7 +1099,7 @@ export const FranchiseService = {
     const outputPath = dryRun ? '' : path.join(dir, outputName);
     if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
 
-    const file = await madden.create(inputPath, { autoParse: true });
+    const file = await openSave(inputPath, gameVersion);
 
     // Team names indexed BY ROW NUMBER (pick refs resolve to row number, NOT TeamIndex).
     const teamByRow: string[] = [];

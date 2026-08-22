@@ -437,6 +437,7 @@ export default function App() {
           {view === 'home' && <HomePage onSelect={setView} />}
           {view === 'franchise' && (
             <FranchiseView
+              gameVersion={gameVersion}
               years={years}
               usedYears={usedYears}
               lastDrawn={lastDrawn}
