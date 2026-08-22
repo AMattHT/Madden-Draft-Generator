@@ -2,6 +2,7 @@ import { MdcService, MdcProspect } from './MdcService';
 import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
+import { genericHeadPid } from './M27Fields';
 import { EraBioService } from './EraBioService';
 import { PlayerLookupService } from './PlayerLookupService';
 import { HometownService } from './HometownService';
@@ -238,9 +239,18 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // real head's portrait id. M27: the real head's own portrait id (legends keep the
   // lookup PhotoID — the id space is shared between the games); generic heads get
   // their fixed PID in assignM27Fields (0x94 is a pure function of genericHeadName).
+  // A real head whose portrait the game no longer ships (M27 dropped most retired
+  // players' regular portraits) gets a tone-matched generic portrait, not the shield.
+  const genericPortrait = () => {
+    const g = like.kind === 'generic' ? like : LikenessService.generic(player, variant ? index + variant * 1000 : index, gameVersion);
+    return gameVersion === 'm27' ? genericHeadPid(g.peps) : (LikenessService.genericPid(g.peps, 'm26') ?? 0);
+  };
+  // A generic-head legend (no renderable scan) still gets his legends portrait.
+  const legendPortrait = like.kind === 'generic' && (player.draftYear ?? 0) < 2015 ? LikenessService.legendPortraitPid(player.firstName, player.lastName, gameVersion) : 0;
   prospect.PID = gameVersion === 'm27'
-    ? (real?.portraitPid || 0)
-    : (portraitPid ?? (like.kind === 'generic' ? (LikenessService.genericPid(like.peps, 'm26') ?? 0) : (real?.portraitPid || player.photoId || 0)));
+    ? (real ? (real.portraitPid || genericPortrait()) : (legendPortrait || 0))
+    : (portraitPid ?? (like.kind === 'generic' ? (legendPortrait || genericPortrait()) : (real?.portraitPid || player.photoId || genericPortrait())));
+  if (gameVersion === 'm27' && !real && legendPortrait) prospect.pinPortrait = true;
   // Announcer name call: the game keys this by SURNAME (same id space in both games,
   // mined from the real files). The CSV CommID column is a different id space.
   prospect.commentaryId = commentaryIdFor(player.lastName);

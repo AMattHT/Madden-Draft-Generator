@@ -30,19 +30,21 @@ let pidByCode: Map<string, number> | null = null;
  *  unique scans decoded from the game's own bundle tables (this is where legends
  *  like polamaluTroy_16548 live) plus the career roster's cranium heads — with the
  *  asset name in the game's casing and its menu-portrait id. */
-export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number }
-interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string> }
+export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number; portraitKind?: 'legend' | 'roster' | 'player' | 'none' }
+interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string> }
 const catalogs: Partial<Record<'m26' | 'm27', FaceCatalog>> = {};
 function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
   const hit = catalogs[version];
   if (hit) return hit;
-  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set() };
+  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set(), legendPids: new Map(), playerPortraits: new Set() };
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'face-assets-by-game.json'), 'utf8'));
     const v = raw?.[version] ?? {};
     for (const [k, e] of Object.entries(v.assets ?? {})) cat.assets.set(k, e as RealFace);
     for (const [k, a] of Object.entries(v.byName ?? {})) cat.byName.set(k, a as string);
     for (const k of (v.legendPortraits ?? []) as string[]) cat.legendPortraits.add(k);
+    for (const [k, pid] of Object.entries(v.legendPids ?? {})) cat.legendPids.set(k, Number(pid));
+    for (const k of (v.playerPortraits ?? []) as string[]) cat.playerPortraits.add(k);
   } catch { /* catalog absent — M27 falls back to the save-only map, M26 to the lookup */ }
   if (version === 'm27' && cat.assets.size === 0) {
     // Older data file: the save-only extract (current players, no legends).
@@ -64,15 +66,17 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
  *  has already cut players, and current players' heads carry over between the two
  *  games (their portrait ids match 1,044 of 1,055 times). */
 const M27_TRUST_LOOKUP_FROM = 2019;
-/** ~280 legacy scan dirs (baughsammy, williamskevin, randlejohn_12183) hold only
- *  shader presets, no head bundle. Whether the game still renders them is an
- *  in-game question; set MADDEN_PRESET_HEADS=0 to fall back to generics for them. */
-const ACCEPT_PRESET_HEADS = process.env.MADDEN_PRESET_HEADS !== '0';
+/** ~280 legacy scan dirs (baughsammy, williamskevin, suggsterrell_16524) hold only
+ *  shader presets, no head bundle. In-game (M27, 22 Aug 2026) they render as the
+ *  default head, so they are generics unless MADDEN_PRESET_HEADS=1. */
+const ACCEPT_PRESET_HEADS = process.env.MADDEN_PRESET_HEADS === '1';
 /** Retired pre-2019 players with an EA id but no scan (AmukamaraPrince_10766): M26
  *  still ships their portraits, M27 dropped them from disk, so their heads may be
  *  gone too. Off by default for M27 (generic head); MADDEN27_TRUST_M26_HEADS=1 to
  *  try them in-game. */
 const M27_TRUST_ALL_M26_HEADS = process.env.MADDEN27_TRUST_M26_HEADS === '1';
+/** Write lookup ids for legends that only have a legends portrait (no scan) on M27. */
+const M27_TRUST_LEGEND_IDS = process.env.MADDEN27_TRUST_LEGEND_IDS === '1';
 let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
 const m27Key = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
 
@@ -230,6 +234,37 @@ export const LikenessService = {
    *      lists — heads carry over between games;
    *   4. M26 only: any lookup asset (the lookup was built from M26's own files). */
   realFace(player: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear' | 'playerAssetsId' | 'photoId'>, version: 'm26' | 'm27'): RealFace | null {
+    const head = this.resolveHead(player, version);
+    if (!head) return null;
+    return { ...head, ...this.portraitFor(player, head, version) };
+  },
+
+  /** Menu portrait for a real head. The games key portraits by PID; a PID the game
+   *  has no image for shows the blank NFL shield. M27 dropped most retired players'
+   *  regular portraits (plpo_<name>, 7,956 in M26 -> 3,339) but keeps the legends set
+   *  (plpo_legends_<name>, its own PID: Polamalu 4829, not the regular 63), so
+   *  legends first, then the roster's PID, then the regular portrait when shipped. */
+  portraitFor(player: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'photoId'>, head: RealFace, version: 'm26' | 'm27'): { portraitPid: number; portraitKind: 'legend' | 'roster' | 'player' | 'none' } {
+    const cat = catalogFor(version);
+    const f = player.firstName.toLowerCase().replace(/[^a-z]/g, '');
+    const l = player.lastName.toLowerCase().replace(/[^a-z]/g, '');
+    const legend = cat.legendPids.get(l + f) ?? cat.legendPids.get(f + l);
+    const roster = /roster/.test(head.source) ? head.portraitPid : 0;
+    const regular = cat.playerPortraits.has(l + f) || cat.playerPortraits.has(f + l) ? (player.photoId || head.portraitPid || 0) : 0;
+    if (version === 'm26') {
+      if (regular) return { portraitPid: regular, portraitKind: 'player' };
+      if (roster) return { portraitPid: roster, portraitKind: 'roster' };
+      if (legend) return { portraitPid: legend, portraitKind: 'legend' };
+      return { portraitPid: player.photoId || head.portraitPid || 0, portraitKind: player.photoId || head.portraitPid ? 'player' : 'none' };
+    }
+    if (legend) return { portraitPid: legend, portraitKind: 'legend' };
+    if (roster) return { portraitPid: roster, portraitKind: 'roster' };
+    if (regular) return { portraitPid: regular, portraitKind: 'player' };
+    return { portraitPid: 0, portraitKind: 'none' };
+  },
+
+  /** The head asset only (see realFace for the portrait). */
+  resolveHead(player: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear' | 'playerAssetsId' | 'photoId'>, version: 'm26' | 'm27'): RealFace | null {
     const cat = catalogFor(version);
     const asset = (player.playerAssetsId || '').trim();
     const hasAsset = !!asset && !/^gen_/i.test(asset);
@@ -240,7 +275,8 @@ export const LikenessService = {
         // A roster head belongs to a CURRENT player. The lookup pairs some old rows
         // with a namesake's id (1989 DJ Johnson -> JohnsonDJ_22983): same name,
         // wrong person — only accept it when the draft years agree.
-        if (/roster/.test(hit.source) && !this.sameEra(key, player.draftYear)) return null;
+        // (A scan-backed id with no nflverse year for the name — Gates, undrafted — is fine.)
+        if (/roster/.test(hit.source) && !this.sameEra(key, player.draftYear, /bundle/.test(hit.source))) return null;
         if (ACCEPT_PRESET_HEADS || !/preset/.test(hit.source)) {
           return { ...hit, assetName: hit.assetName || asset, portraitPid: hit.portraitPid || player.photoId || 0 };
         }
@@ -254,13 +290,15 @@ export const LikenessService = {
       const same = face?.draftYear
         ? player.draftYear == null || Math.abs(player.draftYear - face.draftYear) <= 1
         : this.sameEra(key, player.draftYear);
-      if (face && same) return face;
+      if (face && same && (ACCEPT_PRESET_HEADS || !/preset/.test(face.source))) return face;
     }
     if (hasAsset) {
       const own = { assetName: asset, portraitPid: player.photoId || 0, genericHead: null, first: player.firstName, last: player.lastName };
       // MUT legends added since the cranium pipeline have no scan bundle, only a
-      // legends portrait; the portrait proves the game knows the player.
-      if (this.hasLegendPortrait(player.firstName, player.lastName, version)) return { ...own, source: 'legend-portrait' };
+      // legends portrait. In-game (M27) a legends portrait did NOT guarantee a head
+      // (Suggs rendered as the default head), so on M27 the portrait is used on its
+      // own over a generic head unless MADDEN27_TRUST_LEGEND_IDS=1; M26 keeps the id.
+      if (this.hasLegendPortrait(player.firstName, player.lastName, version) && (version === 'm26' || M27_TRUST_LEGEND_IDS)) return { ...own, source: 'legend-portrait' };
       // M26: the lookup was built from M26's own files, so keep the id — unless a
       // modern namesake exists and the draft years disagree (that id is his).
       if (version === 'm26' && this.sameEra(key, player.draftYear, true)) return { ...own, source: 'lookup' };
@@ -275,6 +313,15 @@ export const LikenessService = {
       if (version === 'm27' && M27_TRUST_ALL_M26_HEADS && this.sameEra(key, player.draftYear, true)) return { ...own, source: 'm26-lookup' };
     }
     return null;
+  },
+
+  /** The legends-portrait PID for this player in `version`, or 0. Works without a
+   *  head: a generic-head prospect can still show the real menu portrait. */
+  legendPortraitPid(firstName: string, lastName: string, version: 'm26' | 'm27'): number {
+    const cat = catalogFor(version);
+    const f = firstName.toLowerCase().replace(/[^a-z]/g, '');
+    const l = lastName.toLowerCase().replace(/[^a-z]/g, '');
+    return cat.legendPids.get(l + f) ?? cat.legendPids.get(f + l) ?? 0;
   },
 
   /** Does the game ship a legends portrait for this player (plpo_legends_<name>)? */
@@ -350,6 +397,13 @@ export const LikenessService = {
     const tone = raceToSkinTone(player.race);
     const real = this.realFace(player, gameVersion);
     if (real) return { peps: real.assetName, kind: 'asset', skinTone: tone };
+    return this.generic(player, index, gameVersion);
+  },
+
+  /** The generic head this player would get (reproducible by `index`). */
+  generic(player: BaselinePlayer, index: number, gameVersion: 'm26' | 'm27' = 'm26'): Likeness {
+    load();
+    const tone = raceToSkinTone(player.race);
     const pools = poolsFor(gameVersion);
     let pool = pools.get(tone);
     if (!pool || pool.length === 0) {

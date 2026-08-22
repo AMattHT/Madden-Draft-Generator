@@ -113,25 +113,30 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 const LEGEND_PORTRAIT = /\/portraits\/playerportraits\/assets\/legends\/plpo_legends_([a-z0-9_]+?)_assetlibrary_playerportraits_brt$/;
+const PLAYER_PORTRAIT = /\/portraits\/playerportraits\/assets\/plpo_([a-z0-9_]+?)_assetlibrary_playerportraits_brt$/;
+const portraitStem = (s: string) => s.replace(/_(profile|alt\d*|\d+)$/g, '').replace(/[^a-z]/g, '');
 
-function headBundles(gameDir: string): { heads: Map<string, boolean>; legendPortraits: Set<string> } {
+function headBundles(gameDir: string): { heads: Map<string, boolean>; legendPortraits: Set<string>; playerPortraits: Set<string> } {
   const heads = new Map<string, boolean>(); // asset -> has a playerhead bundle
   const legendPortraits = new Set<string>(); // "kellyjim", "troyaikman" — MUT legends, whose heads are parametric (no bundle)
+  const playerPortraits = new Set<string>(); // regular plpo_<lastfirst> portraits on disk (M27 dropped most retired players')
   const root = path.join(gameDir, 'Data', 'Win32');
-  if (!fs.existsSync(root)) { console.warn(`  game dir missing: ${gameDir}`); return { heads, legendPortraits }; }
+  if (!fs.existsSync(root)) { console.warn(`  game dir missing: ${gameDir}`); return { heads, legendPortraits, playerPortraits }; }
   for (const toc of walk(root)) {
     let names: string[] = [];
     try { names = tocBundleNames(toc); } catch (e) { console.warn(`  ${path.basename(toc)}: ${(e as Error).message}`); }
     for (const n of names) {
       const lp = LEGEND_PORTRAIT.exec(n);
-      if (lp) { legendPortraits.add(lp[1].replace(/_(profile|alt\d*|\d+)$/g, '').replace(/[^a-z]/g, '')); continue; }
+      if (lp) { legendPortraits.add(portraitStem(lp[1])); continue; }
+      const pp = PLAYER_PORTRAIT.exec(n);
+      if (pp) { playerPortraits.add(portraitStem(pp[1])); continue; }
       const m = HEAD_DIR.exec(n);
       if (!m || m[1].length !== 1) continue; // teen_*/recipes dirs are templates
       const asset = m[2];
       heads.set(asset, (heads.get(asset) ?? false) || /playerhead_brt$/.test(m[3]));
     }
   }
-  return { heads, legendPortraits };
+  return { heads, legendPortraits, playerPortraits };
 }
 
 // ---------- Roster (career autosave) ----------
@@ -190,6 +195,21 @@ function lookupAssets(): Map<string, LookupRow> {
   return m;
 }
 
+/** Legend menu-portrait ids (PID_Portrait_Mapping.csv, Type=legend): portrait stem -> PID. */
+function legendPidTable(): Map<string, number> {
+  const out = new Map<string, number>();
+  try {
+    const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'));
+    for (const r of rows) {
+      if ((r.Type || '').trim() !== 'legend') continue;
+      const pid = parseInt(r.PID || '', 10);
+      const stem = portraitStem((r.Portrait || '').toLowerCase().replace(/^plpo_legends_/, ''));
+      if (pid > 0 && stem) out.set(stem, pid);
+    }
+  } catch { /* mapping absent */ }
+  return out;
+}
+
 const nameKey = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
 const stemKey = (first: string, last: string) => `${last}${first}`.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(jr|sr|iii|ii|iv)$/, '');
 
@@ -216,8 +236,8 @@ function indexLookupNames(): void {
 
 async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
   console.log(`[${v}] bundles from ${GAME_DIRS[v]}`);
-  const { heads, legendPortraits } = headBundles(GAME_DIRS[v]);
-  console.log(`  ${heads.size} unique head scans, ${legendPortraits.size} legend portraits in the game files`);
+  const { heads, legendPortraits, playerPortraits } = headBundles(GAME_DIRS[v]);
+  console.log(`  ${heads.size} unique head scans, ${legendPortraits.size} legend portraits, ${playerPortraits.size} player portraits in the game files`);
   const save = newestAutosave(SAVES_DIRS[v]);
   const roster = save ? await rosterFaces(save) : [];
   console.log(`  ${roster.length} real-face players on ${save ? path.basename(save) : '(no autosave)'}`);
@@ -277,7 +297,10 @@ async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
 
   const byName: Record<string, string> = {};
   for (const [k, e] of Object.entries(assets)) if (e.first && e.last) byName[nameKey(e.first, e.last)] = k;
-  return { assets, byName, legendPortraits: [...legendPortraits].sort(), missingFromLookup: missing.sort(), stats: { heads: heads.size, roster: roster.length, rosterSkipped, bundleOnly, unnamed, presetOnly, save: save ? path.basename(save) : null } };
+  const legendPids: Record<string, number> = {};
+  for (const [stem, pid] of legendPidTable()) if (legendPortraits.has(stem)) legendPids[stem] = pid;
+  console.log(`  ${Object.keys(legendPids).length} legend portraits with a known PID`);
+  return { assets, byName, legendPortraits: [...legendPortraits].sort(), legendPids, playerPortraits: [...playerPortraits].sort(), missingFromLookup: missing.sort(), stats: { heads: heads.size, roster: roster.length, rosterSkipped, bundleOnly, unnamed, presetOnly, save: save ? path.basename(save) : null } };
 }
 
 (async () => {

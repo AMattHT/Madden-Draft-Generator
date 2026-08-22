@@ -108,8 +108,10 @@ export function assignM27Fields(prospect: Record<string, unknown>, bits: M27Play
   const visuals = (prospect.visuals ?? {}) as { genericHeadName?: string };
   const peps = typeof prospect.PEPS === 'string' ? prospect.PEPS : '';
   const head = visuals.genericHeadName || (/^gen_/i.test(peps) ? peps : null);
-  if (head) prospect.PID = genericHeadPid(head);
+  // pinPortrait: the builder set a legends portrait on a generic head — keep it.
+  if (head && !prospect.pinPortrait) prospect.PID = genericHeadPid(head);
   else if (prospect.PID == null) prospect.PID = 0;
+  delete prospect.pinPortrait;
 
   prospect.commentaryId = commentaryIdFor(String(prospect.lastName ?? ''));
   prospect.bodyTypeId = BODY_TYPE_ID[String(prospect.bodyType ?? 'Standard')] ?? 0;

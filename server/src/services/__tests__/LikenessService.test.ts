@@ -21,7 +21,11 @@ test('Polamalu gets his real M27 head scan (the game ships polamalutroy_16548)',
   const face = LikenessService.realFace(p, 'm27');
   assert.ok(face, 'expected a real face for M27');
   assert.equal(face!.assetName, 'polamaluTroy_16548');
-  assert.equal(face!.portraitPid, 63);
+  // M27 dropped his regular portrait (PID 63 shows the blank shield in-game); the
+  // legends portrait has its own id.
+  assert.equal(face!.portraitPid, 4829);
+  assert.equal(face!.portraitKind, 'legend');
+  assert.equal(LikenessService.realFace(p, 'm26')!.portraitPid, 63, 'M26 still ships the regular portrait');
   const like = LikenessService.assign(p, 0, 'm27');
   assert.equal(like.kind, 'asset');
   assert.equal(like.peps, 'polamaluTroy_16548');
@@ -35,10 +39,11 @@ test('a lookup id the game does not ship stays generic in M27 (no silhouettes)',
   assert.equal(LikenessService.assign(p, 0, 'm26').kind, 'generic', 'M26 rejects the namesake collision too');
 });
 
-test('Aikman (legends portrait, parametric head) keeps his id in both games', skipWithoutCatalog, () => {
+test('Aikman (legends portrait, parametric head) keeps his id on M26 and his legends portrait on M27', skipWithoutCatalog, () => {
   const p = player({ firstName: 'Troy', lastName: 'Aikman', playerAssetsId: 'AikmanTroy_7201', photoId: 5644, draftYear: 1989 });
-  assert.equal(LikenessService.realFace(p, 'm27')?.assetName, 'AikmanTroy_7201');
   assert.equal(LikenessService.realFace(p, 'm26')?.assetName, 'AikmanTroy_7201');
+  assert.equal(LikenessService.realFace(p, 'm27'), null);
+  assert.equal(LikenessService.legendPortraitPid('Troy', 'Aikman', 'm27'), 5644);
 });
 
 test('a recent draftee keeps his lookup asset in M27 even when the autosave roster lacks him', skipWithoutCatalog, () => {
@@ -58,7 +63,6 @@ test('M27 face catalog lists legends with portraits', skipWithoutCatalog, () => 
   const troy = scans.find((s) => s.asset === 'polamaluTroy_16548');
   assert.ok(troy, 'Polamalu in the M27 scan catalog');
   assert.equal(troy!.name, 'Troy Polamalu');
-  assert.equal(troy!.portraitPid, 63);
 });
 
 test('a 1989 DJ Johnson does not get the 2023 DJ Johnson head (same-name collision)', skipWithoutCatalog, () => {
@@ -67,12 +71,13 @@ test('a 1989 DJ Johnson does not get the 2023 DJ Johnson head (same-name collisi
   assert.equal(LikenessService.realFace(p, 'm26'), null);
 });
 
-test('a MUT legend with a parametric head (legend portrait, no scan) keeps his lookup id in M27', skipWithoutCatalog, () => {
+test('a MUT legend with only a legends portrait (no scan) gets a generic head plus his legends portrait on M27', skipWithoutCatalog, () => {
+  // In-game: a legends portrait does not prove a renderable head (Suggs showed the
+  // default head), so the id is only written on M26; M27 uses the portrait alone.
   const p = player({ firstName: 'Jim', lastName: 'Kelly', playerAssetsId: 'KellyJim_32174', photoId: 0, draftYear: 1983 });
-  const face = LikenessService.realFace(p, 'm27');
-  assert.ok(face, 'Jim Kelly has a legends portrait in M27');
-  assert.equal(face!.assetName, 'KellyJim_32174');
-  assert.equal(face!.source, 'legend-portrait');
+  assert.equal(LikenessService.realFace(p, 'm27'), null);
+  assert.ok(LikenessService.legendPortraitPid('Jim', 'Kelly', 'm27') > 0, 'M27 ships plpo_legends_kellyjim');
+  assert.equal(LikenessService.realFace(p, 'm26')?.assetName, 'KellyJim_32174');
 });
 
 test('a head on the M26 roster carries over to M27 even after the player left the M27 autosave', skipWithoutCatalog, () => {
@@ -81,4 +86,26 @@ test('a head on the M26 roster carries over to M27 even after the player left th
   const face = LikenessService.realFace(p, 'm27');
   assert.ok(face, 'Mostert was on the M26 roster');
   assert.equal(face!.assetName, 'MostertRaheem_2832');
+});
+
+test('preset-only legacy heads (Suggs, Kevin Williams) are generic: in-game they render as the default head', skipWithoutCatalog, () => {
+  for (const [first, last, asset] of [['Terrell', 'Suggs', 'suggsTerrell_16524'], ['Kevin', 'Williams', 'williamsKevin'], ['Anquan', 'Boldin', 'boldinanquan']]) {
+    const p = player({ firstName: first, lastName: last, playerAssetsId: asset, photoId: 2886, draftYear: 2003 });
+    assert.equal(LikenessService.realFace(p, 'm27'), null, `${last} should be generic on M27`);
+    assert.equal(LikenessService.assign(p, 0, 'm27').kind, 'generic');
+  }
+});
+
+test('a scanned head with no portrait left in M27 reports portraitKind none (builder substitutes a generic portrait)', skipWithoutCatalog, () => {
+  // Tom Brady: full scan in M27, but neither a legends nor a regular portrait on disk.
+  const p = player({ firstName: 'Tom', lastName: 'Brady', playerAssetsId: 'bradyTom_1327', photoId: 1327, draftYear: 2000 });
+  const face = LikenessService.realFace(p, 'm27');
+  assert.ok(face, 'Brady scan present');
+  assert.equal(face!.portraitKind, 'none');
+  assert.equal(face!.portraitPid, 0);
+});
+
+test('an undrafted legend with a scan (Gates) is not rejected for lacking an nflverse draft year', skipWithoutCatalog, () => {
+  const p = player({ firstName: 'Antonio', lastName: 'Gates', playerAssetsId: 'gatesAntonio_17523', photoId: 1216, draftYear: 2003 });
+  assert.equal(LikenessService.realFace(p, 'm27')?.assetName, 'gatesAntonio_17523');
 });

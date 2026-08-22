@@ -107,7 +107,13 @@ web/                          # React (Vite + TS + Tailwind): board, profile edi
   and so is the archetype byte — the game keeps whichever of the position's archetypes scores
   highest. The builder reconciles the skill attributes so the chosen archetype lands exactly and
   no rival archetype scores above it.
-- A real-head asset the game does not ship renders as the empty NFL-shield silhouette. M26 scan
-  bundles all survived into M27 (1,275 of 1,276) but M27 dropped most retired players' portraits
-  from disk, so pre-2019 heads that are neither scans nor legends stay generic on M27 unless
-  `MADDEN27_TRUST_M26_HEADS=1`; `MADDEN_PRESET_HEADS=0` turns off the ~280 preset-only legacy heads.
+- A real-head asset the game cannot render shows the *default* head (verified in M27: the ~280
+  legacy dirs that hold only shader presets — Suggs, Kevin Williams, Boldin — render that way, so
+  they are generics; `MADDEN_PRESET_HEADS=1` re-enables them). M26 scan bundles all survived into
+  M27 (1,275 of 1,276); pre-2019 heads that are neither scans nor on a roster stay generic on M27
+  unless `MADDEN27_TRUST_M26_HEADS=1`, and legends with only a legends portrait keep a generic head
+  unless `MADDEN27_TRUST_LEGEND_IDS=1`.
+- Portraits are keyed by PID and an unknown PID shows the blank NFL shield. M27 dropped most
+  retired players' regular portraits from disk (7,956 in M26 → 3,339) but keeps the legends set with
+  its own ids (Polamalu: regular 63, legends 4829), so M27 exports use the legends id first, the
+  roster's id for current players, and a tone-matched generic portrait when neither exists.
