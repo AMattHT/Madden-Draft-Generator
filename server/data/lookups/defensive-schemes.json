@@ -1,0 +1,105 @@
+{
+  "_notes": [
+    "Base defensive front by franchise and season. Used to decide whether a linebacker-labeled",
+    "draftee was a 3-4 outside linebacker (edge rusher -> Madden LEDG/REDG) or an off-ball",
+    "linebacker (SAM/MIKE/WILL). Only 3-4 eras are listed; any (franchise, season) not covered",
+    "is treated as a 4-3. Nothing before 1972 is a 3-4 (the Dolphins' 53 defense was the first).",
+    "Franchise ids are Pro-Football-Reference codes (clt = Colts, oti = Oilers/Titans, htx = Texans,",
+    "rai = Raiders, ram = Rams, sdg = Chargers, crd = Cardinals, rav = Ravens).",
+    "'to': null means through the present. 'confidence' is editorial: high = well documented,",
+    "medium = coordinator/era inference. Edit freely; the classifier re-reads this file on restart."
+  ],
+  "eras": [
+    { "franchise": "crd", "from": 1981, "to": 1993, "scheme": "3-4", "confidence": "medium", "note": "Hanifan / Stallings / Bugel Cardinals (E.J. Junior, Ken Harvey at OLB)" },
+    { "franchise": "crd", "from": 2007, "to": 2017, "scheme": "3-4", "confidence": "high", "note": "Whisenhunt / Arians (Horton, Bowles)" },
+    { "franchise": "crd", "from": 2019, "to": null, "scheme": "3-4", "confidence": "high", "note": "Vance Joseph, then Gannon / Rallis" },
+
+    { "franchise": "atl", "from": 1983, "to": 1993, "scheme": "3-4", "confidence": "medium", "note": "Henning / Marion Campbell / Glanville" },
+    { "franchise": "atl", "from": 2021, "to": null, "scheme": "3-4", "confidence": "high", "note": "Dean Pees, then Jimmy Lake" },
+
+    { "franchise": "rav", "from": 2002, "to": null, "scheme": "3-4", "confidence": "high", "note": "Nolan switched to the 3-4 in 2002; Ryan / Pees / Martindale / Macdonald / Orr kept it" },
+
+    { "franchise": "buf", "from": 1979, "to": 2000, "scheme": "3-4", "confidence": "high", "note": "Fred Smerlas drafted as NT 1979; Levy / Wade Phillips through 2000" },
+    { "franchise": "buf", "from": 2010, "to": 2012, "scheme": "3-4", "confidence": "high", "note": "Gailey / Edwards" },
+    { "franchise": "buf", "from": 2015, "to": 2016, "scheme": "3-4", "confidence": "high", "note": "Rex Ryan" },
+
+    { "franchise": "car", "from": 1995, "to": 1998, "scheme": "3-4", "confidence": "high", "note": "Dom Capers (Kevin Greene / Lamar Lathon at OLB)" },
+    { "franchise": "car", "from": 2023, "to": null, "scheme": "3-4", "confidence": "high", "note": "Ejiro Evero" },
+
+    { "franchise": "chi", "from": 2019, "to": 2021, "scheme": "3-4", "confidence": "high", "note": "Fangio / Pagano / Desai" },
+
+    { "franchise": "cin", "from": 1980, "to": 1993, "scheme": "3-4", "confidence": "medium", "note": "Forrest Gregg / Wyche with LeBeau's zone-blitz 3-4 (Reggie Williams at OLB)" },
+
+    { "franchise": "cle", "from": 1980, "to": 1990, "scheme": "3-4", "confidence": "high", "note": "Schottenheimer / Carson (Chip Banks, Clay Matthews Jr. at OLB)" },
+    { "franchise": "cle", "from": 2005, "to": 2010, "scheme": "3-4", "confidence": "high", "note": "Crennel, then Mangini" },
+    { "franchise": "cle", "from": 2013, "to": 2016, "scheme": "3-4", "confidence": "high", "note": "Horton / Pettine / O'Neil" },
+
+    { "franchise": "clt", "from": 1982, "to": 1991, "scheme": "3-4", "confidence": "high", "note": "Frank Kush / Ron Meyer Colts (Johnie Cooks, Duane Bickett at OLB)" },
+    { "franchise": "clt", "from": 2012, "to": 2017, "scheme": "3-4", "confidence": "high", "note": "Pagano" },
+
+    { "franchise": "dal", "from": 2005, "to": 2012, "scheme": "3-4", "confidence": "high", "note": "Parcells / Wade Phillips / Rob Ryan (DeMarcus Ware at OLB)" },
+
+    { "franchise": "den", "from": 1976, "to": 1988, "scheme": "3-4", "confidence": "high", "note": "Joe Collier's Orange Crush" },
+    { "franchise": "den", "from": 2015, "to": null, "scheme": "3-4", "confidence": "high", "note": "Wade Phillips / Joseph / Fangio / Evero / Joseph" },
+
+    { "franchise": "det", "from": 1985, "to": 1993, "scheme": "3-4", "confidence": "medium", "note": "Darryl Rogers / early Fontes (Mike Cofer, later Pat Swilling at OLB)" },
+
+    { "franchise": "gnb", "from": 1980, "to": 1991, "scheme": "3-4", "confidence": "medium", "note": "Starr's last years, Forrest Gregg, Infante/Bullough (Tim Harris, Bryce Paup at OLB)" },
+    { "franchise": "gnb", "from": 2009, "to": 2023, "scheme": "3-4", "confidence": "high", "note": "Capers / Pettine / Barry (Clay Matthews at OLB)" },
+
+    { "franchise": "htx", "from": 2002, "to": 2005, "scheme": "3-4", "confidence": "high", "note": "Capers expansion Texans (Jason Babin at OLB)" },
+    { "franchise": "htx", "from": 2011, "to": 2020, "scheme": "3-4", "confidence": "high", "note": "Wade Phillips / Crennel / Vrabel / Weaver" },
+
+    { "franchise": "oti", "from": 1974, "to": 1992, "scheme": "3-4", "confidence": "high", "note": "Bum Phillips / Glanville / Pardee Oilers (Robert Brazile, Lamar Lathon at OLB)" },
+    { "franchise": "oti", "from": 2014, "to": 2023, "scheme": "3-4", "confidence": "high", "note": "Horton / LeBeau / Pees / Bowen Titans" },
+
+    { "franchise": "jax", "from": 2021, "to": 2023, "scheme": "3-4", "confidence": "high", "note": "Cullen, then Caldwell" },
+
+    { "franchise": "kan", "from": 1978, "to": 2000, "scheme": "3-4", "confidence": "high", "note": "Levy / Mackovic (Bill Maas NT) / Schottenheimer / Cunningham (Derrick Thomas at OLB)" },
+    { "franchise": "kan", "from": 2009, "to": 2018, "scheme": "3-4", "confidence": "high", "note": "Pendergast / Crennel / Sutton (Tamba Hali, Justin Houston at OLB)" },
+
+    { "franchise": "sdg", "from": 1986, "to": 1991, "scheme": "3-4", "confidence": "medium", "note": "Ron Lynn Chargers (Billy Ray Smith, Leslie O'Neal at OLB)" },
+    { "franchise": "sdg", "from": 2004, "to": 2016, "scheme": "3-4", "confidence": "high", "note": "Wade Phillips / Cottrell / Rivera / Manusky / Pagano (Shawne Merriman at OLB)" },
+    { "franchise": "sdg", "from": 2021, "to": null, "scheme": "3-4", "confidence": "high", "note": "Staley, then Minter" },
+
+    { "franchise": "ram", "from": 1983, "to": 1991, "scheme": "3-4", "confidence": "high", "note": "Fritz Shurmur (Kevin Greene, Mike Wilcher, Mel Owens at OLB)" },
+    { "franchise": "ram", "from": 2017, "to": null, "scheme": "3-4", "confidence": "high", "note": "Wade Phillips / Staley / Morris / Shula" },
+
+    { "franchise": "rai", "from": 1972, "to": 1994, "scheme": "3-4", "confidence": "medium", "note": "Madden / Flores / Shell Raiders (Ted Hendricks, Rod Martin at OLB)" },
+    { "franchise": "rai", "from": 2022, "to": 2023, "scheme": "3-4", "confidence": "high", "note": "Patrick Graham" },
+
+    { "franchise": "mia", "from": 1971, "to": 1995, "scheme": "3-4", "confidence": "medium", "note": "Arnsparger's 53 defense, then Killer B's / Olivadotti through Shula's last season (Bryan Cox at OLB)" },
+    { "franchise": "mia", "from": 2008, "to": 2011, "scheme": "3-4", "confidence": "high", "note": "Parcells / Sparano / Nolan" },
+    { "franchise": "mia", "from": 2019, "to": null, "scheme": "3-4", "confidence": "high", "note": "Flores / Boyer / Fangio / Weaver" },
+
+    { "franchise": "min", "from": 2022, "to": null, "scheme": "3-4", "confidence": "high", "note": "Donatell, then Flores" },
+
+    { "franchise": "nor", "from": 1981, "to": 1996, "scheme": "3-4", "confidence": "high", "note": "Bum Phillips, then Mora's Dome Patrol (Rickey Jackson, Pat Swilling at OLB)" },
+
+    { "franchise": "nwe", "from": 1974, "to": 1990, "scheme": "3-4", "confidence": "high", "note": "Fairbanks / Erhardt / Meyer / Berry / Rust (Andre Tippett at OLB)" },
+    { "franchise": "nwe", "from": 1993, "to": 1996, "scheme": "3-4", "confidence": "high", "note": "Parcells (Chris Slade, Willie McGinest at OLB)" },
+    { "franchise": "nwe", "from": 2003, "to": 2010, "scheme": "3-4", "confidence": "high", "note": "Belichick / Crennel / Pees (Mike Vrabel at OLB)" },
+    { "franchise": "nwe", "from": 2019, "to": null, "scheme": "3-4", "confidence": "medium", "note": "Belichick's late multiple fronts read as 3-4 base; Mayo / Vrabel" },
+
+    { "franchise": "nyg", "from": 1981, "to": 1992, "scheme": "3-4", "confidence": "high", "note": "Parcells / Belichick / Handley (Lawrence Taylor, Carl Banks at OLB)" },
+    { "franchise": "nyg", "from": 2018, "to": null, "scheme": "3-4", "confidence": "high", "note": "Bettcher / Graham / Martindale / Bowen" },
+
+    { "franchise": "nyj", "from": 1997, "to": 2000, "scheme": "3-4", "confidence": "high", "note": "Parcells / Groh" },
+    { "franchise": "nyj", "from": 2006, "to": 2020, "scheme": "3-4", "confidence": "high", "note": "Mangini / Rex Ryan / Bowles / Gregg Williams" },
+
+    { "franchise": "phi", "from": 1977, "to": 1985, "scheme": "3-4", "confidence": "high", "note": "Marion Campbell as DC then HC" },
+    { "franchise": "phi", "from": 2013, "to": 2015, "scheme": "3-4", "confidence": "high", "note": "Chip Kelly / Bill Davis" },
+
+    { "franchise": "pit", "from": 1982, "to": null, "scheme": "3-4", "confidence": "high", "note": "Steelers moved to the 3-4 in 1982 and never left" },
+
+    { "franchise": "sea", "from": 1983, "to": 1991, "scheme": "3-4", "confidence": "high", "note": "Chuck Knox (Joe Nash NT, Jacob Green DE)" },
+
+    { "franchise": "sfo", "from": 1981, "to": 1993, "scheme": "3-4", "confidence": "high", "note": "Walsh / Seifert (Keena Turner, Charles Haley at OLB); 4-3 from 1994" },
+    { "franchise": "sfo", "from": 2005, "to": 2015, "scheme": "3-4", "confidence": "high", "note": "Nolan / Manusky / Fangio / Mangini" },
+
+    { "franchise": "tam", "from": 1976, "to": 1991, "scheme": "3-4", "confidence": "high", "note": "McKay / Bennett / Perkins (Hugh Green, Broderick Thomas at OLB)" },
+    { "franchise": "tam", "from": 2019, "to": null, "scheme": "3-4", "confidence": "high", "note": "Todd Bowles" },
+
+    { "franchise": "was", "from": 2010, "to": 2019, "scheme": "3-4", "confidence": "high", "note": "Haslett / Barry / Manusky" }
+  ]
+}
