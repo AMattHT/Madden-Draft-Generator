@@ -31,12 +31,12 @@ let pidByCode: Map<string, number> | null = null;
  *  like polamaluTroy_16548 live) plus the career roster's cranium heads — with the
  *  asset name in the game's casing and its menu-portrait id. */
 export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number; portraitKind?: 'legend' | 'roster' | 'player' | 'none' }
-interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string> }
+interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string>; headAccessory: Set<string> }
 const catalogs: Partial<Record<'m26' | 'm27', FaceCatalog>> = {};
 function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
   const hit = catalogs[version];
   if (hit) return hit;
-  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set(), legendPids: new Map(), playerPortraits: new Set() };
+  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set(), legendPids: new Map(), playerPortraits: new Set(), headAccessory: new Set() };
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'face-assets-by-game.json'), 'utf8'));
     const v = raw?.[version] ?? {};
@@ -45,6 +45,7 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
     for (const k of (v.legendPortraits ?? []) as string[]) cat.legendPortraits.add(k);
     for (const [k, pid] of Object.entries(v.legendPids ?? {})) cat.legendPids.set(k, Number(pid));
     for (const k of (v.playerPortraits ?? []) as string[]) cat.playerPortraits.add(k);
+    for (const k of (v.genericHeadAccessory ?? []) as string[]) cat.headAccessory.add(k.toLowerCase());
   } catch { /* catalog absent — M27 falls back to the save-only map, M26 to the lookup */ }
   if (version === 'm27' && cat.assets.size === 0) {
     // Older data file: the save-only extract (current players, no legends).
@@ -66,6 +67,8 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
  *  has already cut players, and current players' heads carry over between the two
  *  games (their portrait ids match 1,044 of 1,055 times). */
 const M27_TRUST_LOOKUP_FROM = 2019;
+/** Skull caps / do-rags under the helmet became common in the late 1990s. */
+const HEADWEAR_FROM = 1995;
 /** ~280 legacy scan dirs (baughsammy, williamskevin, suggsterrell_16524) hold only
  *  shader presets, no head bundle. In-game (M27, 22 Aug 2026) they render as the
  *  default head, so they are generics unless MADDEN_PRESET_HEADS=1. */
@@ -406,6 +409,14 @@ export const LikenessService = {
     const tone = raceToSkinTone(player.race);
     const pools = poolsFor(gameVersion);
     let pool = pools.get(tone);
+    // Heads with built-in headwear (skull cap / do-rag — a `headaccessory` part in
+    // the game files) are a 2000s look; keep them off players drafted before 1995
+    // when the tone still has enough plain heads to choose from.
+    if (pool && (player.draftYear ?? 2026) < HEADWEAR_FROM) {
+      const acc = catalogFor(gameVersion).headAccessory;
+      const plain = pool.filter((h) => !acc.has(h.toLowerCase()));
+      if (plain.length >= 3) pool = plain;
+    }
     if (!pool || pool.length === 0) {
       // Nearest available tone, then any.
       for (let d = 1; d <= 7 && (!pool || pool.length === 0); d++) {

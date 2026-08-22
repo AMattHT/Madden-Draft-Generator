@@ -8,7 +8,7 @@ import { FrontSevenService } from './FrontSevenService';
 import { SkinToneService } from './SkinToneService';
 import { DerivedSkinToneService } from './DerivedSkinToneService';
 import { WikiSkinToneService } from './WikiSkinToneService';
-import { resolveSkinTone } from './SkinToneClassify';
+import { toneFromEvidence } from './SkinToneClassify';
 import { NflverseCareerService } from './NflverseCareerService';
 import { PhotoLookService } from './PhotoLookService';
 import { BaselinePlayer } from '../types/player';
@@ -49,24 +49,19 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const height = c?.heightInches ?? e?.heightInches ?? nv?.heightInches ?? null;
   const weight = c?.weight ?? e?.weight ?? nv?.weight ?? null;
   const age = e?.age ?? nv?.age ?? null;
-  // Skin tone for generic faces, best source first: real Madden portrait tone >
-  // Wikipedia-photo tone (for players with no Madden portrait) > explicit non-7 CSV
-  // race > position-weighted guess. Only matters for players without a 3D face asset.
-  const fallback = SkinToneService.defaultRaceFor(label ?? p.position, `${p.firstName}|${p.lastName}|${p.draftYear}`, p.draftYear);
-  const eraDark = SkinToneService.eraDarkShare(p.draftYear);
-  // ITA-from-photo is biased light on dark skin. Ignore a light/mid ITA when
-  // the position prior is dark — including legends whose M26 asset we will
-  // drop on M27 (otherwise Rod Woodson gets gen_3 + a white player's PID).
-  let derived = DerivedSkinToneService.toneForPid(p.photoId);
+  // Skin tone for generic faces (and the generic portrait of a scan with no
+  // portrait left): calibrated portrait evidence weighed against the position/era
+  // prior — SkinToneClassify.toneFromEvidence. A legends portrait (vintage photo,
+  // Namath reads as dark) is tempered; a Wikipedia tone and an explicit CSV race
+  // are weak extra evidence. No more "ignore a light reading at a dark position"
+  // (that made Keith Brooking tone 7).
+  const prior = SkinToneService.toneDistribution(label ?? p.position, p.draftYear);
+  const portrait = DerivedSkinToneService.itaForPid(p.photoId);
   // The wiki tone was read from the row's Wikipedia photo; if that photo was
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
-  let wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
-  if (fallback >= 6) {
-    if (derived != null && derived <= 4) derived = null;
-    if (wiki != null && wiki <= 4) wiki = null;
-  }
+  const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = resolveSkinTone({ derived, wiki, trustedCsv: trusted, fallback, eraDarkShare: eraDark });
+  const race = toneFromEvidence({ ita: portrait?.ita ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);

@@ -4,6 +4,7 @@ import { DATA_ROOT, LOOKUPS_DIR } from '../config/paths';
 import { PositionMapper } from './PositionMapper';
 import { ObservedGear } from '../types/player';
 import { GEAR_SLOT_TYPES } from './GearOptionsService';
+import { seededRng } from '../util/rng';
 
 /**
  * Era-appropriate gear for generated draft prospects. Emits M26 visual-JSON
@@ -556,6 +557,42 @@ function sanitizeForM27(els: LoadoutElement[], seedKey: string): LoadoutElement[
   return out;
 }
 
+/** Share of prospects with eye black in the game's own M27 classes (1,556
+ *  prospects): none on C/K/LS, a few QBs and DTs, up to half the safeties. */
+const EYE_PAINT_RATE: Record<string, number> = {
+  QB: 0.08, HB: 0.26, FB: 0.43, WR: 0.38, TE: 0.36, LT: 0.18, LG: 0.22, C: 0, RG: 0.25, RT: 0.14,
+  LEDG: 0.04, REDG: 0.46, DT: 0.06, SAM: 0.31, MIKE: 0.40, WILL: 0.20, CB: 0.22, FS: 0.38, SS: 0.55, K: 0, P: 0.17, LS: 0,
+};
+/** The game's mix of marks (M27 names); pre-2000 classes only get grease paint —
+ *  the tape and sticker variants are modern. */
+const EYE_PAINT_KINDS_M27: Array<[string, number]> = [
+  ['FaceMarks_EyePaint2', 87], ['FaceMarks_EyePaint', 64], ['FaceMarks_EyePaint3', 61], ['FaceMarks_NoseEyeTape', 60],
+  ['FaceMarks_EyePaintCross', 44], ['FaceMarks_NoseTapeEyePaint', 26], ['FaceMarks_EyeTapeRight', 18], ['FaceMarks_EyeTape', 17],
+  ['FaceMarks_EyeTapeLeft', 4], ['FaceMarks_NoseTape', 4],
+];
+const EYE_PAINT_GREASE = new Set(['FaceMarks_EyePaint', 'FaceMarks_EyePaint2', 'FaceMarks_EyePaint3']);
+/** Grease eye black was rare before the 1970s and only took off in the 80s. */
+function eyePaintEraFactor(year: number): number {
+  if (year < 1960) return 0.05;
+  if (year < 1970) return 0.2;
+  if (year < 1980) return 0.5;
+  if (year < 1990) return 0.8;
+  return 1;
+}
+function eyePaintFor(year: number, posName: string, seed: string, m27: boolean): string {
+  const rate = (EYE_PAINT_RATE[posName] ?? 0.2) * eyePaintEraFactor(year);
+  const r = seededRng(seed);
+  if (r() >= rate) return '';
+  const kinds = year < 2000 ? EYE_PAINT_KINDS_M27.filter(([k]) => EYE_PAINT_GREASE.has(k)) : EYE_PAINT_KINDS_M27;
+  const total = kinds.reduce((s, [, w]) => s + w, 0);
+  let x = r() * total;
+  let kind = kinds[0][0];
+  for (const [k, w] of kinds) { x -= w; if (x < 0) { kind = k; break; } }
+  if (m27) return kind;
+  // M26 vocabulary: grease for the paint variants, a sticker for tape/cross.
+  return EYE_PAINT_GREASE.has(kind) ? (kind === 'FaceMarks_EyePaint2' ? 'EyeBlack_Grease_Smear' : 'EyeBlack_Grease') : 'EyeBlack_Sticker';
+}
+
 export const EraGearService = {
   /** Build era-appropriate PlayerOnField loadout elements for a prospect.
    *  version='m27' uses the M27-verified equipment vocabulary. */
@@ -571,6 +608,7 @@ export const EraGearService = {
     const era = (m27 && M27_EQUIPMENT[bracket]) || load().eraDefaults[bracket] || load().eraDefaults['1970-1979'];
     if (!era) return [];
     const group = PositionMapper.groupFromId(m26PosId);
+    const posName = PositionMapper.name(m26PosId);
     const els: LoadoutElement[] = [];
     const match = !!(observed && observed.onField);
     const choose = (pool: string[] | null | undefined, slot: string): string | null => {
@@ -674,9 +712,10 @@ export const EraGearService = {
       // removal marker for M26 (merge-into-donor) and by omission for M27.
       for (const el of bodyAccessories(year, group, seedKey, m27)) els.push(el);
 
-      let eyePaint = pick(skill ? extras.eyePaintSkill : null, `${seedKey}|eyePaint`);
-      if (match && observed!.eyeBlack) eyePaint = m27 ? 'FaceMarks_EyePaint' : 'EyeBlack_Grease';
-      else if (match && observed!.eyeBlack === false) eyePaint = '';
+      // The photo detector's eyeBlack flag fires on any dark mid-face under a
+      // helmet (dark skin, shadow): 74% of the 1987 class "wore" eye black. The
+      // game's per-position rates decide instead.
+      let eyePaint = eyePaintFor(year, posName, `${seedKey}|eyePaint`, m27);
       if (m27 && eyePaint) eyePaint = m27fix(eyePaint);
       if (eyePaint && eyePaint !== 'FaceMarks_None') els.push({ slotType: 'FacePaint', itemAssetName: eyePaint });
     }

@@ -190,3 +190,85 @@ export function resolveSkinTone(opts: {
   if (trusted != null) return trusted;
   return clamp(opts.fallback);
 }
+
+/**
+ * Calibrated classifier (22 Aug 2026). Ground truth: EA's own fallback generic
+ * head (gen_<tone>_…) for 2,549 real players on the M26/M27 career rosters, read
+ * against their menu portraits. Median ITA of skin pixels in a tight cheek/nose
+ * window (rows 40-66%, cols 36-64% of the 256px crop — the old 28-74% box was
+ * mostly hair on Namath) separates the tones monotonically; tones 1 and 2 are
+ * indistinguishable even to EA. Per-tone Gaussians below; held-out: 56% exact
+ * (1/2 merged), 81% within one tone, 3.6% light<->dark swaps (old sampler: 36% /
+ * 24% off by 2+).
+ */
+export const TONE_ITA_MODEL: Record<number, [number, number]> = {
+  1: [33.5, 15.9], 2: [32.4, 17.4], 3: [18.6, 19.3], 4: [10.6, 21.5], 5: [-5.6, 19.7], 6: [-23.7, 20.7], 7: [-36.0, 18.7],
+};
+
+/** Median ITA of skin pixels in the calibrated face window (see TONE_ITA_MODEL).
+ *  Neutral pixels (background, white jersey, grey) and very dark ones (hair,
+ *  shadow) are excluded; null when fewer than `minPixels` skin pixels remain. */
+export function sampleSkinITATight(data: Buffer | Uint8Array, width: number, height: number, channels: number, minPixels = 40): number | null {
+  const y0 = Math.floor(0.40 * height), y1 = Math.floor(0.66 * height);
+  const x0 = Math.floor(0.36 * width), x1 = Math.floor(0.64 * width);
+  const Ls: number[] = [], Bs: number[] = [];
+  const lin = (c: number) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const i = (y * width + x) * channels;
+      if (channels >= 4 && data[i + 3] < 200) continue;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const Cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+      const Cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+      if (Math.hypot(Cb - 128, Cr - 128) < 12) continue;
+      if (Cb < 68 || Cb > 142 || Cr < 125 || Cr > 182) continue;
+      const R = lin(r), G = lin(g), B = lin(b);
+      const Y = R * 0.2126 + G * 0.7152 + B * 0.0722;
+      const Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+      const L = 116 * f(Y) - 16;
+      if (L < 12) continue;
+      Ls.push(L); Bs.push(200 * (f(Y) - f(Z)));
+    }
+  }
+  if (Ls.length < minPixels) return null;
+  Ls.sort((a, b) => a - b); Bs.sort((a, b) => a - b);
+  const L = Ls[Ls.length >> 1], bb = Bs[Bs.length >> 1];
+  return (Math.atan2(L - 50, bb) * 180) / Math.PI;
+}
+
+export interface ToneEvidence {
+  /** Median ITA from the player's Madden portrait (sampleSkinITATight). */
+  ita?: number | null;
+  /** The portrait is a plpo_legends_* image — often a scanned vintage photo whose
+   *  exposure is unreliable (Namath reads as dark): likelihood tempered 2x. */
+  legendPortrait?: boolean;
+  /** Tone read from a Wikipedia photo with the old sampler (weak evidence). */
+  wikiTone?: number | null;
+  /** Explicit non-default CSV race (1-6); mild evidence. */
+  trustedCsv?: number | null;
+  /** P(tone) for the position and era (SkinToneService.toneDistribution). */
+  prior: Record<number, number>;
+}
+
+/** Argmax posterior tone over 1..7: prior x portrait likelihood x wiki x CSV. */
+export function toneFromEvidence(e: ToneEvidence): number {
+  let best = 0, bestScore = -Infinity;
+  const k = e.legendPortrait ? 2 : 1;
+  // A modern studio portrait is decent evidence (held-out sd ~18 deg): the
+  // position prior only gets half weight against it (a 2011 QB prior of 58% tone 2
+  // must not outvote Cam Newton's own face). Vintage legend photos keep the full prior.
+  const priorWeight = e.ita != null && !e.legendPortrait ? 0.5 : 1;
+  for (let t = 1; t <= 7; t++) {
+    let ll = priorWeight * Math.log(Math.max(0.03, e.prior[t] ?? 0));
+    if (e.ita != null) {
+      const [mu, sd0] = TONE_ITA_MODEL[t];
+      const sd = sd0 * k;
+      ll += -0.5 * ((e.ita - mu) / sd) ** 2 - Math.log(sd);
+    }
+    if (e.wikiTone != null) ll += -0.5 * ((e.wikiTone - t) / 1.8) ** 2;
+    if (e.trustedCsv != null) ll += (e.trustedCsv <= 3) === (t <= 3) ? Math.log(2) : Math.log(0.5);
+    if (ll > bestScore) { bestScore = ll; best = t; }
+  }
+  return best || 4;
+}

@@ -115,13 +115,18 @@ function walk(dir: string, out: string[] = []): string[] {
 const LEGEND_PORTRAIT = /\/portraits\/playerportraits\/assets\/legends\/plpo_legends_([a-z0-9_]+?)_assetlibrary_playerportraits_brt$/;
 const PLAYER_PORTRAIT = /\/portraits\/playerportraits\/assets\/plpo_([a-z0-9_]+?)_assetlibrary_playerportraits_brt$/;
 const portraitStem = (s: string) => s.replace(/_(profile|alt\d*|\d+)$/g, '').replace(/[^a-z]/g, '');
+// Generic heads ship as players/gen_<tone>/<head>/<head>_<part>_launch_playerhead_brt;
+// a `headaccessory` part is built-in headwear (skull cap / do-rag / headband) —
+// Okoye (gen_6_h_g_01) and Namath (gen_4_t_g_01) rendered in a blue cap in 1987/1965.
+const GENERIC_PART = /\/players\/gen_\d\/(gen_\d_[a-z]+_[a-z]+_\d+)\/\1_([a-z_]+?)_launch_playerhead_brt$/;
 
-function headBundles(gameDir: string): { heads: Map<string, boolean>; legendPortraits: Set<string>; playerPortraits: Set<string> } {
+function headBundles(gameDir: string): { heads: Map<string, boolean>; legendPortraits: Set<string>; playerPortraits: Set<string>; genericParts: Map<string, Set<string>> } {
   const heads = new Map<string, boolean>(); // asset -> has a playerhead bundle
   const legendPortraits = new Set<string>(); // "kellyjim", "troyaikman" — MUT legends, whose heads are parametric (no bundle)
   const playerPortraits = new Set<string>(); // regular plpo_<lastfirst> portraits on disk (M27 dropped most retired players')
+  const genericParts = new Map<string, Set<string>>(); // generic head -> its parts (hair, haircap, headaccessory, ...)
   const root = path.join(gameDir, 'Data', 'Win32');
-  if (!fs.existsSync(root)) { console.warn(`  game dir missing: ${gameDir}`); return { heads, legendPortraits, playerPortraits }; }
+  if (!fs.existsSync(root)) { console.warn(`  game dir missing: ${gameDir}`); return { heads, legendPortraits, playerPortraits, genericParts }; }
   for (const toc of walk(root)) {
     let names: string[] = [];
     try { names = tocBundleNames(toc); } catch (e) { console.warn(`  ${path.basename(toc)}: ${(e as Error).message}`); }
@@ -130,13 +135,15 @@ function headBundles(gameDir: string): { heads: Map<string, boolean>; legendPort
       if (lp) { legendPortraits.add(portraitStem(lp[1])); continue; }
       const pp = PLAYER_PORTRAIT.exec(n);
       if (pp) { playerPortraits.add(portraitStem(pp[1])); continue; }
+      const gp = GENERIC_PART.exec(n);
+      if (gp) { (genericParts.get(gp[1]) ?? genericParts.set(gp[1], new Set()).get(gp[1])!).add(gp[2]); continue; }
       const m = HEAD_DIR.exec(n);
       if (!m || m[1].length !== 1) continue; // teen_*/recipes dirs are templates
       const asset = m[2];
       heads.set(asset, (heads.get(asset) ?? false) || /playerhead_brt$/.test(m[3]));
     }
   }
-  return { heads, legendPortraits, playerPortraits };
+  return { heads, legendPortraits, playerPortraits, genericParts };
 }
 
 // ---------- Roster (career autosave) ----------
@@ -236,7 +243,9 @@ function indexLookupNames(): void {
 
 async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
   console.log(`[${v}] bundles from ${GAME_DIRS[v]}`);
-  const { heads, legendPortraits, playerPortraits } = headBundles(GAME_DIRS[v]);
+  const { heads, legendPortraits, playerPortraits, genericParts } = headBundles(GAME_DIRS[v]);
+  const headAccessory = [...genericParts].filter(([, parts]) => parts.has('headaccessory')).map(([h]) => h).sort();
+  console.log(`  ${genericParts.size} generic heads, ${headAccessory.length} with built-in headwear`);
   console.log(`  ${heads.size} unique head scans, ${legendPortraits.size} legend portraits, ${playerPortraits.size} player portraits in the game files`);
   const save = newestAutosave(SAVES_DIRS[v]);
   const roster = save ? await rosterFaces(save) : [];
@@ -300,7 +309,7 @@ async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
   const legendPids: Record<string, number> = {};
   for (const [stem, pid] of legendPidTable()) if (legendPortraits.has(stem)) legendPids[stem] = pid;
   console.log(`  ${Object.keys(legendPids).length} legend portraits with a known PID`);
-  return { assets, byName, legendPortraits: [...legendPortraits].sort(), legendPids, playerPortraits: [...playerPortraits].sort(), missingFromLookup: missing.sort(), stats: { heads: heads.size, roster: roster.length, rosterSkipped, bundleOnly, unnamed, presetOnly, save: save ? path.basename(save) : null } };
+  return { assets, byName, legendPortraits: [...legendPortraits].sort(), legendPids, playerPortraits: [...playerPortraits].sort(), genericHeadAccessory: headAccessory, missingFromLookup: missing.sort(), stats: { heads: heads.size, roster: roster.length, rosterSkipped, bundleOnly, unnamed, presetOnly, save: save ? path.basename(save) : null } };
 }
 
 (async () => {

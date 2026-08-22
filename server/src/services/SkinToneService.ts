@@ -102,4 +102,15 @@ export function defaultRaceForVaried(label: string | null | undefined, key: stri
   return weightedTone(eraWeights(group, year), hashUnit(key));
 }
 
-export const SkinToneService = { defaultRaceFor, defaultRaceForVaried, eraDarkShare };
+/** P(tone) for a position label in an era — the prior the portrait evidence is
+ *  weighed against (tones the table never lists get a small floor). */
+export function toneDistribution(label: string | null | undefined, year = 2015): Record<number, number> {
+  const group = PositionMapper.groupFromId(PositionMapper.toM26Id(label ?? ''));
+  const w = eraWeights(group, year);
+  const total = w.reduce((s, [, x]) => s + x, 0) || 1;
+  const out: Record<number, number> = { 1: 0.01, 2: 0.01, 3: 0.01, 4: 0.01, 5: 0.01, 6: 0.01, 7: 0.01 };
+  for (const [t, x] of w) out[t] = Math.max(0.01, x / total);
+  return out;
+}
+
+export const SkinToneService = { defaultRaceFor, defaultRaceForVaried, eraDarkShare, toneDistribution };

@@ -117,3 +117,16 @@ test('a legends portrait keyed by name goes to the notable namesake only (Chris 
   assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Chris', lastName: 'Johnson', draftYear: 2003 }), false);
   assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Troy', lastName: 'Polamalu', draftYear: 2003 }), true);
 });
+
+test('generic heads with built-in headwear (skull cap) stay off pre-1995 players', skipWithoutCatalog, () => {
+  const acc = new Set(JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'face-assets-by-game.json'), 'utf8')).m27.genericHeadAccessory as string[]);
+  assert.ok(acc.has('gen_6_h_g_01') && acc.has('gen_4_t_g_01'), 'Okoye/Namath heads are flagged');
+  for (let i = 0; i < 60; i++) {
+    const old = LikenessService.generic(player({ firstName: 'Test', lastName: `P${i}`, race: 6, draftYear: 1987 }), i, 'm27');
+    assert.equal(acc.has(old.peps.toLowerCase()), false, `${old.peps} has headwear`);
+  }
+  // modern classes keep the full pool
+  let modernAcc = 0;
+  for (let i = 0; i < 80; i++) if (acc.has(LikenessService.generic(player({ firstName: 'Test', lastName: `M${i}`, race: 7, draftYear: 2024 }), i, 'm27').peps.toLowerCase())) modernAcc++;
+  assert.ok(modernAcc > 0, 'modern players can still get headwear heads');
+});
