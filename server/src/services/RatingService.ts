@@ -173,6 +173,11 @@ export const RatingService = {
     return clamp(overall);
   },
 
+  /** Career wAV a draft slot is expected to produce (Chase Stuart power law). */
+  slotExpectation(round: number | null, pick: number | null): number {
+    return predictedWavFromSlot(round, pick);
+  },
+
   /** wAV estimate for a player with no reliable actual wAV — shown with a "P" tag. */
   predictedWav(player: BaselinePlayer): number {
     return Math.round(estimateWav(player));

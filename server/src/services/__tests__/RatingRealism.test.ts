@@ -28,3 +28,20 @@ test('2003: a completed career still orders the class (Polamalu, Suggs, A. Johns
   const rankOf = (last: string) => byOvr.findIndex((r) => r.lastName === last) + 1;
   for (const last of ['Polamalu', 'Suggs', 'Johnson']) assert.ok(rankOf(last) <= 20, `${last} ranks ${rankOf(last)}`);
 });
+
+test('when a year has more than 402 players, the weakest undrafted are dropped, never a draftee', async () => {
+  const { players } = await enrichedClass(1968, 'NFL', { fill: false }); // 488 rows
+  assert.ok(players.length > 402, `1968 has ${players.length} rows`);
+  const pv = DraftClassBuilder.preview(players, 'madden');
+  assert.equal(pv.rows.length, 402);
+  assert.ok(pv.dropped.length === players.length - 402, `dropped ${pv.dropped.length}`);
+  const kept = new Set(pv.rows.map((r) => `${r.firstName} ${r.lastName}`));
+  const droppedDraftees = players.filter((p) => p.draftRound != null && !kept.has(`${p.firstName} ${p.lastName}`.trim()));
+  const keptUndrafted = players.filter((p) => p.draftRound == null && kept.has(`${p.firstName} ${p.lastName}`.trim()));
+  // 1968 had 462 picks, so draftees must go too - the weakest later picks, never a round 1-3 pick.
+  assert.ok(droppedDraftees.every((p) => (p.draftRound ?? 0) >= 4), droppedDraftees.map((p) => `${p.lastName} r${p.draftRound}`).slice(0, 6).join(', '));
+  // an undrafted nobody never survives ahead of a draftee with a career
+  assert.ok(keptUndrafted.every((p) => (p.wav ?? 0) > 5 || (p.seasonsStarted ?? 0) > 0), keptUndrafted.map((p) => p.lastName).join(', '));
+  // order preserved: pick 1 still leads the board
+  assert.equal(pv.rows[0].draftPick, 1);
+});

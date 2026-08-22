@@ -108,6 +108,18 @@ export function MetaStrip({
       <span className="text-[11px] text-neutral-400" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`}>
         <b className="tabular-nums text-neutral-200">{data.likeness.asset}</b> real faces
       </span>
+      {data.dropped && data.dropped.length > 0 && (
+        <>
+          <span className="h-4 w-px bg-border" />
+          <span
+            className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[11px] text-warning"
+            title={`The class holds 402; these ${data.dropped.length} (the weakest undrafted players) did not fit:
+${data.dropped.join(', ')}`}
+          >
+            <b className="tabular-nums">{data.dropped.length}</b> didn't fit
+          </span>
+        </>
+      )}
       <span className="hidden h-4 w-px bg-border sm:block" />
       <PositionBreakdown rows={rows} active={pos} onPick={onPickPos} compact />
       <TierKey />

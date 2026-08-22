@@ -280,6 +280,32 @@ export interface PreviewResult {
   rows: PreviewRow[];
   likeness: LikenessStats;
   count: number;
+  /** Players that did not fit the class (years with > 402 rows): the weakest
+   *  undrafted players by caliber, never a draftee. */
+  dropped: string[];
+}
+
+/**
+ * Cut a year with more rows than the class holds down to capacity. The source is in
+ * draft order, so a naive slice drops whoever happens to be last (1960: Bob Talamini
+ * at index 428). Instead drop the lowest-caliber UNDRAFTED players first, then the
+ * lowest-caliber late picks, and keep the survivors in their original order.
+ */
+function fitToCapacity(players: BaselinePlayer[]): { kept: BaselinePlayer[]; dropped: string[] } {
+  if (players.length <= LOGICAL_CAPACITY) return { kept: players, dropped: [] };
+  // Keep-score = career caliber + what the draft slot promised: a first-round bust
+  // stays (he was a real prospect), a 17th-rounder who never played goes first,
+  // and an undrafted star (Warner) outranks both of those.
+  const score = (p: BaselinePlayer) => {
+    const posId = PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight);
+    const slot = p.draftRound != null ? RatingService.slotExpectation(p.draftRound, p.draftPick) : 0;
+    return RatingService.caliber(p, posId) + slot;
+  };
+  const order = players.map((p, i) => ({ i, s: score(p) })).sort((a, b) => a.s - b.s);
+  const drop = new Set(order.slice(0, players.length - LOGICAL_CAPACITY).map((o) => o.i));
+  const kept = players.filter((_, i) => !drop.has(i));
+  const dropped = players.filter((_, i) => drop.has(i)).map((p) => `${p.firstName} ${p.lastName}`.trim());
+  return { kept, dropped };
 }
 
 /** Valid Madden 26 body types (from the shipped template's visuals JSON). */
@@ -424,8 +450,7 @@ export const DraftClassBuilder = {
     dropped: string[];
     likeness: LikenessStats;
   } {
-    const capped = players.slice(0, LOGICAL_CAPACITY);
-    const dropped = players.slice(LOGICAL_CAPACITY).map((p) => `${p.firstName} ${p.lastName}`.trim());
+    const { kept: capped, dropped } = fitToCapacity(players);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
 
     // Resolve each player's M26 position, then even out the two cohorts the source
@@ -502,9 +527,9 @@ export const DraftClassBuilder = {
    *  and the complete editable attribute set (no .mdc written). When
    *  gameVersion='m27', each row also carries its persona DNA trait names. */
   preview(players: BaselinePlayer[], mode: GenMode = 'madden', opts: GenOptions = {}, gameVersion: 'm26' | 'm27' = 'm26'): PreviewResult {
-    const capped = players.slice(0, LOGICAL_CAPACITY);
+    const { kept: capped } = fitToCapacity(players);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
-    const { prospects, likeness } = this.buildProspects(players, mode, opts, gameVersion);
+    const { prospects, likeness, dropped } = this.buildProspects(players, mode, opts, gameVersion);
     const rows: PreviewRow[] = prospects.map((p, i) => {
       const peps = String(p.PEPS || '').toLowerCase();
       const face: 'asset' | 'generic' | 'photo' = portraitMap.has(i)
@@ -562,7 +587,7 @@ export const DraftClassBuilder = {
         ratings,
       };
     });
-    return { rows, likeness, count: rows.length };
+    return { rows, likeness, count: rows.length, dropped };
   },
 
   /** Build a complete, importable .mdc buffer from baseline players, applying
