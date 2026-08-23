@@ -13,6 +13,7 @@ export interface PlayerRow {
   draftPick: number | null;
   wav: number | null;
   wavSource: string; // 'actual' | 'predicted' | 'preset'
+  srcIdx?: number; // index in the year's source list (stable; used to include/exclude)
   face: 'asset' | 'generic' | 'photo';
   faceSource?: string | null; // real-head provenance: bundle | roster | legend-portrait | preset | lookup…
   skinTone?: number; // 1-8, for the face picker's per-tone pool
@@ -100,10 +101,24 @@ export interface GeneratedClass {
   count: number;
   generatedCount?: number; // filler generics added to pad to a full class
   degraded?: boolean; // built before the backend's data caches were ready (not cached client-side)
-  dropped?: string[]; // players that did not fit (years with more than 402 rows)
+  dropped?: DroppedPlayer[]; // players that did not fit (years with more than 402 rows)
+  included?: number[]; // source indexes forced in (DraftOpts.include echo)
   fetchedAt?: number; // stamped client-side when pulled
   _v?: number; // cache schema/logic version (see cache.ts)
   _gen?: string; // backend generator fingerprint the class was built by (see cache.ts)
 }
 
 export type GameVersion = 'm26' | 'm27';
+
+/** A player the 402-slot class could not hold; `idx` is the stable source index. */
+export interface DroppedPlayer {
+  idx: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  round: number | null;
+  pick: number | null;
+  college: string;
+  wav: number | null;
+  score: number;
+}

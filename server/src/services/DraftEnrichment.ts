@@ -35,10 +35,13 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const f7 = LB_BUCKET.test(p.position.trim()) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
   // Pre-2001 defensive backs: no depth charts, so split corner vs safety by build.
   const dbSplit = !curated && !e?.positionLabel && p.draftYear < 2001 ? PositionMapper.dbByBuild(p.position, p.weight, p.draftYear) : null;
-  const label = curated ?? e?.positionLabel ?? f7?.label ?? dbSplit ?? null;
+  // A depth-chart slot never moves a quarterback or a specialist to the line or
+  // the secondary (Hail-Mary and hands-team packages list QBs at LCB / WR).
+  const chartLabel = e?.positionLabel && /^(QB|K|P|LS)$/i.test(p.position.trim()) ? null : e?.positionLabel;
+  const label = curated ?? chartLabel ?? f7?.label ?? dbSplit ?? null;
   // A slot that came from real data (curation or a depth chart) must survive the
   // class-level cohort balancing.
-  const positionLocked = !!(curated || e?.positionLabel);
+  const positionLocked = !!(curated || chartLabel);
 
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear);

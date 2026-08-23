@@ -28,6 +28,7 @@ r.post('/export/mdc', async (req, res) => {
     hindsight: req.body?.hindsight != null && req.body?.hindsight !== '' ? Math.max(0, Math.min(1, Number(req.body.hindsight))) : 1,
     autoStrength: !!req.body?.autoStrength,
     variant: Math.max(0, Math.round(Number(req.body?.variant) || 0)),
+    include: (Array.isArray(req.body?.include) ? req.body.include : []).map((x: unknown) => Number(x)).filter((n: number) => Number.isInteger(n) && n >= 0),
   };
 
   let players; let filename: string;

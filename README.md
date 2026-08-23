@@ -20,7 +20,7 @@ React web app + local Node backend. Run `npm run dev`, open **http://localhost:5
 | M27 extras | Persona DNA sampled from the game's rookies, PersonalityRating, Focus, QB style, birthdate, body-type enum — everything the game reads back verbatim |
 | Builds | Body type (Standard / Thin / Lean / Muscular / Heavy) from the editor's weight bands (Lean 160–215, Standard 175–230, Thin 180–240, Muscular 210–285, Heavy 280+) and the real roster's per-position mix inside them (`scripts/probes/probe-roster-builds.ts`); Lean is the Player table's `Freshman` |
 | Franchise tools | Work on M26 **and** M27 saves (a save from the other game is refused): cap reset (M27 contract table aware), heal injuries / dev traits, position-aware trait realism, **advance the roster N seasons** (age, retire, decline), free-agent trim, draft-pick reset, relocation/rebrand, schedule viewer, per-player roster editor |
-| Editing | Every attribute / bio / face / gear / persona editable; undo/redo; export/import edits as JSON; "game shows N" live recompute; Variant re-rolls; Save straight into the Madden Saves folder (atomic, keeps a `.bak`) |
+| Editing | Every attribute / bio / face / gear / persona editable; undo/redo; export/import edits as JSON; "game shows N" live recompute; Variant re-rolls; years with more players than the 402 slots (1987: 554) list who didn't fit and let you pull any back in (he takes the weakest keeper's slot, so other picks and edits hold); Save straight into the Madden Saves folder (atomic, keeps a `.bak`) |
 | Tests | `npm test` (91 tests incl. golden classes), `npm run verify` (export round-trips), `npm run verify:franchise` (every franchise tool on copies of both autosaves) |
 
 The full audit that drove the last round of work is in
@@ -67,7 +67,7 @@ right game's Saves folder), then in Madden: Franchise → Choose Draft Class.
 |---|---|---|
 | GET | `/api/health` | liveness + generator fingerprint (browser cache key) |
 | GET | `/api/draft/years` | draft years present locally |
-| GET | `/api/draft/:year/generated?league&mode&gameVersion` | generated class preview (rows, likeness, dropped, degraded) |
+| GET | `/api/draft/:year/generated?league&mode&gameVersion&include` | generated class preview (rows, likeness, dropped/included, degraded); `include` = source indexes forced into an over-capacity year |
 | POST | `/api/draft/custom` | All-Time / decade classes and modifiers (strength, studs, generational, hindsight, autoStrength, variant) |
 | POST | `/api/draft/recompute` | Madden's recomputed overall (+ re-solved attributes) for an edited prospect |
 | POST | `/api/export/mdc` | build the `.mdc` (download, or `saveToSaves: true`) |

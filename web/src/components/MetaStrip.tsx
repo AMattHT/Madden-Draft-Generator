@@ -73,11 +73,13 @@ export function MetaStrip({
   rows,
   pos,
   onPickPos,
+  onShowDropped,
 }: {
   data: GeneratedClass;
   rows: PlayerRow[];
   pos: string;
   onPickPos: (group: string) => void;
+  onShowDropped?: () => void;
 }) {
   const dev = [0, 0, 0, 0];
   let ovrSum = 0;
@@ -111,13 +113,13 @@ export function MetaStrip({
       {data.dropped && data.dropped.length > 0 && (
         <>
           <span className="h-4 w-px bg-border" />
-          <span
-            className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[11px] text-warning"
-            title={`The class holds 402; these ${data.dropped.length} (the weakest undrafted players) did not fit:
-${data.dropped.join(', ')}`}
+          <button
+            onClick={onShowDropped}
+            className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[11px] text-warning transition-colors hover:bg-warning/20"
+            title={`The class holds 402; ${data.dropped.length} players did not fit. Click to see them and pull any back in.`}
           >
-            <b className="tabular-nums">{data.dropped.length}</b> didn't fit
-          </span>
+            <b className="tabular-nums">{data.dropped.length}</b> didn't fit{data.included && data.included.length > 0 ? ` · ${data.included.length} included` : ''}
+          </button>
         </>
       )}
       <span className="hidden h-4 w-px bg-border sm:block" />

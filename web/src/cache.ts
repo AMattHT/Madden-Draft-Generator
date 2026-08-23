@@ -20,6 +20,7 @@ let generatorFingerprint: string | null = null;
 export function setGeneratorFingerprint(fp: string | null): void { generatorFingerprint = fp; }
 const keyOf = (year: number, league: string, mode: string) => `class:${year}_${league}_${mode}`;
 const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
+const includeKeyOf = (year: number, league: string) => `include:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
 
 export const cache = {
@@ -37,6 +38,10 @@ export const cache = {
     get<ClassEdits>(editsKeyOf(year, league)).then((e) => e ?? {}),
   editsSet: (year: number, league: string, edits: ClassEdits) => set(editsKeyOf(year, league), edits),
   editsDel: (year: number, league: string) => del(editsKeyOf(year, league)),
+
+  // Per-year "include" list: source indexes of players forced into an over-capacity class.
+  includeGet: (year: number, league: string): Promise<number[]> => get<number[]>(includeKeyOf(year, league)).then((a) => a ?? []),
+  includeSet: (year: number, league: string, idx: number[]) => set(includeKeyOf(year, league), idx),
 
   // Per-year gear edits (shared across modes; keyed by pick).
   gearEditsGet: (year: number, league: string): Promise<GearEdits> =>

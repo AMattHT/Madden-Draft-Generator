@@ -42,6 +42,13 @@ r.get('/draft/years', (_req, res) => {
 });
 
 /** Generated class as JSON (wAV-driven OVR, dev trait, face) for the UI. */
+/** `include`: source-row indexes to force into an over-capacity year — a JSON
+ *  array or a comma list in the query string. */
+function parseInclude(raw: unknown): number[] {
+  const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(',') : [];
+  return [...new Set(list.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n >= 0))].slice(0, 402);
+}
+
 r.get('/draft/:year/generated', async (req, res) => {
   const year = parseInt(req.params.year, 10);
   if (Number.isNaN(year)) return res.status(400).json({ error: 'invalid year' });
@@ -50,13 +57,14 @@ r.get('/draft/:year/generated', async (req, res) => {
   const mode: 'madden' | 'retro' = req.query.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = req.query.gameVersion === 'm27' ? 'm27' : 'm26';
   const fill = req.query.fill !== '0'; // pad to a full class by default
+  const include = parseInclude(req.query.include);
 
   // Baseline players with DB positions corrected + per-pick team map (shared with
   // the .mdc export so the file matches this preview exactly).
   const { players, enrich, generatedCount } = await enrichedClass(year, league, { fill });
   if (!players.length) return res.status(404).json({ error: `no players for ${year}` });
 
-  const preview = DraftClassBuilder.preview(players, mode, {}, gameVersion);
+  const preview = DraftClassBuilder.preview(players, mode, { include }, gameVersion);
   await attachTeams(preview, year, enrich);
   // Degraded until the depth-chart caches are built (first run): positions for
   // 2001+ DBs/OL are uncorrected, so the client must not cache this as final.
@@ -95,7 +103,7 @@ r.post('/draft/recompute', (req, res) => {
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
     source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;
-    strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number;
+    strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number; include?: unknown;
   };
   const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -106,6 +114,7 @@ r.post('/draft/custom', async (req, res) => {
     hindsight: b.hindsight != null && b.hindsight !== '' ? Math.max(0, Math.min(1, Number(b.hindsight))) : 1,
     autoStrength: !!b.autoStrength,
     variant: Math.max(0, Math.round(Number(b.variant) || 0)),
+    include: parseInclude(b.include),
   };
 
   if (b.source === 'alltime' || b.source === 'decade') {

@@ -49,6 +49,10 @@ export interface GenOptions {
   /** Scale the class curve by how good the class actually was (top-32 caliber
    *  vs the 1970-2015 average), so 1983 tops out higher than 2013. */
   autoStrength?: boolean;
+  /** Source-row indexes (see DroppedPlayer.idx) the user wants in the class even
+   *  though the year has more players than the 402 slots: each takes the slot of
+   *  the weakest remaining keeper, so everyone else's pick number is unchanged. */
+  include?: number[];
   /** Variant seed: 0 = the canonical class; any other value re-rolls every
    *  seeded choice (attribute noise, faces, gear, persona, builds) while the
    *  player list, order and overalls stay the same. */
@@ -355,7 +359,7 @@ export interface BuildResult {
   buffer: Buffer;
   count: number;
   truncated: boolean;
-  dropped: string[];
+  dropped: DroppedPlayer[];
   likeness: LikenessStats;
 }
 
@@ -379,6 +383,8 @@ export interface PreviewRow {
   draftPick: number | null;
   wav: number | null;
   wavSource: string;
+  /** Index of this player in the year's source list (stable; GenOptions.include uses it). */
+  srcIdx: number;
   face: 'asset' | 'generic' | 'photo';
   /** Where a real head came from: 'bundle' (scan in the game files), 'roster',
    *  'legend-portrait', 'preset' (shader preset only — pending in-game check),
@@ -426,9 +432,25 @@ export interface PreviewResult {
   rows: PreviewRow[];
   likeness: LikenessStats;
   count: number;
-  /** Players that did not fit the class (years with > 402 rows): the weakest
-   *  undrafted players by caliber, never a draftee. */
-  dropped: string[];
+  /** Players that did not fit the class (years with > 402 rows): the weakest by
+   *  caliber + draft slot. `idx` is the stable source-row index used by
+   *  GenOptions.include. */
+  dropped: DroppedPlayer[];
+  /** Source-row indexes that were forced in (echo of GenOptions.include). */
+  included: number[];
+}
+
+export interface DroppedPlayer {
+  idx: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  round: number | null;
+  pick: number | null;
+  college: string;
+  wav: number | null;
+  /** Keep-score the cut was made on (caliber + slot expectation), for the panel's order. */
+  score: number;
 }
 
 /**
@@ -437,8 +459,8 @@ export interface PreviewResult {
  * at index 428). Instead drop the lowest-caliber UNDRAFTED players first, then the
  * lowest-caliber late picks, and keep the survivors in their original order.
  */
-function fitToCapacity(players: BaselinePlayer[]): { kept: BaselinePlayer[]; dropped: string[] } {
-  if (players.length <= LOGICAL_CAPACITY) return { kept: players, dropped: [] };
+function fitToCapacity(players: BaselinePlayer[], include: number[] = []): { kept: BaselinePlayer[]; keptIdx: number[]; dropped: DroppedPlayer[]; included: number[] } {
+  if (players.length <= LOGICAL_CAPACITY) return { kept: players, keptIdx: players.map((_, i) => i), dropped: [], included: [] };
   // Keep-score = career caliber + what the draft slot promised: a first-round bust
   // stays (he was a real prospect), a 17th-rounder who never played goes first,
   // and an undrafted star (Warner) outranks both of those.
@@ -447,11 +469,34 @@ function fitToCapacity(players: BaselinePlayer[]): { kept: BaselinePlayer[]; dro
     const slot = p.draftRound != null ? RatingService.slotExpectation(p.draftRound, p.draftPick) : 0;
     return RatingService.caliber(p, posId) + slot;
   };
-  const order = players.map((p, i) => ({ i, s: score(p) })).sort((a, b) => a.s - b.s);
-  const drop = new Set(order.slice(0, players.length - LOGICAL_CAPACITY).map((o) => o.i));
-  const kept = players.filter((_, i) => !drop.has(i));
-  const dropped = players.filter((_, i) => drop.has(i)).map((p) => `${p.firstName} ${p.lastName}`.trim());
-  return { kept, dropped };
+  const scores = players.map(score);
+  const order = players.map((_, i) => i).sort((a, b) => scores[a] - scores[b]);
+  const drop = new Set(order.slice(0, players.length - LOGICAL_CAPACITY));
+  // Baseline keep list in source order; pick numbers follow from it.
+  const keptIdx = players.map((_, i) => i).filter((i) => !drop.has(i));
+  // Forced inclusions swap into the slot of the weakest remaining keeper (never a
+  // forced one), so every other prospect keeps its pick number and its edits.
+  const forced = new Set(include.filter((i) => Number.isInteger(i) && i >= 0 && i < players.length && drop.has(i)));
+  const included: number[] = [];
+  for (const i of forced) {
+    let victimPos = -1;
+    for (let k = 0; k < keptIdx.length; k++) {
+      const j = keptIdx[k];
+      if (forced.has(j) || included.includes(j)) continue;
+      if (victimPos < 0 || scores[j] < scores[keptIdx[victimPos]]) victimPos = k;
+    }
+    if (victimPos < 0) break;
+    drop.add(keptIdx[victimPos]);
+    drop.delete(i);
+    keptIdx[victimPos] = i;
+    included.push(i);
+  }
+  const kept = keptIdx.map((i) => players[i]);
+  const dropped: DroppedPlayer[] = [...drop].sort((a, b) => scores[b] - scores[a]).map((i) => {
+    const p = players[i];
+    return { idx: i, firstName: p.firstName, lastName: p.lastName, position: p.position, round: p.draftRound ?? null, pick: p.draftPick ?? null, college: p.college || '', wav: p.wav ?? null, score: Math.round(scores[i] * 10) / 10 };
+  });
+  return { kept, keptIdx, dropped, included };
 }
 
 /** Valid Madden 26 body types (from the shipped template's visuals JSON). */
@@ -593,10 +638,11 @@ export const DraftClassBuilder = {
   ): {
     prospects: MdcProspect[];
     truncated: boolean;
-    dropped: string[];
+    dropped: DroppedPlayer[];
+    included: number[];
     likeness: LikenessStats;
   } {
-    const { kept: capped, dropped } = fitToCapacity(players);
+    const { kept: capped, dropped, included } = fitToCapacity(players, opts.include ?? []);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
 
     // Resolve each player's M26 position, then even out the two cohorts the source
@@ -680,16 +726,16 @@ export const DraftClassBuilder = {
       withPortrait: capped.filter((p) => p.photoId != null).length,
       customPortrait: portraitMap.size,
     };
-    return { prospects: built.map((b) => b.prospect), truncated: dropped.length > 0, dropped, likeness };
+    return { prospects: built.map((b) => b.prospect), truncated: dropped.length > 0, dropped, included, likeness };
   },
 
   /** Full JSON preview of the generated class for the UI: per-player bio, photo,
    *  and the complete editable attribute set (no .mdc written). When
    *  gameVersion='m27', each row also carries its persona DNA trait names. */
   preview(players: BaselinePlayer[], mode: GenMode = 'madden', opts: GenOptions = {}, gameVersion: 'm26' | 'm27' = 'm26'): PreviewResult {
-    const { kept: capped } = fitToCapacity(players);
+    const { kept: capped, keptIdx } = fitToCapacity(players, opts.include ?? []);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
-    const { prospects, likeness, dropped } = this.buildProspects(players, mode, opts, gameVersion);
+    const { prospects, likeness, dropped, included } = this.buildProspects(players, mode, opts, gameVersion);
     const rows: PreviewRow[] = prospects.map((p, i) => {
       const peps = String(p.PEPS || '').toLowerCase();
       const face: 'asset' | 'generic' | 'photo' = portraitMap.has(i)
@@ -726,6 +772,7 @@ export const DraftClassBuilder = {
         // (matches what actually drives their OVR) instead of the raw/absent value.
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         wavSource: base.wavSource,
+        srcIdx: keptIdx[i],
         face,
         faceSource: face === 'asset' ? (LikenessService.realFace(base, gameVersion)?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
@@ -750,7 +797,7 @@ export const DraftClassBuilder = {
         ratings,
       };
     });
-    return { rows, likeness, count: rows.length, dropped };
+    return { rows, likeness, count: rows.length, dropped, included };
   },
 
   /** Build a complete, importable .mdc buffer from baseline players, applying

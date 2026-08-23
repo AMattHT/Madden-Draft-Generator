@@ -77,6 +77,7 @@ async function build(): Promise<void> {
   // gsis -> tally of DB slots seen across all weeks/seasons.
   const tally = new Map<string, Record<DbPos, number>>();
   const slotTally = new Map<string, Record<string, number>>();
+  const rowsPerGsis = new Map<string, number>();
   for (let year = FIRST_YEAR; year <= LAST_YEAR; year++) {
     const rows = await fetchYear(year);
     if (!rows) continue;
@@ -90,6 +91,9 @@ async function build(): Promise<void> {
         tally.set(gsis, t);
       }
       const slot = SLOT_LABEL[(row.depth_position || '').trim().toUpperCase()];
+      // Count every row too: a slot must be where the player actually lines up,
+      // not a Hail-Mary package (Matt Ryan: 285 QB rows, 2 LCB -> "CB").
+      if ((row.position || '').trim() || (row.depth_position || '').trim()) rowsPerGsis.set(gsis, (rowsPerGsis.get(gsis) ?? 0) + 1);
       if (slot) {
         const st = slotTally.get(gsis) ?? {};
         st[slot] = (st[slot] || 0) + 1;
@@ -99,7 +103,9 @@ async function build(): Promise<void> {
   }
   const slots = new Map<string, string>();
   for (const [gsis, st] of slotTally) {
-    slots.set(gsis, Object.keys(st).reduce((a, b) => (st[b] > st[a] ? b : a)));
+    const best = Object.keys(st).reduce((a, b) => (st[b] > st[a] ? b : a));
+    const total = rowsPerGsis.get(gsis) ?? 0;
+    if (st[best] >= 3 && st[best] >= 0.3 * total) slots.set(gsis, best);
   }
   fs.writeFileSync(SLOT_CACHE, JSON.stringify(Object.fromEntries(slots)));
   slotMap = slots;

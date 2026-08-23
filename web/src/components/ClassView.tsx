@@ -21,6 +21,7 @@ export function ClassView({
   onRefresh,
   onVariant,
   onResetVariant,
+  onShowDropped,
   busy,
   edits,
   gearEdits,
@@ -40,6 +41,7 @@ export function ClassView({
   onRefresh: () => void;
   onVariant?: () => void;
   onResetVariant?: () => void;
+  onShowDropped?: () => void;
   busy: boolean;
   edits: ClassEdits;
   gearEdits: GearEdits;
@@ -239,7 +241,7 @@ export function ClassView({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-3">
         {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
-        <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} />
+        <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} onShowDropped={onShowDropped} />
 
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
           <Toolbar

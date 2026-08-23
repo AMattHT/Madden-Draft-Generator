@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
 import { ClassView } from './components/ClassView';
+import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
@@ -20,10 +21,11 @@ export interface DraftOpts {
   hindsight: number; // 0 = draft-day board (by slot), 1 = career outcome
   autoStrength: boolean; // scale the curve by how good the class really was
   variant: number; // 0 = canonical class; N re-rolls faces/gear/attribute noise
+  include?: number[]; // source indexes forced into an over-capacity year (per class, persisted)
 }
 export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false, hindsight: 1, autoStrength: false, variant: 0 };
 export const isCustomDraft = (o: DraftOpts) =>
-  o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational || (o.hindsight ?? 1) !== 1 || !!o.autoStrength || (o.variant ?? 0) !== 0;
+  o.source !== 'year' || o.strength !== 1 || o.studs !== 0 || o.generational || (o.hindsight ?? 1) !== 1 || !!o.autoStrength || (o.variant ?? 0) !== 0 || (o.include?.length ?? 0) > 0;
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1966; // 1967-69: one common draft
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
@@ -51,6 +53,7 @@ export default function App() {
   // For merge-era (1960–69) years the user can pick AFL+NFL / NFL / AFL; null = default.
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
   const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
+  const [showDropped, setShowDropped] = useState(false);
   const editKeyRef = useRef<{ year: number; league: string } | null>(null);
   // Backend liveness: poll /api/health every 15 s (the dot used to mirror the
   // last request's error state, which said "connected" with the server down).
@@ -76,10 +79,15 @@ export default function App() {
 
   const select = useCallback(
     async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts, useVersion: GameVersion = gameVersion) => {
-      const opts = useOpts ?? draftOpts;
-      const custom = isCustomDraft(opts);
+      const baseOpts = useOpts ?? draftOpts;
       // Greats classes key their edits/cache under a fixed pseudo-year / decade label.
-      const league = opts.source === 'alltime' ? 'all-time' : opts.source === 'decade' ? `${opts.decade}s` : useLeague ?? effLeague(year);
+      const league = baseOpts.source === 'alltime' ? 'all-time' : baseOpts.source === 'decade' ? `${baseOpts.decade}s` : useLeague ?? effLeague(year);
+      // The include list lives with the class (not the global options): load it for
+      // this year so a forced-in player survives re-selecting the year.
+      const storedInclude = year > 0 && baseOpts.source === 'year' ? await cache.includeGet(year, league) : [];
+      const opts: DraftOpts = { ...baseOpts, include: useOpts?.include ?? storedInclude };
+      if ((opts.include?.length ?? 0) !== (baseOpts.include?.length ?? 0)) setDraftOpts(opts);
+      const custom = isCustomDraft(opts);
       const ekYear = opts.source === 'alltime' ? 0 : opts.source === 'decade' ? opts.decade : year;
       // M27 classes are cached under a versioned key so M26/M27 views never collide.
       const cacheMode = useVersion === 'm27' ? `${useMode}-m27` : useMode;
@@ -102,7 +110,7 @@ export default function App() {
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
-            hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant,
+            hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant, include: opts.include,
             gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;
@@ -148,6 +156,22 @@ export default function App() {
     },
     [mode, effLeague, draftOpts, gameVersion]
   );
+
+  /** Force a player the 402-slot class cut back in (or out again). Persisted per
+   *  class; the server swaps him into the weakest keeper's slot so other picks hold. */
+  const setInclude = useCallback(
+    async (next: number[]) => {
+      if (selected == null || !data) return;
+      const league = data.league;
+      await cache.includeSet(selected, league, next);
+      const opts = { ...draftOpts, include: next };
+      setDraftOpts(opts);
+      select(selected, true, mode, league, opts);
+    },
+    [selected, data, draftOpts, mode, select]
+  );
+  const onInclude = useCallback((idx: number) => { const cur = draftOpts.include ?? []; if (!cur.includes(idx)) setInclude([...cur, idx]); }, [draftOpts.include, setInclude]);
+  const onExclude = useCallback((idx: number) => setInclude((draftOpts.include ?? []).filter((i) => i !== idx)), [draftOpts.include, setInclude]);
 
   const persistUsed = useCallback((next: Set<number>) => {
     setUsedYears(next);
@@ -483,6 +507,7 @@ export default function App() {
               data={data}
               source={source}
               busy={busy}
+              onShowDropped={() => setShowDropped(true)}
               edits={edits}
               gearEdits={gearEdits}
               onEdit={setEdit}
@@ -504,6 +529,9 @@ export default function App() {
           )}
         </main>
       </div>
+      {showDropped && data && (
+        <DroppedPanel data={data} included={draftOpts.include ?? []} onInclude={onInclude} onExclude={onExclude} onClose={() => setShowDropped(false)} busy={busy} />
+      )}
     </div>
   );
 }

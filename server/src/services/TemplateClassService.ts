@@ -66,6 +66,7 @@ function build() {
       wav: null,
       wavSource: 'preset', // EA's official rookie rating — no career wAV yet
       face: faceOf(p),
+      srcIdx: i,
       faceSource: null,
       skinTone: tone,
       genericHead: gh,
@@ -88,7 +89,7 @@ function build() {
     if (Number(p.PID) > 0) withPortrait++;
   }
   cache = {
-    result: { rows, likeness: { asset, generic, withPortrait, customPortrait: 0 }, count: rows.length, dropped: [] },
+    result: { rows, likeness: { asset, generic, withPortrait, customPortrait: 0 }, count: rows.length, dropped: [], included: [] },
     ordered,
   };
   return cache;

@@ -82,3 +82,12 @@ test('a 290 lb end with edge-rusher production stays an edge (J.J. Watt), a heav
   const heyward = players.find((p) => p.lastName === 'Heyward')!;
   assert.equal(PositionMapper.name(PositionMapper.resolve(heyward.firstName, heyward.lastName, heyward.position, heyward.weight)), 'DT', `Heyward -> ${heyward.position}`);
 });
+
+test('a depth-chart slot never moves a quarterback (2008: Ryan and Flacco were listed at LCB in a Hail-Mary package)', skipWithoutData, async () => {
+  const { enrichedClass } = await import('../DraftEnrichment');
+  const { players } = await enrichedClass(2008, 'NFL', { fill: false });
+  for (const last of ['Ryan', 'Flacco']) {
+    const p = players.find((x) => x.lastName === last && x.draftRound === 1)!;
+    assert.equal(p.position, 'QB', `${last} -> ${p.position}`);
+  }
+});
