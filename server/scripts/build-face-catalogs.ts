@@ -202,6 +202,21 @@ function lookupAssets(): Map<string, LookupRow> {
   return m;
 }
 
+/** PIDs whose portrait is a generic face (PID_Portrait_Mapping.csv Type=generic):
+ *  a roster row carrying one has no real portrait — e.g. a player this tool
+ *  imported earlier (Cam Newton kept the generic PID we wrote in 2011V2). */
+function genericPidSet(): Set<number> {
+  const out = new Set<number>();
+  try {
+    const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'));
+    for (const r of rows) {
+      const pid = parseInt(r.PID || '', 10);
+      if (pid > 0 && ((r.Type || '').trim() === 'generic' || /^plpo_generic/i.test(r.Portrait || '') || (r.Portrait || '').trim() === 'plpo_Blank')) out.add(pid);
+    }
+  } catch { /* mapping absent */ }
+  return out;
+}
+
 /** Legend menu-portrait ids (PID_Portrait_Mapping.csv, Type=legend): portrait stem -> PID. */
 function legendPidTable(): Map<string, number> {
   const out = new Map<string, number>();
@@ -252,7 +267,8 @@ async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
   console.log(`  ${roster.length} real-face players on ${save ? path.basename(save) : '(no autosave)'}`);
 
   const assets: Record<string, Entry> = {};
-  let rosterSkipped = 0;
+  const genericPids = genericPidSet();
+  let rosterSkipped = 0, genericPortraits = 0;
   const skipped: string[] = [];
   for (const r of roster) {
     const key = r.asset.toLowerCase();
@@ -261,9 +277,17 @@ async function buildVersion(v: Version, lookup: Map<string, LookupRow>) {
     // current player either has a scanned head in the game files or was drafted
     // recently enough to have a cranium head; a 2003 draftee with no scan and
     // rookie service is ours.
-    if (!heads.has(key) && lk && lk.draftYear < 2015 && r.yearsPro < 3) { rosterSkipped++; skipped.push(`${r.first} ${r.last} (${r.asset})`); continue; }
-    assets[key] = { assetName: r.asset, portraitPid: r.pid, genericHead: r.genericHead, first: r.first, last: r.last, source: heads.has(key) ? (heads.get(key) ? 'roster+bundle' : 'roster+preset') : 'roster' };
+    const toolImported = !!lk && lk.draftYear < 2015 && r.yearsPro < 3;
+    if (!heads.has(key) && toolImported) { rosterSkipped++; skipped.push(`${r.first} ${r.last} (${r.asset})`); continue; }
+    // A roster PID that is a generic portrait (or came from our own import) is not
+    // this player's picture; fall back to the lookup's PhotoID or none.
+    let pid = r.pid;
+    // (Not the lookup's PhotoID either: that is M26's regular portrait, which M27
+    // no longer ships for retired players — the on-disk check in portraitFor decides.)
+    if (genericPids.has(pid) || toolImported) { genericPortraits++; pid = 0; }
+    assets[key] = { assetName: r.asset, portraitPid: pid, genericHead: r.genericHead, first: r.first, last: r.last, source: heads.has(key) ? (heads.get(key) ? 'roster+bundle' : 'roster+preset') : 'roster' };
   }
+  if (genericPortraits) console.log(`  ${genericPortraits} roster rows carried a generic/imported portrait PID (dropped)`);
   if (rosterSkipped) console.log(`  skipped ${rosterSkipped} roster rows that look tool-imported: ${skipped.slice(0, 10).join(', ')}${skipped.length > 10 ? ', …' : ''}`);
 
   let bundleOnly = 0, unnamed = 0, presetOnly = 0;

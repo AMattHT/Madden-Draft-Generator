@@ -73,6 +73,15 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   }
   const out: BaselinePlayer = { ...p };
   if (label) out.position = label;
+  // A 290+ lb end is an interior lineman in Madden terms (PositionMapper sends a
+  // heavy DE to DT) — unless he rushed like an edge. J.J. Watt (290, 20 sacks a
+  // season) is a RE/LE in the game, Cam Heyward (295, ~6) a DT. 'EDGE' bypasses
+  // the weight rule; 300+ stays interior whatever the production.
+  const endLabel = /^(DE|LE|RE|E|LDE|RDE|DEFENSIVEEND)$/i.test((out.position || '').trim());
+  if (endLabel && weight != null && weight >= 290 && weight < 300 && nv?.defSacks != null) {
+    const seasons = (out.seasonsStarted ?? nv.seasonsStarted ?? null) || (nv.games ? nv.games / 16 : null);
+    if (seasons && seasons >= 3 && nv.defSacks / seasons >= 7) out.position = 'EDGE';
+  }
   if (positionLocked) out.positionLocked = true;
   if (f7?.frontSeven) out.frontSeven = f7.frontSeven;
   if (c) out.combine = { forty: c.forty, bench: c.bench, vertical: c.vertical, broad: c.broad, cone: c.cone, shuttle: c.shuttle };

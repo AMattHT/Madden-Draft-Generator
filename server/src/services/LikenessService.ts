@@ -275,13 +275,15 @@ export const LikenessService = {
     if (hasAsset) {
       const hit = cat.assets.get(asset.toLowerCase());
       if (hit) {
+        // (portraitPid stays the catalog's own value here — 0 when the roster PID was a
+        // generic portrait; portraitFor decides what to show.)
         // A roster head belongs to a CURRENT player. The lookup pairs some old rows
         // with a namesake's id (1989 DJ Johnson -> JohnsonDJ_22983): same name,
         // wrong person — only accept it when the draft years agree.
         // (A scan-backed id with no nflverse year for the name — Gates, undrafted — is fine.)
         if (/roster/.test(hit.source) && !this.sameEra(key, player.draftYear, /bundle/.test(hit.source))) return null;
         if (ACCEPT_PRESET_HEADS || !/preset/.test(hit.source)) {
-          return { ...hit, assetName: hit.assetName || asset, portraitPid: hit.portraitPid || player.photoId || 0 };
+          return { ...hit, assetName: hit.assetName || asset };
         }
       }
     }

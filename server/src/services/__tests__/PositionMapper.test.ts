@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PositionMapper } from '../PositionMapper';
+import { skipWithoutData } from './data';
 
 const SAM = 13, MIKE = 14, WILL = 15;
 const count = (ids: number[], id: number) => ids.filter((x) => x === id).length;
@@ -70,4 +71,14 @@ test('pre-2001 defensive backs split corner vs safety by build (no depth charts 
 test('a 290+ lb defensive end is an interior lineman in Madden terms (3-4 five-technique)', () => {
   assert.equal(PositionMapper.resolve('Calais', 'Campbell', 'DE', 300), 12);
   assert.notEqual(PositionMapper.resolve('Dwight', 'Freeney', 'DE', 268), 12);
+});
+
+test('a 290 lb end with edge-rusher production stays an edge (J.J. Watt), a heavier or quieter one is a DT', skipWithoutData, async () => {
+  const { enrichedClass } = await import('../DraftEnrichment');
+  const { players } = await enrichedClass(2011, 'NFL', { fill: false });
+  const watt = players.find((p) => p.lastName === 'Watt' && p.firstName === 'J.J.')!;
+  assert.ok(watt, 'Watt in 2011');
+  assert.equal(PositionMapper.name(PositionMapper.resolve(watt.firstName, watt.lastName, watt.position, watt.weight)).endsWith('EDG'), true, `Watt -> ${watt.position}`);
+  const heyward = players.find((p) => p.lastName === 'Heyward')!;
+  assert.equal(PositionMapper.name(PositionMapper.resolve(heyward.firstName, heyward.lastName, heyward.position, heyward.weight)), 'DT', `Heyward -> ${heyward.position}`);
 });
