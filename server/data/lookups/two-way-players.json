@@ -1,5 +1,5 @@
 {
-  "_source": "Curated two-way legends for the years the data cannot cover (before 1980: no career totals; kicking and punting: never). Key \"first last|draft year\". roles: Madden labels the player filled at a starter level, verified against PFR/Wikipedia. From 1980 on, secondary roles come from career totals instead (TwoWayService thresholds: 30+ receptions for a non-receiver, 3+ interceptions for an offensive player, 100+ carries for a non-back); a handful of snaps (J.J. Watt's 3 catches at tight end) never qualifies. Through 1949 (single-platoon football) every player also gets the mirrored side.",
+  "_source": "Per-player two-way overrides, keyed \"first last|draft year\" (lower-case, letters only). An entry wins in any era: `roles` (Madden labels: K P FS SS CB WR TE HB FB QB C LG LT DT LEDG REDG MIKE SAM WILL) replace what the career totals would infer; an empty list pins \"no secondary role\"; `era: false` switches off the single-platoon mirror (through 1949). Without an entry: 1980+ uses nflverse draft_picks career totals (30+ receptions for a non-receiver, 3+ interceptions for an offensive player, 100+ carries for a non-back; a few snaps never qualify, and an undrafted player never matches a drafted namesake); before 1980 there are no totals, so only the entries here and the era rule apply. Kicking and punting are never in any table \u2014 always curated.",
   "players": {
     "sammy baugh|1937": {
       "roles": [
@@ -107,6 +107,10 @@
         "CB"
       ],
       "note": "Two-way in 1981 (33 catches for 708 yards as a part-time receiver while starting at cornerback); 4 career interceptions"
+    },
+    "jj watt|2011": {
+      "roles": [],
+      "note": "Three catches at tight end are a package, not a role"
     }
   }
 }

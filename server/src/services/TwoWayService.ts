@@ -58,7 +58,7 @@ const ROLE_CORE: Record<string, { attrs: string[]; gap: number }> = {
 };
 const ALIAS: Record<string, string> = { S: 'FS', DB: 'CB', DE: 'LEDG', LB: 'MIKE', G: 'LG', OT: 'LT', RG: 'LG', RT: 'LT', E: 'TE' };
 
-interface Curated { roles: string[]; note?: string }
+interface Curated { roles: string[]; note?: string; era?: boolean }
 let curated: Map<string, Curated> | null = null;
 function load(): Map<string, Curated> {
   if (curated) return curated;
@@ -88,7 +88,15 @@ export const TwoWayService = {
     const roles = new Set<string>();
     let source: 'curated' | 'era' | 'stats' = 'era';
     let note: string | undefined;
-    if (draftYear >= DATA_FROM) {
+    // A curated entry for this player/year is an override in any era: its roles
+    // replace the data inference (an empty list pins "none"), and `era: false`
+    // switches the single-platoon mirror off for him.
+    const hit = load().get(key(first, last, draftYear));
+    if (hit) {
+      for (const r of hit.roles) { const n = ALIAS[r] ?? r; if (ROLE_CORE[n] && n !== primary) roles.add(n); }
+      source = 'curated';
+      note = hit.note;
+    } else if (draftYear >= DATA_FROM) {
       // Modern players: only what the career totals prove.
       // A namesake's totals must not hand a quarterback 210 receptions.
       const c = NflverseCareerService.ambiguous(first, last, draftYear, draftPick) ? null : NflverseCareerService.get(first, last, draftYear, draftPick ?? undefined);
@@ -100,15 +108,8 @@ export const TwoWayService = {
         if (!['RB', 'QB'].includes(group) && (c.rushAtts ?? 0) >= DATA_THRESHOLDS.rushAtts) { roles.add('HB'); parts.push(`${c.rushAtts} carries`); }
         if (parts.length) { source = 'stats'; note = `Career: ${parts.join(', ')}`; }
       }
-    } else {
-      const hit = load().get(key(first, last, draftYear));
-      if (hit) {
-        for (const r of hit.roles) { const n = ALIAS[r] ?? r; if (ROLE_CORE[n] && n !== primary) roles.add(n); }
-        source = 'curated';
-        note = hit.note;
-      }
     }
-    if (draftYear <= TWO_WAY_ERA_END) {
+    if (draftYear <= TWO_WAY_ERA_END && hit?.era !== false) {
       const mirror = MIRROR[group] ?? '';
       if (mirror && mirror !== primary && ROLE_CORE[mirror]) roles.add(mirror);
     }

@@ -42,3 +42,9 @@ test('Baugh leaves the 1937 class able to punt and cover; his quarterback overal
   assert.equal(OVRWeightsCalculator.computeOverall(r.positionId, r.archetype, r.ratings, 'm27'), r.overall);
   assert.deepEqual(r.twoWay?.roles.sort(), ['FS', 'P']);
 });
+
+test('a curated entry overrides the data rule in any year (pin roles, or pin none)', () => {
+  // Watt is pinned to "none" in the file; the rule would already give nothing, but the pin wins regardless.
+  assert.equal(TwoWayService.rolesFor('J.J.', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null);
+  assert.equal(TwoWayService.rolesFor('JJ', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null, 'key ignores punctuation');
+});
