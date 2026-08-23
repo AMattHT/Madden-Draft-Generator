@@ -237,11 +237,27 @@ export const NflverseCareerService = {
     let hit: CareerBits | undefined;
     if (list && list.length) {
       hit = pick != null ? list.find((b) => b.draftPick === pick) : undefined;
-      if (!hit) hit = [...list].sort((a, b) => (b.wav ?? -1) - (a.wav ?? -1))[0];
+      // `pick === null` means undrafted: draft_picks never holds him, so a same-name
+      // draftee's row (2013: TE Ryan Griffin, pick 201, for the UDFA quarterback)
+      // is another man. `undefined` = pick unknown: keep the most notable match.
+      if (!hit && pick !== null) hit = [...list].sort((a, b) => (b.wav ?? -1) - (a.wav ?? -1))[0];
+      if (!hit && pick === null) hit = list.find((b) => b.draftPick == null);
     }
     const manual = MANUAL[nk] ?? loadUdfa().get(`${year}|${nk}`);
     if (hit && manual) return merge(hit, manual);
     if (manual) return merge(empty(), manual);
     return hit ?? null;
+  },
+
+  /** True when more than one player of this name was drafted (or signed) in
+   *  `year` and `pick` cannot tell them apart — a lookup then returns the more
+   *  notable one, which is the wrong man half the time (2013: Ryan Griffin the
+   *  tight end vs Ryan Griffin the quarterback, both undrafted). */
+  ambiguous(first: string, last: string, year: number, pick?: number | null): boolean {
+    const list = load().get(`${year}|${normalizeName(`${first} ${last}`)}`);
+    if (!list || !list.length) return false;
+    if (pick === null) return list.some((b) => b.draftPick != null); // undrafted vs a drafted namesake
+    if (list.length < 2) return false;
+    return pick == null || !list.some((b) => b.draftPick === pick);
   },
 };

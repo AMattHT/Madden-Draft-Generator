@@ -17,6 +17,8 @@ test('from 1980 the career totals decide: Deion caught 60 passes, Troy Brown pic
   assert.deepEqual(TwoWayService.rolesFor('Troy', 'Brown', 1993, PositionMapper.toM26Id('WR'), 198)?.roles, ['CB']);
   assert.equal(TwoWayService.rolesFor('J.J.', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null);
   assert.equal(TwoWayService.rolesFor('Peyton', 'Manning', 1998, PositionMapper.toM26Id('QB'), 1), null);
+  // Two 2013 undrafted Ryan Griffins: the tight end's 210 catches must not reach the quarterback.
+  assert.equal(TwoWayService.rolesFor('Ryan', 'Griffin', 2013, PositionMapper.toM26Id('QB'), null), null);
   // A receiver with 100+ carries is a usable back (Cordarrelle Patterson).
   assert.deepEqual(TwoWayService.rolesFor('Cordarrelle', 'Patterson', 2013, PositionMapper.toM26Id('WR'), 29)?.roles, ['HB']);
 });

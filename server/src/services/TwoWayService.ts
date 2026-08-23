@@ -90,7 +90,8 @@ export const TwoWayService = {
     let note: string | undefined;
     if (draftYear >= DATA_FROM) {
       // Modern players: only what the career totals prove.
-      const c = NflverseCareerService.get(first, last, draftYear, draftPick ?? undefined);
+      // A namesake's totals must not hand a quarterback 210 receptions.
+      const c = NflverseCareerService.ambiguous(first, last, draftYear, draftPick) ? null : NflverseCareerService.get(first, last, draftYear, draftPick ?? undefined);
       if (c) {
         const offense = ['QB', 'RB', 'WR', 'TE', 'OL'].includes(group);
         const parts: string[] = [];
