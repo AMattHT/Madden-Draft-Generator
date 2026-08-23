@@ -15,13 +15,26 @@ import sharp from 'sharp';
 import { PortraitService } from '../src/services/PortraitService';
 import { LOOKUPS_DIR } from '../src/config/paths';
 import { parseCsvFile } from '../src/util/csv';
-import { sampleSkinITATight, TONE_ITA_MODEL } from '../src/services/SkinToneClassify';
+import { sampleSkinITATight, TONE_ITA_MODEL, TONE_L_MODEL, isGreyscale, sampleGreyL } from '../src/services/SkinToneClassify';
 
-async function itaFromPlpo(plpo: string): Promise<number | null> {
+async function itaFromPlpo(plpo: string): Promise<{ ita: number | null; greyL: number | null }> {
   const png = await PortraitService.cropByPlpo(plpo);
-  if (!png) return null;
+  if (!png) return { ita: null, greyL: null };
   const { data, info } = await sharp(png).raw().toBuffer({ resolveWithObject: true });
-  return sampleSkinITATight(data, info.width, info.height, info.channels, 40);
+  const ita = sampleSkinITATight(data, info.width, info.height, info.channels, 40);
+  if (ita != null) return { ita, greyL: null };
+  // Black-and-white legends photo: luminance is the only evidence.
+  const greyL = isGreyscale(data, info.width, info.height, info.channels) ? sampleGreyL(data, info.width, info.height, info.channels) : null;
+  return { ita: null, greyL };
+}
+function toneFromL(L: number): number {
+  let best = 4, bestLl = -Infinity;
+  for (let t = 1; t <= 7; t++) {
+    const [mu, sd] = TONE_L_MODEL[t];
+    const ll = -0.5 * ((L - mu) / (sd * 2)) ** 2 - Math.log(sd);
+    if (ll > bestLl) { bestLl = ll; best = t; }
+  }
+  return best;
 }
 /** Most likely tone from ITA alone (flat prior) — the legacy pid_skintone value. */
 function toneFromIta(ita: number): number {
@@ -38,7 +51,8 @@ function toneFromIta(ita: number): number {
   if (!PortraitService.available) { console.error('portraits NOT available — cannot build'); process.exit(1); }
   const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'));
   const out: Record<string, number> = {};
-  const itas: Record<string, [number, number]> = {}; // pid -> [ita, legend 0/1]
+  const itas: Record<string, [number, number, number]> = {}; // pid -> [value, legend 0/1, greyscale 0/1 (value is L*)]
+  let grey = 0;
   const toneCount: Record<number, number> = {};
   let real = 0, done = 0, skipped = 0;
   for (const r of rows) {
@@ -46,11 +60,13 @@ function toneFromIta(ita: number): number {
     const plpo = (r['Portrait'] || '').trim();
     if (Number.isNaN(pid) || !plpo || plpo === 'plpo_Blank' || /^plpo_generic/.test(plpo)) continue;
     real++;
-    const ita = await itaFromPlpo(plpo);
-    if (ita == null) { skipped++; continue; }
-    const tone = toneFromIta(ita);
+    const { ita, greyL } = await itaFromPlpo(plpo);
+    if (ita == null && greyL == null) { skipped++; continue; }
+    const tone = ita != null ? toneFromIta(ita) : toneFromL(greyL!);
     out[String(pid)] = tone;
-    itas[String(pid)] = [Math.round(ita * 10) / 10, (r['Type'] || '').trim() === 'legend' ? 1 : 0];
+    const legend = (r['Type'] || '').trim() === 'legend' ? 1 : 0;
+    if (ita != null) itas[String(pid)] = [Math.round(ita * 10) / 10, legend, 0];
+    else { itas[String(pid)] = [Math.round(greyL! * 10) / 10, legend, 1]; grey++; }
     toneCount[tone] = (toneCount[tone] || 0) + 1;
     done++;
     if (done % 500 === 0) console.log(`  ...${done} classified`);
@@ -58,7 +74,7 @@ function toneFromIta(ita: number): number {
   const dst = path.join(LOOKUPS_DIR, 'pid_skintone.json');
   fs.writeFileSync(dst, JSON.stringify(out));
   fs.writeFileSync(path.join(LOOKUPS_DIR, 'pid_ita.json'), JSON.stringify(itas));
-  console.log(`\nreal portraits: ${real}, classified: ${done}, skipped(no skin): ${skipped}`);
+  console.log(`\nreal portraits: ${real}, classified: ${done} (${grey} greyscale by luminance), skipped(no skin): ${skipped}`);
   console.log('tone distribution:', JSON.stringify(toneCount));
   const dark = (toneCount[6] || 0) + (toneCount[7] || 0);
   const light = (toneCount[1] || 0) + (toneCount[2] || 0);

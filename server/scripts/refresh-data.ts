@@ -21,6 +21,8 @@ const targets: Array<{ file: string; url: string }> = [
   { file: 'nflverse_draft_picks.csv', url: 'https://github.com/nflverse/nflverse-data/releases/download/draft_picks/draft_picks.csv' },
   { file: 'nflverse_players.csv', url: 'https://github.com/nflverse/nflverse-data/releases/download/players/players.csv' },
   { file: 'nflverse_combine.csv', url: 'https://github.com/nflverse/nflverse-data/releases/download/combine/combine.csv' },
+  { file: 'nflverse_player_stats.csv', url: 'https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats.csv' },
+  { file: 'nflverse_player_stats_def.csv', url: 'https://github.com/nflverse/nflverse-data/releases/download/player_stats/player_stats_def.csv' },
   // Only the current and previous season's depth charts change; older ones are history.
   ...[thisSeason - 1, thisSeason].map((y) => ({ file: `nflverse_depth_charts_${y}.csv`, url: `https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_${y}.csv` })),
 ];
@@ -46,7 +48,7 @@ const targets: Array<{ file: string; url: string }> = [
     }
   }
   // Derived caches that depend on the above.
-  for (const derived of ['nflverse_db_positions.json', 'nflverse_slot_positions.json']) {
+  for (const derived of ['nflverse_db_positions.json', 'nflverse_slot_positions.json', 'nflverse_usage.json']) {
     const p = path.join(CACHE_DIR, derived);
     if (refreshed && fs.existsSync(p)) { fs.unlinkSync(p); console.log(`  reset  ${derived} (rebuilt on next start or via build-depth-slots.ts)`); }
   }

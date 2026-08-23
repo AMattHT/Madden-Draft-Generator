@@ -165,6 +165,7 @@ function load(): void {
   applyHistoricalAccolades(merged);
   dedupSharedAssets(merged);
   sanitizeWikiPhotos(merged);
+  sanitizeLegendPortraits(merged);
   byYear = new Map();
   byNormName = new Map();
   for (const p of merged) { const k = normName(p.firstName, p.lastName); (byNormName.get(k) ?? byNormName.set(k, []).get(k)!).push(p); }
@@ -211,6 +212,26 @@ function reconstructUnorderedDrafts(): void {
  * skin tone and gear observation, so: drop non-photos, and keep a URL shared
  * across draft years only on its most accomplished owner.
  */
+/** Rows whose Hall-of-Fame flag was a famous namesake's, by "first last|year". */
+const stampedNamesakes = new Set<string>();
+const NO_CAREER_WAV = 20;
+
+/** The CSV stamps isHOF by NAME: the 1969 Hofstra cornerback Jim Thorpe reads
+ *  TRUE and carries plpo_legends_ThorpeJim. PFR's AV exists from 1960, so a real
+ *  HOFer drafted in 1960+ always shows a career; a flagged row with none is the
+ *  namesake — strip the flag and the legends portrait (menu image and the skin
+ *  tone read from it). Short-career legends with their own EA cards (Bo Jackson,
+ *  Dexter Jackson, David Tyree) are not flagged HOF, so they keep theirs. */
+function sanitizeLegendPortraits(players: BaselinePlayer[]): void {
+  for (const p of players) {
+    if (!p.isHOF || p.draftYear < 1960) continue;
+    if ((p.wav ?? 0) >= NO_CAREER_WAV || p.proBowls || p.allPro1) continue;
+    p.isHOF = false;
+    stampedNamesakes.add(`${normName(p.firstName, p.lastName)}|${p.draftYear}`);
+    if (p.plpo && /^plpo_legends_/i.test(p.plpo)) { p.plpo = null; p.photoId = null; }
+  }
+}
+
 function sanitizeWikiPhotos(players: BaselinePlayer[]): void {
   const nonPhoto = /\.svg(\.png)?$|\/flag_|logo|icon|emblem|seal_of|coat_of_arms|wordmark|helmet|placeholder|no_image|silhouette/i;
   const byUrl = new Map<string, BaselinePlayer[]>();
@@ -391,6 +412,16 @@ function stableTail(a: BaselinePlayer, b: BaselinePlayer): number {
  *  legend's PhotoID/CommID/PLPO stay co-located even when its own career line is
  *  empty — Bill Bates); non-legend (current-Madden) assets go to the most recent. */
 function assetOwner(grp: BaselinePlayer[], legend: boolean): BaselinePlayer {
+  // EA's asset ids tell the era: modern scans are CamelCase (MatthewsClay_15246,
+  // MahomesIIPatrick_12635), the legacy legend batch starts lower-case
+  // (jacksonBo_9877, polamaluTroy_16548). A CamelCase id shared by a 1949, a 1978
+  // and a 2009 Clay Matthews belongs to the 2009 one — the one the modern era
+  // scanned — whatever the older men's accolades.
+  const modernAsset = grp.find((p) => p.playerAssetsId && /^[A-Z]/.test(p.playerAssetsId))?.playerAssetsId;
+  if (modernAsset) {
+    const recent = grp.filter((p) => p.draftYear >= 2000);
+    if (recent.length) return [...recent].sort((a, b) => accompl(b) - accompl(a) || stableTail(a, b))[0];
+  }
   return [...grp].sort((a, b) => {
     if (legend) {
       const d = (carriesLegend(b) ? 1 : 0) - (carriesLegend(a) ? 1 : 0);
@@ -470,7 +501,13 @@ function dedupSharedAssets(players: BaselinePlayer[]): void {
     for (const grp of groups.values()) {
       if (grp.length < 2) continue;
       const owner = assetOwner(grp, grp.some(carriesLegend));
-      for (const p of grp) if (p !== owner) p[key] = empty as BaselinePlayer[K];
+      // The same man drafted twice (Bo Jackson: Bucs 1986 #1, Raiders 1987 round 7)
+      // is one identity — same name, same college, within a few years — and keeps
+      // his assets in both classes.
+      const samePerson = (p: BaselinePlayer) =>
+        normalizeName(`${p.firstName} ${p.lastName}`) === normalizeName(`${owner.firstName} ${owner.lastName}`) &&
+        !!p.college && normalizeName(p.college) === normalizeName(owner.college) && Math.abs(p.draftYear - owner.draftYear) <= 3;
+      for (const p of grp) if (p !== owner && !samePerson(p)) p[key] = empty as BaselinePlayer[K];
     }
   };
   dedup('photoId', null);
@@ -521,6 +558,9 @@ export const PlayerLookupService = {
   isMostNotable(p: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear'>): boolean {
     load();
     const group = byNormName?.get(normName(p.firstName, p.lastName)) ?? [];
+    // The famous namesake may have no row at all (the real Jim Thorpe predates
+    // the draft): a row that carried his name-stamped HOF flag is never the owner.
+    if (stampedNamesakes.has(`${normName(p.firstName, p.lastName)}|${p.draftYear}`)) return false;
     if (group.length <= 1) return true;
     const best = group.reduce((a, b) => (greatness(b) > greatness(a) ? b : a));
     return best.draftYear === p.draftYear;

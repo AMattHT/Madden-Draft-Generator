@@ -64,7 +64,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
   const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = toneFromEvidence({ ita: portrait?.ita ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  const race = toneFromEvidence({ ita: portrait?.ita ?? null, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);

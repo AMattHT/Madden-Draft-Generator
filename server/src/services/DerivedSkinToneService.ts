@@ -22,8 +22,8 @@ function load(): Record<string, number> {
   return map!;
 }
 
-let itaMap: Record<string, [number, number]> | null = null;
-function loadIta(): Record<string, [number, number]> {
+let itaMap: Record<string, [number, number, number?]> | null = null;
+function loadIta(): Record<string, [number, number, number?]> {
   if (itaMap) return itaMap;
   try { itaMap = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'pid_ita.json'), 'utf8')); } catch { itaMap = {}; }
   return itaMap!;
@@ -32,10 +32,12 @@ function loadIta(): Record<string, [number, number]> {
 export const DerivedSkinToneService = {
   /** Median skin ITA read off the player's portrait + whether it is a legends
    *  portrait (vintage photo, unreliable exposure), or null if none. */
-  itaForPid(pid: number | null | undefined): { ita: number; legend: boolean } | null {
+  itaForPid(pid: number | null | undefined): { ita: number | null; greyL: number | null; legend: boolean } | null {
     if (pid == null || pid <= 0) return null;
     const v = loadIta()[String(pid)];
-    return Array.isArray(v) ? { ita: v[0], legend: v[1] === 1 } : null;
+    if (!Array.isArray(v)) return null;
+    const grey = v[2] === 1;
+    return { ita: grey ? null : v[0], greyL: grey ? v[0] : null, legend: v[1] === 1 };
   },
   /** Skin tone (1-7) read off the player's real portrait, or null if none. */
   toneForPid(pid: number | null | undefined): number | null {

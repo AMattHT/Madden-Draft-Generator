@@ -243,6 +243,8 @@ export interface ToneEvidence {
   /** The portrait is a plpo_legends_* image — often a scanned vintage photo whose
    *  exposure is unreliable (Namath reads as dark): likelihood tempered 2x. */
   legendPortrait?: boolean;
+  /** Median face L* of a greyscale portrait (no chroma): TONE_L_MODEL, sd doubled. */
+  greyL?: number | null;
   /** Tone read from a Wikipedia photo with the old sampler (weak evidence). */
   wikiTone?: number | null;
   /** Explicit non-default CSV race (1-6); mild evidence. */
@@ -258,17 +260,69 @@ export function toneFromEvidence(e: ToneEvidence): number {
   // A modern studio portrait is decent evidence (held-out sd ~18 deg): the
   // position prior only gets half weight against it (a 2011 QB prior of 58% tone 2
   // must not outvote Cam Newton's own face). Vintage legend photos keep the full prior.
-  const priorWeight = e.ita != null && !e.legendPortrait ? 0.5 : 1;
+  const priorWeight = e.ita != null && !e.legendPortrait ? 0.5 : 1; // greyscale keeps the full prior
   for (let t = 1; t <= 7; t++) {
     let ll = priorWeight * Math.log(Math.max(0.03, e.prior[t] ?? 0));
     if (e.ita != null) {
       const [mu, sd0] = TONE_ITA_MODEL[t];
       const sd = sd0 * k;
       ll += -0.5 * ((e.ita - mu) / sd) ** 2 - Math.log(sd);
+    } else if (e.greyL != null) {
+      const [mu, sd0] = TONE_L_MODEL[t];
+      const sd = sd0 * 2;
+      ll += -0.5 * ((e.greyL - mu) / sd) ** 2 - Math.log(sd);
     }
     if (e.wikiTone != null) ll += -0.5 * ((e.wikiTone - t) / 1.8) ** 2;
     if (e.trustedCsv != null) ll += (e.trustedCsv <= 3) === (t <= 3) ? Math.log(2) : Math.log(0.5);
     if (ll > bestScore) { bestScore = ll; best = t; }
   }
   return best || 4;
+}
+
+/** Median skin L* per tone on the same labelled set (sd 7-9). For greyscale
+ *  portraits — old legends' photos with no chroma to find skin by — the face
+ *  window's luminance is the only evidence; exposure is unknown, so the sd is
+ *  doubled in toneFromEvidence. */
+export const TONE_L_MODEL: Record<number, [number, number]> = {
+  1: [62.7, 6.9], 2: [62.5, 7.4], 3: [57.3, 7.6], 4: [54.5, 8.6], 5: [47.9, 8.3], 6: [40.5, 8.3], 7: [36.2, 7.3],
+};
+
+/** True when the face window has no chroma (a black-and-white photo). */
+export function isGreyscale(data: Buffer | Uint8Array, width: number, height: number, channels: number): boolean {
+  const y0 = Math.floor(0.40 * height), y1 = Math.floor(0.66 * height);
+  const x0 = Math.floor(0.36 * width), x1 = Math.floor(0.64 * width);
+  let n = 0, chroma = 0;
+  for (let y = y0; y < y1; y += 2) {
+    for (let x = x0; x < x1; x += 2) {
+      const i = (y * width + x) * channels;
+      if (channels >= 4 && data[i + 3] < 200) continue;
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      chroma += Math.max(r, g, b) - Math.min(r, g, b);
+      n++;
+    }
+  }
+  return n > 0 && chroma / n < 6;
+}
+
+/** Median L* of the face window in a greyscale portrait (hair and shirt excluded
+ *  by luminance since chroma cannot tell skin apart). */
+export function sampleGreyL(data: Buffer | Uint8Array, width: number, height: number, channels: number, minPixels = 40): number | null {
+  const y0 = Math.floor(0.40 * height), y1 = Math.floor(0.66 * height);
+  const x0 = Math.floor(0.36 * width), x1 = Math.floor(0.64 * width);
+  const lin = (c: number) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const Ls: number[] = [];
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const i = (y * width + x) * channels;
+      if (channels >= 4 && data[i + 3] < 200) continue;
+      const Y = lin(data[i]) * 0.2126 + lin(data[i + 1]) * 0.7152 + lin(data[i + 2]) * 0.0722;
+      const L = 116 * f(Y) - 16;
+      if (L < 12 || L > 88) continue;
+      Ls.push(L);
+    }
+  }
+  if (Ls.length < minPixels) return null;
+  Ls.sort((a, b) => a - b);
+  return Ls[Ls.length >> 1];
 }

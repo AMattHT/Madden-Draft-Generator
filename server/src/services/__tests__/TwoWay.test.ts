@@ -48,3 +48,12 @@ test('a curated entry overrides the data rule in any year (pin roles, or pin non
   assert.equal(TwoWayService.rolesFor('J.J.', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null);
   assert.equal(TwoWayService.rolesFor('JJ', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null, 'key ignores punctuation');
 });
+
+test('the weekly stats cover the undrafted: Taysom Hill (QB) is a usable back and tight end; Lamar Jackson is not a back', skipWithoutData, () => {
+  const { NflverseStatsService } = require('../NflverseStatsService');
+  const hill = TwoWayService.rolesFor('Taysom', 'Hill', 2017, PositionMapper.toM26Id('QB'), null);
+  assert.deepEqual(hill?.roles.sort(), ['HB', 'TE'], JSON.stringify(hill));
+  assert.equal(hill?.source, 'stats');
+  assert.equal(TwoWayService.rolesFor('Lamar', 'Jackson', 2018, PositionMapper.toM26Id('QB'), 32), null);
+  assert.ok(NflverseStatsService.usage('Taysom', 'Hill', 2017)!.carries > 400);
+});

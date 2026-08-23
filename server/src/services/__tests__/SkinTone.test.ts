@@ -44,6 +44,12 @@ test('pid_ita carries the legends flag and reads Namath/Sayers/Butkus portraits 
   const butkus = DerivedSkinToneService.itaForPid(10807)!;
   assert.ok(namath && sayers && butkus, 'legend portraits sampled');
   assert.equal(namath.legend, true);
-  assert.ok(butkus.ita > sayers.ita, 'Butkus lighter than Sayers');
-  assert.ok(butkus.ita > 5, `Butkus ITA ${butkus.ita}`);
+  assert.ok(butkus.ita! > sayers.ita!, 'Butkus lighter than Sayers');
+  assert.ok(butkus.ita! > 5, `Butkus ITA ${butkus.ita}`);
+});
+
+test('a greyscale legends portrait still carries luminance evidence (L.C. Greenwood: L* 37 -> dark)', () => {
+  const prior = SkinToneService.toneDistribution('LEDG', 1969);
+  assert.ok(toneFromEvidence({ greyL: 36.7, legendPortrait: true, prior }) >= 6);
+  assert.ok(toneFromEvidence({ greyL: 64, legendPortrait: true, prior: SkinToneService.toneDistribution('HB', 1969) }) <= 3, 'a bright greyscale face is light');
 });

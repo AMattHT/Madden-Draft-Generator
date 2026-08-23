@@ -3,6 +3,7 @@ import path from 'path';
 import { LOOKUPS_DIR } from '../config/paths';
 import { PositionMapper } from './PositionMapper';
 import { NflverseCareerService } from './NflverseCareerService';
+import { NflverseStatsService } from './NflverseStatsService';
 
 /**
  * Two-way players. Madden holds one position per player, so a player's other
@@ -10,10 +11,13 @@ import { NflverseCareerService } from './NflverseCareerService';
  * position from the attributes, and a QB with 85 kick power is a usable punter.
  *
  * Three sources of secondary roles:
- *   - career totals (nflverse draft_picks, 1980+): 30+ receptions for a
- *     non-receiver, 3+ interceptions for an offensive player, 100+ carries for a
- *     non-back — Deion and Troy Brown qualify, J.J. Watt's three catches at tight
- *     end do not;
+ *   - career totals (nflverse weekly stats 1999+ for everyone incl. the undrafted;
+ *     draft_picks 1980-98 for draftees): 30+ receptions for a non-receiver, 3+
+ *     interceptions for an offensive player, 100+ carries for a non-back (a
+ *     quarterback only with 30+ catches too — Taysom Hill, not Lamar Jackson or
+ *     Peyton Manning's 431 kneels and scrambles), 100+ pass attempts for a
+ *     non-quarterback — Deion, Troy Brown and Hill qualify, J.J. Watt's three
+ *     catches at tight end do not;
  *   - a curated, verified list for the years before the data
  *     (data/lookups/two-way-players.json): Baugh punted and played safety, Blanda
  *     kicked, Bednarik snapped — and kicking/punting, which no table records;
@@ -78,7 +82,9 @@ const DATA_FROM = 1980;
 /** Career totals that prove a secondary role was real, not a package: Deion's 60
  *  catches and Troy Brown's 3 interceptions qualify; J.J. Watt's 3 receptions at
  *  tight end do not. */
-const DATA_THRESHOLDS = { receptions: 30, defInts: 3, rushAtts: 100 };
+const DATA_THRESHOLDS = { receptions: 30, defInts: 3, rushAtts: 100, qbCarries: 250, passAttempts: 100 };
+/** First season of the weekly player stats (everyone, drafted or not). */
+const STATS_FROM = 1999;
 
 export const TwoWayService = {
   /** Secondary roles for a player at his resolved primary position, or null. */
@@ -97,15 +103,26 @@ export const TwoWayService = {
       source = 'curated';
       note = hit.note;
     } else if (draftYear >= DATA_FROM) {
-      // Modern players: only what the career totals prove.
-      // A namesake's totals must not hand a quarterback 210 receptions.
-      const c = NflverseCareerService.ambiguous(first, last, draftYear, draftPick) ? null : NflverseCareerService.get(first, last, draftYear, draftPick ?? undefined);
-      if (c) {
+      // Modern players: only what the career totals prove. From 1999 the weekly
+      // stats cover everyone (Taysom Hill, undrafted); before that, draft_picks
+      // career totals cover draftees. A namesake's totals must not hand a
+      // quarterback 210 receptions, so an ambiguous name yields nothing.
+      const u = draftYear >= STATS_FROM && !NflverseStatsService.ambiguous(first, last, draftYear) ? NflverseStatsService.usage(first, last, draftYear) : null;
+      const c = u ? null : NflverseCareerService.ambiguous(first, last, draftYear, draftPick) ? null : NflverseCareerService.get(first, last, draftYear, draftPick ?? undefined);
+      const receptions = u ? u.receptions : c?.receptions ?? 0;
+      const defInts = u ? u.defInts : c?.defInts ?? 0;
+      const carries = u ? u.carries : c?.rushAtts ?? 0;
+      const attempts = u ? u.attempts : 0;
+      if (u || c) {
         const offense = ['QB', 'RB', 'WR', 'TE', 'OL'].includes(group);
         const parts: string[] = [];
-        if (!['WR', 'TE', 'RB'].includes(group) && (c.receptions ?? 0) >= DATA_THRESHOLDS.receptions) { roles.add(group === 'OL' || group === 'IDL' || group === 'EDGE' ? 'TE' : 'WR'); parts.push(`${c.receptions} receptions`); }
-        if (offense && (c.defInts ?? 0) >= DATA_THRESHOLDS.defInts) { roles.add(group === 'QB' || group === 'TE' || group === 'OL' ? 'FS' : 'CB'); parts.push(`${c.defInts} interceptions`); }
-        if (!['RB', 'QB'].includes(group) && (c.rushAtts ?? 0) >= DATA_THRESHOLDS.rushAtts) { roles.add('HB'); parts.push(`${c.rushAtts} carries`); }
+        if (!['WR', 'TE', 'RB'].includes(group) && receptions >= DATA_THRESHOLDS.receptions) { roles.add(group === 'OL' || group === 'IDL' || group === 'EDGE' || group === 'QB' ? 'TE' : 'WR'); parts.push(`${receptions} receptions`); }
+        if (offense && defInts >= DATA_THRESHOLDS.defInts) { roles.add(group === 'QB' || group === 'TE' || group === 'OL' ? 'FS' : 'CB'); parts.push(`${defInts} interceptions`); }
+        // A quarterback's carries are scrambles and kneels (Manning 431, Lamar 1,014);
+        // only a QB who also CAUGHT passes lined up somewhere else (Hill: 104).
+        const qbAlignedElsewhere = group === 'QB' && receptions >= DATA_THRESHOLDS.receptions;
+        if (!['RB'].includes(group) && carries >= DATA_THRESHOLDS.rushAtts && (group !== 'QB' || (qbAlignedElsewhere && carries >= DATA_THRESHOLDS.qbCarries))) { roles.add('HB'); parts.push(`${carries} carries`); }
+        if (group !== 'QB' && attempts >= DATA_THRESHOLDS.passAttempts) { roles.add('QB'); parts.push(`${attempts} pass attempts`); }
         if (parts.length) { source = 'stats'; note = `Career: ${parts.join(', ')}`; }
       }
     }

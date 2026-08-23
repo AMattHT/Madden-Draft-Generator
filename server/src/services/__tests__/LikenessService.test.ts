@@ -130,3 +130,13 @@ test('generic heads with built-in headwear (skull cap) stay off pre-1995 players
   for (let i = 0; i < 80; i++) if (acc.has(LikenessService.generic(player({ firstName: 'Test', lastName: `M${i}`, race: 7, draftYear: 2024 }), i, 'm27').peps.toLowerCase())) modernAcc++;
   assert.ok(modernAcc > 0, 'modern players can still get headwear heads');
 });
+
+test('a legends portrait never goes to a no-name namesake (1969 Jim Thorpe, Hofstra CB, is not THE Jim Thorpe)', skipWithoutCatalog, async () => {
+  const { PlayerLookupService } = await import('../PlayerLookupService');
+  const thorpe = PlayerLookupService.byYear(1969, 'AFL').find((p) => p.lastName === 'Thorpe' && p.firstName === 'Jim')
+    ?? PlayerLookupService.byYear(1969, 'NFL').find((p) => p.lastName === 'Thorpe' && p.firstName === 'Jim');
+  assert.ok(thorpe, '1969 Jim Thorpe row');
+  assert.equal(thorpe!.plpo, null);
+  assert.equal(thorpe!.photoId, null);
+  assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Jim', lastName: 'Thorpe', draftYear: 1969 }), false);
+});
