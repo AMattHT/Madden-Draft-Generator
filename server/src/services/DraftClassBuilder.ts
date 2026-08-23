@@ -5,6 +5,7 @@ import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeM
 import { genericHeadPid } from './M27Fields';
 import { EraBioService } from './EraBioService';
 import { PlayerLookupService } from './PlayerLookupService';
+import { TwoWayService, TwoWayInfo } from './TwoWayService';
 import { HometownService } from './HometownService';
 export { RATING_KEYS } from './AttributeModel';
 import { PersonaService } from './PersonaService';
@@ -282,6 +283,10 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   });
   Object.assign(prospect, generated);
   prospect.archetype = archetype;
+  // Two-way players: the other role lives in the ratings (Baugh punts, Blanda
+  // kicks, a 1940s end covers), then the primary overall is re-solved around it.
+  const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId);
+  if (twoWay) TwoWayService.apply(prospect as Record<string, number>, twoWay.roles, overall);
   reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
 
   // Identity.
@@ -385,6 +390,8 @@ export interface PreviewRow {
   wavSource: string;
   /** Index of this player in the year's source list (stable; GenOptions.include uses it). */
   srcIdx: number;
+  /** Secondary roles carried in the ratings (two-way players / the single-platoon era). */
+  twoWay: TwoWayInfo | null;
   face: 'asset' | 'generic' | 'photo';
   /** Where a real head came from: 'bundle' (scan in the game files), 'roster',
    *  'legend-portrait', 'preset' (shader preset only — pending in-game check),
@@ -773,6 +780,7 @@ export const DraftClassBuilder = {
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         wavSource: base.wavSource,
         srcIdx: keptIdx[i],
+        twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0),
         face,
         faceSource: face === 'asset' ? (LikenessService.realFace(base, gameVersion)?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,

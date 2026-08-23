@@ -67,6 +67,7 @@ function build() {
       wavSource: 'preset', // EA's official rookie rating — no career wAV yet
       face: faceOf(p),
       srcIdx: i,
+      twoWay: null,
       faceSource: null,
       skinTone: tone,
       genericHead: gh,

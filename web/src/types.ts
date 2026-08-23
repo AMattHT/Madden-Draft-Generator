@@ -14,6 +14,7 @@ export interface PlayerRow {
   wav: number | null;
   wavSource: string; // 'actual' | 'predicted' | 'preset'
   srcIdx?: number; // index in the year's source list (stable; used to include/exclude)
+  twoWay?: { roles: string[]; source: 'curated' | 'era'; note?: string } | null; // secondary roles carried in the ratings
   face: 'asset' | 'generic' | 'photo';
   faceSource?: string | null; // real-head provenance: bundle | roster | legend-portrait | preset | lookup…
   skinTone?: number; // 1-8, for the face picker's per-tone pool
