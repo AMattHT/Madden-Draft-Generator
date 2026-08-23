@@ -256,24 +256,31 @@ export interface ToneEvidence {
 /** Argmax posterior tone over 1..7: prior x portrait likelihood x wiki x CSV. */
 export function toneFromEvidence(e: ToneEvidence): number {
   let best = 0, bestScore = -Infinity;
-  const k = e.legendPortrait ? 2 : 1;
+  // Shadows push a vintage photo's reading DEEP negative (Namath: -30, a white
+  // man); a medium reading (-15..+10: Upshaw -4, Newton -4) is not something a
+  // shadow makes of a light face, so a legends portrait is tempered 2x only when
+  // the reading is deep, and its prior gets 3/4 weight.
+  const deep = e.ita != null && e.ita <= -15;
+  const k = e.legendPortrait && deep ? 2 : 1;
   // A modern studio portrait is decent evidence (held-out sd ~18 deg): the
   // position prior only gets half weight against it (a 2011 QB prior of 58% tone 2
   // must not outvote Cam Newton's own face). Vintage legend photos keep the full prior.
-  const priorWeight = e.ita != null && !e.legendPortrait ? 0.5 : 1; // greyscale keeps the full prior
+  const priorWeight = e.ita == null && e.greyL == null ? 1 : e.legendPortrait && e.ita != null ? 0.75 : 0.5;
   for (let t = 1; t <= 7; t++) {
-    let ll = priorWeight * Math.log(Math.max(0.03, e.prior[t] ?? 0));
+    let ll = priorWeight * Math.log(Math.max(0.05, e.prior[t] ?? 0));
     if (e.ita != null) {
       const [mu, sd0] = TONE_ITA_MODEL[t];
       const sd = sd0 * k;
       ll += -0.5 * ((e.ita - mu) / sd) ** 2 - Math.log(sd);
     } else if (e.greyL != null) {
       const [mu, sd0] = TONE_L_MODEL[t];
-      const sd = sd0 * 2;
+      const sd = sd0; // greyscale luminance separates the tones cleanly (sd 7-9)
       ll += -0.5 * ((e.greyL - mu) / sd) ** 2 - Math.log(sd);
     }
     if (e.wikiTone != null) ll += -0.5 * ((e.wikiTone - t) / 1.8) ** 2;
-    if (e.trustedCsv != null) ll += (e.trustedCsv <= 3) === (t <= 3) ? Math.log(2) : Math.log(0.5);
+    // The CSV race column marks Alan Page, Lem Barney and Gene Upshaw white: it
+    // only speaks when no picture does, and softly.
+    if (e.trustedCsv != null && e.ita == null && e.greyL == null && e.wikiTone == null) ll += (e.trustedCsv <= 3) === (t <= 3) ? Math.log(1.5) : Math.log(1 / 1.5);
     if (ll > bestScore) { bestScore = ll; best = t; }
   }
   return best || 4;

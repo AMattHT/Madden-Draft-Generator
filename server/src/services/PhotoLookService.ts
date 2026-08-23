@@ -108,7 +108,15 @@ async function wikiPhoto(first: string, last: string): Promise<string | null> {
     const json = (await res.json()) as {
       query?: { pages?: Record<string, { title?: string; terms?: { description?: string[] }; original?: { source?: string } }> };
     };
-    const pages = Object.values(json.query?.pages || {});
+    // The search also returns articles that merely MENTION the player (Floyd
+    // Little's page for "Ernie Davis" — both Syracuse #44): only a page whose
+    // title is this player's name may supply his picture, exact title first.
+    const norm = (x: string) => x.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+    const want = norm(`${first} ${last}`);
+    const lastN = norm(last);
+    const pages = Object.values(json.query?.pages || {})
+      .filter((p) => { const t = norm((p.title || '').replace(/\s*\(.*\)$/, '')); return t === want || (t.startsWith(want) || t.endsWith(lastN)) && t.includes(lastN); })
+      .sort((a, b) => Number(norm((b.title || '').replace(/\s*\(.*\)$/, '')) === want) - Number(norm((a.title || '').replace(/\s*\(.*\)$/, '')) === want));
     let hit: string | null = null;
     for (const p of pages) {
       const src = p.original?.source || '';
