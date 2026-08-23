@@ -373,9 +373,9 @@ export function ProfileModal({
               {archName && <span className="text-xs text-muted">{archName}</span>}
               {row.twoWay && row.twoWay.roles.length > 0 && (
                 <span
-                  title={row.twoWay.source === 'curated'
-                    ? `${row.twoWay.note ?? 'Two-way player'} — the ${row.twoWay.roles.join(' / ')} ratings are floored near his overall so the depth chart can play him there.`
-                    : `Single-platoon era (through 1949): every player went both ways, so his ${row.twoWay.roles.join(' / ')} ratings are floored a step below his overall.`}
+                  title={row.twoWay.source === 'era'
+                    ? `Single-platoon era (through 1949): every player went both ways, so his ${row.twoWay.roles.join(' / ')} ratings are floored a step below his overall.`
+                    : `${row.twoWay.note ?? 'Two-way player'} — the ${row.twoWay.roles.join(' / ')} ratings are floored near his overall so the depth chart can play him there.`}
                   className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[10px] text-legend-light"
                 >
                   also {row.twoWay.roles.join(' · ')}

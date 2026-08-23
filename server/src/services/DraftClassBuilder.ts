@@ -285,7 +285,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.archetype = archetype;
   // Two-way players: the other role lives in the ratings (Baugh punts, Blanda
   // kicks, a 1940s end covers), then the primary overall is re-solved around it.
-  const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId);
+  const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId, player.draftPick);
   if (twoWay) TwoWayService.apply(prospect as Record<string, number>, twoWay.roles, overall);
   reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
 
@@ -780,7 +780,7 @@ export const DraftClassBuilder = {
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         wavSource: base.wavSource,
         srcIdx: keptIdx[i],
-        twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0),
+        twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0, base.draftPick),
         face,
         faceSource: face === 'asset' ? (LikenessService.realFace(base, gameVersion)?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,

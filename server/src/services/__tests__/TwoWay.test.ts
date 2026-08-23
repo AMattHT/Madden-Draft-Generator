@@ -4,12 +4,21 @@ import { skipWithoutData } from './data';
 import { TwoWayService } from '../TwoWayService';
 import { PositionMapper } from '../PositionMapper';
 
-test('curated two-way roles: Baugh punts and plays safety, Blanda kicks, Deion catches', () => {
+test('curated two-way roles (pre-1980): Baugh punts and plays safety, Blanda kicks', () => {
   const qb = PositionMapper.toM26Id('QB');
   assert.deepEqual(TwoWayService.rolesFor('Sammy', 'Baugh', 1937, qb)?.roles.sort(), ['FS', 'P']);
   assert.deepEqual(TwoWayService.rolesFor('George', 'Blanda', 1949, qb)?.roles.sort(), ['FS', 'K']);
-  assert.deepEqual(TwoWayService.rolesFor('Deion', 'Sanders', 1989, PositionMapper.toM26Id('CB'))?.roles, ['WR']);
-  assert.equal(TwoWayService.rolesFor('Peyton', 'Manning', 1998, qb), null);
+  // Graham kicked nothing (Groza did); the era rule still has him at safety.
+  assert.deepEqual(TwoWayService.rolesFor('Otto', 'Graham', 1944, qb)?.roles, ['FS']);
+});
+
+test('from 1980 the career totals decide: Deion caught 60 passes, Troy Brown picked off 3, Watt caught 3 (no role)', skipWithoutData, () => {
+  assert.deepEqual(TwoWayService.rolesFor('Deion', 'Sanders', 1989, PositionMapper.toM26Id('CB'), 5)?.roles, ['WR']);
+  assert.deepEqual(TwoWayService.rolesFor('Troy', 'Brown', 1993, PositionMapper.toM26Id('WR'), 198)?.roles, ['CB']);
+  assert.equal(TwoWayService.rolesFor('J.J.', 'Watt', 2011, PositionMapper.toM26Id('LEDG'), 11), null);
+  assert.equal(TwoWayService.rolesFor('Peyton', 'Manning', 1998, PositionMapper.toM26Id('QB'), 1), null);
+  // A receiver with 100+ carries is a usable back (Cordarrelle Patterson).
+  assert.deepEqual(TwoWayService.rolesFor('Cordarrelle', 'Patterson', 2013, PositionMapper.toM26Id('WR'), 29)?.roles, ['HB']);
 });
 
 test('the single-platoon era gives everyone the mirrored side; it ends in 1949', () => {

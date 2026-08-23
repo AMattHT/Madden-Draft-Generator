@@ -1,30 +1,112 @@
 {
-  "_source": "Curated two-way / secondary-role legends. Key: \"first last|draft year\" (lower-case, letters only). roles: Madden position labels the player also filled at a starter level. Through 1949 (single-platoon football) every player additionally gets the era rule in TwoWayService; this list is for roles the mirror rule would not give, or for post-1949 players.",
+  "_source": "Curated two-way legends for the years the data cannot cover (before 1980: no career totals; kicking and punting: never). Key \"first last|draft year\". roles: Madden labels the player filled at a starter level, verified against PFR/Wikipedia. From 1980 on, secondary roles come from career totals instead (TwoWayService thresholds: 30+ receptions for a non-receiver, 3+ interceptions for an offensive player, 100+ carries for a non-back); a handful of snaps (J.J. Watt's 3 catches at tight end) never qualifies. Through 1949 (single-platoon football) every player also gets the mirrored side.",
   "players": {
-    "sammy baugh|1937": { "roles": ["P", "FS"], "note": "Led the NFL in passing, punting (51.4 yd avg, 1940) and interceptions (11, 1943)" },
-    "ace parker|1937": { "roles": ["FS", "P"], "note": "Tailback/defensive back/punter, 1940 MVP" },
-    "sid luckman|1939": { "roles": ["P", "FS"], "note": "Chicago's punter and a defensive back in the single-platoon years" },
-    "bill dudley|1942": { "roles": ["FS", "P", "K"], "note": "1946 MVP: led the league in rushing, interceptions and punt returns; kicked" },
-    "bob waterfield|1944": { "roles": ["K", "P", "FS"], "note": "Rams QB who kicked (field goals and extra points) and punted; 20 career interceptions" },
-    "otto graham|1944": { "roles": ["FS"], "note": "Defensive back through the AAFC years" },
-    "steve van buren|1944": { "roles": ["FS"], "note": "Two-way back; kickoff returns" },
-    "charley trippi|1945": { "roles": ["P", "FS", "QB"], "note": "Halfback, quarterback, punter and defensive back for the Cardinals" },
-    "doak walker|1949": { "roles": ["K", "P", "FS"], "note": "Led the NFL in scoring as a kicker-halfback; punted; played safety" },
-    "george blanda|1949": { "roles": ["K"], "note": "Kicked for 26 seasons; still the career-scoring leader of his era" },
-    "chuck bednarik|1949": { "roles": ["C"], "note": "The last full-time two-way player: center and linebacker into 1962" },
-    "leo nomellini|1950": { "roles": ["LT"], "note": "All-Pro at both defensive tackle and offensive tackle" },
-    "lou groza|1946": { "roles": ["K"], "note": "Browns left tackle and the place-kicker who gave the position its name" },
-    "frank gifford|1952": { "roles": ["FS"], "note": "Started at defensive back in 1953 before moving to offense full time" },
-    "les richter|1952": { "roles": ["K"], "note": "Rams linebacker who handled kickoffs and field goals" },
-    "paul hornung|1957": { "roles": ["K"], "note": "Packers halfback and place-kicker; 1960 scoring record (176) with his foot" },
-    "gino cappelletti|1960": { "roles": ["K"], "note": "Patriots receiver and kicker; AFL's all-time scorer" },
-    "deion sanders|1989": { "roles": ["WR"], "note": "36 career receptions, 475 yards as a receiver in 1996" },
-    "roy green|1979": { "roles": ["CB"], "note": "Played both ways for the Cardinals in 1981 before settling at receiver" },
-    "troy brown|1993": { "roles": ["CB"], "note": "Patriots receiver who started at cornerback in 2004 (three interceptions)" },
-    "travis hunter|2025": { "roles": ["WR"], "note": "Heisman winner at both cornerback and receiver; Madden itself rates both" },
-    "kordell stewart|1995": { "roles": ["WR"], "note": "Slash: receiver, runner and quarterback in 1995-96" },
-    "mike vrabel|1997": { "roles": ["TE"], "note": "Goal-line tight end: 10 career receptions, all touchdowns" },
-    "julian edelman|2009": { "roles": ["CB"], "note": "Filled in at cornerback for the 2011 Patriots" },
-    "jim thorpe|1920": { "roles": ["FS", "K", "P"], "note": "Everything, both ways" }
+    "sammy baugh|1937": {
+      "roles": [
+        "P",
+        "FS"
+      ],
+      "note": "Led the NFL in passing, punting (51.4 yd avg, 1940) and interceptions (11, 1943)"
+    },
+    "ace parker|1937": {
+      "roles": [
+        "FS",
+        "P"
+      ],
+      "note": "Tailback/defensive back/punter, 1940 MVP"
+    },
+    "sid luckman|1939": {
+      "roles": [
+        "P",
+        "FS"
+      ],
+      "note": "Chicago's punter and a defensive back in the single-platoon years"
+    },
+    "bill dudley|1942": {
+      "roles": [
+        "FS",
+        "P",
+        "K"
+      ],
+      "note": "1946 MVP: led the league in rushing, interceptions and punt returns; kicked"
+    },
+    "bob waterfield|1944": {
+      "roles": [
+        "K",
+        "P",
+        "FS"
+      ],
+      "note": "Rams QB who kicked (field goals and extra points) and punted; 20 career interceptions"
+    },
+    "charley trippi|1945": {
+      "roles": [
+        "P",
+        "FS",
+        "QB"
+      ],
+      "note": "Halfback, quarterback, punter and defensive back for the Cardinals"
+    },
+    "doak walker|1949": {
+      "roles": [
+        "K",
+        "P",
+        "FS"
+      ],
+      "note": "Led the NFL in scoring as a kicker-halfback; punted; played safety"
+    },
+    "george blanda|1949": {
+      "roles": [
+        "K"
+      ],
+      "note": "Kicked for 26 seasons; still the career-scoring leader of his era"
+    },
+    "chuck bednarik|1949": {
+      "roles": [
+        "C"
+      ],
+      "note": "The last full-time two-way player: center and linebacker into 1962"
+    },
+    "leo nomellini|1950": {
+      "roles": [
+        "LT"
+      ],
+      "note": "All-Pro at both defensive tackle and offensive tackle"
+    },
+    "lou groza|1946": {
+      "roles": [
+        "K"
+      ],
+      "note": "Browns left tackle and the place-kicker who gave the position its name"
+    },
+    "frank gifford|1952": {
+      "roles": [
+        "FS"
+      ],
+      "note": "Started at defensive back in 1953 before moving to offense full time"
+    },
+    "les richter|1952": {
+      "roles": [
+        "K"
+      ],
+      "note": "Rams linebacker who handled kickoffs and field goals"
+    },
+    "paul hornung|1957": {
+      "roles": [
+        "K"
+      ],
+      "note": "Packers halfback and place-kicker; 1960 scoring record (176) with his foot"
+    },
+    "gino cappelletti|1960": {
+      "roles": [
+        "K"
+      ],
+      "note": "Patriots receiver and kicker; AFL's all-time scorer"
+    },
+    "roy green|1979": {
+      "roles": [
+        "CB"
+      ],
+      "note": "Two-way in 1981 (33 catches for 708 yards as a part-time receiver while starting at cornerback); 4 career interceptions"
+    }
   }
 }
