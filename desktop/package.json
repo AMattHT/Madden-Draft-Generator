@@ -1,0 +1,79 @@
+{
+  "name": "madden-draft-class-generator",
+  "productName": "Madden Draft Class Generator",
+  "version": "1.0.0",
+  "description": "Generate importable Madden 26/27 draft classes from real NFL draft history",
+  "main": "main.cjs",
+  "author": "amatthews",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-async-errors": "^3.1.1",
+    "fzstd": "^0.1.1",
+    "madden-franchise": "^4.3.6",
+    "papaparse": "^5.5.3",
+    "sharp": "^0.34.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.amatthews.madden-draft-class-generator",
+    "productName": "Madden Draft Class Generator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "package.json",
+      {
+        "from": "../server/dist",
+        "to": "server",
+        "filter": [
+          "**/*",
+          "!**/__tests__/**",
+          "!**/*.map"
+        ]
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "../server/data",
+        "to": "data"
+      },
+      {
+        "from": "../web/dist",
+        "to": "web"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

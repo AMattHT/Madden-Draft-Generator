@@ -1,3 +1,5 @@
+import path from 'path';
+import fs from 'fs';
 import 'express-async-errors'; // rejected async handlers reach the error middleware (Express 4)
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
@@ -30,6 +32,19 @@ export function attachErrorHandling(app: Express): void {
   });
 }
 
+/** The built web UI (web/dist), when it exists: the packaged desktop app and
+ *  `npm run start` serve the whole tool from this one server. API routes keep
+ *  priority; anything else falls back to index.html (the SPA router). */
+function webDist(): string | null {
+  const candidates = [
+    process.env.WEB_DIST,
+    path.resolve(__dirname, '..', '..', 'web', 'dist'), // server/dist -> repo web/dist
+    path.resolve(__dirname, '..', '..', '..', 'web', 'dist'),
+  ].filter((c): c is string => !!c);
+  for (const c of candidates) if (fs.existsSync(path.join(c, 'index.html'))) return c;
+  return null;
+}
+
 export function createApp(): Express {
   const app = express();
   app.use(cors({ origin: allowedOrigins() }));
@@ -45,6 +60,12 @@ export function createApp(): Express {
   app.use('/api', franchise);
   app.use('/api', gear);
 
+  const dist = webDist();
+  if (dist) {
+    app.use(express.static(dist));
+    app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+  }
   attachErrorHandling(app);
+
   return app;
 }

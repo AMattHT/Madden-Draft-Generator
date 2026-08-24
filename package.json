@@ -10,7 +10,9 @@
     "dev:server:build": "cd server && npm run build",
     "dev:web:build": "cd web && npm run build",
     "test": "cd server && npm test",
-    "predev": "node scripts/free-ports.js"
+    "predev": "node scripts/free-ports.js",
+    "app:build": "npm run dev:server:build && npm run dev:web:build && cd desktop && npm install && npx electron-builder --win",
+    "start": "cd server && npm run start"
   },
   "repository": {
     "type": "git",

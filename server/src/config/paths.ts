@@ -7,6 +7,8 @@ import fs from 'fs';
  * server root in both cases; we copy it into dist/ during build.
  */
 function findDataRoot(): string {
+  // The packaged desktop app sets DRAFT_TOOL_DATA to its resources/data folder.
+  if (process.env.DRAFT_TOOL_DATA && fs.existsSync(process.env.DRAFT_TOOL_DATA)) return process.env.DRAFT_TOOL_DATA;
   const candidates = [
     path.resolve(__dirname, '..', '..', 'data'), // src/config -> server/data (dev)
     path.resolve(__dirname, '..', '..', '..', 'data'), // dist/config -> server/data (build)
@@ -30,7 +32,8 @@ export const TEMPLATE_M27 = path.join(TEMPLATES_DIR, 'CAREERDRAFT-2027Template')
 export const M27_BLOCK_SIZE = 5876;
 export const M27_DATA_START = 0x46;
 
-export const CACHE_DIR = path.join(SERVER_ROOT, 'cache');
+// The packaged app keeps the cache in the user profile (resources are read-only).
+export const CACHE_DIR = process.env.DRAFT_TOOL_CACHE || path.join(SERVER_ROOT, 'cache');
 export const CACHE_DB = path.join(CACHE_DIR, 'draft-cache.db');
 export const EXPORTS_DIR = path.join(CACHE_DIR, 'exports');
 

@@ -6,7 +6,11 @@ calibrated against the games' own generated classes. AFL and NFL drafts are merg
 undrafted stars get their careers, players get era-correct builds, faces, gear and (M27) persona DNA.
 A set of franchise-save tools (cap reset, dev traits, aging, relocation, roster editing) rounds it out.
 
-React web app + local Node backend. Run `npm run dev`, open **http://localhost:5173**.
+React web app + local Node backend. Run `npm run dev`, open **http://localhost:5173** —
+or build the **desktop app** (`npm run app:build`): a Windows installer + portable exe in
+`desktop/release/` that people download and run with nothing else installed. The packaged app
+serves the UI from the same local server, keeps its cache under `%APPDATA%/madden-draft-class-generator/`,
+and downloads the nflverse data on first run.
 
 ## What it does
 
