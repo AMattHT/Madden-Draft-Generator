@@ -61,6 +61,8 @@ right game's Saves folder), then in Madden: Franchise → Choose Draft Class.
 | `node scripts/build-calibration.js [m26\|m27]` | rebuild `madden-calibration[-m27].json` from game-generated classes in the Saves folders |
 | `npx tsx scripts/build-m27-field-stats.ts` | mine M27 field distributions, surname → announcer ids, rookie persona mix |
 | `npx tsx scripts/build-generic-heads.ts` | per-game generic-head catalogs + portrait ids |
+| `npx tsx scripts/build-portrait-pack.ts` | pre-crop every menu portrait to `data/portraits/` (~37 MB) — what installs without the Editor Suite's sprite atlas serve from |
+| `npx tsx scripts/crawl-player-photos.ts [--retry-nulls]` | pre-crawl Wikipedia photos for pre-1999 notables into the cache; found URLs ship as `wiki-photos-seed.json` |
 | `npx tsx scripts/build-face-catalogs.ts` | per-game real-head catalogs (`face-assets-by-game.json`): decodes the Huffman-coded bundle names in each game's `Data/Win32/*.toc`, merges the newest career autosave's `PLYR_ASSETNAME`/`PLYR_PORTRAIT` and the lookup's casing/PhotoID; env `MADDEN26_DIR`, `MADDEN27_DIR` |
 | `python scripts/fit-ovrweights.py [m26\|m27]` | refit overall-formula overrides where `ovrweights.json` disagrees with the game |
 | `npx tsx scripts/build-skintone.ts` | rebuild portrait-derived skin tones (`pid_ita.json`: median skin ITA + legends flag per portrait; model in `SkinToneClassify.TONE_ITA_MODEL`, fitted by `scripts/probes/probe-roster-tones.ts` against the rosters' fallback generic heads) |

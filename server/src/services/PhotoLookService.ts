@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import sharp from 'sharp';
-import { CACHE_DIR } from '../config/paths';
+import { CACHE_DIR, LOOKUPS_DIR } from '../config/paths';
 import { BaselinePlayer, ObservedGear } from '../types/player';
 
 const UA = 'MaddenDraftClassGenerator/0.1 (personal modding tool; historical draft research)';
@@ -42,7 +42,16 @@ function saveJson(file: string, data: unknown): void {
 }
 
 function wikiMap(): WikiMap {
-  if (!wikiMem) wikiMem = loadJson<WikiMap>(WIKI_CACHE, {});
+  if (!wikiMem) {
+    wikiMem = loadJson<WikiMap>(WIKI_CACHE, {});
+    // A fresh machine (packaged install) starts from the shipped seed: the
+    // photos found by scripts/crawl-player-photos.ts, so old classes show
+    // pictures without re-crawling Wikipedia.
+    if (Object.keys(wikiMem).length === 0) {
+      const seed = loadJson<WikiMap>(path.join(LOOKUPS_DIR, 'wiki-photos-seed.json'), {});
+      if (Object.keys(seed).length) { wikiMem = seed; saveJson(WIKI_CACHE, wikiMem); }
+    }
+  }
   return wikiMem;
 }
 function gearMap(): GearMap {
@@ -285,6 +294,20 @@ export const PhotoLookService = {
   bestPhotoUrl,
 
   /** Resolve a picture (nflverse / PFR / Wiki CSV, else live Wikipedia). */
+  /** Drop cached not-found wiki entries the predicate claims (so a better search
+   *  or a recovered network can retry them). Returns how many were cleared. */
+  clearNullWikiEntries(want: (first: string, last: string) => boolean): number {
+    const cache = wikiMap();
+    let n = 0;
+    for (const [key, v] of Object.entries(cache)) {
+      if (v != null) continue;
+      const [first, last] = key.split('|');
+      if (first && last && want(first, last)) { delete cache[key]; n++; }
+    }
+    saveJson(WIKI_CACHE, cache);
+    return n;
+  },
+
   async resolvePhoto(p: BaselinePlayer): Promise<string | null> {
     const have = bestPhotoUrl(p);
     if (have) return have;

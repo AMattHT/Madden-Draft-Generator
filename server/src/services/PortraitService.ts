@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
-import { SERVER_ROOT, LOOKUPS_DIR } from '../config/paths';
+import { DATA_ROOT, SERVER_ROOT, LOOKUPS_DIR } from '../config/paths';
 import { parseCsvFile } from '../util/csv';
 
 /**
@@ -60,6 +60,27 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
+/** The pre-cropped pack (data/portraits/<plpo>.jpg, built by
+ *  scripts/build-portrait-pack.ts): what a machine without the Editor Suite's
+ *  sprite atlas — every packaged desktop install — serves from. */
+const PACK_DIR = path.join(DATA_ROOT, 'portraits');
+const packAvailable = () => fs.existsSync(PACK_DIR);
+const packFile = (plpo: string) => path.join(PACK_DIR, `${plpo}.jpg`);
+
+function loadPidMap(): Map<number, string> {
+  if (pidToPlpo) return pidToPlpo;
+  pidToPlpo = new Map();
+  try {
+    const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'));
+    for (const r of rows) {
+      const pid = parseInt(r['PID'], 10);
+      const plpo = (r['Portrait'] || '').trim();
+      if (!Number.isNaN(pid) && plpo) pidToPlpo.set(pid, plpo);
+    }
+  } catch { /* mapping absent */ }
+  return pidToPlpo;
+}
+
 function load(): boolean {
   if (byPlpo) return true;
   if (!DATA_DIR) return false;
@@ -80,14 +101,31 @@ function load(): boolean {
   }
   for (const list of genericByTone.values()) list.sort(); // stable order for deterministic picks
 
-  pidToPlpo = new Map();
-  const rows = parseCsvFile<Record<string, string>>(path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv'));
-  for (const r of rows) {
-    const pid = parseInt(r['PID'], 10);
-    const plpo = (r['Portrait'] || '').trim();
-    if (!Number.isNaN(pid) && plpo) pidToPlpo.set(pid, plpo);
-  }
+  loadPidMap();
   return true;
+}
+
+/** Without the atlas: the pack's filenames still tell us every plpo and the
+ *  generic pools per tone. */
+function loadFromPack(): boolean {
+  if (byPlpo) return true;
+  if (!packAvailable()) return false;
+  byPlpo = new Map();
+  genericByTone = new Map();
+  for (const f of fs.readdirSync(PACK_DIR)) {
+    if (!f.endsWith('.jpg')) continue;
+    const key = f.slice(0, -4);
+    byPlpo.set(key, { sheet: -1, x: 0, y: 0, width: 128, height: 128, category: /^plpo_generic/.test(key) ? 'generic' : 'player' });
+    const m = /^plpo_generic_(\d+)_/.exec(key);
+    if (m) {
+      const tone = parseInt(m[1], 10);
+      if (!genericByTone.has(tone)) genericByTone.set(tone, []);
+      genericByTone.get(tone)!.push(key);
+    }
+  }
+  for (const list of genericByTone.values()) list.sort();
+  loadPidMap();
+  return byPlpo.size > 0;
 }
 
 /** Pick a skin-tone-matched generic portrait deterministically. */
@@ -103,13 +141,13 @@ function genericFor(race: number | null, seed: string): string | null {
 
 export const PortraitService = {
   get available(): boolean {
-    return load();
+    return load() || loadFromPack();
   },
 
   /** The plpo portrait a prospect should display: real portrait by PID, else a
    *  skin-tone-matched generic. Returns null if portraits are unavailable. */
   plpoFor(pid: number, race: number | null, seed: string): string | null {
-    if (!load()) return null;
+    if (!load() && !loadFromPack()) return null;
     if (pid > 0) {
       const plpo = pidToPlpo!.get(pid);
       if (plpo && plpo !== 'plpo_Blank' && byPlpo!.has(plpo)) return plpo;
@@ -119,18 +157,25 @@ export const PortraitService = {
 
   /** plpo for a known portrait PID only (no generic fallback), else null. */
   plpoForPid(pid: number): string | null {
-    if (!load()) return null;
+    if (!load() && !loadFromPack()) return null;
     const plpo = pidToPlpo!.get(pid);
     return plpo && plpo !== 'plpo_Blank' && byPlpo!.has(plpo) ? plpo : null;
   },
 
   /** Crop and cache the 256x256 portrait PNG for a plpo, or null if unknown. */
   async cropByPlpo(plpo: string): Promise<Buffer | null> {
-    if (!load()) return null;
+    if (!load() && !loadFromPack()) return null;
     const cached = cropCache.get(plpo);
     if (cached) return cached;
     const e = byPlpo!.get(plpo);
     if (!e) return null;
+    if (e.sheet < 0 || !DATA_DIR) {
+      const f = packFile(plpo);
+      if (!fs.existsSync(f)) return null;
+      const buf = fs.readFileSync(f);
+      cropCache.set(plpo, buf);
+      return buf;
+    }
     const sheet = path.join(SPRITES_DIR, `portraits-sheet-${e.sheet}.png`);
     if (!fs.existsSync(sheet)) return null;
     const buf = await sharp(sheet)
