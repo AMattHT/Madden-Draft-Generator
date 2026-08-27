@@ -44,7 +44,11 @@ export default function App() {
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
   const [gameVersion, setGameVersion] = useState<GameVersion>('m27');
-  const [view, setView] = useState<AppView>('home');
+  // Per-game desktop builds pin the target game (no M26/M27 toggle); Franchise
+  // Tools only appear when the server enables them (out of the 1.0.0 release).
+  const [pinnedGame, setPinnedGame] = useState<GameVersion | null>(null);
+  const [franchiseEnabled, setFranchiseEnabled] = useState(false);
+  const [view, setView] = useState<AppView>('draft');
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
@@ -413,14 +417,26 @@ export default function App() {
     cache.usedYearsGet().then((a) => setUsedYears(new Set(a)));
     cache.recentYearsGet().then(setRecentYears);
     api.archetypesByPosition().then(setArchetypeOptions).catch(() => {});
-    api
-      .years()
-      .then((ys) => {
-        setYears(ys);
-        const def = ys.includes(2003) ? 2003 : ys[ys.length - 1];
-        if (def) select(def);
-      })
-      .catch((e) => setError(e.message));
+    (async () => {
+      // Deployment shape first, so a pinned per-game build never pulls its
+      // first class for the wrong game.
+      let pinned: GameVersion | null = null;
+      try {
+        const cfg = await api.appConfig();
+        pinned = cfg.gameVersion;
+        if (pinned) {
+          setPinnedGame(pinned);
+          setGameVersion(pinned);
+          document.title = pinned === 'm26' ? 'Madden 26 Draft Class Generator' : 'Madden 27 Draft Class Generator';
+        }
+        setFranchiseEnabled(cfg.franchise);
+        if (cfg.franchise) setView('home');
+      } catch { /* older server: defaults stand */ }
+      const ys = await api.years();
+      setYears(ys);
+      const def = ys.includes(2003) ? 2003 : ys[ys.length - 1];
+      if (def) select(def, false, mode, undefined, undefined, pinned ?? gameVersion);
+    })().catch((e) => setError(e.message));
     // Run once on mount; mode changes are handled via changeMode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -430,13 +446,15 @@ export default function App() {
       <TopBar
         view={view}
         onSetView={setView}
-        onGoHome={() => setView('home')}
+        onGoHome={() => setView(franchiseEnabled ? 'home' : 'draft')}
         onDrawRandom={drawRandomYear}
         canDraw={years.some((y) => !usedYears.has(y) && inRange(y))}
         mode={mode}
         onSetMode={changeMode}
         gameVersion={gameVersion}
         onSetGameVersion={changeGameVersion}
+        pinnedGame={pinnedGame}
+        franchiseEnabled={franchiseEnabled}
         showLeague={selected != null && isMergeEra(selected)}
         league={selected != null ? effLeague(selected) : 'NFL'}
         onSetLeague={changeLeague}
@@ -460,8 +478,8 @@ export default function App() {
       />
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
-          {view === 'home' && <HomePage onSelect={setView} />}
-          {view === 'franchise' && (
+          {view === 'home' && franchiseEnabled && <HomePage onSelect={setView} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
+          {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}
               years={years}

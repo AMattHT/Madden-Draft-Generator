@@ -8,7 +8,9 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win",
+    "dist": "npm run dist:m26 && npm run dist:m27",
+    "dist:m26": "electron-builder --win --config builder-m26.json",
+    "dist:m27": "electron-builder --win --config builder-m27.json",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
@@ -26,54 +28,5 @@
     "electron": "^38.2.0",
     "electron-builder": "^26.0.12"
   },
-  "build": {
-    "appId": "com.amatthews.madden-draft-class-generator",
-    "productName": "Madden Draft Class Generator",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "main.cjs",
-      "package.json",
-      {
-        "from": "../server/dist",
-        "to": "server",
-        "filter": [
-          "**/*",
-          "!**/__tests__/**",
-          "!**/*.map"
-        ]
-      }
-    ],
-    "extraResources": [
-      {
-        "from": "../server/data",
-        "to": "data"
-      },
-      {
-        "from": "../web/dist",
-        "to": "web"
-      }
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    }
-  }
+  "$comment": "The per-game electron-builder configs live in builder-m26.json / builder-m27.json (dist:m26 / dist:m27)."
 }

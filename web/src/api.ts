@@ -3,11 +3,20 @@ import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, 
 /** Backend-proxied image URL (avoids hotlink/CORS blocks on Wikipedia/PFR). */
 export const imageUrl = (url: string) => `/api/image?url=${encodeURIComponent(url)}`;
 
-/** 2D portrait for the board/profile: official NFL headshot / PFR / Wiki first
- *  (the Carter/Bennett look). Fall back to the in-game menu portrait. */
+/** Avatar sources in order: real photo (NFL/ESPN/PFR/Wiki) first, then the
+ *  in-game menu portrait. A photo that errors — the proxy 404s dead NFL
+ *  placeholder headshots, ESPN 404s ids it never had — falls through to the
+ *  portrait instead of a blank chip. */
+export function displayPortraitChain(row: { face?: string; photoUrl?: string | null; portrait?: string | null }): string[] {
+  const urls: string[] = [];
+  if (row.photoUrl) urls.push(imageUrl(row.photoUrl));
+  if (row.portrait) urls.push(row.portrait);
+  return urls;
+}
+
+/** First (best) avatar source; see displayPortraitChain. */
 export function displayPortrait(row: { face?: string; photoUrl?: string | null; portrait?: string | null }): string | null {
-  if (row.photoUrl) return imageUrl(row.photoUrl);
-  return row.portrait ?? null;
+  return displayPortraitChain(row)[0] ?? null;
 }
 
 async function jget<T>(url: string): Promise<T> {
@@ -249,6 +258,9 @@ export interface FranchiseScheduleResult {
 let franchiseGameVersion: GameVersion = 'm26';
 
 export const api = {
+  /** Deployment shape: a per-game desktop build pins gameVersion; Franchise
+   *  Tools only show when the server enables them (DRAFT_TOOL_FRANCHISE=1). */
+  appConfig: () => jget<{ gameVersion: GameVersion | null; franchise: boolean }>('/api/config'),
   years: () => jget<{ years: number[] }>('/api/draft/years').then((r) => r.years),
 
   archetypesByPosition: () =>

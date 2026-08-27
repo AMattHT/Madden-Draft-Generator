@@ -159,7 +159,7 @@ export function PlayerTable({
               </td>
               <td className="px-3 py-1.5 font-medium text-neutral-100">
                 <span className="inline-flex items-center gap-2.5">
-                  <Portrait src={displayPortrait(r)} size="xs" />
+                  <Portrait src={displayPortrait(r)} fallback={r.portrait} size="xs" />
                   <span className="inline-flex items-center gap-1.5">
                     {r.edited && <span className="text-gold" title="edited">●</span>}
                     {r.firstName} {r.lastName}

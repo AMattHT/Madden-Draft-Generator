@@ -4,13 +4,17 @@ Generate importable Madden 26 **and Madden 27** draft classes (`CAREERDRAFT-*`) 
 history (1936–2026), rated from Pro-Football-Reference **weighted Approximate Value (wAV)** and
 calibrated against the games' own generated classes. AFL and NFL drafts are merged for 1960–66,
 undrafted stars get their careers, players get era-correct builds, faces, gear and (M27) persona DNA.
-A set of franchise-save tools (cap reset, dev traits, aging, relocation, roster editing) rounds it out.
+A set of franchise-save tools (cap reset, dev traits, aging, relocation, roster editing) exists in the
+repo but is **not part of the 1.0.0 release** — it only appears when the server runs with
+`DRAFT_TOOL_FRANCHISE=1`.
 
 React web app + local Node backend. Run `npm run dev`, open **http://localhost:5173** —
-or build the **desktop app** (`npm run app:build`): a Windows installer + portable exe in
-`desktop/release/` that people download and run with nothing else installed. The packaged app
-serves the UI from the same local server, keeps its cache under `%APPDATA%/madden-draft-class-generator/`,
-and downloads the nflverse data on first run.
+or build the **desktop apps** (`npm run app:build`, or `app:build:m26` / `app:build:m27` for one):
+**two separate Windows apps, one per game** — *Madden 26 Draft Class Generator* and *Madden 27
+Draft Class Generator* — as installer + portable exe under `desktop/release/m26/` and
+`desktop/release/m27/`. Each app is locked to its game (no M26/M27 toggle; it only writes that
+game's `.mdc` format), serves the UI from its own local server, keeps its cache under
+`%APPDATA%/<app name>/`, and downloads the nflverse data on first run.
 
 ## What it does
 
@@ -24,9 +28,10 @@ and downloads the nflverse data on first run.
 | M27 extras | Persona DNA sampled from the game's rookies, PersonalityRating, Focus, QB style, birthdate, body-type enum — everything the game reads back verbatim |
 | Two-way | Secondary roles carried in the ratings so the depth chart can use a player there: 1980+ from career totals (30+ receptions, 3+ INTs, 100+ carries; an undrafted player never matches a drafted namesake), the single-platoon mirror through 1949, and per-player overrides in `two-way-players.json` (pin roles, pin none, or switch the era rule off) |
 | Builds | Body type (Standard / Thin / Lean / Muscular / Heavy) from the editor's weight bands (Lean 160–215, Standard 175–230, Thin 180–240, Muscular 210–285, Heavy 280+) and the real roster's per-position mix inside them (`scripts/probes/probe-roster-builds.ts`); Lean is the Player table's `Freshman` |
-| Franchise tools | Work on M26 **and** M27 saves (a save from the other game is refused): cap reset (M27 contract table aware), heal injuries / dev traits, position-aware trait realism, **advance the roster N seasons** (age, retire, decline), free-agent trim, draft-pick reset, relocation/rebrand, schedule viewer, per-player roster editor |
+| Franchise tools | **Dev-only for now (out of the 1.0.0 release; enable with `DRAFT_TOOL_FRANCHISE=1`).** Work on M26 **and** M27 saves (a save from the other game is refused): cap reset (M27 contract table aware), heal injuries / dev traits, position-aware trait realism, **advance the roster N seasons** (age, retire, decline), free-agent trim, draft-pick reset, relocation/rebrand, schedule viewer, per-player roster editor |
 | Editing | Every attribute / bio / face / gear / persona editable; undo/redo; export/import edits as JSON; "game shows N" live recompute; Variant re-rolls; years with more players than the 402 slots (1987: 554) list who didn't fit and let you pull any back in (he takes the weakest keeper's slot, so other picks and edits hold); Save straight into the Madden Saves folder (atomic, keeps a `.bak`) |
-| Tests | `npm test` (91 tests incl. golden classes), `npm run verify` (export round-trips), `npm run verify:franchise` (every franchise tool on copies of both autosaves) |
+| Photos | Board/profile avatars walk photo → in-game portrait → silhouette. Photos: curated CSV/Wikipedia shots, then **ESPN headshots** for anyone whose last season was ≤2019 (the NFL CDN replaced most retirees' photos with one generic helmeted placeholder — the proxy detects it by hash and 404s so the portrait takes over), then NFL headshots for current players |
+| Tests | `npm test` (135 tests incl. golden classes), `npm run verify` (export round-trips), `npm run verify:franchise` (every franchise tool on copies of both autosaves) |
 
 The full audit that drove the last round of work is in
 [`docs/improvement-report-2026-08-22.html`](docs/improvement-report-2026-08-22.html); the M27 binary

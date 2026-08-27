@@ -80,6 +80,24 @@ interface PlayerRow {
   height?: string;
   weight?: string;
   headshot?: string;
+  espn_id?: string;
+  last_season?: string;
+}
+
+/**
+ * The NFL CDN no longer hosts photos for most players out of the league since
+ * ~2019 — their nflverse headshot URLs answer 200 with a generic helmeted-
+ * silhouette placeholder (byte-identical for every player), which painted whole
+ * historical classes with the same fake "photo". ESPN still serves the real
+ * headshot for those ids (and honestly 404s when it has none, which lets the UI
+ * fall back to the in-game portrait). Current players keep the NFL photo.
+ */
+export function preferredHeadshot(espnId: string | undefined, lastSeason: number | null, nflUrl: string | null): string | null {
+  const espn = (espnId || '').trim();
+  if (/^\d+$/.test(espn) && (lastSeason == null || lastSeason <= 2019)) {
+    return `https://a.espncdn.com/i/headshots/nfl/players/full/${espn}.png`;
+  }
+  return nflUrl;
 }
 
 let byKey: Map<string, CareerBits[]> | null = null;
@@ -193,7 +211,7 @@ function load(): Map<string, CareerBits[]> {
         jersey: (() => { const j = num(r.jersey_number); return j != null && j >= 0 && j <= 99 ? j : null; })(),
         heightInches: h != null && h >= 60 && h <= 84 ? h : null,
         weight: w != null && w >= 140 && w <= 400 ? w : null,
-        headshotUrl: hs.startsWith('http') ? hs : null,
+        headshotUrl: preferredHeadshot(r.espn_id, num(r.last_season), hs.startsWith('http') ? hs : null),
       };
       // Attach to the draft_picks row with the same pick (or the only row); otherwise
       // this is a distinct same-name player -> its own entry.

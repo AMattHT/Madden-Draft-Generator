@@ -4,7 +4,18 @@ import { YearPicker } from './YearPicker';
 import { PlayerSearch } from './PlayerSearch';
 import { Icon, ICONS } from './ui';
 
-function GameToggle({ gameVersion, onSetGameVersion }: { gameVersion: GameVersion; onSetGameVersion: (v: GameVersion) => void }) {
+function GameToggle({ gameVersion, onSetGameVersion, pinned }: { gameVersion: GameVersion; onSetGameVersion: (v: GameVersion) => void; pinned: GameVersion | null }) {
+  // A per-game build is locked to its game: show which, don't offer a switch.
+  if (pinned) {
+    return (
+      <span
+        className="rounded-lg border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-semibold text-gold"
+        title={`This app builds classes for Madden ${pinned === 'm26' ? '26' : '27'}`}
+      >
+        {pinned === 'm26' ? 'Madden 26' : 'Madden 27'}
+      </span>
+    );
+  }
   const opts: [GameVersion, string, string][] = [
     ['m26', 'M26', 'Build classes for Madden 26 (4296-byte format)'],
     ['m27', 'M27', 'Build classes for Madden 27 (5876-byte format + persona DNA)'],
@@ -122,6 +133,8 @@ export function TopBar({
   onSetMode,
   gameVersion,
   onSetGameVersion,
+  pinnedGame,
+  franchiseEnabled,
   showLeague,
   league,
   onSetLeague,
@@ -142,6 +155,8 @@ export function TopBar({
   onSetMode: (m: GenMode) => void;
   gameVersion: GameVersion;
   onSetGameVersion: (v: GameVersion) => void;
+  pinnedGame: GameVersion | null;
+  franchiseEnabled: boolean;
   showLeague: boolean;
   league: string;
   onSetLeague: (l: string) => void;
@@ -160,19 +175,25 @@ export function TopBar({
         <button onClick={onGoHome} title="Home" className="flex items-center gap-3 rounded-lg transition-opacity hover:opacity-80">
           <LogoMark />
           <div className="hidden leading-tight text-left sm:block">
-            <div className="text-[13px] font-bold tracking-tight text-neutral-100">Madden Draft Toolkit</div>
-            <div className="text-[11px] text-muted">Draft classes · Franchise tools</div>
+            <div className="text-[13px] font-bold tracking-tight text-neutral-100">
+              {pinnedGame === 'm26' ? 'Madden 26 Draft Class Generator' : pinnedGame === 'm27' ? 'Madden 27 Draft Class Generator' : 'Madden Draft Toolkit'}
+            </div>
+            <div className="text-[11px] text-muted">{franchiseEnabled ? 'Draft classes · Franchise tools' : 'Historical draft classes · importable .mdc'}</div>
           </div>
         </button>
-        <div className="ml-1 h-6 w-px bg-border" />
-        <ViewToggle view={view} onSetView={onSetView} />
+        {franchiseEnabled && (
+          <>
+            <div className="ml-1 h-6 w-px bg-border" />
+            <ViewToggle view={view} onSetView={onSetView} />
+          </>
+        )}
         {draft && (
           <>
             <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} recent={recentYears} />
             <button
               onClick={onDrawRandom}
               disabled={!canDraw}
-              title={canDraw ? 'Draw a random unused draft year' : 'All years used — reset history in the Franchise tab'}
+              title={canDraw ? 'Draw a random unused draft year' : franchiseEnabled ? 'All years used — reset history in the Franchise tab' : 'All draft years drawn'}
               className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border-strong bg-surface-2 text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100 disabled:opacity-40"
             >
               <Icon path={ICONS.shuffle} className="h-4 w-4" />
@@ -187,7 +208,7 @@ export function TopBar({
           {connected ? 'Backend connected' : 'Backend offline'}
         </div>
         <div className="hidden h-6 w-px bg-border sm:block" />
-        {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} />}
+        {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} pinned={pinnedGame} />}
         {draft && showLeague && (
           <div className="flex items-center gap-2">
             <span className="hidden text-[11px] uppercase tracking-wider text-muted md:inline">League</span>

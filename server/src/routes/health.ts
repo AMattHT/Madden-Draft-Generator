@@ -36,6 +36,20 @@ r.get('/health', (_req, res) => {
   res.json({ ok: true, ts: Date.now(), generator: generatorFingerprint() });
 });
 
+/**
+ * Deployment shape for the web app. The packaged per-game desktop builds pin
+ * gameVersion (the M26 app only writes M26 files, the M27 app M27), and
+ * Franchise Tools ship only when explicitly enabled (DRAFT_TOOL_FRANCHISE=1) —
+ * pulled from the 1.0.0 release until they are ready.
+ */
+r.get('/config', (_req, res) => {
+  const g = process.env.DRAFT_TOOL_GAME;
+  res.json({
+    gameVersion: g === 'm26' || g === 'm27' ? g : null,
+    franchise: process.env.DRAFT_TOOL_FRANCHISE === '1',
+  });
+});
+
 /** Debug: confirm the vendored .mdc engine works through the HTTP layer. */
 r.get('/template/info', (_req, res) => {
   const buf = MdcService.loadTemplate();

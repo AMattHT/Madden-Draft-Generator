@@ -37,6 +37,17 @@ async function waitForHealth(port, tries = 120) {
   return false;
 }
 
+/** Which game this build targets ('m26' | 'm27'), baked into the packaged
+ *  package.json by electron-builder extraMetadata. Dev falls back to the env. */
+function pinnedGameVersion() {
+  try {
+    const v = require(path.join(app.getAppPath(), 'package.json')).gameVersion;
+    if (v === 'm26' || v === 'm27') return v;
+  } catch { /* dev: no extraMetadata */ }
+  const e = process.env.DRAFT_TOOL_GAME;
+  return e === 'm26' || e === 'm27' ? e : null;
+}
+
 async function start() {
   const port = await freePort();
   const cacheDir = path.join(app.getPath('userData'), 'cache');
@@ -47,6 +58,8 @@ async function start() {
   process.env.DRAFT_TOOL_DATA = packaged ? res('data') : path.join(__dirname, '..', 'server', 'data');
   process.env.DRAFT_TOOL_CACHE = cacheDir;
   process.env.WEB_DIST = packaged ? res('web') : path.join(__dirname, '..', 'web', 'dist');
+  const game = pinnedGameVersion();
+  if (game) process.env.DRAFT_TOOL_GAME = game;
 
   // The server listens as a side effect of the require (same process: no child
   // Node needed, and the native modules are the ones electron-builder rebuilt).
@@ -64,7 +77,7 @@ async function start() {
     height: 900,
     backgroundColor: '#0b0d12',
     autoHideMenuBar: true,
-    title: 'Madden Draft Class Generator',
+    title: game === 'm26' ? 'Madden 26 Draft Class Generator' : game === 'm27' ? 'Madden 27 Draft Class Generator' : 'Madden Draft Class Generator',
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
   // External links (Wikipedia photos etc.) go to the real browser.

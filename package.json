@@ -11,7 +11,9 @@
     "dev:web:build": "cd web && npm run build",
     "test": "cd server && npm test",
     "predev": "node scripts/free-ports.js",
-    "app:build": "npm run dev:server:build && npm run dev:web:build && cd desktop && npm install && npx electron-builder --win",
+    "app:build": "npm run dev:server:build && npm run dev:web:build && cd desktop && npm install && npm run dist",
+    "app:build:m26": "npm run dev:server:build && npm run dev:web:build && cd desktop && npm install && npm run dist:m26",
+    "app:build:m27": "npm run dev:server:build && npm run dev:web:build && cd desktop && npm install && npm run dist:m27",
     "start": "cd server && npm run start"
   },
   "repository": {

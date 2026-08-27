@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PlayerRow, GearOption, FrontSevenInfo } from '../types';
-import { api, displayPortrait, type ArchetypeOption, type PersonaTrait } from '../api';
+import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait } from '../api';
 import { POS_NAMES, DEV_NAMES, ATTR_GROUPS, humanize, fmtHeight, keyAttrsForPosition, tierColor } from '../constants';
 import { RatingChip, DevBadge, Icon, ICONS } from './ui';
 import { RadarChart } from './RadarChart';
@@ -182,7 +182,11 @@ export function ProfileModal({
   canPrev?: boolean;
   canNext?: boolean;
 }) {
-  const [imgErr, setImgErr] = useState(false);
+  // Avatar source chain (photo, then in-game portrait): imgErr counts how many
+  // sources have failed so a dead photo URL falls back instead of going blank.
+  const [imgErr, setImgErr] = useState(0);
+  const imgChain = displayPortraitChain(row);
+  const imgSrc = imgChain[imgErr] ?? null;
   const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
   const [gearOpen, setGearOpen] = useState(false);
   const [appearOpen, setAppearOpen] = useState(false);
@@ -223,7 +227,7 @@ export function ProfileModal({
     return () => { alive = false; };
   }, [gameVersion]);
   useEffect(() => setFaceTone(row.skinTone ?? 4), [row.id, row.skinTone]);
-  useEffect(() => setImgErr(false), [row.id]);
+  useEffect(() => setImgErr(0), [row.id]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -338,12 +342,13 @@ export function ProfileModal({
         <div className="sticky top-0 z-10 border-b border-border bg-surface-1/95 backdrop-blur-sm">
           <div className="flex items-start gap-4 px-5 pt-4">
           <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2 ring-1 ring-black/20">
-            {displayPortrait(row) && !imgErr ? (
+            {imgSrc ? (
               <img
-                src={displayPortrait(row)!}
+                key={imgSrc}
+                src={imgSrc}
                 alt=""
                 className="h-full w-full object-cover"
-                onError={() => setImgErr(true)}
+                onError={() => setImgErr((e) => e + 1)}
               />
             ) : (
               <span className="text-2xl font-bold text-neutral-600">
@@ -644,8 +649,8 @@ export function ProfileModal({
             <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-surface-2">
               {curFace && /^gen_/i.test(curFace) ? (
                 <img key={curFace} src={`/api/portrait/generic-head/${encodeURIComponent(curFace)}`} alt="" className="h-full w-full object-cover" />
-              ) : displayPortrait(row) && !imgErr ? (
-                <img src={displayPortrait(row)!} alt="" className="h-full w-full object-cover" />
+              ) : imgSrc ? (
+                <img key={imgSrc} src={imgSrc} alt="" className="h-full w-full object-cover" onError={() => setImgErr((e) => e + 1)} />
               ) : (
                 <Icon path={ICONS.image} className="h-6 w-6 text-neutral-600" />
               )}

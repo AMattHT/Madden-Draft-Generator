@@ -1,0 +1,33 @@
+{
+  "appId": "com.amatthews.madden27-draft-class-generator",
+  "productName": "Madden 27 Draft Class Generator",
+  "extraMetadata": {
+    "gameVersion": "m27"
+  },
+  "directories": {
+    "output": "release/m27"
+  },
+  "files": [
+    "main.cjs",
+    "package.json",
+    {
+      "from": "../server/dist",
+      "to": "server",
+      "filter": ["**/*", "!**/__tests__/**", "!**/*.map"]
+    }
+  ],
+  "extraResources": [
+    { "from": "../server/data", "to": "data" },
+    { "from": "../web/dist", "to": "web" }
+  ],
+  "win": {
+    "target": [
+      { "target": "nsis", "arch": ["x64"] },
+      { "target": "portable", "arch": ["x64"] }
+    ]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true
+  }
+}

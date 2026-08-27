@@ -63,18 +63,23 @@ function Dot({ className }: { className: string }) {
   return <span className={`h-1.5 w-1.5 rounded-full ${className}`} />;
 }
 
-/** Madden menu portrait for a player. Falls back to a neutral silhouette chip
- *  if the portrait is unavailable (Editor Suite data missing, or load error). */
-export function Portrait({ src, size = 'md' }: { src?: string | null; size?: 'xs' | 'sm' | 'md' | 'lg' }) {
-  const [broken, setBroken] = useState(false);
+/** Player avatar. Walks the source chain (real photo, then in-game portrait —
+ *  a dead photo URL 404s and the next source takes over) and only then falls
+ *  back to a neutral silhouette chip. */
+export function Portrait({ src, fallback, size = 'md' }: { src?: string | null; fallback?: string | null; size?: 'xs' | 'sm' | 'md' | 'lg' }) {
+  const chain = [src, fallback].filter((u, i, a): u is string => !!u && a.indexOf(u) === i);
+  const [broken, setBroken] = useState(0);
+  useEffect(() => setBroken(0), [src, fallback]);
   const dim = size === 'xs' ? 'h-7 w-7' : size === 'lg' ? 'h-20 w-20' : size === 'sm' ? 'h-8 w-8' : 'h-10 w-10';
-  if (src && !broken) {
+  const url = chain[broken];
+  if (url) {
     return (
       <img
-        src={src}
+        key={url}
+        src={url}
         alt=""
         loading="lazy"
-        onError={() => setBroken(true)}
+        onError={() => setBroken((b) => b + 1)}
         className={`${dim} shrink-0 rounded-md bg-surface-2 object-cover ring-1 ring-border`}
       />
     );

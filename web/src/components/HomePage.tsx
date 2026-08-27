@@ -70,12 +70,12 @@ function ModePanel({
   );
 }
 
-export function HomePage({ onSelect }: { onSelect: (v: AppView) => void }) {
+export function HomePage({ onSelect, title = 'Madden Draft Toolkit' }: { onSelect: (v: AppView) => void; title?: string }) {
   return (
     <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center px-6 py-10">
       <div className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight text-neutral-50 sm:text-4xl" style={{ textWrap: 'balance' }}>
-          Madden 26 Toolkit
+          {title}
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-muted">
           Generate historically-rated draft classes, or run cap and draft tools for your franchise. Choose where to start.
