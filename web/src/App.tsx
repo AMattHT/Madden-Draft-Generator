@@ -428,6 +428,7 @@ export default function App() {
           setPinnedGame(pinned);
           setGameVersion(pinned);
           document.title = pinned === 'm26' ? 'Madden 26 Draft Class Generator' : 'Madden 27 Draft Class Generator';
+          document.querySelector('link[rel="icon"]')?.setAttribute('href', `/icons/${pinned}.svg`);
         }
         setFranchiseEnabled(cfg.franchise);
         if (cfg.franchise) setView('home');

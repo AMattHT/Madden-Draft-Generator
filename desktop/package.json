@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "electron": "^38.2.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "png-to-ico": "^3.0.2"
   },
   "$comment": "The per-game electron-builder configs live in builder-m26.json / builder-m27.json (dist:m26 / dist:m27)."
 }

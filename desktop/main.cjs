@@ -72,12 +72,16 @@ async function start() {
     return;
   }
 
+  // Packaged builds get their icon from the exe (builder-m26/27.json win.icon);
+  // dev (`npm start`) reads the same .ico from disk so the window matches.
+  const devIcon = path.join(__dirname, 'icons', game === 'm27' ? 'm27.ico' : 'm26.ico');
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
     backgroundColor: '#0b0d12',
     autoHideMenuBar: true,
     title: game === 'm26' ? 'Madden 26 Draft Class Generator' : game === 'm27' ? 'Madden 27 Draft Class Generator' : 'Madden Draft Class Generator',
+    ...(packaged ? {} : fs.existsSync(devIcon) ? { icon: devIcon } : {}),
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
   // External links (Wikipedia photos etc.) go to the real browser.

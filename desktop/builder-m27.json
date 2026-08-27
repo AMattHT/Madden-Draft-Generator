@@ -21,6 +21,7 @@
     { "from": "../web/dist", "to": "web" }
   ],
   "win": {
+    "icon": "icons/m27.ico",
     "target": [
       { "target": "nsis", "arch": ["x64"] },
       { "target": "portable", "arch": ["x64"] }
