@@ -6,7 +6,7 @@ Pick a year, and the whole class is built for you — real players, rated from w
 in the NFL, with era-correct builds, gear, faces and real drafting teams. Export it, start a
 franchise, and draft Barry Sanders yourself.
 
-**[Download the latest release](https://github.com/amatthewsHT/Madden-2026-Draft-Generator/releases/latest)**
+**[Download the latest release](https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest)**
 
 ## Install
 

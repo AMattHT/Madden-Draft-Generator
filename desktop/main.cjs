@@ -141,7 +141,7 @@ function checkForUpdates(win, game) {
         detail: 'This is the portable build, which cannot replace itself. Open the releases page to download it.',
       })
       .then(({ response }) => {
-        if (response === 0) shell.openExternal('https://github.com/amatthewsHT/Madden-2026-Draft-Generator/releases/latest');
+        if (response === 0) shell.openExternal('https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest');
       })
       .catch(() => {});
   });
