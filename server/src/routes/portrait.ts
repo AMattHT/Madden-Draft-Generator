@@ -57,7 +57,7 @@ r.get('/portrait/retro/:first/:last', async (req, res) => {
  *  filtered out of extraResources. It appears only when the user has extracted
  *  it from their own copy of the game; until then this 404s and the UI draws its
  *  own mark instead. */
-r.get('/dev-icon/:name', (req, res) => {
+r.get('/portrait/dev-icon/:name', (req, res) => {
   const name = String(req.params.name || '').toLowerCase();
   if (!/^(slow|normal|quick|superstar|hidden)$/.test(name)) return res.status(400).end();
   const file = path.join(DATA_ROOT, 'dev-icons', `${name}.png`);
