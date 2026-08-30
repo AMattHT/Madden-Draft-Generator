@@ -7,13 +7,15 @@ type Row = PlayerRow & { edited?: boolean };
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-/** Madden's general/physical block — the attributes that mean the same thing at
- *  every position, so no column is dead weight for half the table. Deliberately
- *  not "every rating with a non-zero value": the game gives everyone a baseline
- *  in all 53, so that test passes for throw power on a nose tackle. Position
- *  ratings (coverage, block shedding, route running) stay in the detail panel,
- *  where they can be shown against that position's own set. */
+/** Every rating the game carries, in Madden's own groups and abbreviations.
+ *
+ *  The general/physical block leads because it means the same thing everywhere;
+ *  after that the columns are position-specific by nature (throw power on a nose
+ *  tackle is a floor value, not a scouting signal). That is the cost of showing
+ *  all of them, and it is why the table must scroll horizontally rather than
+ *  squeeze — see the min-width on the table element. */
 export const ATTR_COLUMNS = [
+  // General / physical — meaningful at every position, so they lead.
   { id: 'spd', label: 'SPD', key: 'speed' },
   { id: 'acc', label: 'ACC', key: 'acceleration' },
   { id: 'agi', label: 'AGI', key: 'agility' },
@@ -24,7 +26,62 @@ export const ATTR_COLUMNS = [
   { id: 'sta', label: 'STA', key: 'stamina' },
   { id: 'tgh', label: 'TGH', key: 'toughness' },
   { id: 'inj', label: 'INJ', key: 'injury' },
+  // Ball carrier
+  { id: 'car', label: 'CAR', key: 'carrying' },
+  { id: 'bcv', label: 'BCV', key: 'ballCarrierVision' },
+  { id: 'btk', label: 'BTK', key: 'breakTackle' },
+  { id: 'trk', label: 'TRK', key: 'trucking' },
+  { id: 'sfa', label: 'SFA', key: 'stiffArm' },
+  { id: 'spm', label: 'SPM', key: 'spinMove' },
+  { id: 'jkm', label: 'JKM', key: 'jukeMove' },
+  // Receiving
+  { id: 'cth', label: 'CTH', key: 'catching' },
+  { id: 'cit', label: 'CIT', key: 'catchInTraffic' },
+  { id: 'spc', label: 'SPC', key: 'spectacularCatch' },
+  { id: 'srr', label: 'SRR', key: 'shortRouteRunning' },
+  { id: 'mrr', label: 'MRR', key: 'mediumRouteRunning' },
+  { id: 'drr', label: 'DRR', key: 'deepRouteRunning' },
+  { id: 'rls', label: 'RLS', key: 'release' },
+  // Passing
+  { id: 'thp', label: 'THP', key: 'throwPower' },
+  { id: 'tas', label: 'TAS', key: 'throwAccuracyShort' },
+  { id: 'tam', label: 'TAM', key: 'throwAccuracyMid' },
+  { id: 'tad', label: 'TAD', key: 'throwAccuracyDeep' },
+  { id: 'tor', label: 'TOR', key: 'throwOnTheRun' },
+  { id: 'tup', label: 'TUP', key: 'throwUnderPressure' },
+  { id: 'pac', label: 'PAC', key: 'playAction' },
+  { id: 'bsk', label: 'BSK', key: 'breakSack' },
+  // Blocking
+  { id: 'pbk', label: 'PBK', key: 'passBlock' },
+  { id: 'pbp', label: 'PBP', key: 'passBlockPower' },
+  { id: 'pbf', label: 'PBF', key: 'passBlockFinesse' },
+  { id: 'rbk', label: 'RBK', key: 'runBlock' },
+  { id: 'rbp', label: 'RBP', key: 'runBlockPower' },
+  { id: 'rbf', label: 'RBF', key: 'runBlockFinesse' },
+  { id: 'lbk', label: 'LBK', key: 'leadBlock' },
+  { id: 'ibl', label: 'IBL', key: 'impactBlocking' },
+  // Defence
+  { id: 'tak', label: 'TAK', key: 'tackle' },
+  { id: 'pow', label: 'POW', key: 'hitPower' },
+  { id: 'pmv', label: 'PMV', key: 'powerMoves' },
+  { id: 'fmv', label: 'FMV', key: 'finesseMoves' },
+  { id: 'bsh', label: 'BSH', key: 'blockShedding' },
+  { id: 'pur', label: 'PUR', key: 'pursuit' },
+  { id: 'prc', label: 'PRC', key: 'playRecognition' },
+  { id: 'mcv', label: 'MCV', key: 'manCoverage' },
+  { id: 'zcv', label: 'ZCV', key: 'zoneCoverage' },
+  { id: 'prs', label: 'PRS', key: 'pressCoverage' },
+  // Special teams
+  { id: 'kpw', label: 'KPW', key: 'kickPower' },
+  { id: 'kac', label: 'KAC', key: 'kickAccuracy' },
+  { id: 'kr', label: 'KR', key: 'kickReturn' },
+  { id: 'lng', label: 'LNG', key: 'longSnap' },
 ] as const;
+
+/** Columns the spoiler mask hides. Sorting by any of them would order the board
+ *  by the very numbers being hidden, so they stop being sortable while masked --
+ *  hiding a value but ranking by it is not hiding it. */
+export const SPOILER_SORTS = new Set<string>(['ovr', 'dev', 'wav', ...ATTR_COLUMNS.map((c) => c.id)]);
 
 /** Same thresholds the rating chips use, so a 90 reads as elite everywhere. */
 function attrTone(v: number): string {
@@ -47,13 +104,21 @@ function SortTh({
   onSort,
   className,
   children,
+  locked = false,
 }: {
   id: string;
   sort?: string;
   onSort?: (s: string) => void;
   className: string;
   children: React.ReactNode;
+  locked?: boolean;
 }) {
+  if (locked)
+    return (
+      <th className={`${className} font-semibold text-neutral-600`} title="Hidden while Spoilers is off">
+        {children}
+      </th>
+    );
   if (!onSort) return <th className={`${className} font-semibold`}>{children}</th>;
   const col = (sort ?? '').replace(/^-/, '');
   const on = col === id;
@@ -91,6 +156,7 @@ export function PlayerTable({
   focusName,
   sort,
   onSort,
+  spoilers = true,
 }: {
   rows: Row[];
   selectedId: number | null;
@@ -98,6 +164,8 @@ export function PlayerTable({
   focusName?: string | null;
   sort?: string;
   onSort?: (s: string) => void;
+  /** false hides overall, dev trait, wAV and attributes (blind scouting). */
+  spoilers?: boolean;
 }) {
   const maxWav = useMemo(() => Math.max(1, ...rows.map((r) => r.wav ?? 0)), [rows]);
 
@@ -136,18 +204,18 @@ export function PlayerTable({
   // nothing to scroll and the columns just squeezed instead. A min-width lets
   // the table grow past a narrow pane and scroll, while still filling a wide one.
   return (
-    <table className="w-full min-w-[1180px] border-collapse text-sm">
+    <table className="w-full min-w-[3000px] border-collapse text-sm">
       <thead className="sticky top-0 z-10 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400 shadow-[0_1px_0_var(--color-border)]">
         <tr>
           <SortTh id="pick" sort={sort} onSort={onSort} className="w-12 px-3 py-2.5 text-right">#</SortTh>
           <SortTh id="team" sort={sort} onSort={onSort} className="w-12 px-3 py-2.5 text-center">Team</SortTh>
           <SortTh id="name" sort={sort} onSort={onSort} className="w-56 px-3 py-2.5 text-left">Player</SortTh>
           <SortTh id="pos" sort={sort} onSort={onSort} className="w-16 px-3 py-2.5 text-left">Pos</SortTh>
-          <SortTh id="ovr" sort={sort} onSort={onSort} className="w-16 px-3 py-2.5 text-center">OVR</SortTh>
-          <SortTh id="dev" sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-left">Dev</SortTh>
-          <SortTh id="wav" sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-right">wAV</SortTh>
+          <SortTh id="ovr" locked={!spoilers} sort={sort} onSort={onSort} className="w-16 px-3 py-2.5 text-center">OVR</SortTh>
+          <SortTh id="dev" locked={!spoilers} sort={sort} onSort={onSort} className="w-14 px-3 py-2.5 text-center">Dev</SortTh>
+          <SortTh id="wav" locked={!spoilers} sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-right">wAV</SortTh>
           {ATTR_COLUMNS.map((c) => (
-            <SortTh key={c.id} id={c.id} sort={sort} onSort={onSort} className="w-12 px-2 py-2.5 text-center">
+            <SortTh key={c.id} id={c.id} locked={!spoilers} sort={sort} onSort={onSort} className="w-12 px-2 py-2.5 text-center">
               {c.label}
             </SortTh>
           ))}
@@ -206,22 +274,26 @@ export function PlayerTable({
                 </span>
               </td>
               <td className="px-3 py-1.5 text-center">
-                <RatingChip ovr={r.overall} size="sm" />
+                <RatingChip ovr={r.overall} size="sm" hidden={!spoilers} />
               </td>
               <td className="px-3 py-1.5">
-                <DevBadge dev={r.devTrait} />
+                <span className="flex justify-center"><DevBadge dev={r.devTrait} hidden={!spoilers} /></span>
               </td>
               <td className="px-3 py-1.5">
                 <div className="flex items-center justify-end gap-2">
                   <span className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-2">
-                    <span
-                      className="block h-full rounded-full bg-primary/70"
-                      style={{ width: `${wavPct}%` }}
-                    />
+                    {spoilers && (
+                      <span
+                        className="block h-full rounded-full bg-primary/70"
+                        style={{ width: `${wavPct}%` }}
+                      />
+                    )}
                   </span>
-                  <span className="w-8 text-right tabular-nums text-neutral-300">{r.wav ?? '—'}</span>
-                  <span className={`w-5 text-left text-[10px] ${tag.cls}`} title={tag.title}>
-                    {tag.label}
+                  <span className="w-8 text-right tabular-nums text-neutral-300">
+                    {spoilers ? (r.wav ?? '—') : '?'}
+                  </span>
+                  <span className={`w-5 text-left text-[10px] ${spoilers ? tag.cls : 'text-muted'}`} title={spoilers ? tag.title : undefined}>
+                    {spoilers ? tag.label : ''}
                   </span>
                 </div>
               </td>
@@ -229,7 +301,11 @@ export function PlayerTable({
                 const v = r.ratings?.[c.key];
                 return (
                   <td key={c.id} className="px-2 py-1.5 text-center tabular-nums">
-                    <span className={v == null ? 'text-neutral-600' : attrTone(v)}>{v ?? '—'}</span>
+                    {spoilers ? (
+                      <span className={v == null ? 'text-neutral-600' : attrTone(v)}>{v ?? '—'}</span>
+                    ) : (
+                      <span className="text-neutral-600">?</span>
+                    )}
                   </td>
                 );
               })}

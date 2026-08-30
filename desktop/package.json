@@ -11,11 +11,14 @@
     "dist": "npm run dist:m26 && npm run dist:m27",
     "dist:m26": "electron-builder --win --config builder-m26.json",
     "dist:m27": "electron-builder --win --config builder-m27.json",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "publish:m26": "electron-builder --win --config builder-m26.json --publish never",
+    "publish:m27": "electron-builder --win --config builder-m27.json --publish never"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "cors": "^2.8.5",
+    "electron-updater": "^6.8.9",
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
     "fzstd": "^0.1.1",

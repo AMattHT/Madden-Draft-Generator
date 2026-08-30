@@ -13,22 +13,50 @@
     {
       "from": "../server/dist",
       "to": "server",
-      "filter": ["**/*", "!**/__tests__/**", "!**/*.map"]
+      "filter": [
+        "**/*",
+        "!**/__tests__/**",
+        "!**/*.map"
+      ]
     }
   ],
   "extraResources": [
-    { "from": "../server/data", "to": "data" },
-    { "from": "../web/dist", "to": "web" }
+    {
+      "from": "../server/data",
+      "to": "data"
+    },
+    {
+      "from": "../web/dist",
+      "to": "web"
+    }
   ],
   "win": {
     "icon": "icons/m26.ico",
     "target": [
-      { "target": "nsis", "arch": ["x64"] },
-      { "target": "portable", "arch": ["x64"] }
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      }
     ]
   },
   "nsis": {
     "oneClick": false,
     "allowToChangeInstallationDirectory": true
-  }
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "amatthewsHT",
+      "repo": "Madden-2026-Draft-Generator",
+      "channel": "m26"
+    }
+  ]
 }

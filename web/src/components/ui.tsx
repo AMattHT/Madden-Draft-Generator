@@ -2,7 +2,18 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { TeamInfo } from '../types';
 
 /** OVR chip — color encodes tier (gold elite … gray fringe), mirroring wAV. */
-export function RatingChip({ ovr, size = 'md' }: { ovr: number; size?: 'sm' | 'md' | 'lg' }) {
+export function RatingChip({ ovr, size = 'md', hidden = false }: { ovr: number; size?: 'sm' | 'md' | 'lg'; hidden?: boolean }) {
+  const dimH = size === 'lg' ? 'h-9 w-11 text-base' : size === 'sm' ? 'h-6 w-8 text-xs' : 'h-7 w-9 text-sm';
+  // Same footprint as a real chip, so revealing a class does not reflow the board.
+  if (hidden)
+    return (
+      <span
+        className={`inline-flex items-center justify-center rounded-md border border-dashed border-border bg-surface-2 font-bold text-muted ${dimH}`}
+        title="Hidden — tick Spoilers to reveal"
+      >
+        ?
+      </span>
+    );
   const cls =
     ovr >= 90
       ? 'bg-gold text-black shadow-[0_1px_6px_rgba(245,197,24,0.35)]'
@@ -21,21 +32,22 @@ export function RatingChip({ ovr, size = 'md' }: { ovr: number; size?: 'sm' | 'm
   );
 }
 
-const DEV = [
-  { label: 'Normal', short: '—', cls: 'text-muted', pill: '' },
-  { label: 'Star', short: 'Star', cls: 'text-primary-light', pill: 'bg-primary/15 text-primary-light ring-1 ring-primary/30' },
-  { label: 'Superstar', short: 'Superstar', cls: 'text-pink-400', pill: 'bg-pink-500/15 text-pink-300 ring-1 ring-pink-500/30' },
-  { label: 'X-Factor', short: 'X-Factor', cls: 'text-legend-light', pill: 'bg-legend/20 text-legend-light ring-1 ring-legend/40' },
-];
-
-/** Development-trait marks in Madden's shapes: a hollow ring for Normal, a star
- *  for Star, a ringed star for Superstar, and the X-in-a-hexagon for X-Factor.
+/** Development-trait badges.
  *
- *  These are drawn, not EA's own artwork — the game's icons live inside the
- *  Frostbite archives, which we can't read. They follow the same silhouettes and
- *  take the tier's colour from `currentColor`, so a badge reads at a glance in
- *  the row the way the in-game ones do. */
-function DevIcon({ dev, className = 'h-3.5 w-3.5' }: { dev: number; className?: string }) {
+ *  EA's own artwork when the user has extracted it from their copy of the game
+ *  (served from data/dev-icons, which the installer deliberately does NOT ship),
+ *  and a drawn mark in the same silhouette when they have not. The drawn set is
+ *  the shipped default, so a clean install still reads correctly.
+ *
+ *  The asset names are the game's older internal ladder, one step below the
+ *  tiers the UI shows, so the mapping is NOT name-for-name: bronze `slow` is
+ *  Normal, silver `normal` is Star, gold `quick` is Superstar, red `superstar`
+ *  is X-Factor, and `hidden` is the game's unscouted mark. */
+const DEV_ART_NAME = ['slow', 'normal', 'quick', 'superstar'];
+const devIconUrl = (name: string) => `/api/portrait/dev-icon/${name}`;
+
+/** Drawn stand-ins: ring, star, ringed star, X-in-a-hexagon. */
+function DrawnDevMark({ dev, className }: { dev: number; className: string }) {
   const common = { viewBox: '0 0 16 16', className, 'aria-hidden': true as const, fill: 'none' };
   if (dev >= 3)
     return (
@@ -64,23 +76,29 @@ function DevIcon({ dev, className = 'h-3.5 w-3.5' }: { dev: number; className?: 
   );
 }
 
-export function DevBadge({ dev }: { dev: number }) {
-  const d = DEV[dev] || DEV[0];
-  if (dev <= 0)
+const DEV = [{ label: 'Normal' }, { label: 'Star' }, { label: 'Superstar' }, { label: 'X-Factor' }];
+const DEV_TINT = ['text-amber-700', 'text-slate-300', 'text-gold', 'text-red-400'];
+
+export function DevBadge({ dev, hidden = false, size = 'sm' }: { dev: number; hidden?: boolean; size?: 'sm' | 'lg' }) {
+  const dim = size === 'lg' ? 'h-10 w-10' : 'h-6 w-6';
+  const name = hidden ? 'hidden' : DEV_ART_NAME[dev] ?? DEV_ART_NAME[0];
+  const label = hidden ? 'Hidden — tick Spoilers to reveal' : `${(DEV[dev] || DEV[0]).label} development`;
+  const [noArt, setNoArt] = useState(false);
+  useEffect(() => setNoArt(false), [name]);
+  if (noArt)
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] text-muted" title="Normal development">
-        <DevIcon dev={0} />
-        Normal
+      <span className={`inline-flex ${dim} items-center justify-center ${hidden ? 'text-info' : DEV_TINT[dev] ?? DEV_TINT[0]}`} title={label}>
+        <DrawnDevMark dev={hidden ? 0 : dev} className={size === 'lg' ? 'h-7 w-7' : 'h-4 w-4'} />
       </span>
     );
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.pill}`}
-      title={`${d.label} development`}
-    >
-      <DevIcon dev={dev} />
-      {d.short}
-    </span>
+    <img
+      src={devIconUrl(name)}
+      alt={label}
+      title={label}
+      onError={() => setNoArt(true)}
+      className={`${dim} shrink-0 object-contain`}
+    />
   );
 }
 

@@ -74,12 +74,15 @@ export function MetaStrip({
   pos,
   onPickPos,
   onShowDropped,
+  spoilers = true,
 }: {
   data: GeneratedClass;
   rows: PlayerRow[];
   pos: string;
   onPickPos: (group: string) => void;
   onShowDropped?: () => void;
+  /** false masks the class's average OVR and its dev-trait counts. */
+  spoilers?: boolean;
 }) {
   const dev = [0, 0, 0, 0];
   let ovrSum = 0;
@@ -97,14 +100,23 @@ export function MetaStrip({
         <b className="tabular-nums text-sm text-neutral-100">{data.count}</b> prospects
       </span>
       <span className="h-4 w-px bg-border" />
-      <span className="flex items-baseline gap-1.5 text-xs text-neutral-400" title={`Top rated: ${ovrMax}`}>
-        avg OVR <b className="tabular-nums text-sm text-neutral-100">{avg}</b>
+      {/* The class average and its dev-trait counts describe how strong the class
+          is, which is the whole thing blind scouting is meant to withhold. The
+          "top rated" tooltip leaked it too. Dot colours track the badges. */}
+      <span
+        className="flex items-baseline gap-1.5 text-xs text-neutral-400"
+        title={spoilers ? `Top rated: ${ovrMax}` : 'Hidden — tick Spoilers to reveal'}
+      >
+        avg OVR <b className="tabular-nums text-sm text-neutral-100">{spoilers ? avg : '?'}</b>
       </span>
       <span className="h-4 w-px bg-border" />
-      <span className="flex items-center gap-2 text-[11px] text-neutral-400" title="Dev traits: X-Factor / Superstar / Star">
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-legend" /><b className="tabular-nums text-neutral-200">{dev[3]}</b></span>
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-pink-500" /><b className="tabular-nums text-neutral-200">{dev[2]}</b></span>
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-primary" /><b className="tabular-nums text-neutral-200">{dev[1]}</b></span>
+      <span
+        className="flex items-center gap-2 text-[11px] text-neutral-400"
+        title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — tick Spoilers to reveal'}
+      >
+        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[3] : '?'}</b></span>
+        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[2] : '?'}</b></span>
+        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[1] : '?'}</b></span>
       </span>
       <span className="h-4 w-px bg-border" />
       <span className="text-[11px] text-neutral-400" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`}>

@@ -9,7 +9,7 @@ import { DraftOptions } from './DraftOptions';
 import { ExportMenu } from './ExportMenu';
 import type { EditTools } from './ExportMenu';
 import { Toolbar } from './Toolbar';
-import { PlayerTable, ATTR_COLUMNS } from './PlayerTable';
+import { PlayerTable, ATTR_COLUMNS, SPOILER_SORTS } from './PlayerTable';
 import { ProfileModal } from './ProfileModal';
 import { Pill, Icon, ICONS } from './ui';
 
@@ -66,6 +66,9 @@ export function ClassView({
   const [search, setSearch] = useState('');
   const [pos, setPos] = useState('ALL');
   const [sort, setSort] = useState('pick');
+  // Blind-scouting mode, OFF by default: a class opens with overall, dev trait,
+  // wAV and attributes masked, and you tick Spoilers to reveal them.
+  const [spoilers, setSpoilers] = useState(false);
   const [showOpts, setShowOpts] = useState(false);
   const allTime = data.league === 'all-time';
   const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
@@ -83,15 +86,22 @@ export function ClassView({
       setSearch(f?.search ?? '');
       setPos(f?.pos ?? 'ALL');
       setSort(f?.sort ?? 'pick');
+      setSpoilers(f?.spoilers ?? false);
       filtersLoaded.current = true;
     });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterKey]);
   useEffect(() => {
-    if (filtersLoaded.current) cache.filtersSet(data.year, data.league, { search, pos, sort });
+    if (filtersLoaded.current) cache.filtersSet(data.year, data.league, { search, pos, sort, spoilers });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, pos, sort]);
+  }, [search, pos, sort, spoilers]);
+
+  // Hiding a value while still ranking by it is not hiding it: if the board is
+  // sorted by a masked column when spoilers go off, fall back to draft order.
+  useEffect(() => {
+    if (!spoilers && SPOILER_SORTS.has(sort.replace(/^-/, ''))) setSort('pick');
+  }, [spoilers, sort]);
 
   // Jumping to a searched player: clear filters so the row is visible to highlight.
   useEffect(() => {
@@ -251,7 +261,7 @@ export function ClassView({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-3">
         {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
-        <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} onShowDropped={onShowDropped} />
+        <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} onShowDropped={onShowDropped} spoilers={spoilers} />
 
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
           <Toolbar
@@ -264,9 +274,11 @@ export function ClassView({
             setSort={setSort}
             shown={rows.length}
             total={data.count}
+            spoilers={spoilers}
+            setSpoilers={setSpoilers}
           />
           <div className="min-h-0 flex-1 overflow-auto">
-            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} />
+            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} />
           </div>
         </section>
       </div>
@@ -279,6 +291,7 @@ export function ClassView({
           year={data.year}
           archetypeOptions={archetypeOptions}
           gameVersion={data.gameVersion ?? "m26"}
+          spoilers={spoilers}
           onEdit={(f, v) => onEdit(selectedRow.id, f, v)}
           onGearEdit={(slot, asset) => onGearEdit(selectedRow.id, slot, asset)}
           onReset={() => onResetPlayer(selectedRow.id)}

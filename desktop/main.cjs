@@ -94,6 +94,75 @@ async function start() {
     return;
   }
   await win.loadURL(`http://127.0.0.1:${port}`);
+  checkForUpdates(win, game);
+}
+
+/**
+ * Update check against the GitHub releases this app publishes to (see
+ * builder-m26/27.json `publish`).
+ *
+ * Only the NSIS install can replace itself, so the portable exe is told where
+ * the new build is rather than pretending it can update. Builds are unsigned,
+ * so `latest.yml` is verified by SHA-512 rather than by signature -- that is
+ * electron-updater's default and is what makes an unsigned auto-update safe
+ * against a corrupted or truncated download.
+ *
+ * Any failure here is silent: a missing release, no network, or a rate-limited
+ * API must never block someone using the app offline.
+ */
+function checkForUpdates(win, game) {
+  if (!app.isPackaged) return;
+  let autoUpdater;
+  try {
+    ({ autoUpdater } = require('electron-updater'));
+  } catch {
+    return; // dependency absent in a dev tree
+  }
+  // Both apps publish to ONE repo, and each would otherwise write a manifest
+  // called `latest.yml` -- the second upload would clobber the first and M26
+  // could then update itself into the M27 build. A channel per app gives them
+  // m26.yml / m27.yml instead.
+  autoUpdater.channel = game === 'm27' ? 'm27' : 'm26';
+  // PORTABLE_EXECUTABLE_DIR is only set for the portable target.
+  const portable = !!process.env.PORTABLE_EXECUTABLE_DIR;
+  autoUpdater.autoDownload = !portable;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('error', () => {});
+
+  autoUpdater.on('update-available', (info) => {
+    if (!portable) return; // the installer build downloads it quietly
+    dialog
+      .showMessageBox(win, {
+        type: 'info',
+        buttons: ['Get it', 'Later'],
+        defaultId: 0,
+        title: 'Update available',
+        message: `Version ${info.version} is available.`,
+        detail: 'This is the portable build, which cannot replace itself. Open the releases page to download it.',
+      })
+      .then(({ response }) => {
+        if (response === 0) shell.openExternal('https://github.com/amatthewsHT/Madden-2026-Draft-Generator/releases/latest');
+      })
+      .catch(() => {});
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    dialog
+      .showMessageBox(win, {
+        type: 'info',
+        buttons: ['Restart now', 'On next launch'],
+        defaultId: 0,
+        title: 'Update ready',
+        message: `Version ${info.version} is ready to install.`,
+        detail: 'Your generated classes and edits are kept.',
+      })
+      .then(({ response }) => {
+        if (response === 0) autoUpdater.quitAndInstall();
+      })
+      .catch(() => {});
+  });
+
+  autoUpdater.checkForUpdates().catch(() => {});
 }
 
 app.whenReady().then(start);

@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import fs from 'fs';
+import path from 'path';
+import { DATA_ROOT } from '../config/paths';
 import { PortraitService } from '../services/PortraitService';
 import { GearImageService } from '../services/GearImageService';
 import { LikenessService } from '../services/LikenessService';
@@ -46,6 +49,22 @@ r.get('/portrait/retro/:first/:last', async (req, res) => {
   } catch (e) {
     return res.status(500).json({ error: (e as Error).message });
   }
+});
+
+/** Serve a Madden development-trait badge.
+ *
+ *  EA's artwork, so it is NOT shipped in the installer -- data/dev-icons is
+ *  filtered out of extraResources. It appears only when the user has extracted
+ *  it from their own copy of the game; until then this 404s and the UI draws its
+ *  own mark instead. */
+r.get('/dev-icon/:name', (req, res) => {
+  const name = String(req.params.name || '').toLowerCase();
+  if (!/^(slow|normal|quick|superstar|hidden)$/.test(name)) return res.status(400).end();
+  const file = path.join(DATA_ROOT, 'dev-icons', `${name}.png`);
+  if (!fs.existsSync(file)) return res.status(404).end();
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+  return res.sendFile(file);
 });
 
 /** Serve a Madden menu portrait PNG by portrait PID. */

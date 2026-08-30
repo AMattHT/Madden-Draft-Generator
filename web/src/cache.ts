@@ -6,6 +6,8 @@ export interface TableFilters {
   search: string;
   pos: string;
   sort: string;
+  /** false = ratings masked (blind scouting). Persisted per class. */
+  spoilers?: boolean;
 }
 
 // Client-side cache: every pulled class is stored in IndexedDB so revisiting a

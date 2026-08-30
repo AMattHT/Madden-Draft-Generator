@@ -10,6 +10,8 @@ export function Toolbar({
   setSort,
   shown,
   total,
+  spoilers,
+  setSpoilers,
 }: {
   search: string;
   setSearch: (s: string) => void;
@@ -20,6 +22,8 @@ export function Toolbar({
   setSort: (s: string) => void;
   shown: number;
   total: number;
+  spoilers: boolean;
+  setSpoilers: (b: boolean) => void;
 }) {
   const select =
     'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
@@ -64,11 +68,24 @@ export function Toolbar({
         <option value="team">Sort: Team</option>
         <option value="name">Sort: Name</option>
         <option value="pos">Sort: Position</option>
-        <option value="ovr">Sort: OVR</option>
-        <option value="dev">Sort: Dev</option>
-        <option value="wav">Sort: wAV</option>
+        {spoilers && <option value="ovr">Sort: OVR</option>}
+        {spoilers && <option value="dev">Sort: Dev</option>}
+        {spoilers && <option value="wav">Sort: wAV</option>}
         <option value="face">Sort: Face</option>
       </select>
+
+      <label
+        className="inline-flex cursor-pointer select-none items-center gap-2 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300"
+        title="Off: overall, dev trait and attributes are hidden so you can scout the class blind"
+      >
+        <input
+          type="checkbox"
+          checked={spoilers}
+          onChange={(e) => setSpoilers(e.target.checked)}
+          className="h-3.5 w-3.5 accent-primary"
+        />
+        Spoilers
+      </label>
 
       <span className="ml-auto text-xs tabular-nums text-muted">
         <span className="font-semibold text-neutral-300">{shown}</span> of {total}

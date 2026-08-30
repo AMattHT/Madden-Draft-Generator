@@ -167,6 +167,7 @@ export function ProfileModal({
   onNavigate,
   canPrev = false,
   canNext = false,
+  spoilers = true,
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
@@ -179,6 +180,8 @@ export function ProfileModal({
   onReset: () => void;
   onClose: () => void;
   onNavigate?: (delta: number) => void;
+  /** false masks overall, dev trait, the radar and every rating (blind scouting). */
+  spoilers?: boolean;
   canPrev?: boolean;
   canNext?: boolean;
 }) {
@@ -314,6 +317,15 @@ export function ProfileModal({
   const faceBtn = 'rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-xs text-neutral-200 transition-colors hover:bg-surface-3 disabled:opacity-40';
   const num = (key: string) => {
     const v = eff(key);
+    if (!spoilers)
+      return (
+        <span
+          className={`${field} inline-flex w-14 items-center justify-end font-semibold text-muted`}
+          title="Hidden — tick Spoilers to reveal"
+        >
+          ?
+        </span>
+      );
     return (
       <input
         type="number"
@@ -362,7 +374,7 @@ export function ProfileModal({
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{posName}</span>
-              <RatingChip ovr={overall} size="sm" />
+              <RatingChip ovr={overall} size="sm" hidden={!spoilers} />
               {gameView && gameView.overall != null && (gameView.overall !== overall || (gameView.archetype != null && gameView.archetype !== archetype)) && (
                 <span
                   className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
@@ -374,7 +386,7 @@ export function ProfileModal({
                   {gameView.archetype != null && gameView.archetype !== archetype && ` as ${archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}`}
                 </span>
               )}
-              <DevBadge dev={dev} />
+              <DevBadge dev={dev} size="lg" hidden={!spoilers} />
               {archName && <span className="text-xs text-muted">{archName}</span>}
               {row.twoWay && row.twoWay.roles.length > 0 && (
                 <span
@@ -457,13 +469,22 @@ export function ProfileModal({
         </div>
 
         <div ref={scoutingRef} className="scroll-mt-36 border-b border-border px-5 py-4">
-          <RadarChart
-            data={keyAttrsForPosition(posId).map(([k, label]) => ({ label, value: eff(k) }))}
-            color={tierColor(overall)}
-          />
-          <p className="mt-1 text-center text-[11px] text-muted">
-            Signature {posName} attributes — dashed gold ring = elite (90+)
-          </p>
+          {spoilers ? (
+            <>
+              <RadarChart
+                data={keyAttrsForPosition(posId).map(([k, label]) => ({ label, value: eff(k) }))}
+                color={tierColor(overall)}
+              />
+              <p className="mt-1 text-center text-[11px] text-muted">
+                Signature {posName} attributes — dashed gold ring = elite (90+)
+              </p>
+            </>
+          ) : (
+            // The chart's outline is the ratings, so plotting it would leak them.
+            <div className="grid h-[240px] place-items-center rounded-lg border border-dashed border-border text-sm text-muted">
+              Signature {posName} attributes hidden — tick Spoilers to reveal
+            </div>
+          )}
         </div>
 
         {row.combine &&
