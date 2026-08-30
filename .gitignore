@@ -22,9 +22,3 @@ M26Writer_debug.log
 .impeccable/
 .DS_Store
 Thumbs.db
-
-# Extracted Madden disc headshots (167 MB, 8,101 files). The installer bundles
-# them, but they are not kept in git — rebuild with:
-#   npx tsx server/scripts/build-retro-headshot-pack.ts
-# from the per-disc output in ../headshots/madden<year>-ps2|ps3/.
-server/data/retro-portraits/
