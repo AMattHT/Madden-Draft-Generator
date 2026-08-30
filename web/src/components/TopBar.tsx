@@ -145,6 +145,7 @@ export function TopBar({
   onSelectPlayer,
   cachedYears,
   recentYears = [],
+  onWhatsNew,
 }: {
   view: AppView;
   onSetView: (v: AppView) => void;
@@ -167,6 +168,7 @@ export function TopBar({
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
   recentYears?: number[];
+  onWhatsNew?: () => void;
 }) {
   const draft = view === 'draft';
   return (
@@ -203,6 +205,15 @@ export function TopBar({
         )}
       </div>
       <div className="flex items-center gap-4">
+        {onWhatsNew && (
+          <button
+            onClick={onWhatsNew}
+            title="What's new in this version"
+            className="hidden rounded-md border border-border px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:border-primary/40 hover:text-neutral-100 sm:block"
+          >
+            What's new
+          </button>
+        )}
         <div className="hidden items-center gap-2 text-[11px] text-muted sm:flex">
           <span className={`h-2 w-2 rounded-full ${connected ? 'bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-danger'}`} />
           {connected ? 'Backend connected' : 'Backend offline'}

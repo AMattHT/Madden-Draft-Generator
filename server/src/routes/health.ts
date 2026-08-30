@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { MdcService } from '../services/MdcService';
 import { PlayerLookupService } from '../services/PlayerLookupService';
-import { LOOKUPS_DIR } from '../config/paths';
+import { LOOKUPS_DIR, DATA_ROOT } from '../config/paths';
 
 const r = Router();
 
@@ -70,3 +70,25 @@ r.get('/template/info', (_req, res) => {
 });
 
 export default r;
+
+/** App version + release notes, for the What's new panel.
+ *
+ *  CHANGELOG.md sits at the repo root in a dev tree and beside the bundled data
+ *  in a packaged one, so try both rather than assuming a layout. Missing notes
+ *  are not an error -- the panel just shows the version. */
+r.get('/about', (_req, res) => {
+  const candidates = [
+    path.resolve(__dirname, '..', '..', '..', 'CHANGELOG.md'),
+    path.resolve(__dirname, '..', '..', 'CHANGELOG.md'),
+    path.join(DATA_ROOT, '..', 'CHANGELOG.md'),
+    path.join(DATA_ROOT, 'CHANGELOG.md'),
+  ];
+  const file = candidates.find((c) => fs.existsSync(c));
+  let version = '';
+  for (const p of [path.resolve(__dirname, '..', '..', 'package.json'),
+                   path.resolve(__dirname, '..', '..', '..', 'package.json')]) {
+    try { version = JSON.parse(fs.readFileSync(p, 'utf8')).version || ''; if (version) break; } catch { /* next */ }
+  }
+  res.json({ version, changelog: file ? fs.readFileSync(file, 'utf8') : null });
+});
+

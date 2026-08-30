@@ -10,6 +10,9 @@ const root = path.join(__dirname, '..');
 const copies = [
   ['src/vendor', 'dist/vendor'],
   ['src/db/schema.sql', 'dist/db/schema.sql'],
+  // The What's new panel reads this at runtime. Copied rather than committed to
+  // data/ so there is one source of truth at the repo root, not two that drift.
+  ['../CHANGELOG.md', 'data/CHANGELOG.md'],
 ];
 
 function copyRecursive(src, dst) {

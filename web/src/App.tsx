@@ -6,6 +6,7 @@ import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
+import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
 import type { ClassEdits, GearEdits, GeneratedClass, GameVersion } from './types';
 
@@ -49,6 +50,8 @@ export default function App() {
   const [pinnedGame, setPinnedGame] = useState<GameVersion | null>(null);
   const [franchiseEnabled, setFranchiseEnabled] = useState(false);
   const [view, setView] = useState<AppView>('draft');
+  // Opens itself once after an update, and is reachable any time from the bar.
+  const [whatsNewOpen, openWhatsNew, closeWhatsNew] = useWhatsNew();
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
@@ -444,7 +447,9 @@ export default function App() {
 
   return (
     <div className="flex h-screen flex-col">
+      <WhatsNew open={whatsNewOpen} onClose={closeWhatsNew} />
       <TopBar
+        onWhatsNew={openWhatsNew}
         view={view}
         onSetView={setView}
         onGoHome={() => setView(franchiseEnabled ? 'home' : 'draft')}

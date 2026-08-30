@@ -5,3 +5,4 @@ M26Writer_debug.log
 cache/
 data/cache/
 .env
+data/CHANGELOG.md
