@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { PortraitService } from '../services/PortraitService';
 import { GearImageService } from '../services/GearImageService';
 import { LikenessService } from '../services/LikenessService';
+import { RetroHeadshotService } from '../services/RetroHeadshotService';
 
 const r = Router();
 
@@ -20,6 +21,24 @@ r.get('/portrait/generic-head/:code', async (req, res) => {
     const pid = LikenessService.genericPid(req.params.code);
     const plpo = pid != null ? PortraitService.plpoForPid(pid) : null;
     const buf = plpo ? await PortraitService.cropByPlpo(plpo) : null;
+    if (!buf) return res.status(404).end();
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    return res.send(buf);
+  } catch (e) {
+    return res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/** Serve a real headshot from the retro pack (Madden 2001-2003 discs) for a
+ *  player by name. 404 when he is not on any of those rosters. */
+r.get('/portrait/retro/:first/:last', async (req, res) => {
+  try {
+    const size = Math.min(512, Math.max(64, parseInt(String(req.query.size || '256'), 10) || 256));
+    // Position guards against same-name players from different eras (the 1973
+    // CB J.T. Thomas vs the 2011 LB). Absent, the lookup cannot tell them apart.
+    const position = typeof req.query.position === 'string' ? req.query.position : null;
+    const buf = await RetroHeadshotService.portraitPng(req.params.first, req.params.last, size, position);
     if (!buf) return res.status(404).end();
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');

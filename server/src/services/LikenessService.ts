@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { LOOKUPS_DIR, CACHE_DIR } from '../config/paths';
 import { BaselinePlayer } from '../types/player';
-import { parseCsvFile } from '../util/csv';
+import { FaceFeatures, faceDistance } from './FaceFeatures';
+import { parseCsvFile, normalizeName } from '../util/csv';
 
 /**
  * Player likeness assignment. Each generated prospect gets, in priority order:
@@ -33,6 +34,29 @@ let pidByCode: Map<string, number> | null = null;
 export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number; portraitKind?: 'legend' | 'roster' | 'player' | 'none' }
 interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string>; headAccessory: Set<string> }
 const catalogs: Partial<Record<'m26' | 'm27', FaceCatalog>> = {};
+/** Measured appearance features, baked by scripts/build-face-features.ts.
+ *  Absent files simply disable matching and the stride fallback takes over. */
+let headFeatMem: Record<string, Record<string, FaceFeatures>> | null = null;
+let playerFeatMem: Record<string, FaceFeatures> | null = null;
+
+function headFeatures(): Record<string, Record<string, FaceFeatures>> {
+  if (!headFeatMem) {
+    try {
+      headFeatMem = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'generic-head-features.json'), 'utf8'));
+    } catch { headFeatMem = {}; }
+  }
+  return headFeatMem!;
+}
+
+function playerFeatures(): Record<string, FaceFeatures> {
+  if (!playerFeatMem) {
+    try {
+      playerFeatMem = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'player-face-features.json'), 'utf8'));
+    } catch { playerFeatMem = {}; }
+  }
+  return playerFeatMem!;
+}
+
 function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
   const hit = catalogs[version];
   if (hit) return hit;
@@ -67,6 +91,11 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
  *  has already cut players, and current players' heads carry over between the two
  *  games (their portrait ids match 1,044 of 1,055 times). */
 const M27_TRUST_LOOKUP_FROM = 2019;
+/** How many of the nearest-matching heads a player may be spread across. Too
+ *  low and a class collapses onto a handful of faces; too high and the match
+ *  stops resembling him. 6 keeps every candidate a close match while bounding
+ *  reuse near the even-spread figure. */
+const GENERIC_MATCH_CANDIDATES = 6;
 /** Skull caps / do-rags under the helmet became common in the late 1990s. */
 const HEADWEAR_FROM = 1995;
 /** ~280 legacy scan dirs (baughsammy, williamskevin, suggsterrell_16524) hold only
@@ -426,7 +455,40 @@ export const LikenessService = {
       }
       pool = pool && pool.length ? pool : [...pools.values()][0];
     }
-    const key = `${player.firstName}|${player.lastName}|${index}`;
-    return { peps: pool[hash(key) % pool.length], kind: 'generic', skinTone: tone };
+    // Stride the pool by draft position rather than hashing the name into it.
+    // An independent per-name hash collides by the birthday problem: over a 1974
+    // class it left one head on 15 players while others went unused, so Ed "Too
+    // Tall" Jones (6'9") and Ross Browner (6'3") drew the same face. `index` is
+    // unique within a class, so `index % len` walks the pool evenly -- every head
+    // is used, the count per head is within one of the average, and no two
+    // adjacent picks repeat. The name still breaks ties between classes.
+    // Pick the head that actually looks like him when we have measured his face.
+    // Tone alone gave Pat Leahy -- light-haired, clean-shaven -- a head with dark
+    // hair and stubble, because nothing in the pick ever looked at his picture.
+    // Features come from the Madden disc headshots, so this only fires for a
+    // player the pack has; see FaceFeatures for why they survive photo-vs-render.
+    const mine = playerFeatures()[`${normalizeName(player.firstName)}_${normalizeName(player.lastName)}`];
+    const heads = headFeatures()[gameVersion];
+    if (mine && heads) {
+      // Spread across the K CLOSEST heads rather than taking the single nearest.
+      // The features are coarse, so a strict argmax collapses: in a 2003 class it
+      // put 181 players on one head, because most modern players measure alike.
+      // Every candidate here is still a close match on hair and facial hair; the
+      // draft position only decides which of the near-ties he gets.
+      const ranked = pool
+        .filter((c) => heads[c])
+        .map((c) => ({ c, d: faceDistance(mine, heads[c]) }))
+        .sort((a, b) => a.d - b.d);
+      if (ranked.length) {
+        const k = Math.min(ranked.length, GENERIC_MATCH_CANDIDATES);
+        return { peps: ranked[index % k].c, kind: 'generic', skinTone: tone };
+      }
+    }
+    // No measured face: stride the pool by draft position rather than hashing the
+    // name into it. An independent per-name hash collides by the birthday problem
+    // -- over a 1974 class it left one head on 15 players while others went unused,
+    // so Ed "Too Tall" Jones and Ross Browner drew the same face. `index` is unique
+    // within a class, so this walks the pool evenly instead.
+    return { peps: pool[index % pool.length], kind: 'generic', skinTone: tone };
   },
 };

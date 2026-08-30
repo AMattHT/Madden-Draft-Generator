@@ -2,6 +2,7 @@ import path from 'path';
 import { LOOKUPS_DIR } from '../config/paths';
 import { parseCsvFile } from '../util/csv';
 import { BaselinePlayer } from '../types/player';
+import { RetroHeadshotService } from './RetroHeadshotService';
 
 /**
  * Assigns recyclable "generic" portrait slots (from PID_Portrait_Mapping.csv) to
@@ -40,12 +41,15 @@ function photoUrl(p: BaselinePlayer): string | null {
   return p.headshotUrl || p.pfrImageUrl || p.wikiImageUrl || null;
 }
 
-/** A player needs a custom portrait if they have a photo but no Madden 3D asset
- *  and no existing in-game portrait (PhotoID). */
+/** A player needs a custom portrait if we can get a real photo of him but he has
+ *  no Madden 3D asset and no existing in-game portrait (PhotoID). The photo can
+ *  come off the web or out of the retro pack -- for retirees the pack is often
+ *  the only one of the two that has anything. */
 function needsCustomPortrait(p: BaselinePlayer): boolean {
   const hasAsset = !!p.playerAssetsId;
   const hasPortrait = p.photoId != null && p.photoId !== 0;
-  return !hasAsset && !hasPortrait && !!photoUrl(p);
+  const hasPhoto = !!photoUrl(p) || !!RetroHeadshotService.lookup(p.firstName, p.lastName, p.position);
+  return !hasAsset && !hasPortrait && hasPhoto;
 }
 
 export interface PortraitAssignment {
@@ -53,7 +57,10 @@ export interface PortraitAssignment {
   name: string;
   pid: number;
   plpo: string;
-  photoUrl: string;
+  /** Web photo, if one exists. Null when only the retro pack has this player. */
+  photoUrl: string | null;
+  /** The Madden disc a packed headshot came from, else null. */
+  retroYear: number | null;
   position: string;
 }
 
@@ -94,7 +101,8 @@ export const PortraitSlotService = {
         name: `${p.firstName} ${p.lastName}`.trim(),
         pid: slot.pid,
         plpo: slot.plpo,
-        photoUrl: photoUrl(p)!,
+        photoUrl: photoUrl(p),
+        retroYear: RetroHeadshotService.lookup(p.firstName, p.lastName, p.position)?.year ?? null,
         position: p.position,
       });
     });

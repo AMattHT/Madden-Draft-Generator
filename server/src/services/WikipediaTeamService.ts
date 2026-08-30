@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { CACHE_DIR } from '../config/paths';
+import { CACHE_DIR, LOOKUPS_DIR } from '../config/paths';
 import { normalizeName } from '../util/csv';
 import { TeamInfo, espnLogo, logoForHistoricalName, wikiTeamIdentity } from './TeamService';
 
@@ -87,6 +87,20 @@ function resolveWikiTeam(fullName: string, year?: number): TeamInfo {
   return chipInfo(name, year);
 }
 
+type BakedTeams = Record<string, Record<string, TeamInfo>>;
+let bakedMem: BakedTeams | null = null;
+
+/** data/lookups/pre1980-draft-teams.json, built by scripts/build-pre1980-draft-teams.ts. */
+function bakedTeams(): BakedTeams {
+  if (bakedMem) return bakedMem;
+  try {
+    bakedMem = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'pre1980-draft-teams.json'), 'utf8')) as BakedTeams;
+  } catch {
+    bakedMem = {};
+  }
+  return bakedMem;
+}
+
 const cacheFile = (year: number) => path.join(CACHE_DIR, `wiki_nfl_draft_${year}.html`);
 
 async function fetchHtml(year: number): Promise<string> {
@@ -157,6 +171,18 @@ export const WikipediaTeamService = {
     const cached = memo.get(year);
     if (cached) return cached;
     const out = new Map<string, TeamInfo>();
+    // Prefer the baked lookup. The runtime cache lives in server/cache, which the
+    // installer does not bundle, so a shipped copy would otherwise fetch ~44
+    // Wikipedia articles live -- and this method swallows failures and returns an
+    // empty map, so a single throttled request silently blanks every team for a
+    // draft year. Every pre-1980 year fetched here failed at least once during
+    // the build purely from rate limiting, so that was not a rare edge case.
+    const baked = bakedTeams()[String(year)];
+    if (baked) {
+      for (const [key, team] of Object.entries(baked)) out.set(key, team);
+      memo.set(year, out);
+      return out;
+    }
     try {
       const html = await fetchHtml(year);
       const tables = html.match(/<table[^>]*wikitable[\s\S]*?<\/table>/g) ?? [];

@@ -1,0 +1,117 @@
+import fs from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+import { DATA_ROOT, LOOKUPS_DIR } from '../config/paths';
+import { normalizeName } from '../util/csv';
+
+/**
+ * Real NFL headshots lifted off the Madden 2001-2012 PS2 discs and the PS3
+ * discs (Madden 25 and 15), which ship the photo of every player on their
+ * rosters (see ../../../headshots/extract_madden_ps2_portraits.py and
+ * ../../../headshots/ps3/extract_ps3_portraits.py).
+ *
+ * These matter because the web sources behind PhotoLookService are weakest for
+ * exactly the players historical draft classes are made of: the NFL CDN answers
+ * with a silhouette for most retirees, and Wikipedia often has no free photo at
+ * all. Around 1,900 players in ALL_PLAYER_LOOKUP have no in-game face and no
+ * portrait, but do appear on one of these discs.
+ *
+ * The pack (data/retro-portraits, built by scripts/build-retro-headshot-pack.ts)
+ * holds each portrait at whatever its disc shipped: 96x96 from the PS2 discs,
+ * 256x256 from the PS3 ones. The PS2 sizes are small for a texture replacement,
+ * so `portraitPng` resizes with Lanczos -- upscaling those and merely fitting
+ * the PS3 art. An upscaled 96x96 is softer than a modern web photo but is a real
+ * likeness of the right player, in period, and it needs no network. If the pack
+ * is absent the service reports unavailable and every caller falls back to the
+ * web lookup as before.
+ */
+const PACK_DIR = path.join(DATA_ROOT, 'retro-portraits');
+const INDEX_FILE = path.join(LOOKUPS_DIR, 'retro-headshots.json');
+
+interface Entry {
+  year: number;
+  position: string;
+}
+
+let index: Record<string, Entry> | null = null;
+
+function load(): Record<string, Entry> {
+  if (!index) {
+    try {
+      index = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf8')) as Record<string, Entry>;
+    } catch {
+      index = {};
+    }
+  }
+  return index;
+}
+
+const key = (first: string, last: string) => `${normalizeName(first)}|${normalizeName(last)}`;
+
+/** Coarse position families. Two players of the same name are the same man only
+ *  if they played the same kind of football; exact labels drift between sources
+ *  (LE/DE, HB/RB, OLB/EDGE) so compare the family, not the string. */
+const POSITION_GROUP: Record<string, string> = {
+  QB: 'QB',
+  HB: 'BACK', RB: 'BACK', FB: 'BACK',
+  WR: 'REC', TE: 'REC',
+  LT: 'OL', LG: 'OL', C: 'OL', RG: 'OL', RT: 'OL', OL: 'OL', OT: 'OL', OG: 'OL', G: 'OL', T: 'OL',
+  LE: 'DL', RE: 'DL', DT: 'DL', DE: 'DL', DL: 'DL', NT: 'DL',
+  LEDG: 'EDGE', REDG: 'EDGE', EDGE: 'EDGE',
+  LOLB: 'LB', ROLB: 'LB', MLB: 'LB', OLB: 'LB', ILB: 'LB', LB: 'LB', SAM: 'LB', MIKE: 'LB', WILL: 'LB',
+  CB: 'DB', FS: 'DB', SS: 'DB', S: 'DB', DB: 'DB',
+  K: 'ST', P: 'ST',
+};
+
+const groupOf = (pos: string | null | undefined): string | null =>
+  POSITION_GROUP[(pos || '').trim().toUpperCase()] ?? null;
+
+/** EDGE and LB/DL overlap by design (a 3-4 rusher is listed either way). */
+function groupsCompatible(a: string | null, b: string | null): boolean {
+  if (!a || !b) return true; // unknown on either side: don't reject on no evidence
+  if (a === b) return true;
+  const edgy = new Set(['EDGE', 'DL', 'LB']);
+  return edgy.has(a) && edgy.has(b);
+}
+
+export const RetroHeadshotService = {
+  get available(): boolean {
+    return fs.existsSync(PACK_DIR) && Object.keys(load()).length > 0;
+  },
+
+  /** The disc this player's photo came from, or null if we have no photo.
+   *
+   *  The pack is keyed by NAME ONLY, so without `position` a name shared across
+   *  eras returns the wrong man: the 1973 Steelers cornerback J.T. Thomas was
+   *  being handed the face of the 2011 West Virginia linebacker of the same
+   *  name, whose photo is the one on the 2012 disc. Pass the position and a
+   *  mismatch is refused.
+   *
+   *  Position rather than era, because era cannot tell the two cases apart:
+   *  Madden discs carry legends, so Walter Payton's real photo is legitimately
+   *  on a 2012 disc decades after he was drafted. He is HB on both sides and
+   *  survives; a cornerback matched to a linebacker does not. */
+  lookup(first: string, last: string, position?: string | null): Entry | null {
+    const hit = load()[key(first, last)] || null;
+    if (!hit) return null;
+    return groupsCompatible(groupOf(position), groupOf(hit.position)) ? hit : null;
+  },
+
+  /** Path to the packed PNG (96x96 from PS2, 256x256 from PS3), or null. */
+  filePath(first: string, last: string, position?: string | null): string | null {
+    if (!this.lookup(first, last, position)) return null;
+    const file = path.join(PACK_DIR, `${key(first, last).replace('|', '_')}.png`);
+    return fs.existsSync(file) ? file : null;
+  },
+
+  /** Square portrait PNG at `size`, matching what PortraitFetchService returns
+   *  for a web photo so the two are interchangeable to callers. */
+  async portraitPng(first: string, last: string, size = 256, position?: string | null): Promise<Buffer | null> {
+    const file = this.filePath(first, last, position);
+    if (!file) return null;
+    return sharp(file)
+      .resize(size, size, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
+      .png()
+      .toBuffer();
+  },
+};

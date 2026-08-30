@@ -18,6 +18,7 @@ export interface CareerBits {
   allPro1: number | null;
   seasonsStarted: number | null;
   careerTo: number | null;
+  careerFrom: number | null; // nflverse rookie_season; the only career signal most UDFAs have
   isHOF: boolean | null;
   age: number | null;
   receptions: number | null;
@@ -40,7 +41,7 @@ export interface CareerBits {
 const MANUAL: Record<string, CareerBits> = {
   criscarter: {
     wav: 99, heightInches: 75, weight: 202, proBowls: 8, allPro1: 2,
-    seasonsStarted: 15, careerTo: 2002, isHOF: true, age: 21,
+    seasonsStarted: 15, careerTo: 2002, careerFrom: 1987, isHOF: true, age: 21,
     receptions: 1101, recYards: 13899, recTds: 130,
     rushAtts: 13, rushYards: 41, defSacks: null, defInts: null, games: 234, draftTeam: 'PHI', draftPick: null, birthDate: '1965-11-25', jersey: 80, passYards: null, headshotUrl: null,
   },
@@ -72,6 +73,8 @@ interface PlayerRow {
   display_name?: string;
   first_name?: string;
   last_name?: string;
+  common_first_name?: string;
+  football_name?: string;
   draft_year?: string;
   draft_team?: string;
   draft_pick?: string;
@@ -82,6 +85,7 @@ interface PlayerRow {
   headshot?: string;
   espn_id?: string;
   last_season?: string;
+  rookie_season?: string;
 }
 
 /**
@@ -101,6 +105,8 @@ export function preferredHeadshot(espnId: string | undefined, lastSeason: number
 }
 
 let byKey: Map<string, CareerBits[]> | null = null;
+/** Undrafted players indexed by name + rookie season (see load()). */
+let undraftedByName: Map<string, { rookie: number; bits: CareerBits }[]> | null = null;
 
 function num(s: string | undefined): number | null {
   const n = parseInt(String(s ?? '').trim(), 10);
@@ -109,6 +115,31 @@ function num(s: string | undefined): number | null {
 
 function keyOf(year: number, name: string): string {
   return `${year}|${normalizeName(name)}`;
+}
+
+/** Every name nflverse knows a player by, most formal first.
+ *
+ *  draft_picks keys on PFR's name, which is the formal one ("Matthew Bosher",
+ *  "Michael Person", "Olusegun Oluwatimi"), while players.csv leads with the
+ *  casual display_name ("Matt Bosher", "Mike Person", "Olu Oluwatimi"). Keying
+ *  only on display_name files the headshot under a name nothing else uses, so
+ *  the player the app actually looks up never gets a photo. Multi-word
+ *  surnames (Van Noy, Vander Esch, St. Brown, Randle El) hit the same problem
+ *  whenever the two sources disagree about the given name.
+ */
+function nameVariants(r: PlayerRow): string[] {
+  const last = (r.last_name || '').trim();
+  const firsts = [r.first_name, r.common_first_name, r.football_name]
+    .map((f) => (f || '').trim())
+    .filter(Boolean);
+  const names = [(r.display_name || '').trim(), ...(last ? firsts.map((f) => `${f} ${last}`) : [])];
+  const seen = new Set<string>();
+  return names.filter((n) => {
+    const key = normalizeName(n);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function merge(into: CareerBits, extra: Partial<CareerBits>): CareerBits {
@@ -120,6 +151,7 @@ function merge(into: CareerBits, extra: Partial<CareerBits>): CareerBits {
     allPro1: extra.allPro1 ?? into.allPro1,
     seasonsStarted: extra.seasonsStarted ?? into.seasonsStarted,
     careerTo: extra.careerTo ?? into.careerTo,
+    careerFrom: extra.careerFrom ?? into.careerFrom,
     isHOF: extra.isHOF ?? into.isHOF,
     age: extra.age ?? into.age,
     receptions: extra.receptions ?? into.receptions,
@@ -142,7 +174,7 @@ function merge(into: CareerBits, extra: Partial<CareerBits>): CareerBits {
 function empty(): CareerBits {
   return {
     wav: null, heightInches: null, weight: null, proBowls: null,
-    allPro1: null, seasonsStarted: null, careerTo: null, isHOF: null, age: null,
+    allPro1: null, seasonsStarted: null, careerTo: null, careerFrom: null, isHOF: null, age: null,
     receptions: null, recYards: null, recTds: null, rushAtts: null,
     rushYards: null, defSacks: null, defInts: null, games: null, draftTeam: null,
     draftPick: null, birthDate: null, jersey: null, passYards: null, headshotUrl: null,
@@ -152,6 +184,7 @@ function empty(): CareerBits {
 function load(): Map<string, CareerBits[]> {
   if (byKey) return byKey;
   byKey = new Map();
+  undraftedByName = new Map();
   const add = (k: string, bits: CareerBits) => {
     const list = byKey!.get(k);
     if (list) list.push(bits);
@@ -172,6 +205,7 @@ function load(): Map<string, CareerBits[]> {
         allPro1: num(r.allpro),
         seasonsStarted: num(r.seasons_started),
         careerTo: num(r.to),
+        careerFrom: year,
         isHOF: String(r.hof || '').toUpperCase() === 'TRUE',
         age: num(r.age),
         receptions: num(r.receptions),
@@ -195,15 +229,16 @@ function load(): Map<string, CareerBits[]> {
     const players = parseCsvFile<PlayerRow>(path.join(CACHE_DIR, 'nflverse_players.csv'));
     for (const r of players) {
       const year = num(r.draft_year);
-      const name = (r.display_name || `${r.first_name || ''} ${r.last_name || ''}`).trim();
-      if (!year || !name) continue;
-      const k = keyOf(year, name);
+      const variants = nameVariants(r);
+      if (!variants.length) continue;
       const h = num(r.height);
       const w = num(r.weight);
       const hs = (r.headshot || '').trim();
       const dt = (r.draft_team || '').trim().toUpperCase();
       const pk = num(r.draft_pick);
       const bd = (r.birth_date || '').trim();
+      const rookie = num(r.rookie_season);
+      const last = num(r.last_season);
       const extra: Partial<CareerBits> = {
         draftTeam: dt || null,
         draftPick: pk,
@@ -213,15 +248,44 @@ function load(): Map<string, CareerBits[]> {
         weight: w != null && w >= 140 && w <= 400 ? w : null,
         headshotUrl: preferredHeadshot(r.espn_id, num(r.last_season), hs.startsWith('http') ? hs : null),
       };
+      // Undrafted players carry no draft_year, so the year-keyed index above can
+      // never reach them -- 51% of players.csv. Index them by name alongside
+      // their rookie season, which is what disambiguates same-name players.
+      if (rookie != null) {
+        // The span goes ONLY on the undrafted bits. Putting it in `extra` would
+        // let nflverse's last_season override draft_picks' `to` for every
+        // drafted player, shifting career lengths the ratings are calibrated on.
+        const bits = merge(empty(), { ...extra, careerFrom: rookie, careerTo: last });
+        for (const n of variants) {
+          const k = normalizeName(n);
+          const l = undraftedByName!.get(k);
+          if (l) l.push({ rookie, bits });
+          else undraftedByName!.set(k, [{ rookie, bits }]);
+        }
+      }
+      if (!year) continue;
+      const keys = variants.map((n) => keyOf(year, n));
       // Attach to the draft_picks row with the same pick (or the only row); otherwise
-      // this is a distinct same-name player -> its own entry.
-      const list = byKey.get(k);
-      const target = list ? (list.length === 1 && (pk == null || list[0].draftPick == null || list[0].draftPick === pk) ? list[0] : list.find((b) => pk != null && b.draftPick === pk)) : undefined;
+      // this is a distinct same-name player -> its own entry. Try every name
+      // nflverse knows him by, so a formal/casual mismatch still finds him.
+      let list: CareerBits[] | undefined;
+      let target: CareerBits | undefined;
+      for (const key of keys) {
+        const candidates = byKey.get(key);
+        if (!candidates) continue;
+        const hit = candidates.length === 1 && (pk == null || candidates[0].draftPick == null || candidates[0].draftPick === pk)
+          ? candidates[0]
+          : candidates.find((b) => pk != null && b.draftPick === pk);
+        if (hit) { list = candidates; target = hit; break; }
+      }
       if (target) {
         const merged = merge(target, { ...extra, draftTeam: target.draftTeam ?? extra.draftTeam ?? null });
         list![list!.indexOf(target)] = merged;
       } else {
-        add(k, merge(empty(), extra));
+        // No draft_picks row under any name -- file him under all of them so a
+        // lookup by either the formal or the casual name resolves.
+        const merged = merge(empty(), extra);
+        for (const key of keys) add(key, merged);
       }
     }
   } catch { /* optional cache */ }
@@ -265,6 +329,34 @@ export const NflverseCareerService = {
     if (hit && manual) return merge(hit, manual);
     if (manual) return merge(empty(), manual);
     return hit ?? null;
+  },
+
+  /**
+   * Career span for an UNDRAFTED player, from nflverse players.csv.
+   *
+   * ALL_PLAYER_LOOKUP carries 4,201 undrafted rows and almost nothing about
+   * them: 0% have seasons-started, 0% a wAV, 0.1% an All-Pro, 0.1% even a
+   * career end. With no career signal at all the wAV estimator falls back to
+   * the draft-slot expectation and rates every one of them ~2, including men
+   * who started for a decade.
+   *
+   * nflverse knows 3,479 of them, and has rookie_season/last_season for 100%
+   * of those -- but no draft_year, so the year-keyed index above can never
+   * reach them. Match on name plus rookie season instead: an undrafted player
+   * signs the year he would have been drafted, so his rookie season sits within
+   * a year of the lookup's draft class. That tolerance is what makes this safe
+   * -- 426 name matches are a different man from another era (deltas up to 47
+   * seasons) and are correctly refused. 3,079 match cleanly; 1,633 of them had
+   * careers of five seasons or more.
+   */
+  getUndrafted(first: string, last: string, draftYear: number, tolerance = 1): CareerBits | null {
+    load();
+    const list = undraftedByName?.get(normalizeName(`${first} ${last}`));
+    if (!list || !list.length) return null;
+    const near = list
+      .filter((c) => Math.abs(c.rookie - draftYear) <= tolerance)
+      .sort((a, b) => Math.abs(a.rookie - draftYear) - Math.abs(b.rookie - draftYear));
+    return near.length ? near[0].bits : null;
   },
 
   /** True when more than one player of this name was drafted (or signed) in

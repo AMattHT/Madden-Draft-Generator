@@ -10,6 +10,7 @@ import { DerivedSkinToneService } from './DerivedSkinToneService';
 import { WikiSkinToneService } from './WikiSkinToneService';
 import { toneFromEvidence } from './SkinToneClassify';
 import { NflverseCareerService } from './NflverseCareerService';
+import { RetroItaService } from './RetroItaService';
 import { PhotoLookService } from './PhotoLookService';
 import { BaselinePlayer } from '../types/player';
 
@@ -60,11 +61,18 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // (that made Keith Brooking tone 7).
   const prior = SkinToneService.toneDistribution(label ?? p.position, p.draftYear);
   const portrait = DerivedSkinToneService.itaForPid(p.photoId);
+  // A player with no in-game portrait has only his Wikipedia photo to go on, and
+  // the prior does the rest -- which made the 1991 WR Mike Pritchard tone 2 off a
+  // wiki reading of 3. His Madden disc headshot reads ITA -37.5 (tone 7). Those
+  // headshots are studio crops framed like the portraits the ITA model was built
+  // on, so when we have one it is the better skin sample; the in-game portrait
+  // still wins when it exists.
+  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName) : null;
   // The wiki tone was read from the row's Wikipedia photo; if that photo was
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
   const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = toneFromEvidence({ ita: portrait?.ita ?? null, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  const race = toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);
@@ -106,6 +114,20 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
     if (out.careerTo == null && nv.careerTo != null) out.careerTo = nv.careerTo;
     if (!out.isHOF && nv.isHOF) out.isHOF = true;
     if (!out.headshotUrl && nv.headshotUrl) out.headshotUrl = nv.headshotUrl;
+  }
+  // Undrafted players are absent from draft_picks and carry no career columns of
+  // their own, so without this they keep the ~2 AV draft-slot default however
+  // long they actually played. nflverse has a rookie/last season for them; the
+  // span alone is enough for the wAV estimate to treat a ten-year starter as one.
+  if (out.draftRound == null) {
+    const ud = NflverseCareerService.getUndrafted(out.firstName, out.lastName, out.draftYear);
+    if (ud) {
+      if (out.careerFrom == null && ud.careerFrom != null) out.careerFrom = ud.careerFrom;
+      if (out.careerTo == null && ud.careerTo != null) out.careerTo = ud.careerTo;
+      if (out.heightInches == null && ud.heightInches != null) out.heightInches = ud.heightInches;
+      if (out.weight == null && ud.weight != null) out.weight = ud.weight;
+      if (!out.headshotUrl && ud.headshotUrl) out.headshotUrl = ud.headshotUrl;
+    }
   }
   const photo = await PhotoLookService.resolvePhoto(out);
   if (photo && !out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) {

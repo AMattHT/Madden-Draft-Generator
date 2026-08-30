@@ -796,6 +796,16 @@ export const DraftClassBuilder = {
           const plpo = PortraitService.plpoFor(Number(p.PID) || 0, base.race, `${base.firstName}|${base.lastName}|${i}`);
           return plpo ? `/api/portrait/plpo/${plpo}` : null;
         })(),
+        // The player's OWN in-game portrait: the game ships one keyed to HIM.
+        // Deliberately keyed on the lookup's PhotoID, not on p.PID -- the latter
+        // is the slot the prospect will occupy, which is frequently a recycled
+        // generic portrait, so resolving it would hand back a real-looking face
+        // belonging to somebody else. `portrait` below has the same problem
+        // (it falls back to a generic head by skin tone) and so stays last.
+        gamePortrait: (() => {
+          const plpo = base.photoId ? PortraitService.plpoForPid(base.photoId) : null;
+          return plpo ? `/api/portrait/plpo/${plpo}` : null;
+        })(),
         combine: base.combine ?? null,
         persona,
         frontSeven: base.frontSeven

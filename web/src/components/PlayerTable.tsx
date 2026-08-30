@@ -1,11 +1,38 @@
 import { displayPortrait } from '../api';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PlayerRow } from '../types';
-import { RatingChip, DevBadge, FaceTag, TeamLogo, Portrait } from './ui';
+import { RatingChip, DevBadge, TeamLogo, Portrait } from './ui';
 
 type Row = PlayerRow & { edited?: boolean };
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/** Madden's general/physical block — the attributes that mean the same thing at
+ *  every position, so no column is dead weight for half the table. Deliberately
+ *  not "every rating with a non-zero value": the game gives everyone a baseline
+ *  in all 53, so that test passes for throw power on a nose tackle. Position
+ *  ratings (coverage, block shedding, route running) stay in the detail panel,
+ *  where they can be shown against that position's own set. */
+export const ATTR_COLUMNS = [
+  { id: 'spd', label: 'SPD', key: 'speed' },
+  { id: 'acc', label: 'ACC', key: 'acceleration' },
+  { id: 'agi', label: 'AGI', key: 'agility' },
+  { id: 'cod', label: 'COD', key: 'changeOfDirection' },
+  { id: 'str', label: 'STR', key: 'strength' },
+  { id: 'jmp', label: 'JMP', key: 'jumping' },
+  { id: 'awr', label: 'AWR', key: 'awareness' },
+  { id: 'sta', label: 'STA', key: 'stamina' },
+  { id: 'tgh', label: 'TGH', key: 'toughness' },
+  { id: 'inj', label: 'INJ', key: 'injury' },
+] as const;
+
+/** Same thresholds the rating chips use, so a 90 reads as elite everywhere. */
+function attrTone(v: number): string {
+  if (v >= 90) return 'text-success';
+  if (v >= 80) return 'text-info';
+  if (v >= 70) return 'text-neutral-300';
+  return 'text-neutral-500';
+}
 
 function wavTag(source: string): { label: string; cls: string; title: string } {
   if (source === 'actual') return { label: 'A', cls: 'text-info', title: 'actual career wAV' };
@@ -105,18 +132,25 @@ export function PlayerTable({
     if (focusId != null) focusRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [focusId]);
 
+  // `w-full` alone can never overflow, so the wrapper's overflow-auto had
+  // nothing to scroll and the columns just squeezed instead. A min-width lets
+  // the table grow past a narrow pane and scroll, while still filling a wide one.
   return (
-    <table className="w-full border-collapse text-sm">
+    <table className="w-full min-w-[1180px] border-collapse text-sm">
       <thead className="sticky top-0 z-10 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400 shadow-[0_1px_0_var(--color-border)]">
         <tr>
           <SortTh id="pick" sort={sort} onSort={onSort} className="w-12 px-3 py-2.5 text-right">#</SortTh>
           <SortTh id="team" sort={sort} onSort={onSort} className="w-12 px-3 py-2.5 text-center">Team</SortTh>
-          <SortTh id="name" sort={sort} onSort={onSort} className="px-3 py-2.5 text-left">Player</SortTh>
+          <SortTh id="name" sort={sort} onSort={onSort} className="w-56 px-3 py-2.5 text-left">Player</SortTh>
           <SortTh id="pos" sort={sort} onSort={onSort} className="w-16 px-3 py-2.5 text-left">Pos</SortTh>
           <SortTh id="ovr" sort={sort} onSort={onSort} className="w-16 px-3 py-2.5 text-center">OVR</SortTh>
           <SortTh id="dev" sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-left">Dev</SortTh>
-          <SortTh id="wav" sort={sort} onSort={onSort} className="w-36 px-3 py-2.5 text-right">wAV</SortTh>
-          <SortTh id="face" sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-left">Face</SortTh>
+          <SortTh id="wav" sort={sort} onSort={onSort} className="w-28 px-3 py-2.5 text-right">wAV</SortTh>
+          {ATTR_COLUMNS.map((c) => (
+            <SortTh key={c.id} id={c.id} sort={sort} onSort={onSort} className="w-12 px-2 py-2.5 text-center">
+              {c.label}
+            </SortTh>
+          ))}
         </tr>
       </thead>
       <tbody>
@@ -191,9 +225,14 @@ export function PlayerTable({
                   </span>
                 </div>
               </td>
-              <td className="px-3 py-1.5">
-                <FaceTag face={r.face} />
-              </td>
+              {ATTR_COLUMNS.map((c) => {
+                const v = r.ratings?.[c.key];
+                return (
+                  <td key={c.id} className="px-2 py-1.5 text-center tabular-nums">
+                    <span className={v == null ? 'text-neutral-600' : attrTone(v)}>{v ?? '—'}</span>
+                  </td>
+                );
+              })}
             </tr>
           );
         })}

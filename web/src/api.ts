@@ -3,19 +3,49 @@ import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, 
 /** Backend-proxied image URL (avoids hotlink/CORS blocks on Wikipedia/PFR). */
 export const imageUrl = (url: string) => `/api/image?url=${encodeURIComponent(url)}`;
 
-/** Avatar sources in order: real photo (NFL/ESPN/PFR/Wiki) first, then the
- *  in-game menu portrait. A photo that errors — the proxy 404s dead NFL
- *  placeholder headshots, ESPN 404s ids it never had — falls through to the
- *  portrait instead of a blank chip. */
-export function displayPortraitChain(row: { face?: string; photoUrl?: string | null; portrait?: string | null }): string[] {
+interface PortraitRow {
+  face?: string;
+  photoUrl?: string | null;
+  portrait?: string | null;
+  gamePortrait?: string | null;
+  firstName?: string;
+  lastName?: string;
+  position?: string;
+}
+
+/** Avatar sources, best first:
+ *
+ *   1. the player's OWN in-game portrait, when the game ships one for him
+ *   2. his headshot off the Madden discs (2001-2017)
+ *   3. a real photo from the web (NFL/ESPN/PFR/Wiki)
+ *   4. the in-game menu portrait, which by this point is a generic head
+ *
+ *  Madden art comes before the web photo deliberately. The web sources are
+ *  inconsistent for retirees — action shots, wrong-team jerseys, and scanned
+ *  newspaper halftones — while every Madden headshot is the same studio crop on
+ *  the same grey background, so a class rendered from them looks like one set.
+ *  `gamePortrait` is separate from `portrait` because the latter silently falls
+ *  back to a generic head keyed on skin tone, which is not a likeness and must
+ *  stay last.
+ *
+ *  A source that errors — the proxy 404s dead NFL placeholder headshots, ESPN
+ *  404s ids it never had — falls through to the next instead of a blank chip. */
+export function displayPortraitChain(row: PortraitRow): string[] {
   const urls: string[] = [];
+  if (row.gamePortrait) urls.push(row.gamePortrait);
+  if (row.firstName && row.lastName) {
+    // Position disambiguates same-name players from different eras: without it
+    // the 1973 CB J.T. Thomas is served the 2011 LB's photo off a 2012 disc.
+    const pos = row.position ? `?position=${encodeURIComponent(row.position)}` : '';
+    urls.push(`/api/portrait/retro/${encodeURIComponent(row.firstName)}/${encodeURIComponent(row.lastName)}${pos}`);
+  }
   if (row.photoUrl) urls.push(imageUrl(row.photoUrl));
-  if (row.portrait) urls.push(row.portrait);
+  if (row.portrait && row.portrait !== row.gamePortrait) urls.push(row.portrait);
   return urls;
 }
 
 /** First (best) avatar source; see displayPortraitChain. */
-export function displayPortrait(row: { face?: string; photoUrl?: string | null; portrait?: string | null }): string | null {
+export function displayPortrait(row: PortraitRow): string | null {
   return displayPortraitChain(row)[0] ?? null;
 }
 

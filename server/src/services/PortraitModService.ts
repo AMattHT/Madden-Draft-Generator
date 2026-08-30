@@ -4,11 +4,14 @@ import { CACHE_DIR } from '../config/paths';
 import { PlayerLookupService } from './PlayerLookupService';
 import { PortraitSlotService, PortraitAssignment } from './PortraitSlotService';
 import { PortraitFetchService } from './PortraitFetchService';
+import { RetroHeadshotService } from './RetroHeadshotService';
 
 const FROSTY_README = `Custom Portrait Mod — Frosty import
 =====================================
 This folder contains real-photo portraits for historical draft prospects who
-have no built-in Madden face/portrait. Each PNG is named after the recyclable
+have no built-in Madden face/portrait. Each is either the player's own headshot
+from the Madden 2001-2003 PS2 discs or, failing that, a photo from the web --
+see the Source column in assignments.csv. Each PNG is named after the recyclable
 generic portrait slot (PLPO) it overrides; the matching draft class (.mdc)
 already points those prospects at the same slot's PID.
 
@@ -48,7 +51,7 @@ export const PortraitModService = {
   async buildForYear(
     year: number,
     league: string,
-    opts: { limit?: number; nowIso?: string } = {}
+    opts: { limit?: number; nowIso?: string; preferWeb?: boolean } = {}
   ): Promise<PortraitModResult> {
     const players = PlayerLookupService.byYear(year, league).slice(0, 402);
     let assignments = PortraitSlotService.assignSlots(players);
@@ -60,9 +63,29 @@ export const PortraitModService = {
     const errors: { name: string; error: string }[] = [];
     const ok: PortraitAssignment[] = [];
 
+    // The retro pack wins by default: for these classes it is the period-correct
+    // likeness, it needs no network, and the web alternative for a retiree is
+    // usually the NFL CDN's silhouette. Its 96x96 source upscales softer than a
+    // web photo would, so `preferWeb` flips the order.
+    const usedRetro = new Set<string>();
     await mapPool(assignments, 4, async (a) => {
+      const [first, ...rest] = a.name.split(' ');
+      const last = rest.join(' ');
+      const fromRetro = async () => {
+        const png = await RetroHeadshotService.portraitPng(first, last, 256, a.position);
+        if (png) usedRetro.add(a.plpo);
+        return png;
+      };
+      const fromWeb = async () =>
+        a.photoUrl ? await PortraitFetchService.fetchPortraitPng(a.photoUrl) : null;
+      const order = opts.preferWeb ? [fromWeb, fromRetro] : [fromRetro, fromWeb];
       try {
-        const png = await PortraitFetchService.fetchPortraitPng(a.photoUrl);
+        let png: Buffer | null = null;
+        for (const source of order) {
+          png = await source();
+          if (png) break;
+        }
+        if (!png) throw new Error('no photo available');
         fs.writeFileSync(path.join(outputDir, `${a.plpo}.png`), png);
         ok.push(a);
       } catch (e) {
@@ -80,7 +103,7 @@ export const PortraitModService = {
         plpo: a.plpo,
         pid: a.pid,
         position: a.position,
-        source: a.photoUrl,
+        source: usedRetro.has(a.plpo) ? `madden${a.retroYear} disc` : a.photoUrl,
       })),
     };
     fs.writeFileSync(path.join(outputDir, 'manifest.json'), JSON.stringify(manifest, null, 2));

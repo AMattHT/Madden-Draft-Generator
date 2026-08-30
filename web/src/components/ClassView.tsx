@@ -9,11 +9,18 @@ import { DraftOptions } from './DraftOptions';
 import { ExportMenu } from './ExportMenu';
 import type { EditTools } from './ExportMenu';
 import { Toolbar } from './Toolbar';
-import { PlayerTable } from './PlayerTable';
+import { PlayerTable, ATTR_COLUMNS } from './PlayerTable';
 import { ProfileModal } from './ProfileModal';
 import { Pill, Icon, ICONS } from './ui';
 
 export type DisplayRow = PlayerRow & { edited?: boolean };
+
+/** Attribute column id -> ratings key, so sorting an attribute column reads the
+ *  rating the header names. Derived from the table's own column list so the two
+ *  cannot drift apart. */
+const ATTR_BY_ID: Record<string, string> = Object.fromEntries(
+  ATTR_COLUMNS.map((c) => [c.id, c.key])
+);
 
 export function ClassView({
   data,
@@ -142,7 +149,10 @@ export function ClassView({
       else if (col === 'name') cmp = a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
       else if (col === 'pos') cmp = a.position.localeCompare(b.position) || a.pick - b.pick;
       else if (col === 'team') cmp = teamKey(a).localeCompare(teamKey(b)) || a.pick - b.pick;
-      else if (col === 'face') cmp = a.face.localeCompare(b.face) || a.pick - b.pick;
+      else if (ATTR_BY_ID[col]) {
+        const k = ATTR_BY_ID[col];
+        cmp = ((a.ratings?.[k] ?? -1) as number) - ((b.ratings?.[k] ?? -1) as number);
+      }
       else cmp = a.pick - b.pick;
       return cmp * dir || a.pick - b.pick;
     });

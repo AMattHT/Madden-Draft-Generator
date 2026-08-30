@@ -89,7 +89,58 @@ function careerWavEstimate(p: BaselinePlayer): number {
   const impliedFromLength = len ? Math.round(len * 0.6) : 0;
   const st = Math.max(p.seasonsStarted ?? 0, impliedFromAccolades, impliedFromLength);
   const nonStarter = Math.max(0, len - st);
-  return 5.5 * st + 3 * pb + 4 * ap + nonStarter;
+  return calibrateWav(5.5 * st + 3 * pb + 4 * ap + nonStarter);
+}
+
+/**
+ * Low-end calibration for the raw aggregate estimate above.
+ *
+ * Measured against the 14,149 players who have a real PFR wAV, the raw formula
+ * ranks well (r = 0.91) but is badly miscalibrated in one direction only:
+ *
+ *     actual wAV   n      mean actual   mean estimate   bias
+ *     < 5          5078       1.4           10.5        +9.0
+ *     5-15         3266       8.8           19.2       +10.4
+ *     15-30        2403      21.4           28.1        +6.8
+ *     30-60        2398      42.2           42.0        -0.2
+ *     60-100        855      73.7           69.8        -3.9
+ *     100+          149     115.9          112.9        -2.9
+ *
+ * It is accurate from ~30 up and inflates journeymen by ~10 AV, which made
+ * every long-but-unremarkable career read like a contributor. Refitting the
+ * coefficients fixes the middle but wrecks the tail (least squares chases the
+ * crowded low end, and st/pb/ap saturate, so a 12-Pro-Bowl career and an
+ * all-time-great one are indistinguishable in the features). So instead this
+ * maps the raw estimate onto observed means below the threshold and leaves it
+ * untouched above -- the tail keeps exactly the behaviour it already had.
+ *
+ * Held out 25%: MAE 8.84 -> 6.17, overall bias +6.59 -> +0.96, low-end bias
+ * +9.50 -> +2.62, stars and elite unchanged (-3.42 / -5.82). Monotone, so the
+ * ranking the estimate is mostly used for is preserved.
+ *
+ * Knots are (raw estimate, mean actual wAV) from decile bins of the 10,819
+ * labelled players below the threshold; regenerate with scripts/probes/probe-av.ts.
+ */
+const WAV_IDENTITY_ABOVE = 35;
+const WAV_CALIBRATION: readonly (readonly [number, number])[] = [
+  [5.5, 1.0], [6.23, 1.84], [7.99, 2.45], [12.0, 3.42], [12.87, 5.71],
+  [16.17, 8.73], [20.57, 11.57], [24.32, 13.61], [27.55, 19.65],
+  [31.51, 23.43], [WAV_IDENTITY_ABOVE, WAV_IDENTITY_ABOVE],
+];
+
+function calibrateWav(raw: number): number {
+  if (raw >= WAV_IDENTITY_ABOVE) return raw;
+  const [x0, y0] = WAV_CALIBRATION[0];
+  if (raw <= x0) {
+    const [x1, y1] = WAV_CALIBRATION[1];
+    return Math.max(0, y0 + ((raw - x0) * (y1 - y0)) / (x1 - x0));
+  }
+  for (let i = 0; i < WAV_CALIBRATION.length - 1; i++) {
+    const [xa, ya] = WAV_CALIBRATION[i];
+    const [xb, yb] = WAV_CALIBRATION[i + 1];
+    if (raw <= xb) return ya + ((raw - xa) * (yb - ya)) / (xb - xa);
+  }
+  return raw;
 }
 
 /** True when a player carries any career-quality signal (career span, starts, or

@@ -28,12 +28,57 @@ const DEV = [
   { label: 'X-Factor', short: 'X-Factor', cls: 'text-legend-light', pill: 'bg-legend/20 text-legend-light ring-1 ring-legend/40' },
 ];
 
+/** Development-trait marks in Madden's shapes: a hollow ring for Normal, a star
+ *  for Star, a ringed star for Superstar, and the X-in-a-hexagon for X-Factor.
+ *
+ *  These are drawn, not EA's own artwork — the game's icons live inside the
+ *  Frostbite archives, which we can't read. They follow the same silhouettes and
+ *  take the tier's colour from `currentColor`, so a badge reads at a glance in
+ *  the row the way the in-game ones do. */
+function DevIcon({ dev, className = 'h-3.5 w-3.5' }: { dev: number; className?: string }) {
+  const common = { viewBox: '0 0 16 16', className, 'aria-hidden': true as const, fill: 'none' };
+  if (dev >= 3)
+    return (
+      <svg {...common}>
+        <path d="M8 1l6 3.5v7L8 15l-6-3.5v-7L8 1z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M5.8 5.8l4.4 4.4M10.2 5.8l-4.4 4.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  if (dev === 2)
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="8" r="6.8" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M8 3.6l1.3 2.7 3 .4-2.2 2.1.5 3L8 10.4l-2.6 1.4.5-3-2.2-2.1 3-.4L8 3.6z" fill="currentColor" />
+      </svg>
+    );
+  if (dev === 1)
+    return (
+      <svg {...common}>
+        <path d="M8 1.8l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.6l-3.8 2-.7-4.3-3.1-3 4.3-.6L8 1.8z" fill="currentColor" />
+      </svg>
+    );
+  return (
+    <svg {...common}>
+      <circle cx="8" cy="8" r="4.6" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 export function DevBadge({ dev }: { dev: number }) {
   const d = DEV[dev] || DEV[0];
-  if (dev <= 0) return <span className="text-xs text-muted">—</span>;
+  if (dev <= 0)
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] text-muted" title="Normal development">
+        <DevIcon dev={0} />
+        Normal
+      </span>
+    );
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.pill}`}>
-      {dev === 3 && <span aria-hidden>✦</span>}
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${d.pill}`}
+      title={`${d.label} development`}
+    >
+      <DevIcon dev={dev} />
       {d.short}
     </span>
   );

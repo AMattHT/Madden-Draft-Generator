@@ -3,6 +3,7 @@ import { LOOKUPS_DIR } from '../config/paths';
 import { parseCsvFile, normalizeName } from '../util/csv';
 import { BaselinePlayer } from '../types/player';
 import { HistoricalAccoladeService } from './HistoricalAccoladeService';
+import { NflverseCareerService } from './NflverseCareerService';
 
 export interface PlayerSearchResult {
   firstName: string;
@@ -97,6 +98,38 @@ function toHeightInches(s: string | undefined): number | null {
 const CURRENT_YEAR = new Date().getFullYear();
 
 let rowsCache: RawRow[] | null = null;
+/** Surname particles that ALL_PLAYER_LOOKUP.csv mis-split onto the first name.
+ *
+ *  86 rows arrived as e.g. `Last="Noy", First="Kyle Van"` and
+ *  `Last="Brocklin", First="Norm Van"` -- the particle stayed with the given
+ *  name. Concatenated the name still reads correctly, which is why this hid for
+ *  so long, but every match against another source fails: nflverse keys Kyle
+ *  Van Noy as `kyle|vannoy` while this file yields `kylevan|noy`, so he never
+ *  picks up a headshot, career bits, or a combine row. Two Hall of Famers (Van
+ *  Brocklin, Van Buren) are in the affected set.
+ */
+const SURNAME_PARTICLES = new Set([
+  'van', 'vander', 'vanden', 'von', 'de', 'del', 'della', 'di', 'da', 'du',
+  'la', 'le', 'st', 'st.', 'ste', 'ste.', 'mc', 'mac', 'el', 'ah', 'te', 'ter',
+  'abdul', 'bin', 'al',
+]);
+
+function repairSurname(first: string, last: string): { first: string; last: string } {
+  const parts = first.split(/\s+/).filter(Boolean);
+  if (parts.length < 2 || !last) return { first, last };
+  const tail = parts[parts.length - 1];
+  // Usual case: the particle rode along on the first name ("Kyle Van" + "Noy").
+  if (SURNAME_PARTICLES.has(tail.toLowerCase())) {
+    return { first: parts.slice(0, -1).join(' '), last: `${tail} ${last}` };
+  }
+  // Mirror case: the split landed a word early, leaving the particle alone as
+  // the surname ("Antwaan Randle" + "El").
+  if (SURNAME_PARTICLES.has(last.toLowerCase())) {
+    return { first: parts.slice(0, -1).join(' '), last: `${tail} ${last}` };
+  }
+  return { first, last };
+}
+
 let byYear: Map<number, BaselinePlayer[]> | null = null;
 let byNormName: Map<string, BaselinePlayer[]> | null = null;
 const normName = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
@@ -115,9 +148,13 @@ function load(): void {
     const rawLeague = (row.League || '').trim();
     const h = toHeightInches(row.Height);
     const w = toInt(row.Weight);
+    const { first: fixedFirst, last: fixedLast } = repairSurname(
+      cleanName(row['First Name']),
+      cleanName(row['Last Name']),
+    );
     const player: BaselinePlayer = {
-      firstName: cleanName(row['First Name']),
-      lastName: cleanName(row['Last Name']),
+      firstName: fixedFirst,
+      lastName: fixedLast,
       college: (row['College/Univ'] || '').trim(),
       draftYear,
       draftRound: toRound(row.Round),
@@ -161,6 +198,7 @@ function load(): void {
   // Order matters: collapse same-person duplicate rows first, then backfill
   // pre-1960 accolades (so the merged row's career signals are complete), then
   // resolve name-matched shared assets (which use those signals to pick owners).
+  splitSharedCareers(all);
   const merged = mergeDuplicatePeople(all);
   applyHistoricalAccolades(merged);
   dedupSharedAssets(merged);
@@ -222,10 +260,45 @@ const NO_CAREER_WAV = 20;
  *  namesake — strip the flag and the legends portrait (menu image and the skin
  *  tone read from it). Short-career legends with their own EA cards (Bo Jackson,
  *  Dexter Jackson, David Tyree) are not flagged HOF, so they keep theirs. */
+/** Hall of Famers inducted as COACHES, not players.
+ *
+ *  The CSV's '‡' marks the Hall of Fame without saying in which category, and
+ *  coaching success must not inflate a player's rating. The career test below
+ *  catches Dungy and Cowher for free because neither has a playing accolade on
+ *  record, but it cannot catch Tom Flores -- he made an AFL All-Star team as a
+ *  quarterback, and his 1959 class sits the wrong side of the 1960 gate anyway.
+ *  A short explicit list is honest and auditable where a heuristic is not.
+ */
+const COACH_INDUCTEES = new Set(['tom flores', 'tony dungy', 'bill cowher']);
+
 function sanitizeLegendPortraits(players: BaselinePlayer[]): void {
   for (const p of players) {
-    if (!p.isHOF || p.draftYear < 1960) continue;
-    if ((p.wav ?? 0) >= NO_CAREER_WAV || p.proBowls || p.allPro1) continue;
+    if (!p.isHOF) continue;
+    if (COACH_INDUCTEES.has(`${p.firstName} ${p.lastName}`.toLowerCase())) {
+      p.isHOF = false;
+      if (p.plpo && /^plpo_legends_/i.test(p.plpo)) { p.plpo = null; p.photoId = null; }
+      continue;
+    }
+    if (p.draftYear < 1960) continue;
+    // The flag has to be earned by PLAYING, so judge it on career value only.
+    // Two traps sit on either side of that:
+    //   * Undrafted rows (Round "UD") carry no career columns at all -- PFR's
+    //     draft table only records wAV/PB/AP1 for players it drafted -- so the
+    //     lookup row alone cannot tell a real undrafted HOFer from a namesake.
+    //     All 24 rows the CSV marks with '‡' are undrafted, and 18 are 1960+.
+    //     Their careers live in udfa_careers.json, so consult that too.
+    //   * The '‡' does not distinguish a Hall of Fame PLAYER from a Hall of
+    //     Fame COACH. Tony Dungy and Bill Cowher are marked, but were ordinary
+    //     players; coaching success must not inflate a player's rating, so with
+    //     no playing career on record they lose the flag like any other.
+    // The namesake this rule exists for -- the 1969 Hofstra cornerback Jim
+    // Thorpe, drafted round 17 -- has no career under either source, so he is
+    // still caught.
+    const career = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+    const wav = p.wav ?? career?.wav ?? 0;
+    const proBowls = p.proBowls ?? career?.proBowls ?? 0;
+    const allPro1 = p.allPro1 ?? career?.allPro1 ?? 0;
+    if (wav >= NO_CAREER_WAV || proBowls || allPro1) continue;
     p.isHOF = false;
     stampedNamesakes.add(`${normName(p.firstName, p.lastName)}|${p.draftYear}`);
     if (p.plpo && /^plpo_legends_/i.test(p.plpo)) { p.plpo = null; p.photoId = null; }
@@ -319,6 +392,53 @@ function mergeInto(keep: BaselinePlayer, other: BaselinePlayer): void {
  * a separate combined-mode concern and intentionally untouched here — the same-league
  * guard keeps this from merging only the subset whose AFL row happens to be blank.
  */
+/**
+ * Two different men of the same name, drafted the same year, cannot share one
+ * career -- but the lookup gives them one when the career was joined by name.
+ *
+ * 1964 has both Bob Browns: the Hall of Fame tackle out of Nebraska (NFL, pick
+ * 2) and the Arkansas-Pine Bluff defensive tackle (AFL, pick 4). Different
+ * colleges, different positions, different leagues -- different people -- yet
+ * both rows carry 1964-1973, 5 All-Pros, 6 Pro Bowls, wAV 83. That is the
+ * tackle's career, and it was rating the DT as a 77 Superstar.
+ *
+ * Only the better draft slot keeps the career; the other is left career-unknown
+ * and rated from his slot instead. Deliberately narrow: it fires only when the
+ * COLLEGES disagree (so the rows are genuinely different men, not a dual-draft
+ * of one man) and only when the career is non-blank. Across the whole file that
+ * is this one case; nine groups have disagreeing colleges but the other eight
+ * share an empty career, where there is nothing to take away.
+ */
+function splitSharedCareers(players: BaselinePlayer[]): void {
+  const groups = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    const k = `${normalizeName(`${p.firstName} ${p.lastName}`)}|${p.draftYear}`;
+    (groups.get(k) ?? groups.set(k, []).get(k)!).push(p);
+  }
+  for (const grp of groups.values()) {
+    if (grp.length < 2) continue;
+    if (new Set(grp.map((p) => normalizeName(p.college))).size < 2) continue;
+    const career = (p: BaselinePlayer) =>
+      `${p.careerFrom}|${p.careerTo}|${p.allPro1}|${p.proBowls}|${p.seasonsStarted}|${p.wav}`;
+    if (new Set(grp.map(career)).size !== 1) continue;
+    const real = grp[0];
+    if ((real.wav ?? 0) <= 0 && !real.allPro1 && !real.proBowls) continue;
+    // Keep it on the earliest overall pick; a Hall of Fame career belongs to the
+    // more highly drafted of two same-named men far more often than not.
+    const keep = [...grp].sort((a, b) => (a.draftPick ?? 9999) - (b.draftPick ?? 9999))[0];
+    for (const p of grp) {
+      if (p === keep) continue;
+      p.wav = null;
+      p.wavSource = 'predicted';
+      p.allPro1 = null;
+      p.proBowls = null;
+      p.seasonsStarted = null;
+      p.careerTo = null;
+      p.isHOF = false;
+    }
+  }
+}
+
 function mergeDuplicatePeople(players: BaselinePlayer[]): BaselinePlayer[] {
   const groups = new Map<string, BaselinePlayer[]>();
   for (const p of players) {

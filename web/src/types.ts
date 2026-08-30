@@ -27,6 +27,7 @@ export interface PlayerRow {
   bodyType: string; // Madden 26 build: Heavy / Muscular / Thin / Standard
   photoUrl: string | null;
   portrait?: string | null; // Madden menu-portrait URL (real or generic-by-skintone)
+  gamePortrait?: string | null; // the player's OWN in-game portrait, null when he has none
   team?: TeamInfo; // drafting team (nflverse, 1980+), joined by overall pick
   combine?: CombineMeasurements | null; // NFL combine testing (nflverse, 2000+)
   persona?: string[]; // M27 persona DNA trait names (only present when gameVersion='m27')
