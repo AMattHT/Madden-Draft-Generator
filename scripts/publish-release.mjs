@@ -81,6 +81,9 @@ function artefacts() {
     const dir = path.join(RELEASE_DIR, app);
     if (!fs.existsSync(dir)) throw new Error(`missing build output: ${dir}`);
     for (const f of fs.readdirSync(dir)) {
+      // Previous builds are left behind in this directory, and uploading a
+      // 1.0.0 installer into the 1.0.1 release is worse than uploading none.
+      if (/\.(exe|blockmap)$/.test(f) && !f.includes(` ${VERSION}.exe`)) continue;
       if (/\.(exe|blockmap)$/.test(f) || f === `${app}.yml`) out.push(path.join(dir, f));
     }
   }
@@ -89,6 +92,21 @@ function artefacts() {
 }
 
 const release = draftRelease();
+/** The uploads.github.com endpoint answers 307, and `gh api` does not follow
+ *  redirects -- so uploads go through `gh release upload`, which does. That
+ *  names each asset after its file, and the manifests above reference the
+ *  hyphenated form, so link every artefact under its exact required name
+ *  first rather than uploading the spaced original. */
+const STAGE = path.join(RELEASE_DIR, '.upload');
+fs.rmSync(STAGE, { recursive: true, force: true });
+fs.mkdirSync(STAGE, { recursive: true });
+const staged = (file) => {
+  const dest = path.join(STAGE, assetName(file));
+  // A hard link keeps this from copying ~1.2 GB of installers around.
+  try { fs.linkSync(file, dest); } catch { fs.copyFileSync(file, dest); }
+  return dest;
+};
+
 const existing = new Map((release.assets || []).map((a) => [a.name, a.id]));
 
 for (const file of artefacts()) {
@@ -98,17 +116,11 @@ for (const file of artefacts()) {
     console.log(`  would upload ${name} (${mb} MB)${existing.has(name) ? ' — replacing' : ''}`);
     continue;
   }
-  if (existing.has(name)) {
-    gh(['api', '--method', 'DELETE', `repos/${REPO}/releases/assets/${existing.get(name)}`]);
-  }
-  gh([
-    'api', '--method', 'POST',
-    '-H', 'Content-Type: application/octet-stream',
-    `https://uploads.github.com/repos/${REPO}/releases/${release.id}/assets?name=${encodeURIComponent(name)}`,
-    '--input', file,
-  ]);
+  gh(['release', 'upload', TAG, staged(file), '--clobber', '--repo', REPO]);
   console.log(`  uploaded ${name} (${mb} MB)`);
 }
+
+fs.rmSync(STAGE, { recursive: true, force: true });
 
 // A manifest naming an asset that is not in the release is a silently broken
 // update channel: the app sees a new version and then cannot fetch it.

@@ -34,10 +34,9 @@ export function RatingChip({ ovr, size = 'md', hidden = false }: { ovr: number; 
 
 /** Development-trait badges.
  *
- *  EA's own artwork when the user has extracted it from their copy of the game
- *  (served from data/dev-icons, which the installer deliberately does NOT ship),
- *  and a drawn mark in the same silhouette when they have not. The drawn set is
- *  the shipped default, so a clean install still reads correctly.
+ *  EA's own artwork, served from data/dev-icons, with a drawn mark in the same
+ *  silhouette as the fallback. The icons do ship, so the fallback is for a build
+ *  whose data directory is incomplete rather than for the normal install.
  *
  *  The asset names are the game's older internal ladder, one step below the
  *  tiers the UI shows, so the mapping is NOT name-for-name: bronze `slow` is

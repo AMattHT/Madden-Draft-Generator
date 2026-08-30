@@ -53,10 +53,14 @@ r.get('/portrait/retro/:first/:last', async (req, res) => {
 
 /** Serve a Madden development-trait badge.
  *
- *  EA's artwork, so it is NOT shipped in the installer -- data/dev-icons is
- *  filtered out of extraResources. It appears only when the user has extracted
- *  it from their own copy of the game; until then this 404s and the UI draws its
- *  own mark instead. */
+ *  EA's artwork, extracted from the game and shipped in data/dev-icons like the
+ *  rest of that directory. When a file is missing this 404s and the UI falls
+ *  back to drawing its own mark.
+ *
+ *  The path must stay under /portrait: every route in this file is mounted that
+ *  way and the client asks for /api/portrait/dev-icon/. Registered as
+ *  /dev-icon/ it 404s, and the fallback hides it -- the badges just quietly
+ *  stop being the real artwork. */
 r.get('/portrait/dev-icon/:name', (req, res) => {
   const name = String(req.params.name || '').toLowerCase();
   if (!/^(slow|normal|quick|superstar|hidden)$/.test(name)) return res.status(400).end();
