@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.2
+
+**Madden's dev-trait badges are back.** They were being served from a path one
+segment off from the one the app asks for, so every badge quietly fell back to a
+drawn mark. Nothing looked broken, which is why it lasted.
+
+**Persona DNA can be edited again.** The *Add* button only appeared when a
+player had a free slot, and every generated prospect is given all five — so it
+was hidden on every player in a fresh class, leaving what looked like a row of
+fixed labels. It now stays visible, says why it is disabled when the slots are
+full, and there is a Reset back to the generated traits.
+
+**Sixty-eight players stopped wearing a stranger's face.** A player last seen in
+2019 or earlier gets his photo from ESPN, because the NFL's own CDN answers for
+those with a silhouette. That trusted the player id in the source data, and a
+few of those ids belong to somebody else entirely: the 1984 nose tackle Michael
+Carter, born 1960, was showing a photograph of a Michael Carter born in 1991.
+Every affected id was checked against its birth year — 10,500 were right, 68 were
+not. Those 68 now fall back to their in-game portrait.
+
 ## 1.0.1
 
 **Real player headshots, 2001–2017.** 8,101 photographs pulled off seventeen
