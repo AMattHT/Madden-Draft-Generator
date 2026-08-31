@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.6
+
+**Hall of Famers look like themselves.** Two thirds of the players in the
+database have no photograph anywhere the app can reach — no in-game portrait, no
+Madden-disc headshot, no Wikipedia picture — so their appearance is estimated
+from what players at that position looked like in that era. For an individual
+that estimate is a coin toss weighted by the decade, and it landed wrong in both
+directions: Bob Hayes came out white, Paul Krause came out black. The 108 Hall
+of Famers it could not get right are now recorded rather than guessed. Everyone
+else is still estimated, and you can always set a face yourself under *Edit
+appearance*.
+
 ## 1.0.5
 
 **Blank headshots are fixed.** 1.0.4 tried to give players their own in-game
