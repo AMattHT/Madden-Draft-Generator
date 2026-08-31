@@ -58,9 +58,10 @@ function PersonaEditor({
   const idOf = new Map(traits.map((t) => [t.name, t.id]));
   const nameOf = new Map(traits.map((t) => [t.id, t.name]));
   const edited = typeof patch.personaDNA === 'string';
+  const generatedIds = (generated ?? []).map((n) => idOf.get(n)).filter((n): n is number => n != null);
   const ids: number[] = edited
     ? String(patch.personaDNA).split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isFinite(n) && n > 0)
-    : (generated ?? []).map((n) => idOf.get(n)).filter((n): n is number => n != null);
+    : generatedIds;
 
   const apply = (next: number[]) => onEdit('personaDNA', next.join(','));
   const q = query.trim().toLowerCase();
@@ -68,17 +69,19 @@ function PersonaEditor({
 
   return (
     <div ref={wrapRef} className="relative mt-1.5 flex flex-wrap items-center gap-1" title="M27 Persona DNA — written into the export (5 slots max)">
-      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">DNA</span>
+      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">
+        DNA <span className="text-neutral-500">{ids.length}/5</span>
+      </span>
       {ids.map((id) => (
         <span
           key={id}
-          className="group inline-flex items-center gap-1 rounded-full bg-legend/15 px-2 py-0.5 text-[10px] font-medium text-legend-light ring-1 ring-legend/30"
+          className="inline-flex items-center gap-1 rounded-full bg-legend/15 py-0.5 pl-2 pr-1 text-[10px] font-medium text-legend-light ring-1 ring-legend/30"
         >
           {nameOf.get(id) ?? `#${id}`}
           <button
             onClick={() => apply(ids.filter((x) => x !== id))}
-            className="text-legend-light/50 transition-colors hover:text-white"
-            aria-label={`Remove ${nameOf.get(id)}`}
+            className="grid h-3.5 w-3.5 place-items-center rounded-full text-legend-light/80 transition-colors hover:bg-legend/30 hover:text-white"
+            aria-label={`Remove ${nameOf.get(id) ?? id}`}
             title="Remove trait"
           >
             ×
@@ -92,12 +95,24 @@ function PersonaEditor({
             {n}
           </span>
         ))}
-      {ids.length < 5 && (
+      {/* Generated prospects fill all five slots, so hiding this at the cap hid
+       *  it from every player in a fresh class -- leaving chips that read as
+       *  static labels. It stays visible and explains itself instead. */}
+      <button
+        onClick={() => setAdding((v) => !v)}
+        disabled={ids.length >= 5}
+        title={ids.length >= 5 ? 'All five slots are used — remove a trait to add another' : 'Add a persona trait'}
+        className="rounded-full border border-dashed border-legend/40 px-2 py-0.5 text-[10px] font-medium text-legend-light transition-colors hover:bg-legend/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+      >
+        + Add
+      </button>
+      {edited && generatedIds.length > 0 && (
         <button
-          onClick={() => setAdding((v) => !v)}
-          className="rounded-full border border-dashed border-legend/40 px-2 py-0.5 text-[10px] font-medium text-legend-light transition-colors hover:bg-legend/10"
+          onClick={() => apply(generatedIds)}
+          title="Restore the generated traits"
+          className="rounded-full px-1.5 py-0.5 text-[10px] text-muted underline-offset-2 transition-colors hover:text-neutral-200 hover:underline"
         >
-          + Add
+          Reset
         </button>
       )}
       {adding && (
