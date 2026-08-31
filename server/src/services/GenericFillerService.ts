@@ -69,7 +69,13 @@ export const GenericFillerService = {
     for (let i = 0; i < need; i++) {
       const rand = seededRng(`filler|${year}|${i}`);
       const position = positions[i];
-      const race = SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`, year);
+      // Filler is invented, so no real person is described wrongly here -- but a
+      // 1940 class padded with black prospects is an anachronism on the board,
+      // which is the same reason the enrichment pins real pre-1946 draftees
+      // light. The NFL was segregated from 1934 to 1945.
+      const race = year <= 1945
+        ? 2
+        : SkinToneService.defaultRaceForVaried(position, `filler|${year}|${i}|race`, year);
       const firstName = first[Math.floor(rand() * first.length)] || 'Draft';
       const lastName = last[Math.floor(rand() * last.length)] || 'Prospect';
       out.push({

@@ -76,7 +76,15 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // A recorded tone wins outright. It exists for players the evidence cannot
   // reach or reads wrong, and inference has nothing to add to a known answer.
   const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear);
-  const race = curatedTone ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  // The NFL was segregated from 1934 to 1945, and no black player was drafted
+  // until 1949. For a player drafted in that window a dark tone is not an
+  // unlikely guess, it is an impossible one -- so this overrides the portrait
+  // too, which is where all eight of the current cases come from: a dim vintage
+  // photograph measuring dark exactly as Paul Krause's does. 1945 rather than
+  // 1948 because Marion Motley signed in 1946 and the lookup carries him as a
+  // 1946 draftee.
+  const segregationEra = p.draftYear <= 1945 ? 2 : null;
+  const race = curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);

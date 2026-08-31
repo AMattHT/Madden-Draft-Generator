@@ -4,6 +4,8 @@ import { CuratedSkinToneService } from '../CuratedSkinToneService';
 import { PlayerLookupService } from '../PlayerLookupService';
 import { DerivedSkinToneService } from '../DerivedSkinToneService';
 import { RetroItaService } from '../RetroItaService';
+import { DraftClassBuilder } from '../DraftClassBuilder';
+import { enrichedClass } from '../DraftEnrichment';
 
 /** Two thirds of the database has no tone evidence of any kind, so the tone is
  *  inferred from a position/era prior. For an individual that is a weighted
@@ -60,6 +62,35 @@ test('pre-1946 draftees are light, which is history rather than judgement', () =
   ] as [string, string, number][]) {
     assert.ok(light(CuratedSkinToneService.toneFor(f, l, y)), `${f} ${l} played before the NFL reintegrated`);
   }
+});
+
+test('no segregated-era class contains a black player, and 1946 does again', async () => {
+  // The NFL was segregated from 1934 to 1945. For those classes a dark tone is
+  // not an unlikely guess but an impossible one, so it is a rule rather than a
+  // prior -- and it has to beat the portrait, which is where the cases came
+  // from: dim vintage photographs measuring dark exactly as Krause's does. It
+  // also covers the invented filler that pads these short classes, since a 1940
+  // board with black prospects on it is the same anachronism.
+  // Through enrichedClass + preview, which is exactly what the route does. Going
+  // straight to preview with raw lookup rows skips the enrichment the rule lives
+  // in, and the test passes while the board is still wrong.
+  const darkOf = async (year: number) => {
+    const { players } = await enrichedClass(year, 'NFL', { fill: true });
+    return DraftClassBuilder.preview(players, 'madden', {}, 'm27')
+      .rows.filter((r) => (r.skinTone ?? 0) >= 5);
+  };
+
+  for (const year of [1936, 1940, 1942, 1945]) {
+    const dark = await darkOf(year);
+    assert.equal(
+      dark.length,
+      0,
+      `${year} was segregated; found ${dark.length} dark-toned players ` +
+        `(e.g. ${dark.slice(0, 3).map((r) => `${r.firstName} ${r.lastName}`).join(', ')})`
+    );
+  }
+  // And the rule must stop at the line, or it would whitewash the integration.
+  assert.ok((await darkOf(1946)).length > 0, '1946 reintegrated the league and should have black players again');
 });
 
 test('the overlay does not reach players it was never given', () => {
