@@ -11,6 +11,7 @@ import { WikiSkinToneService } from './WikiSkinToneService';
 import { toneFromEvidence } from './SkinToneClassify';
 import { NflverseCareerService } from './NflverseCareerService';
 import { RetroItaService } from './RetroItaService';
+import { CuratedSkinToneService } from './CuratedSkinToneService';
 import { PhotoLookService } from './PhotoLookService';
 import { BaselinePlayer } from '../types/player';
 
@@ -72,7 +73,10 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
   const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
   const trusted = p.race != null && p.race !== 7 ? p.race : null;
-  const race = toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  // A recorded tone wins outright. It exists for players the evidence cannot
+  // reach or reads wrong, and inference has nothing to add to a known answer.
+  const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear);
+  const race = curatedTone ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     const photo = await PhotoLookService.resolvePhoto(p);
