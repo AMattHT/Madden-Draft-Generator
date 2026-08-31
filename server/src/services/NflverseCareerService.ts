@@ -88,6 +88,22 @@ interface PlayerRow {
   rookie_season?: string;
 }
 
+/** ESPN ids nflverse files on the wrong player, keyed by id — see
+ *  scripts/build-espn-headshot-check.ts. Empty if the file was never built. */
+let espnBlocked: Set<string> | null = null;
+function blockedEspnIds(): Set<string> {
+  if (espnBlocked) return espnBlocked;
+  try {
+    const raw = JSON.parse(
+      fs.readFileSync(path.join(LOOKUPS_DIR, 'espn-headshot-blocklist.json'), 'utf8')
+    ) as { blocked?: Record<string, unknown> };
+    espnBlocked = new Set(Object.keys(raw.blocked ?? {}));
+  } catch {
+    espnBlocked = new Set();
+  }
+  return espnBlocked;
+}
+
 /**
  * The NFL CDN no longer hosts photos for most players out of the league since
  * ~2019 — their nflverse headshot URLs answer 200 with a generic helmeted-
@@ -95,11 +111,24 @@ interface PlayerRow {
  * historical classes with the same fake "photo". ESPN still serves the real
  * headshot for those ids (and honestly 404s when it has none, which lets the UI
  * fall back to the in-game portrait). Current players keep the NFL photo.
+ *
+ * That leans on the id being right, and a handful are not: nflverse files
+ * espn_id 17343 on the 1984 nose tackle Michael Carter, but ESPN's 17343 is a
+ * Michael Carter born in 1991. The URL resolves, so the class showed a real
+ * photo of the wrong man. Ids whose ESPN birth year contradicts nflverse's are
+ * blocked (scripts/build-espn-headshot-check.ts).
+ *
+ * A blocked id returns nothing rather than the NFL url: for these players that
+ * url is the silhouette placeholder above, so falling back to it would trade a
+ * stranger's face for a fake one. With no photo the UI drops to the player's
+ * in-game portrait, which is what a player with no picture already gets.
  */
 export function preferredHeadshot(espnId: string | undefined, lastSeason: number | null, nflUrl: string | null): string | null {
   const espn = (espnId || '').trim();
   if (/^\d+$/.test(espn) && (lastSeason == null || lastSeason <= 2019)) {
-    return `https://a.espncdn.com/i/headshots/nfl/players/full/${espn}.png`;
+    return blockedEspnIds().has(espn)
+      ? null
+      : `https://a.espncdn.com/i/headshots/nfl/players/full/${espn}.png`;
   }
   return nflUrl;
 }

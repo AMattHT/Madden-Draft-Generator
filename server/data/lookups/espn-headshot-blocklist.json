@@ -1,0 +1,416 @@
+{
+ "_source": "ESPN core API dateOfBirth vs nflverse players.csv birth_date",
+ "_checked": 10578,
+ "_agreed": 10500,
+ "_unverifiable": 10,
+ "blocked": {
+  "140": {
+   "player": "Mike Horan",
+   "espnName": "Mike Horan",
+   "nflverseBirth": 1959,
+   "espnBirth": 1951
+  },
+  "562": {
+   "player": "Darnay Scott",
+   "espnName": "Darnay Scott",
+   "nflverseBirth": 1972,
+   "espnBirth": 1989
+  },
+  "1358": {
+   "player": "Jamie Nails",
+   "espnName": "Jamie Nails",
+   "nflverseBirth": 1975,
+   "espnBirth": 1977
+  },
+  "2587": {
+   "player": "Kendrell Bell",
+   "espnName": "Kendrell Bell",
+   "nflverseBirth": 1980,
+   "espnBirth": 1978
+  },
+  "3004": {
+   "player": "Carl Fair",
+   "espnName": "Carl Fair",
+   "nflverseBirth": 1977,
+   "espnBirth": 1979
+  },
+  "5760": {
+   "player": "Derrick Ward",
+   "espnName": "Derrick Ward",
+   "nflverseBirth": 1980,
+   "espnBirth": 1976
+  },
+  "6656": {
+   "player": "Frank Warren",
+   "espnName": "Frank Warren",
+   "nflverseBirth": 1959,
+   "espnBirth": 1989
+  },
+  "7322": {
+   "player": "Jesse Campbell",
+   "espnName": "Jesse Campbell",
+   "nflverseBirth": 1969,
+   "espnBirth": 1981
+  },
+  "7437": {
+   "player": "Mike Reid",
+   "espnName": "Mike Reid",
+   "nflverseBirth": 1970,
+   "espnBirth": 1987
+  },
+  "7618": {
+   "player": "Jay Walker",
+   "espnName": "Jay Walker",
+   "nflverseBirth": 1972,
+   "espnBirth": 1974
+  },
+  "8011": {
+   "player": "Ray Farmer",
+   "espnName": "Ray Farmer",
+   "nflverseBirth": 1974,
+   "espnBirth": 1972
+  },
+  "8149": {
+   "player": "Antwuan Wyatt",
+   "espnName": "Antwuan Wyatt",
+   "nflverseBirth": 1975,
+   "espnBirth": 1979
+  },
+  "10163": {
+   "player": "Quincy Butler",
+   "espnName": "Quincy Butler",
+   "nflverseBirth": 1983,
+   "espnBirth": 1981
+  },
+  "10343": {
+   "player": "Boone Stutz",
+   "espnName": "Boone Stutz",
+   "nflverseBirth": 1982,
+   "espnBirth": 1984
+  },
+  "10589": {
+   "player": "Aundrae Allison",
+   "espnName": "Aundrae Allison",
+   "nflverseBirth": 1984,
+   "espnBirth": 1986
+  },
+  "11398": {
+   "player": "Carl Nicks",
+   "espnName": "Carl Nicks",
+   "nflverseBirth": 1985,
+   "espnBirth": 1983
+  },
+  "12637": {
+   "player": "Freddie Brown",
+   "espnName": "Freddie Brown",
+   "nflverseBirth": 1986,
+   "espnBirth": 1993
+  },
+  "12804": {
+   "player": "Jerome Johnson",
+   "espnName": "Jerome Johnson",
+   "nflverseBirth": 1985,
+   "espnBirth": 2007
+  },
+  "14385": {
+   "player": "Harry Flaherty",
+   "espnName": "Harry Flaherty",
+   "nflverseBirth": 1961,
+   "espnBirth": 1989
+  },
+  "15254": {
+   "player": "Anthony Mosley",
+   "espnName": "Anthony Mosley",
+   "nflverseBirth": 1965,
+   "espnBirth": 1989
+  },
+  "15398": {
+   "player": "Leonard Johnson",
+   "espnName": "Leonard Johnson",
+   "nflverseBirth": 1990,
+   "espnBirth": 1998
+  },
+  "15491": {
+   "player": "A.J. Greene",
+   "espnName": "A.J. Greene",
+   "nflverseBirth": 1966,
+   "espnBirth": 1989
+  },
+  "15644": {
+   "player": "Cliff Harris",
+   "espnName": "Cliff Harris",
+   "nflverseBirth": 1948,
+   "espnBirth": 1990
+  },
+  "15656": {
+   "player": "Greg Williams",
+   "espnName": "Greg Williams",
+   "nflverseBirth": 1959,
+   "espnBirth": 1988
+  },
+  "15657": {
+   "player": "Jon Embree",
+   "espnName": "Jon Embree",
+   "nflverseBirth": 1965,
+   "espnBirth": 1988
+  },
+  "15729": {
+   "player": "David Little",
+   "espnName": "David Little",
+   "nflverseBirth": 1959,
+   "espnBirth": 1988
+  },
+  "16050": {
+   "player": "Greg Brown",
+   "espnName": "Greg Brown",
+   "nflverseBirth": 1957,
+   "espnBirth": 1990
+  },
+  "16229": {
+   "player": "Matt Smith",
+   "espnName": "Matt Smith",
+   "nflverseBirth": 1965,
+   "espnBirth": 1990
+  },
+  "16384": {
+   "player": "Alonzo Highsmith",
+   "espnName": "Alonzo Highsmith",
+   "nflverseBirth": 1965,
+   "espnBirth": 1989
+  },
+  "16583": {
+   "player": "Gary Walker",
+   "espnName": "Gary Walker",
+   "nflverseBirth": 1963,
+   "espnBirth": 1991
+  },
+  "16979": {
+   "player": "Steven Clark",
+   "espnName": "Steven Clark",
+   "nflverseBirth": 1959,
+   "espnBirth": 1991
+  },
+  "17343": {
+   "player": "Michael Carter",
+   "espnName": "Michael Carter",
+   "nflverseBirth": 1960,
+   "espnBirth": 1991
+  },
+  "17490": {
+   "player": "Tim Jackson",
+   "espnName": "Tim Jackson",
+   "nflverseBirth": 1965,
+   "espnBirth": 1991
+  },
+  "2184059": {
+   "player": "Brandon Williams",
+   "espnName": "Brandon Williams",
+   "nflverseBirth": 1980,
+   "espnBirth": 1994
+  },
+  "2467155": {
+   "player": "Tim Smith",
+   "espnName": "Tim Smith",
+   "nflverseBirth": 1957,
+   "espnBirth": 1991
+  },
+  "2470365": {
+   "player": "James Rouse",
+   "espnName": "James Rouse",
+   "nflverseBirth": 1966,
+   "espnBirth": 1991
+  },
+  "2509739": {
+   "player": "Gary Wilkins",
+   "espnName": "Gary Wilkins",
+   "nflverseBirth": 1963,
+   "espnBirth": 1992
+  },
+  "2511102": {
+   "player": "Tony Jones",
+   "espnName": "Tony Jones",
+   "nflverseBirth": 1965,
+   "espnBirth": 1992
+  },
+  "2512549": {
+   "player": "Matt Robinson",
+   "espnName": "Matt Robinson",
+   "nflverseBirth": 1955,
+   "espnBirth": 1991
+  },
+  "2514269": {
+   "player": "John Harris",
+   "espnName": "John Harris",
+   "nflverseBirth": 1956,
+   "espnBirth": 1991
+  },
+  "2515882": {
+   "player": "Andre Davis",
+   "espnName": "Andre Davis",
+   "nflverseBirth": 1975,
+   "espnBirth": 1991
+  },
+  "2576086": {
+   "player": "Will Johnson",
+   "espnName": "Will Johnson",
+   "nflverseBirth": 1964,
+   "espnBirth": 1993
+  },
+  "2576502": {
+   "player": "Robert Smith",
+   "espnName": "Robert Smith",
+   "nflverseBirth": 1962,
+   "espnBirth": 1992
+  },
+  "2972063": {
+   "player": "Aaron Taylor",
+   "espnName": "Aaron Taylor",
+   "nflverseBirth": 1975,
+   "espnBirth": 1993
+  },
+  "3059734": {
+   "player": "Larry Williams",
+   "espnName": "Larry Williams",
+   "nflverseBirth": 1963,
+   "espnBirth": 1995
+  },
+  "3884368": {
+   "player": "James Williams",
+   "espnName": "James Williams",
+   "nflverseBirth": 1988,
+   "espnBirth": 1996
+  },
+  "3914305": {
+   "player": "Anthony Jones",
+   "espnName": "Anthony Jones",
+   "nflverseBirth": 1960,
+   "espnBirth": 1997
+  },
+  "3917288": {
+   "player": "Leo Lewis",
+   "espnName": "Leo Lewis",
+   "nflverseBirth": 1956,
+   "espnBirth": 1996
+  },
+  "3918044": {
+   "player": "Mike Bell",
+   "espnName": "Mike Bell",
+   "nflverseBirth": 1957,
+   "espnBirth": 1997
+  },
+  "3932392": {
+   "player": "Bryant Jones",
+   "espnName": "Bryant Jones",
+   "nflverseBirth": 1963,
+   "espnBirth": 1997
+  },
+  "4035255": {
+   "player": "Kendrick Rogers",
+   "espnName": "Kendrick Rogers",
+   "nflverseBirth": 1976,
+   "espnBirth": 1997
+  },
+  "4040172": {
+   "player": "Terry Williams",
+   "espnName": "Terry Williams",
+   "nflverseBirth": 1965,
+   "espnBirth": 1992
+  },
+  "4245162": {
+   "player": "Willie Taylor",
+   "espnName": "Willie Taylor III",
+   "nflverseBirth": 1955,
+   "espnBirth": 1999
+  },
+  "4339828": {
+   "player": "Tim Wilson",
+   "espnName": "Tim Wilson",
+   "nflverseBirth": 1954,
+   "espnBirth": 1994
+  },
+  "4361807": {
+   "player": "Larry Brooks",
+   "espnName": "Larry Brooks",
+   "nflverseBirth": 1950,
+   "espnBirth": 2000
+  },
+  "4362500": {
+   "player": "Al Blades",
+   "espnName": "Al Blades Jr.",
+   "nflverseBirth": 1977,
+   "espnBirth": 1999
+  },
+  "4368881": {
+   "player": "Lawrence Johnson",
+   "espnName": "Lawrence Johnson",
+   "nflverseBirth": 1957,
+   "espnBirth": 1999
+  },
+  "4372028": {
+   "player": "Emil Ekiyor",
+   "espnName": "Emil Ekiyor",
+   "nflverseBirth": 1974,
+   "espnBirth": 2000
+  },
+  "4431390": {
+   "player": "Gary Smith",
+   "espnName": "Gary Smith III",
+   "nflverseBirth": 1960,
+   "espnBirth": 2001
+  },
+  "4570773": {
+   "player": "Marlon Jones",
+   "espnName": "Marlon Jones",
+   "nflverseBirth": 1964,
+   "espnBirth": 2001
+  },
+  "4570858": {
+   "player": "Jason Johnson",
+   "espnName": "Jason Johnson",
+   "nflverseBirth": 1965,
+   "espnBirth": 2001
+  },
+  "4685248": {
+   "player": "David Bailey",
+   "espnName": "David Bailey",
+   "nflverseBirth": 1965,
+   "espnBirth": 2003
+  },
+  "4685442": {
+   "player": "Anthony Lucas",
+   "espnName": "Anthony Lucas",
+   "nflverseBirth": 1976,
+   "espnBirth": 2004
+  },
+  "4685970": {
+   "player": "Kenneth Harris",
+   "espnName": "Kenneth Harris",
+   "nflverseBirth": 1986,
+   "espnBirth": 2002
+  },
+  "4686092": {
+   "player": "Fred Davis",
+   "espnName": "Fred Davis II",
+   "nflverseBirth": 1964,
+   "espnBirth": 2002
+  },
+  "4686658": {
+   "player": "Mike Washington",
+   "espnName": "Mike Washington Jr.",
+   "nflverseBirth": 1953,
+   "espnBirth": 2003
+  },
+  "4693371": {
+   "player": "James Thompson",
+   "espnName": "James Thompson Jr.",
+   "nflverseBirth": 1953,
+   "espnBirth": 2002
+  },
+  "5081450": {
+   "player": "Blake Miller",
+   "espnName": "Blake Miller",
+   "nflverseBirth": 1968,
+   "espnBirth": 2004
+  }
+ }
+}
