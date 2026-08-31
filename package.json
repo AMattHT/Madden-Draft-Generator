@@ -1,6 +1,6 @@
 {
   "name": "draft-class-generator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Generate importable Madden 26 draft classes (`.mdc`) from real NFL draft history (1936–2026), with player ratings derived from Pro-Football-Reference **weighted Approximate Value (wAV)**. AFL+NFL drafts are merged for 1960–1969, veteran free agents can be injected, and players are cached.",
   "main": "index.js",
   "scripts": {

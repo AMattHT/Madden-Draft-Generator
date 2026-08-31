@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.4
+
+**Players wear their own faces in the game.** A player with a real head scan
+but no portrait id fell back to a generic portrait matched only on skin tone —
+the right body under a stranger's face. Madden ships those portraits; nothing
+was asking for them. The 2011 class goes from 14 real portraits to 234, and
+every class since about 2000 gains a similar share.
+
+**Two players who share a name each get their own photograph.** The disc
+headshots were filed by name, and the earliest disc won — so a 2008 safety
+called Cam Newton held the name and the 2011 quarterback, who is on six discs,
+had no photo at all. 343 names were hiding a second player like this. The
+collection grows from 8,101 photographs to 8,452, and skin tone is now read
+from the right man's picture.
+
+**Fullbacks are fullbacks.** The draft records file them under halfback — Kyle
+Juszczyk among them — and Madden rates the two positions differently.
+
 ## 1.0.3
 
 **The update prompt is part of the app now.** It used to be a Windows message
