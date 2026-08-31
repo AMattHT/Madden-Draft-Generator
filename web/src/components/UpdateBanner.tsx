@@ -60,50 +60,59 @@ export function UpdateBanner() {
   const percent = Math.max(0, Math.min(100, state.percent ?? 0));
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-4">
-      <div className="pointer-events-auto w-full max-w-xl overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl">
-        <div className="flex items-center gap-4 px-4 py-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-neutral-100">
+    <div className="pointer-events-none fixed bottom-0 right-0 z-40 p-4">
+      <div className="update-toast pointer-events-auto w-80 overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl">
+        <div className="px-4 pb-3 pt-3.5">
+          <div className="flex items-start gap-2">
+            <p className="min-w-0 flex-1 text-sm font-semibold text-neutral-100">
               {downloading && `${version} is downloading`}
               {state.phase === 'ready' && `${version} is ready to install`}
               {state.phase === 'manual' && `${version} is available`}
             </p>
-            <p className="mt-0.5 text-xs text-muted">
-              {downloading && 'You can keep working — it installs when you restart.'}
-              {state.phase === 'ready' && 'Your generated classes and edits are kept.'}
-              {state.phase === 'manual' &&
-                'This is the portable build, which cannot replace itself. The releases page has the new one.'}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {state.phase === 'ready' && (
-              <button
-                onClick={() => {
-                  setInstalling(true);
-                  window.desktopUpdater?.install().catch(() => setInstalling(false));
-                }}
-                disabled={installing}
-                className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-light disabled:opacity-50"
-              >
-                {installing ? 'Restarting…' : 'Restart now'}
-              </button>
-            )}
-            {state.phase === 'manual' && (
-              <button
-                onClick={() => window.desktopUpdater?.openReleases()}
-                className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-light"
-              >
-                Get it
-              </button>
-            )}
             <button
               onClick={() => setDismissed(state.version ?? 'unknown')}
-              className="rounded-md px-2.5 py-1.5 text-xs text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+              aria-label="Dismiss"
+              title={state.phase === 'ready' ? 'Install on next launch instead' : 'Dismiss'}
+              className="-mr-1 -mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded text-neutral-500 transition-colors hover:bg-surface-2 hover:text-neutral-100"
             >
-              {state.phase === 'ready' ? 'Later' : 'Dismiss'}
+              ×
             </button>
           </div>
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            {downloading && 'You can keep working — it installs when you restart.'}
+            {state.phase === 'ready' && 'Your generated classes and edits are kept.'}
+            {state.phase === 'manual' &&
+              'This is the portable build, which cannot replace itself. The releases page has the new one.'}
+          </p>
+          {(state.phase === 'ready' || state.phase === 'manual') && (
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setDismissed(state.version ?? 'unknown')}
+                className="rounded-md px-2.5 py-1.5 text-xs text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+              >
+                Later
+              </button>
+              {state.phase === 'ready' ? (
+                <button
+                  onClick={() => {
+                    setInstalling(true);
+                    window.desktopUpdater?.install().catch(() => setInstalling(false));
+                  }}
+                  disabled={installing}
+                  className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-light disabled:opacity-50"
+                >
+                  {installing ? 'Restarting…' : 'Restart now'}
+                </button>
+              ) : (
+                <button
+                  onClick={() => window.desktopUpdater?.openReleases()}
+                  className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-primary-light"
+                >
+                  Get it
+                </button>
+              )}
+            </div>
+          )}
         </div>
         {downloading && (
           <div

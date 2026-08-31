@@ -128,6 +128,12 @@ body {
   }
 }
 
+/* The update toast slides in from the corner it sits in. Reused keyframe; the
+   reduced-motion block below already flattens it to a plain appearance. */
+.update-toast {
+  animation: slide-in-right 220ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
