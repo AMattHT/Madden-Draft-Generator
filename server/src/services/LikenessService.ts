@@ -32,7 +32,7 @@ let pidByCode: Map<string, number> | null = null;
  *  like polamaluTroy_16548 live) plus the career roster's cranium heads — with the
  *  asset name in the game's casing and its menu-portrait id. */
 export interface RealFace { assetName: string; portraitPid: number; genericHead: string | null; first: string | null; last: string | null; source: string; draftYear?: number; portraitKind?: 'legend' | 'roster' | 'player' | 'none' }
-interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string>; headAccessory: Set<string> }
+interface FaceCatalog { assets: Map<string, RealFace>; byName: Map<string, string>; byNameTight: Map<string, string>; legendPortraits: Set<string>; legendPids: Map<string, number>; playerPortraits: Set<string>; headAccessory: Set<string> }
 const catalogs: Partial<Record<'m26' | 'm27', FaceCatalog>> = {};
 /** Measured appearance features, baked by scripts/build-face-features.ts.
  *  Absent files simply disable matching and the stride fallback takes over. */
@@ -60,12 +60,17 @@ function playerFeatures(): Record<string, FaceFeatures> {
 function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
   const hit = catalogs[version];
   if (hit) return hit;
-  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), legendPortraits: new Set(), legendPids: new Map(), playerPortraits: new Set(), headAccessory: new Set() };
+  const cat: FaceCatalog = { assets: new Map(), byName: new Map(), byNameTight: new Map(), legendPortraits: new Set(), legendPids: new Map(), playerPortraits: new Set(), headAccessory: new Set() };
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'face-assets-by-game.json'), 'utf8'));
     const v = raw?.[version] ?? {};
     for (const [k, e] of Object.entries(v.assets ?? {})) cat.assets.set(k, e as RealFace);
-    for (const [k, a] of Object.entries(v.byName ?? {})) cat.byName.set(k, a as string);
+    for (const [k, a] of Object.entries(v.byName ?? {})) {
+      cat.byName.set(k, a as string);
+      const t = k.replace(/[^a-z]/g, '');
+      if (cat.byNameTight.has(t) && cat.byNameTight.get(t) !== a) cat.byNameTight.set(t, '');
+      else cat.byNameTight.set(t, a as string);
+    }
     for (const k of (v.legendPortraits ?? []) as string[]) cat.legendPortraits.add(k);
     for (const [k, pid] of Object.entries(v.legendPids ?? {})) cat.legendPids.set(k, Number(pid));
     for (const k of (v.playerPortraits ?? []) as string[]) cat.playerPortraits.add(k);
@@ -80,6 +85,9 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
         const [first, ...rest] = name.split(' ');
         cat.assets.set(e.assetName.toLowerCase(), { ...e, first, last: rest.join(' '), source: 'roster' });
         cat.byName.set(name, e.assetName.toLowerCase());
+        const tight = name.toLowerCase().replace(/[^a-z]/g, '');
+        if (cat.byNameTight.has(tight) && cat.byNameTight.get(tight) !== e.assetName.toLowerCase()) cat.byNameTight.set(tight, '');
+        else cat.byNameTight.set(tight, e.assetName.toLowerCase());
       }
     } catch { /* nothing */ }
   }
@@ -111,6 +119,13 @@ const M27_TRUST_ALL_M26_HEADS = process.env.MADDEN27_TRUST_M26_HEADS === '1';
 const M27_TRUST_LEGEND_IDS = process.env.MADDEN27_TRUST_LEGEND_IDS === '1';
 let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
 const m27Key = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
+/** The same name with the spaces gone too. m27Key keeps them, so a player the
+ *  lookup writes "T. J. Parker" keys as "t j parker" while the game's catalog
+ *  writes "t.j. parker" and keys as "tj parker" -- the two never meet, and five
+ *  of the 2026 rookies had a scan sitting unused because of a full stop. This is
+ *  a LAST resort: it is looser, so everything found through it goes through the
+ *  same era guard as the exact key. */
+const m27KeyTight = (first: string, last: string) => `${first}${last}`.toLowerCase().replace(/[^a-z]/g, '');
 
 /** nflverse draft year by the same name key as the M27 face map. */
 let draftYearByKey: Map<string, number> | null = null;
@@ -321,6 +336,20 @@ export const LikenessService = {
       const face = cat.assets.get(byName);
       // A catalog entry that knows its owner's draft year (lookup-matched scans)
       // is checked against it directly; roster heads fall back to nflverse.
+      const same = face?.draftYear
+        ? player.draftYear == null || Math.abs(player.draftYear - face.draftYear) <= 1
+        : this.sameEra(key, player.draftYear);
+      if (face && same && (ACCEPT_PRESET_HEADS || !/preset/.test(face.source))) return face;
+    }
+    // Same lookup with punctuation and spacing ignored, for "T. J." against
+    // "t.j.". Deliberately after the exact key and behind the identical era
+    // check: the loose key is what would otherwise hand the 2026 pick 149 named
+    // Justin Jefferson the 2020 receiver's face. An empty value means two
+    // catalog names collapsed to this key, which is not a match but an
+    // ambiguity, so it is skipped.
+    const tight = cat.byNameTight.get(m27KeyTight(player.firstName, player.lastName));
+    if (tight) {
+      const face = cat.assets.get(tight);
       const same = face?.draftYear
         ? player.draftYear == null || Math.abs(player.draftYear - face.draftYear) <= 1
         : this.sameEra(key, player.draftYear);
