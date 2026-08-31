@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.9
+
+**A few more players get their real in-game face.** The app and the game spell
+some names differently — "T. J. Parker" against "t.j. parker" — and a full stop
+was enough to stop a player being matched to the head scan Madden already had
+for him. Names now match across punctuation. Players who share a name with an
+established player are still refused rather than guessed at, so nobody inherits
+someone else's face.
+
 ## 1.0.8
 
 **Fifty more faces checked.** The second pass through the players whose
