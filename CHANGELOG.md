@@ -2,6 +2,13 @@
 
 ## 1.0.5
 
+**Blank headshots are fixed.** 1.0.4 tried to give players their own in-game
+portrait and asked the wrong question to decide whether it could: it checked
+whether the app had the picture, not whether Madden 27 had it. The game draws a
+blank NFL shield for an id it does not know, so classes came back with rows of
+empty portraits. Players Madden 27 has no portrait for go back to a matched
+generic face, which is the best the game can actually draw.
+
 **The update prompt is a corner card.** It spanned the width of the window
 before, which read as a page-level bar and covered the last row of the board.
 It now sits in the bottom-right, out of the way of the class you are reading,

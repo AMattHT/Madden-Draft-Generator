@@ -331,19 +331,18 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   const legendPortrait = like.kind === 'generic' && (player.draftYear ?? 0) < 2015 && PlayerLookupService.isMostNotable(player)
     ? LikenessService.legendPortraitPid(player.firstName, player.lastName, gameVersion) : 0;
   const realPid = real && !(real.portraitKind === 'legend' && !PlayerLookupService.isMostNotable(player)) ? real.portraitPid : 0;
-  // The player's own portrait, but only when this game actually ships it.
-  // M27 kept Cam Newton's (plpo_NewtonCam) yet the M27 branch never offered his
-  // PhotoID, so a real head with no catalog portraitPid fell straight to a
-  // tone-matched generic: the right body under a stranger's face. plpoForPid
-  // returns null for the retired players M27 dropped, which is what keeps this
-  // from writing an id the game would answer with a blank shield.
-  const ownPid =
-    player.photoId && PortraitService.plpoForPid(player.photoId) ? player.photoId : 0;
+  // Do NOT reach for the lookup's PhotoID on M27. It was tried, and it is the
+  // reason a class came back full of blank NFL shields: PortraitService only
+  // knows whether WE hold the portrait art, while the PID indexes the GAME's
+  // portrait table, and M27 ships portraits for the 1,817 players on its own
+  // roster and nobody else. Cam Newton's 4439 is not among them. realPid comes
+  // from LikenessService.portraitFor, which checks the catalog for THIS game
+  // version -- that check is the whole point, so route every portrait through
+  // it and let the rest fall to a tone-matched generic.
   prospect.PID = gameVersion === 'm27'
-    ? (real ? (realPid || ownPid || genericPortrait()) : (legendPortrait || ownPid || 0))
+    ? (real ? (realPid || genericPortrait()) : (legendPortrait || 0))
     : (portraitPid ?? (like.kind === 'generic' ? (legendPortrait || genericPortrait()) : (realPid || player.photoId || genericPortrait())));
-  // assignM27Fields overwrites PID from the generic head unless it is pinned.
-  if (gameVersion === 'm27' && !real && (legendPortrait || ownPid)) prospect.pinPortrait = true;
+  if (gameVersion === 'm27' && !real && legendPortrait) prospect.pinPortrait = true;
   // Announcer name call: the game keys this by SURNAME (same id space in both games,
   // mined from the real files). The CSV CommID column is a different id space.
   prospect.commentaryId = commentaryIdFor(player.lastName);
