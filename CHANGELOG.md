@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.3
+
+**The update prompt is part of the app now.** It used to be a Windows message
+box: grey, over a dark window, and modal — it interrupted whatever you were
+doing to ask about a download you had not started. Updates now appear as a
+banner along the bottom in the app's own styling, with a progress bar while the
+new build downloads and a *Restart now* button when it is ready. Declining only
+chooses when to restart; the update still installs the next time you quit.
+
+Dismissing is per version, so saying no to one release does not silence the
+next. The portable build gets a link to the releases page instead, since it
+cannot replace itself.
+
 ## 1.0.2
 
 **Madden's dev-trait badges are back.** They were being served from a path one
