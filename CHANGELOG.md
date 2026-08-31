@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.7
+
+**Segregation-era classes are historically correct.** The NFL had no black
+players between 1934 and 1945, so those draft classes no longer contain any —
+including the invented prospects used to pad them out to a full board. Eight
+real players were affected, all of them mismeasured from dim vintage
+photographs.
+
+**Fifty more faces checked by hand.** The players whose appearance the app was
+least sure about, weighted by how prominent they are, were reviewed against the
+record — sixteen were wrong and are now fixed, among them Dick Anderson, Mark
+Gastineau, Jim Kiick, Ray Childress, Dwight White and Mike Garrett. The
+thirty-four already right are recorded too, so they cannot drift later.
+
 ## 1.0.6
 
 **Hall of Famers look like themselves.** Two thirds of the players in the
