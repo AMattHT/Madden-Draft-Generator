@@ -6,6 +6,7 @@ import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
+import { UpdateBanner } from './components/UpdateBanner';
 import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
 import type { ClassEdits, GearEdits, GeneratedClass, GameVersion } from './types';
@@ -448,6 +449,7 @@ export default function App() {
   return (
     <div className="flex h-screen flex-col">
       <WhatsNew open={whatsNewOpen} onClose={closeWhatsNew} />
+      <UpdateBanner />
       <TopBar
         onWhatsNew={openWhatsNew}
         view={view}

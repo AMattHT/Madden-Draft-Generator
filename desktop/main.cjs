@@ -7,7 +7,7 @@
  * In development (`npm start` inside desktop/) it uses the repo's server/dist,
  * web/dist and server/data directly.
  */
-const { app, BrowserWindow, shell, dialog } = require('electron');
+const { app, BrowserWindow, shell, dialog, ipcMain } = require('electron');
 const path = require('path');
 const net = require('net');
 const fs = require('fs');
@@ -82,7 +82,11 @@ async function start() {
     autoHideMenuBar: true,
     title: game === 'm26' ? 'Madden 26 Draft Class Generator' : game === 'm27' ? 'Madden 27 Draft Class Generator' : 'Madden Draft Class Generator',
     ...(packaged ? {} : fs.existsSync(devIcon) ? { icon: devIcon } : {}),
-    webPreferences: { contextIsolation: true, nodeIntegration: false },
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.cjs'),
+    },
   });
   // External links (Wikipedia photos etc.) go to the real browser.
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: 'deny' }; });
@@ -97,20 +101,36 @@ async function start() {
   checkForUpdates(win, game);
 }
 
+/** Last state pushed to the page, so a reload can ask for it instead of
+ *  waiting for an event that already fired. */
+let updateState = { phase: 'idle' };
+const RELEASES_URL = 'https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest';
+
 /**
  * Update check against the GitHub releases this app publishes to (see
  * builder-m26/27.json `publish`).
  *
- * Only the NSIS install can replace itself, so the portable exe is told where
- * the new build is rather than pretending it can update. Builds are unsigned,
- * so `latest.yml` is verified by SHA-512 rather than by signature -- that is
- * electron-updater's default and is what makes an unsigned auto-update safe
- * against a corrupted or truncated download.
+ * Every phase is pushed to the page over the preload bridge and drawn by
+ * UpdateBanner, so the prompt is the app's own UI rather than an OS message box
+ * over a dark window. Only the NSIS install can replace itself, so the portable
+ * exe is told where the new build is rather than pretending it can update.
  *
- * Any failure here is silent: a missing release, no network, or a rate-limited
- * API must never block someone using the app offline.
+ * Builds are unsigned, so the manifest is verified by SHA-512 rather than by
+ * signature -- electron-updater's default, and what makes an unsigned
+ * auto-update safe against a corrupted or truncated download.
+ *
+ * Any failure here is silent in the sense that it never blocks the app: a
+ * missing release, no network, or a rate-limited API leaves the banner hidden
+ * and the app usable offline.
  */
 function checkForUpdates(win, game) {
+  const send = (state) => {
+    updateState = state;
+    if (win && !win.isDestroyed()) win.webContents.send('update:state', state);
+  };
+  ipcMain.handle('update:current', () => updateState);
+  ipcMain.handle('update:open-releases', () => shell.openExternal(RELEASES_URL));
+
   if (!app.isPackaged) return;
   let autoUpdater;
   try {
@@ -127,41 +147,35 @@ function checkForUpdates(win, game) {
   const portable = !!process.env.PORTABLE_EXECUTABLE_DIR;
   autoUpdater.autoDownload = !portable;
   autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.on('error', () => {});
 
-  autoUpdater.on('update-available', (info) => {
-    if (!portable) return; // the installer build downloads it quietly
-    dialog
-      .showMessageBox(win, {
-        type: 'info',
-        buttons: ['Get it', 'Later'],
-        defaultId: 0,
-        title: 'Update available',
-        message: `Version ${info.version} is available.`,
-        detail: 'This is the portable build, which cannot replace itself. Open the releases page to download it.',
-      })
-      .then(({ response }) => {
-        if (response === 0) shell.openExternal('https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest');
-      })
-      .catch(() => {});
+  // Every phase is reported to the page, which renders it in the app's own
+  // styling. Nothing here opens a native dialog: an OS message box over a
+  // dark full-bleed window is the one piece of UI the app cannot theme, and it
+  // interrupts whatever the user was doing to demand an answer.
+  autoUpdater.on('error', () => send({ phase: 'error', portable }));
+  autoUpdater.on('update-not-available', () => send({ phase: 'current', portable }));
+  autoUpdater.on('update-available', (info) =>
+    send({ phase: portable ? 'manual' : 'downloading', version: info.version, percent: 0, portable })
+  );
+  autoUpdater.on('download-progress', (p) =>
+    send({ phase: 'downloading', version: updateState.version, percent: Math.round(p.percent || 0), portable })
+  );
+  autoUpdater.on('update-downloaded', (info) =>
+    send({ phase: 'ready', version: info.version, portable })
+  );
+
+  ipcMain.handle('update:install', () => {
+    // autoInstallOnAppQuit means a declined restart still installs later, so
+    // this only decides when -- never whether.
+    setImmediate(() => autoUpdater.quitAndInstall());
+    return true;
+  });
+  ipcMain.handle('update:check', () => {
+    send({ phase: 'checking', portable });
+    return autoUpdater.checkForUpdates().then(() => true).catch(() => false);
   });
 
-  autoUpdater.on('update-downloaded', (info) => {
-    dialog
-      .showMessageBox(win, {
-        type: 'info',
-        buttons: ['Restart now', 'On next launch'],
-        defaultId: 0,
-        title: 'Update ready',
-        message: `Version ${info.version} is ready to install.`,
-        detail: 'Your generated classes and edits are kept.',
-      })
-      .then(({ response }) => {
-        if (response === 0) autoUpdater.quitAndInstall();
-      })
-      .catch(() => {});
-  });
-
+  send({ phase: 'checking', portable });
   autoUpdater.checkForUpdates().catch(() => {});
 }
 

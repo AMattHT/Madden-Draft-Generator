@@ -9,6 +9,7 @@
   },
   "files": [
     "main.cjs",
+    "preload.cjs",
     "package.json",
     {
       "from": "../server/dist",
