@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.8
+
+**Fifty more faces checked.** The second pass through the players whose
+appearance the app was least sure about: seventeen were wrong, including Mike
+Wagner, Bill Bradley and Carl Ekern the light way, and Brig Owens, Emerson
+Boozer, Fred Carr and William Roberts the dark way. 208 players now have a
+recorded appearance rather than an estimated one.
+
 ## 1.0.7
 
 **Segregation-era classes are historically correct.** The NFL had no black
