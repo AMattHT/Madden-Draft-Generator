@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.5
+
+**The update prompt is a corner card.** It spanned the width of the window
+before, which read as a page-level bar and covered the last row of the board.
+It now sits in the bottom-right, out of the way of the class you are reading,
+and shows its buttons only once there is something to decide.
+
 ## 1.0.4
 
 **Players wear their own faces in the game.** A player with a real head scan
