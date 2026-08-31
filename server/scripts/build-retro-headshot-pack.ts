@@ -26,6 +26,9 @@ import fs from 'fs';
 import path from 'path';
 import { DATA_ROOT, LOOKUPS_DIR, SERVER_ROOT } from '../src/config/paths';
 import { parseCsvFile, normalizeName } from '../src/util/csv';
+// Same grouping the lookup uses, so what the pack separates is exactly what a
+// query can tell apart.
+import { groupOf } from '../src/services/RetroHeadshotService';
 
 /**
  * The PS2 discs (2001-2012) and the PS3 discs each store portraits in their own
@@ -85,7 +88,7 @@ if (!root) {
 const out = path.join(DATA_ROOT, 'retro-portraits');
 fs.mkdirSync(out, { recursive: true });
 
-const index: Record<string, { year: number; position: string }> = {};
+const index: Record<string, { year: number; position: string; file: string }[]> = {};
 let copied = 0;
 let bytes = 0;
 let skipped = 0;
@@ -101,16 +104,28 @@ for (const { year, dir: name, images } of SOURCES) {
   for (const row of parseCsvFile<RosterRow>(csv)) {
     if (row.roster !== 'current' || !row.portrait_file) continue;
     const key = `${normalizeName(row.first_name)}|${normalizeName(row.last_name)}`;
-    if (key.length < 3 || index[key]) continue; // earliest disc wins
+    if (key.length < 3) continue;
+    // The earliest disc wins PER POSITION GROUP, not per name. Keyed on the
+    // name alone, a 2008 safety called Cam Newton shut the 2011 quarterback out
+    // of the pack for good -- 343 names were hiding a second man this way, and
+    // 1,058 headshots were being discarded. Same player, later position change
+    // (Leonard Little ROLB -> RE) just earns a second crop of the same face,
+    // which costs a file and loses nothing.
+    const group = groupOf(row.position) ?? (row.position || '').toUpperCase();
+    const entries = (index[key] ??= []);
+    if (entries.some((e) => (groupOf(e.position) ?? e.position.toUpperCase()) === group)) continue;
     const src = path.join(dir, images, row.portrait_file);
     if (!fs.existsSync(src)) {
       skipped++;
       continue;
     }
-    const dst = path.join(out, `${key.replace('|', '_')}.png`);
+    // The first man to claim a name keeps the bare filename, so an existing
+    // pack (and anything keyed off it) does not have to be rebuilt at once.
+    const stem = entries.length === 0 ? key.replace('|', '_') : `${key.replace('|', '_')}__${group}`;
+    const dst = path.join(out, `${stem}.png`);
     fs.copyFileSync(src, dst);
     bytes += fs.statSync(dst).size;
-    index[key] = { year, position: row.position };
+    entries.push({ year, position: row.position, file: `${stem}.png` });
     added++;
     copied++;
   }

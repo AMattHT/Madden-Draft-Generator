@@ -35,6 +35,9 @@ export interface CareerBits {
   jersey: number | null; // last known jersey number (nflverse players.csv)
   passYards: number | null;
   headshotUrl: string | null;
+  /** nflverse players.csv `position` -- the position he actually played in the
+   *  NFL, which is not always the one the draft table filed him under. */
+  position: string | null;
 }
 
 // Supplemental / UDFA stars nflverse draft_picks omits. Values from PFR.
@@ -43,7 +46,7 @@ const MANUAL: Record<string, CareerBits> = {
     wav: 99, heightInches: 75, weight: 202, proBowls: 8, allPro1: 2,
     seasonsStarted: 15, careerTo: 2002, careerFrom: 1987, isHOF: true, age: 21,
     receptions: 1101, recYards: 13899, recTds: 130,
-    rushAtts: 13, rushYards: 41, defSacks: null, defInts: null, games: 234, draftTeam: 'PHI', draftPick: null, birthDate: '1965-11-25', jersey: 80, passYards: null, headshotUrl: null,
+    rushAtts: 13, rushYards: 41, defSacks: null, defInts: null, games: 234, draftTeam: 'PHI', draftPick: null, birthDate: '1965-11-25', jersey: 80, passYards: null, headshotUrl: null, position: 'WR',
   },
 };
 
@@ -84,6 +87,7 @@ interface PlayerRow {
   weight?: string;
   headshot?: string;
   espn_id?: string;
+  position?: string;
   last_season?: string;
   rookie_season?: string;
 }
@@ -197,6 +201,7 @@ function merge(into: CareerBits, extra: Partial<CareerBits>): CareerBits {
     jersey: extra.jersey ?? into.jersey,
     passYards: extra.passYards ?? into.passYards,
     headshotUrl: extra.headshotUrl ?? into.headshotUrl,
+    position: extra.position ?? into.position,
   };
 }
 
@@ -206,7 +211,7 @@ function empty(): CareerBits {
     allPro1: null, seasonsStarted: null, careerTo: null, careerFrom: null, isHOF: null, age: null,
     receptions: null, recYards: null, recTds: null, rushAtts: null,
     rushYards: null, defSacks: null, defInts: null, games: null, draftTeam: null,
-    draftPick: null, birthDate: null, jersey: null, passYards: null, headshotUrl: null,
+    draftPick: null, birthDate: null, jersey: null, passYards: null, headshotUrl: null, position: null,
   };
 }
 
@@ -251,6 +256,7 @@ function load(): Map<string, CareerBits[]> {
         jersey: null,
         passYards: num(r.pass_yards),
         headshotUrl: null,
+        position: null, // draft_picks is the draft-table position; players.csv has the NFL one
       });
     }
   } catch { /* optional cache */ }
@@ -276,6 +282,7 @@ function load(): Map<string, CareerBits[]> {
         heightInches: h != null && h >= 60 && h <= 84 ? h : null,
         weight: w != null && w >= 140 && w <= 400 ? w : null,
         headshotUrl: preferredHeadshot(r.espn_id, num(r.last_season), hs.startsWith('http') ? hs : null),
+        position: (r.position || '').trim().toUpperCase() || null,
       };
       // Undrafted players carry no draft_year, so the year-keyed index above can
       // never reach them -- 51% of players.csv. Index them by name alongside

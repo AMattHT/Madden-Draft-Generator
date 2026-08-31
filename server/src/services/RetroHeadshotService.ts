@@ -28,17 +28,25 @@ import { normalizeName } from '../util/csv';
 const PACK_DIR = path.join(DATA_ROOT, 'retro-portraits');
 const INDEX_FILE = path.join(LOOKUPS_DIR, 'retro-headshots.json');
 
-interface Entry {
+export interface Entry {
   year: number;
   position: string;
+  /** Pack filename. Absent in the old single-entry format, where the name
+   *  alone gave the file. */
+  file?: string;
 }
 
-let index: Record<string, Entry> | null = null;
+let index: Record<string, Entry[]> | null = null;
 
-function load(): Record<string, Entry> {
+function load(): Record<string, Entry[]> {
   if (!index) {
     try {
-      index = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf8')) as Record<string, Entry>;
+      const raw = JSON.parse(fs.readFileSync(INDEX_FILE, 'utf8')) as Record<string, Entry | Entry[]>;
+      // The pack used to hold one entry per name. Read either shape so an old
+      // pack still works rather than silently returning no headshots at all.
+      index = Object.fromEntries(
+        Object.entries(raw).map(([k, v]) => [k, Array.isArray(v) ? v : [v]])
+      );
     } catch {
       index = {};
     }
@@ -63,11 +71,11 @@ const POSITION_GROUP: Record<string, string> = {
   K: 'ST', P: 'ST',
 };
 
-const groupOf = (pos: string | null | undefined): string | null =>
+export const groupOf = (pos: string | null | undefined): string | null =>
   POSITION_GROUP[(pos || '').trim().toUpperCase()] ?? null;
 
 /** EDGE and LB/DL overlap by design (a 3-4 rusher is listed either way). */
-function groupsCompatible(a: string | null, b: string | null): boolean {
+export function groupsCompatible(a: string | null, b: string | null): boolean {
   if (!a || !b) return true; // unknown on either side: don't reject on no evidence
   if (a === b) return true;
   const edgy = new Set(['EDGE', 'DL', 'LB']);
@@ -92,16 +100,34 @@ export const RetroHeadshotService = {
    *  on a 2012 disc decades after he was drafted. He is HB on both sides and
    *  survives; a cornerback matched to a linebacker does not. */
   lookup(first: string, last: string, position?: string | null): Entry | null {
-    const hit = load()[key(first, last)] || null;
-    if (!hit) return null;
-    return groupsCompatible(groupOf(position), groupOf(hit.position)) ? hit : null;
+    const hits = load()[key(first, last)];
+    if (!hits || !hits.length) return null;
+    const want = groupOf(position);
+    // A name can hold several men -- Cam Newton is a 2008 safety and a 2011
+    // quarterback. Take the one who played this kind of football, preferring an
+    // exact group over the deliberate EDGE/DL/LB overlap so a real end is not
+    // handed a linebacker's face while his own photo sits in the pack.
+    return (
+      hits.find((h) => want != null && groupOf(h.position) === want) ??
+      hits.find((h) => groupsCompatible(want, groupOf(h.position))) ??
+      null
+    );
   },
 
   /** Path to the packed PNG (96x96 from PS2, 256x256 from PS3), or null. */
   filePath(first: string, last: string, position?: string | null): string | null {
-    if (!this.lookup(first, last, position)) return null;
-    const file = path.join(PACK_DIR, `${key(first, last).replace('|', '_')}.png`);
+    const hit = this.lookup(first, last, position);
+    if (!hit) return null;
+    const file = path.join(PACK_DIR, hit.file ?? `${key(first, last).replace('|', '_')}.png`);
     return fs.existsSync(file) ? file : null;
+  },
+
+  /** Pack file stem for this player, so other measurements taken off the same
+   *  image (skin ITA) can key on the picture rather than on the name. */
+  stem(first: string, last: string, position?: string | null): string | null {
+    const hit = this.lookup(first, last, position);
+    if (!hit) return null;
+    return (hit.file ?? `${key(first, last).replace('|', '_')}.png`).replace(/\.png$/, '');
   },
 
   /** Square portrait PNG at `size`, matching what PortraitFetchService returns

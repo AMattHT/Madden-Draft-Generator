@@ -67,7 +67,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // headshots are studio crops framed like the portraits the ITA model was built
   // on, so when we have one it is the better skin sample; the in-game portrait
   // still wins when it exists.
-  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName) : null;
+  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, p.position) : null;
   // The wiki tone was read from the row's Wikipedia photo; if that photo was
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
   const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
@@ -114,6 +114,13 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
     if (out.careerTo == null && nv.careerTo != null) out.careerTo = nv.careerTo;
     if (!out.isHOF && nv.isHOF) out.isHOF = true;
     if (!out.headshotUrl && nv.headshotUrl) out.headshotUrl = nv.headshotUrl;
+    // The draft table files fullbacks under HB -- Kyle Juszczyk (2013) is "HB"
+    // there and FB everywhere else -- and Madden has a separate FB with its own
+    // ratings and archetypes, so the label decides what kind of player he
+    // becomes. Only this one pair is corrected: the other disagreements
+    // (HB/RB, CB/DB, LE/DE) are the same position under two names, and
+    // PositionMapper already folds those together.
+    if (out.position === 'HB' && nv.position === 'FB') out.position = 'FB';
   }
   // Undrafted players are absent from draft_picks and carry no career columns of
   // their own, so without this they keep the ~2 AV draft-slot default however
