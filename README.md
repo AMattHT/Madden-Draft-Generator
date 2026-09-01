@@ -8,10 +8,15 @@ franchise, and draft Barry Sanders yourself.
 
 **[Download the latest release](https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest)**
 
+![The 2010 draft class with spoilers off — every overall, dev trait and attribute hidden](docs/screenshots/board-hidden.png)
+
+*A class opens blind. Every overall, dev trait and attribute reads `?` until you decide otherwise —
+so you can scout and draft a year you already know the answers to.*
+
 ## Install
 
-1. Download **Setup 1.0.1.exe** from the link above and run it. (There's also a portable `.exe` that
-   runs without installing.)
+1. Download the **Setup** `.exe` from the link above and run it. (There's also a portable `.exe`
+   that runs without installing.)
 2. Windows will warn you the app is unrecognised — click **More info → Run anyway**. The app isn't
    code-signed, which is what triggers that.
 3. Launch **Madden 27 Draft Class Generator** from the Start menu.
@@ -31,6 +36,19 @@ restart.
    name. Undo and redo are there if you go too far.
 4. **Export → Save to Madden Saves.** It writes the class straight into Madden's folder for you.
 5. In Madden: **Franchise → Choose Draft Class**, and pick the year.
+
+## What it looks like
+
+![The same class with spoilers on, sorted by dev trait](docs/screenshots/board-revealed.png)
+
+*Tick **Spoilers** and the board fills in: overalls, Madden's own dev-trait badges, career value and
+all 54 attributes. Here 1998 is sorted by dev trait — Peyton Manning, Charles Woodson, Randy Moss,
+Alan Faneca and London Fletcher come out as the X-Factors.*
+
+![A player profile with ratings radar, persona DNA, appearance and equipment](docs/screenshots/player-profile.png)
+
+*Every player opens into a card you can edit — attributes, bio, position, dev trait, persona DNA,
+face and equipment. Changes save automatically and apply to the exported `.mdc`.*
 
 ## What it does
 
