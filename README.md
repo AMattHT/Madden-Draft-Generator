@@ -8,7 +8,8 @@ franchise, and draft Barry Sanders yourself.
 
 **[Download the latest release](https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest)**
 
-![The 2010 draft class with spoilers off — every overall, dev trait and attribute hidden](docs/screenshots/board-hidden.png)
+!<img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/44dfa85b-c675-47f9-aec8-0d6feeec3f1c" />
+
 
 *A class opens blind. Every overall, dev trait and attribute reads `?` until you decide otherwise —
 so you can scout and draft a year you already know the answers to.*
