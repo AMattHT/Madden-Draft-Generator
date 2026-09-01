@@ -713,6 +713,19 @@ export const DraftClassBuilder = {
       // Dev traits always follow the true outcome (rank by caliber)...
       const outcomeRank = new Map<RankedItem, number>();
       [...items].sort((a, b) => b.caliber - a.caliber).forEach((it, rank) => outcomeRank.set(it, rank));
+      // An elite career is promoted to X-Factor past whatever his draft slot
+      // said -- but only the best few. Unbounded, the promotion stops being a
+      // promotion: an all-time class is 335 elite players, so 83% of it came
+      // out X-Factor and the Superstar tier emptied completely, because every
+      // player in that band was also elite. A class is still a Madden class,
+      // so the promotion gets a ceiling and the calibrated rates carry the rest.
+      const eliteCap = Math.max(3, Math.round(N * 0.02));
+      const promoted = new Set(
+        items
+          .filter((it) => isElite(it.player))
+          .sort((a, b) => b.caliber - a.caliber)
+          .slice(0, eliteCap)
+      );
       // ...while the overall order blends outcome with what the draft slot said.
       const boardScore = (it: RankedItem) => hindsight * it.caliber + (1 - hindsight) * RatingService.slotCaliber(it.player, it.posId);
       [...items]
@@ -722,7 +735,7 @@ export const DraftClassBuilder = {
           const outcomeFrac = ((outcomeRank.get(it) ?? rank) + 0.5) / N;
           const base = CalibrationService.ovrAtPercentile(1 - topFrac, gameVersion);
           it.overall = Math.min(capMax, Math.round(base * strength));
-          it.devTrait = isElite(it.player) ? 3 : CalibrationService.devForTopFraction(outcomeFrac, gameVersion);
+          it.devTrait = promoted.has(it) ? 3 : CalibrationService.devForTopFraction(outcomeFrac, gameVersion);
           if (rank < studs) {
             it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
             it.devTrait = Math.max(it.devTrait, 2);
