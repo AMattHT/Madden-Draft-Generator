@@ -52,6 +52,26 @@ test('legends keep the photo the discs really carry for them', () => {
   }
 });
 
+test('a Hall of Famer does not take a photo of the man who shares his name', () => {
+  // Both are tight ends called Kellen Winslow and both are in the lookup; the
+  // 2006 disc is the son's. Hall of Fame alone cleared the father, because on a
+  // PS2 disc there is no team id to say whose roster it was.
+  assert.equal(photoFor('Kellen', 'Winslow', 1979), null);
+  const son = photoFor('Kellen', 'Winslow', 2004);
+  assert.ok(son, 'the son was playing when the 2006 disc shipped');
+
+  // Cliff Harris is in the Hall and the 2013 photo is a Jaguars cornerback of
+  // the same name. That disc DOES carry a team id, and it says a real team.
+  assert.equal(photoFor('Cliff', 'Harris', 1970), null);
+});
+
+test('a retired legend keeps a photo the disc itself attributes to him', () => {
+  // Warren Moon has no namesake and was still playing in 2000, so the Madden
+  // 2001 roster is legitimately his -- the rule must not sweep him up with the
+  // others just because his career end is unrecorded.
+  assert.ok(photoFor('Warren', 'Moon', 1978), 'Warren Moon played through 2000');
+});
+
 test('the guard costs only a small share of real matches', () => {
   let before = 0;
   let after = 0;

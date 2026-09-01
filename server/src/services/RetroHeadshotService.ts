@@ -35,6 +35,9 @@ export interface Entry {
   /** Pack filename. Absent in the old single-entry format, where the name
    *  alone gave the file. */
   file?: string;
+  /** The disc listed him on an all-time team rather than a real one. Only the
+   *  PS3 rosters carry a team id, so PS2 entries have no flag either way. */
+  legend?: boolean;
 }
 
 let index: Record<string, Entry[]> | null = null;
@@ -85,7 +88,7 @@ export function groupsCompatible(a: string | null, b: string | null): boolean {
 
 /** Career spans of every player sharing a name, built once. A disc photo shows
  *  whoever was on that roster, so the span is what says whether it can be him. */
-let careersByName: Map<string, { draftYear: number; from: number; to: number; hof: boolean }[]> | null = null;
+let careersByName: Map<string, { draftYear: number; position: string; from: number; to: number; hof: boolean }[]> | null = null;
 function careersFor(first: string, last: string) {
   if (!careersByName) {
     careersByName = new Map();
@@ -97,7 +100,7 @@ function careersFor(first: string, last: string) {
         // generous span so a real match is never refused for missing data.
         const to = p.careerTo ?? from + 20;
         const list = careersByName.get(k) ?? [];
-        list.push({ draftYear: p.draftYear, from, to, hof: !!p.isHOF });
+        list.push({ draftYear: p.draftYear, position: p.position, from, to, hof: !!p.isHOF });
         careersByName.set(k, list);
       }
     }
@@ -118,13 +121,43 @@ function careersFor(first: string, last: string) {
  *  player a legends roster carries -- and a Hall of Famer is the honest test of
  *  that. Everyone else is refused, which is how the 1968 Steve Smith stops
  *  wearing the 2003 receiver's face. */
-function plausibleEra(first: string, last: string, draftYear: number | null | undefined, disc: number): boolean {
+function plausibleEra(
+  first: string,
+  last: string,
+  draftYear: number | null | undefined,
+  entry: Entry,
+  position?: string | null
+): boolean {
+  const disc = entry.year;
   if (draftYear == null) return true; // nothing to check against
   const all = careersFor(first, last);
-  const me = all.find((c) => c.draftYear === draftYear);
+  // The draft year alone is not always one man: 1993 holds two Chad Browns, the
+  // pick-44 linebacker who played to 2007 and a pick-199 end who was gone by
+  // 1995. Matching on the year took the first and cleared the linebacker's 2001
+  // photo for the end. Position separates them, and the caller already has it.
+  const sameYear = all.filter((c) => c.draftYear === draftYear);
+  const want = groupOf(position);
+  const me =
+    (want != null ? sameYear.find((c) => groupOf(c.position) === want) : undefined) ??
+    sameYear[0];
   if (!me) return true;
   if (disc >= me.from && disc <= me.to + 2) return true; // he was playing
-  return me.hof; // otherwise only a legend belongs on a later disc
+  // He was not playing, so the photo is his only if the disc itself says it is
+  // -- an all-time team rather than a real one. Hall of Fame was standing in for
+  // this and could not tell Walter Payton on the 2012 legends roster from the
+  // 2013 Jaguars corner who shares Cliff Harris's name; both are "a Hall of
+  // Famer on a much later disc". The team id is the disc's own answer.
+  if (entry.legend === true) return true;
+  // PS2 rosters carry no team column, so the disc cannot say. One thing still
+  // can: if another man of this name was playing when it shipped, the photo is
+  // his no matter what this one's plaque says. Kellen Winslow is in the Hall,
+  // and the 2006 photo is his son's.
+  if (entry.legend === undefined) {
+    const someoneElseWasPlaying = all.some((c) => c !== me && disc >= c.from && disc <= c.to + 2);
+    if (someoneElseWasPlaying) return false;
+    return me.hof;
+  }
+  return false;
 }
 
 export const RetroHeadshotService = {
@@ -149,7 +182,7 @@ export const RetroHeadshotService = {
     if (!hits0 || !hits0.length) return null;
     // Drop any disc the player could not have been photographed on before the
     // position match runs, so a refused entry cannot shadow a valid one.
-    const hits = hits0.filter((h) => plausibleEra(first, last, draftYear, h.year));
+    const hits = hits0.filter((h) => plausibleEra(first, last, draftYear, h, position));
     if (!hits.length) return null;
     const want = groupOf(position);
     // A name can hold several men -- Cam Newton is a 2008 safety and a 2011

@@ -68,6 +68,8 @@ interface RosterRow {
   position: string;
   portrait_file: string;
   roster: string;
+  /** PS3 rosters only; legends teams are outside the 1-32 range. */
+  team?: string;
 }
 
 function resolveHeadshots(argDir?: string): string | null {
@@ -88,7 +90,7 @@ if (!root) {
 const out = path.join(DATA_ROOT, 'retro-portraits');
 fs.mkdirSync(out, { recursive: true });
 
-const index: Record<string, { year: number; position: string; file: string }[]> = {};
+const index: Record<string, { year: number; position: string; file: string; legend?: boolean }[]> = {};
 let copied = 0;
 let bytes = 0;
 let skipped = 0;
@@ -125,7 +127,17 @@ for (const { year, dir: name, images } of SOURCES) {
     const dst = path.join(out, `${stem}.png`);
     fs.copyFileSync(src, dst);
     bytes += fs.statSync(dst).size;
-    entries.push({ year, position: row.position, file: `${stem}.png` });
+    // The PS3 rosters carry a team id, and the legends teams sit outside the
+    // 1-32 range (1008/1009). That is the difference between Walter Payton on
+    // the 2012 disc -- really him, on an all-time team -- and the 2013 Cliff
+    // Harris, a current Jaguars corner who happens to share a Hall of Famer's
+    // name. The PS2 rosters have no team column, so those entries stay unflagged.
+    const teamId = parseInt(String(row.team ?? ''), 10);
+    const legend = Number.isFinite(teamId) ? teamId > 32 : undefined;
+    // Written whenever the disc HAS a team column, true or false. Omitting the
+    // false case makes "real team" indistinguishable from "PS2, no column", and
+    // the guard then falls through to the wrong branch.
+    entries.push({ year, position: row.position, file: `${stem}.png`, ...(legend !== undefined ? { legend } : {}) });
     added++;
     copied++;
   }
