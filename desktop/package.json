@@ -13,7 +13,9 @@
     "dist:m27": "electron-builder --win --config builder-m27.json",
     "postinstall": "electron-builder install-app-deps",
     "publish:m26": "electron-builder --win --config builder-m26.json --publish never",
-    "publish:m27": "electron-builder --win --config builder-m27.json --publish never"
+    "publish:m27": "electron-builder --win --config builder-m27.json --publish never",
+    "pack:m26": "electron-builder --win --dir --config builder-m26.json --publish never",
+    "pack:m27": "electron-builder --win --dir --config builder-m27.json --publish never"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
