@@ -8,7 +8,7 @@ franchise, and draft Barry Sanders yourself.
 
 **[Download the latest release](https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest)**
 
-!<img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/44dfa85b-c675-47f9-aec8-0d6feeec3f1c" />
+<img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/44dfa85b-c675-47f9-aec8-0d6feeec3f1c" />
 
 
 *A class opens blind. Every overall, dev trait and attribute reads `?` until you decide otherwise —
@@ -40,13 +40,13 @@ restart.
 
 ## What it looks like
 
-![The same class with spoilers on, sorted by dev trait](docs/screenshots/board-revealed.png)
+<img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/b4e75f61-a865-4e2c-8ffd-12fb0606beab" />
 
 *Tick **Spoilers** and the board fills in: overalls, Madden's own dev-trait badges, career value and
 all 54 attributes. Here 1998 is sorted by dev trait — Peyton Manning, Charles Woodson, Randy Moss,
 Alan Faneca and London Fletcher come out as the X-Factors.*
 
-![A player profile with ratings radar, persona DNA, appearance and equipment](docs/screenshots/player-profile.png)
+<img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/55d26159-8a5c-4f0f-abaf-fd0bd211f412" />
 
 *Every player opens into a card you can edit — attributes, bio, position, dev trait, persona DNA,
 face and equipment. Changes save automatically and apply to the exported `.mdc`.*
