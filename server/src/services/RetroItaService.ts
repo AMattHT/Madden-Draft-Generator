@@ -14,7 +14,7 @@ export const RetroItaService = {
   /** `position` picks the right photo when a name covers more than one player:
    *  the 2008 safety Cam Newton reads ITA -20, the 2011 quarterback +1.7, and
    *  taking the name's first entry would hand one man the other's skin tone. */
-  itaFor(first: string, last: string, position?: string | null): number | null {
+  itaFor(first: string, last: string, position?: string | null, draftYear?: number | null): number | null {
     if (!map) {
       try {
         map = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'retro-ita.json'), 'utf8'));
@@ -23,7 +23,7 @@ export const RetroItaService = {
       }
     }
     const stem =
-      RetroHeadshotService.stem(first, last, position) ??
+      RetroHeadshotService.stem(first, last, position, draftYear) ??
       `${normalizeName(first)}_${normalizeName(last)}`;
     const v = map![stem];
     return typeof v === 'number' ? v : null;

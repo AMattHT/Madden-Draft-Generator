@@ -9,6 +9,7 @@ export interface PlayerRow {
   devTrait: number; // 0 Normal, 1 Star, 2 Superstar, 3 X-Factor
   archetype: number;
   archetypeName: string;
+  draftYear: number; // the player's own draft year (all-time classes mix many)
   round: number | null;
   draftPick: number | null;
   wav: number | null;

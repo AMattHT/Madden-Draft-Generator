@@ -68,7 +68,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // headshots are studio crops framed like the portraits the ITA model was built
   // on, so when we have one it is the better skin sample; the in-game portrait
   // still wins when it exists.
-  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, p.position) : null;
+  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, p.position, p.draftYear) : null;
   // The wiki tone was read from the row's Wikipedia photo; if that photo was
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
   const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;

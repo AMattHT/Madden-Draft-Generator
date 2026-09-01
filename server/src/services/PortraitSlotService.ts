@@ -48,7 +48,7 @@ function photoUrl(p: BaselinePlayer): string | null {
 function needsCustomPortrait(p: BaselinePlayer): boolean {
   const hasAsset = !!p.playerAssetsId;
   const hasPortrait = p.photoId != null && p.photoId !== 0;
-  const hasPhoto = !!photoUrl(p) || !!RetroHeadshotService.lookup(p.firstName, p.lastName, p.position);
+  const hasPhoto = !!photoUrl(p) || !!RetroHeadshotService.lookup(p.firstName, p.lastName, p.position, p.draftYear);
   return !hasAsset && !hasPortrait && hasPhoto;
 }
 
@@ -102,7 +102,7 @@ export const PortraitSlotService = {
         pid: slot.pid,
         plpo: slot.plpo,
         photoUrl: photoUrl(p),
-        retroYear: RetroHeadshotService.lookup(p.firstName, p.lastName, p.position)?.year ?? null,
+        retroYear: RetroHeadshotService.lookup(p.firstName, p.lastName, p.position, p.draftYear)?.year ?? null,
         position: p.position,
       });
     });

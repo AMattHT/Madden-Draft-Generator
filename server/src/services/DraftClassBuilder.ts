@@ -799,6 +799,10 @@ export const DraftClassBuilder = {
         weight: Number(p.weight) || 0,
         jersey: Number(p.jerseyNum) || 0,
         bodyType: String(p.bodyType || 'Standard'),
+        // The row's OWN draft year, not the class year: an all-time or decade
+        // class mixes players from many drafts, and the retro photo guard needs
+        // to know when this man played.
+        draftYear: base.draftYear,
         photoUrl: PhotoLookService.bestPhotoUrl(base) || null,
         portrait: (() => {
           const plpo = PortraitService.plpoFor(Number(p.PID) || 0, base.race, `${base.firstName}|${base.lastName}|${i}`);

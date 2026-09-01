@@ -41,7 +41,12 @@ r.get('/portrait/retro/:first/:last', async (req, res) => {
     // Position guards against same-name players from different eras (the 1973
     // CB J.T. Thomas vs the 2011 LB). Absent, the lookup cannot tell them apart.
     const position = typeof req.query.position === 'string' ? req.query.position : null;
-    const buf = await RetroHeadshotService.portraitPng(req.params.first, req.params.last, size, position);
+    // Position says what kind of player he was; draftYear says whether he was
+    // playing when the disc shipped. Without the year the 1968 Steve Smith gets
+    // the 2003 receiver's photograph -- both are REC, so position clears him.
+    const dy = parseInt(String(req.query.draftYear ?? ''), 10);
+    const draftYear = Number.isFinite(dy) ? dy : null;
+    const buf = await RetroHeadshotService.portraitPng(req.params.first, req.params.last, size, position, draftYear);
     if (!buf) return res.status(404).end();
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');

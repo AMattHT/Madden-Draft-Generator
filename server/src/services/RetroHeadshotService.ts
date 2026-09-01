@@ -3,6 +3,7 @@ import path from 'path';
 import sharp from 'sharp';
 import { DATA_ROOT, LOOKUPS_DIR } from '../config/paths';
 import { normalizeName } from '../util/csv';
+import { PlayerLookupService } from './PlayerLookupService';
 
 /**
  * Real NFL headshots lifted off the Madden 2001-2012 PS2 discs and the PS3
@@ -82,6 +83,50 @@ export function groupsCompatible(a: string | null, b: string | null): boolean {
   return edgy.has(a) && edgy.has(b);
 }
 
+/** Career spans of every player sharing a name, built once. A disc photo shows
+ *  whoever was on that roster, so the span is what says whether it can be him. */
+let careersByName: Map<string, { draftYear: number; from: number; to: number; hof: boolean }[]> | null = null;
+function careersFor(first: string, last: string) {
+  if (!careersByName) {
+    careersByName = new Map();
+    for (const y of PlayerLookupService.years()) {
+      for (const p of PlayerLookupService.byYear(y)) {
+        const k = key(p.firstName, p.lastName);
+        const from = p.careerFrom ?? p.draftYear;
+        // An open career (still active, or simply unrecorded) is given a
+        // generous span so a real match is never refused for missing data.
+        const to = p.careerTo ?? from + 20;
+        const list = careersByName.get(k) ?? [];
+        list.push({ draftYear: p.draftYear, from, to, hof: !!p.isHOF });
+        careersByName.set(k, list);
+      }
+    }
+  }
+  return careersByName.get(key(first, last)) ?? [];
+}
+
+/** Could the man drafted in `draftYear` be the player photographed on the
+ *  `disc` year's roster?
+ *
+ *  Position alone cannot answer this. The 1968 linebacker D.D. Lewis and the
+ *  2002 linebacker D.D. Lewis are both LB, and the photo on the 2005 disc is
+ *  the second one's. Nor can era alone: the discs carry legends teams, so
+ *  Walter Payton (1975) really is on the 2012 disc.
+ *
+ *  What separates them is whether the player was PLAYING when the disc shipped.
+ *  If he was, it is him. If he was not, it is only him when he is the sort of
+ *  player a legends roster carries -- and a Hall of Famer is the honest test of
+ *  that. Everyone else is refused, which is how the 1968 Steve Smith stops
+ *  wearing the 2003 receiver's face. */
+function plausibleEra(first: string, last: string, draftYear: number | null | undefined, disc: number): boolean {
+  if (draftYear == null) return true; // nothing to check against
+  const all = careersFor(first, last);
+  const me = all.find((c) => c.draftYear === draftYear);
+  if (!me) return true;
+  if (disc >= me.from && disc <= me.to + 2) return true; // he was playing
+  return me.hof; // otherwise only a legend belongs on a later disc
+}
+
 export const RetroHeadshotService = {
   get available(): boolean {
     return fs.existsSync(PACK_DIR) && Object.keys(load()).length > 0;
@@ -99,9 +144,13 @@ export const RetroHeadshotService = {
    *  Madden discs carry legends, so Walter Payton's real photo is legitimately
    *  on a 2012 disc decades after he was drafted. He is HB on both sides and
    *  survives; a cornerback matched to a linebacker does not. */
-  lookup(first: string, last: string, position?: string | null): Entry | null {
-    const hits = load()[key(first, last)];
-    if (!hits || !hits.length) return null;
+  lookup(first: string, last: string, position?: string | null, draftYear?: number | null): Entry | null {
+    const hits0 = load()[key(first, last)];
+    if (!hits0 || !hits0.length) return null;
+    // Drop any disc the player could not have been photographed on before the
+    // position match runs, so a refused entry cannot shadow a valid one.
+    const hits = hits0.filter((h) => plausibleEra(first, last, draftYear, h.year));
+    if (!hits.length) return null;
     const want = groupOf(position);
     // A name can hold several men -- Cam Newton is a 2008 safety and a 2011
     // quarterback. Take the one who played this kind of football, preferring an
@@ -115,8 +164,8 @@ export const RetroHeadshotService = {
   },
 
   /** Path to the packed PNG (96x96 from PS2, 256x256 from PS3), or null. */
-  filePath(first: string, last: string, position?: string | null): string | null {
-    const hit = this.lookup(first, last, position);
+  filePath(first: string, last: string, position?: string | null, draftYear?: number | null): string | null {
+    const hit = this.lookup(first, last, position, draftYear);
     if (!hit) return null;
     const file = path.join(PACK_DIR, hit.file ?? `${key(first, last).replace('|', '_')}.png`);
     return fs.existsSync(file) ? file : null;
@@ -124,16 +173,16 @@ export const RetroHeadshotService = {
 
   /** Pack file stem for this player, so other measurements taken off the same
    *  image (skin ITA) can key on the picture rather than on the name. */
-  stem(first: string, last: string, position?: string | null): string | null {
-    const hit = this.lookup(first, last, position);
+  stem(first: string, last: string, position?: string | null, draftYear?: number | null): string | null {
+    const hit = this.lookup(first, last, position, draftYear);
     if (!hit) return null;
     return (hit.file ?? `${key(first, last).replace('|', '_')}.png`).replace(/\.png$/, '');
   },
 
   /** Square portrait PNG at `size`, matching what PortraitFetchService returns
    *  for a web photo so the two are interchangeable to callers. */
-  async portraitPng(first: string, last: string, size = 256, position?: string | null): Promise<Buffer | null> {
-    const file = this.filePath(first, last, position);
+  async portraitPng(first: string, last: string, size = 256, position?: string | null, draftYear?: number | null): Promise<Buffer | null> {
+    const file = this.filePath(first, last, position, draftYear);
     if (!file) return null;
     return sharp(file)
       .resize(size, size, { fit: 'cover', kernel: sharp.kernel.lanczos3 })

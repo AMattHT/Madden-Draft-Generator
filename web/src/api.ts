@@ -5,6 +5,7 @@ export const imageUrl = (url: string) => `/api/image?url=${encodeURIComponent(ur
 
 interface PortraitRow {
   face?: string;
+  draftYear?: number;
   photoUrl?: string | null;
   portrait?: string | null;
   gamePortrait?: string | null;
@@ -36,8 +37,15 @@ export function displayPortraitChain(row: PortraitRow): string[] {
   if (row.firstName && row.lastName) {
     // Position disambiguates same-name players from different eras: without it
     // the 1973 CB J.T. Thomas is served the 2011 LB's photo off a 2012 disc.
-    const pos = row.position ? `?position=${encodeURIComponent(row.position)}` : '';
-    urls.push(`/api/portrait/retro/${encodeURIComponent(row.firstName)}/${encodeURIComponent(row.lastName)}${pos}`);
+    // Position says what kind of player he was, the year says whether he was
+    // playing when the disc shipped. The 1968 TE Steve Smith passes the position
+    // check against the 2003 receiver -- both are REC -- and only the year
+    // refuses him.
+    const q = new URLSearchParams();
+    if (row.position) q.set('position', row.position);
+    if (row.draftYear != null) q.set('draftYear', String(row.draftYear));
+    const qs = q.toString() ? `?${q}` : '';
+    urls.push(`/api/portrait/retro/${encodeURIComponent(row.firstName)}/${encodeURIComponent(row.lastName)}${qs}`);
   }
   if (row.photoUrl) urls.push(imageUrl(row.photoUrl));
   if (row.portrait && row.portrait !== row.gamePortrait) urls.push(row.portrait);
