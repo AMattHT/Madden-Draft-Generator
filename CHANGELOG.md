@@ -13,7 +13,9 @@ on accolades alone.
 Vera-Tucker, Owusu-Koramoah) had their portrait key cut at the hyphen, so thirteen of them showed
 some other Smith, Vera or Davis; they now point at their own art. 239 recent players whose row
 had no portrait id at all but an exact-name match in the portrait table (Shaquille Leonard,
-Kyle Van Noy, Amon-Ra St. Brown) now show their real portrait instead of a generic.
+Kyle Van Noy, Amon-Ra St. Brown) now show their real portrait instead of a generic, and 628
+players from 2012 on whose portrait id names a head scan the game ships now export with that
+scan instead of a generic head.
 
 **Careers are current through the 2025 season.** wAV, Pro Bowls, first-team All-Pros, seasons
 started and last season now come from nflverse's mirror of Pro Football Reference for every
