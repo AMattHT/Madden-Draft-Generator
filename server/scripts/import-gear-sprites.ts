@@ -9,7 +9,8 @@
  * "Madden Editor Suite/resources/app/.vite/build/data". The output is fully
  * generated: the Suite's gear-atlas.json plus the curated fixes below
  * (removed / relabelled / added entries, and the image substitutions). Edit the
- * tables here, re-run, commit data/gear.
+ * tables here, re-run, then run scripts/import-m27-gear-icons.py (the game's own
+ * icons and the items the Suite atlas lacks), commit data/gear.
  */
 import fs from 'fs';
 import path from 'path';

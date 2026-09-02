@@ -10,9 +10,12 @@ rebuilds the pack from a fresh export, and names every new portrait from the gam
 names. The Madden 27 face picker now offers all 262 generic heads
 the game ships (from its own head-item data), 69 more than its random classes ever used.
 
-**Equipment pictures ship with the app.** The Equipment Builder's thumbnails (one render per
-helmet, facemask, visor, glove, cleat, sleeve, pad and eye-black style) are now bundled, so the
-installed app shows them without a Madden Editor Suite install next to it. Names were checked
+**Equipment pictures ship with the app.** The Equipment Builder's thumbnails are now bundled, so
+the installed app shows them without a Madden Editor Suite install next to it, and they are the
+game's own Madden 27 icons: 698 renders exported from its vanity image library cover every gear
+option except the seven novelty helmets and three eye-black styles the game itself has no icon
+for. 183 items the Suite atlas never listed (masks, gloves, cleats, sleeves, wristbands) are now
+selectable with the game's picture. Names were checked
 against the renders and the game's own asset list: the Oakley Prizm visor is now the asset real
 rosters wear (the old entry showed a clear visor), the VICIS Zero1 masks are named by helmet, and
 45 assets the game assigns but the builder never offered are now selectable with names and
