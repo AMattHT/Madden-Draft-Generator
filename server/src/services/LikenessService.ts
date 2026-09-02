@@ -66,8 +66,14 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
     const v = raw?.[version] ?? {};
     for (const [k, e] of Object.entries(v.assets ?? {})) cat.assets.set(k, e as RealFace);
     for (const [k, a] of Object.entries(v.byName ?? {})) {
-      cat.byName.set(k, a as string);
-      const t = k.replace(/[^a-z]/g, '');
+      // Register the key as written and in suffix-free m27Key form, so "will
+      // anderson jr" is also found as "will anderson" (what the lookup asks for).
+      const nk = normKey(k);
+      for (const key of new Set([k, nk])) {
+        if (cat.byName.has(key) && cat.byName.get(key) !== a) continue; // two catalog names collapsed: keep the first
+        cat.byName.set(key, a as string);
+      }
+      const t = nk.replace(/[^a-z]/g, '');
       if (cat.byNameTight.has(t) && cat.byNameTight.get(t) !== a) cat.byNameTight.set(t, '');
       else cat.byNameTight.set(t, a as string);
     }
@@ -118,14 +124,23 @@ const M27_TRUST_ALL_M26_HEADS = process.env.MADDEN27_TRUST_M26_HEADS === '1';
 /** Write lookup ids for legends that only have a legends portrait (no scan) on M27. */
 const M27_TRUST_LEGEND_IDS = process.env.MADDEN27_TRUST_LEGEND_IDS === '1';
 let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
-const m27Key = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '');
+/** Generational suffixes are not part of who a man is. The game's catalog writes
+ *  "Will Anderson Jr" (asset AndersonJrWill_22702, 149 roster players carry a
+ *  Jr/Sr/II/III/IV) while the lookup writes "Will Anderson", and the two never
+ *  met -- the 2023 #3 pick was getting a generic head with his own scan sitting
+ *  in the pack. Both sides of every name match drop the suffix first. */
+const stripSuffix = (s: string) => s.replace(/\b(jr|sr|ii|iii|iv)\b\.?/gi, ' ');
+const m27Key = (first: string, last: string) =>
+  stripSuffix(`${first} ${last}`.toLowerCase()).replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+/** A catalog byName key (as written by build-face-catalogs) in m27Key form. */
+const normKey = (k: string) => stripSuffix(k.toLowerCase()).replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
 /** The same name with the spaces gone too. m27Key keeps them, so a player the
  *  lookup writes "T. J. Parker" keys as "t j parker" while the game's catalog
  *  writes "t.j. parker" and keys as "tj parker" -- the two never meet, and five
  *  of the 2026 rookies had a scan sitting unused because of a full stop. This is
  *  a LAST resort: it is looser, so everything found through it goes through the
  *  same era guard as the exact key. */
-const m27KeyTight = (first: string, last: string) => `${first}${last}`.toLowerCase().replace(/[^a-z]/g, '');
+const m27KeyTight = (first: string, last: string) => stripSuffix(`${first} ${last}`.toLowerCase()).replace(/[^a-z]/g, '');
 
 /** nflverse draft year by the same name key as the M27 face map. */
 let draftYearByKey: Map<string, number> | null = null;

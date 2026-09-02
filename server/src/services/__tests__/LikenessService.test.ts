@@ -140,3 +140,18 @@ test('a legends portrait never goes to a no-name namesake (1969 Jim Thorpe, Hofs
   assert.equal(thorpe!.photoId, null);
   assert.equal(PlayerLookupService.isMostNotable({ firstName: 'Jim', lastName: 'Thorpe', draftYear: 1969 }), false);
 });
+
+test('a roster head whose asset carries a suffix (AndersonJrWill) matches the lookup\'s plain "Will Anderson"', skipWithoutCatalog, () => {
+  // The 2023 #3 pick has no asset id in the lookup; the catalog keys him as
+  // "will anderson jr", and the lookup writes him without the suffix. 149 roster
+  // players carry Jr/Sr/II/III/IV in their asset names, so the match must be
+  // suffix-blind on both sides.
+  const p = player({ firstName: 'Will', lastName: 'Anderson', draftYear: 2023, position: 'MLB', college: 'Alabama' });
+  const face = LikenessService.realFace(p, 'm27');
+  assert.ok(face, 'expected Will Anderson Jr.\'s real head');
+  assert.equal(face!.assetName, 'AndersonJrWill_22702');
+  assert.equal(face!.portraitPid, 856);
+  // And the other way round: a lookup row that does carry the suffix.
+  const q = player({ firstName: 'Odell', lastName: 'Beckham Jr.', draftYear: 2014, position: 'WR' });
+  assert.equal(LikenessService.realFace(q, 'm27')?.assetName.toLowerCase(), 'beckhamjrodell_10829');
+});

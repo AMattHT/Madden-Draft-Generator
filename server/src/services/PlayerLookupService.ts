@@ -699,8 +699,11 @@ function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
 export const PlayerLookupService = {
   /** Is this the most accomplished player of this name in the lookup? Shared
    *  assets keyed by name (legends portraits: plpo_legends_johnsonchris) belong to
-   *  him, not to a 2003 seventh-round namesake. Same-year rows are the same person. */
-  isMostNotable(p: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear'>): boolean {
+   *  him, not to a 2003 seventh-round namesake. Same-year rows are usually the same
+   *  person, but not always: 1964 drafted Bob Brown the Hall of Fame tackle
+   *  (Nebraska, NFL) and Bob Brown the AFL defensive tackle (Arkansas-Pine Bluff),
+   *  so when the caller knows the college it has to agree too. */
+  isMostNotable(p: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear'> & { college?: string | null }): boolean {
     load();
     const group = byNormName?.get(normName(p.firstName, p.lastName)) ?? [];
     // The famous namesake may have no row at all (the real Jim Thorpe predates
@@ -708,7 +711,9 @@ export const PlayerLookupService = {
     if (stampedNamesakes.has(`${normName(p.firstName, p.lastName)}|${p.draftYear}`)) return false;
     if (group.length <= 1) return true;
     const best = group.reduce((a, b) => (greatness(b) > greatness(a) ? b : a));
-    return best.draftYear === p.draftYear;
+    if (best.draftYear !== p.draftYear) return false;
+    if (!p.college || !best.college) return true;
+    return normalizeName(best.college) === normalizeName(p.college);
   },
 
   /** All draft years present in the local lookup, ascending. */

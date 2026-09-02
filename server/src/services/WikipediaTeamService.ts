@@ -139,58 +139,110 @@ function cellText(html: string): string {
 const memo = new Map<number, Map<string, TeamInfo>>();
 
 /** Parse one wikitable's rows into name -> team, using header-located columns. */
-function parseTable(tableHtml: string, out: Map<string, TeamInfo>, year: number): void {
+/** Parse state shared across one article's tables (a name repeats across rounds). */
+interface ParseState {
+  out: Map<string, TeamInfo>;
+  /** bare name -> college of the first row seen under it */
+  seen: Map<string, string>;
+  /** bare names two different men share on this page */
+  ambiguous: Set<string>;
+}
+
+/**
+ * Every draftee is keyed `name|college`; the bare `name` key is kept only while
+ * it is unique on the page. 1964 has two Bob Browns -- Nebraska to Philadelphia
+ * at pick 2 and Arkansas A&M to San Francisco at 169 -- and keying by name alone
+ * handed both men, the Hall of Famer included, whichever team was parsed last.
+ */
+function parseTable(tableHtml: string, st: ParseState, year: number): void {
   const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
   let teamIdx = -1;
   let playerIdx = -1;
+  let collegeIdx = -1;
   for (const row of rows) {
     const cells = [...row.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((m) => cellText(m[1]));
     if (!cells.length) continue;
-    // Header row: locate the team + player columns (may repeat per round).
+    // Header row: locate the team + player (+ college) columns (may repeat per round).
     const ti = cells.findIndex((c) => /\bteam\b/i.test(c));
     const pi = cells.findIndex((c) => /^player$/i.test(c));
     if (ti >= 0 && pi >= 0) {
       teamIdx = ti;
       playerIdx = pi;
+      collegeIdx = cells.findIndex((c) => /^college$/i.test(c));
       continue;
     }
     if (teamIdx < 0 || playerIdx < 0) continue;
     if (cells.length <= Math.max(teamIdx, playerIdx)) continue;
-    const team = cells[teamIdx];
+    const teamCell = cells[teamIdx];
     const player = cells[playerIdx];
-    if (!team || !player) continue;
+    if (!teamCell || !player) continue;
     const key = normalizeName(player);
-    if (key) out.set(key, resolveWikiTeam(team, year));
+    if (!key) continue;
+    const team = resolveWikiTeam(teamCell, year);
+    const college = collegeIdx >= 0 ? normalizeName(cells[collegeIdx] ?? '') : '';
+    if (college) st.out.set(`${key}|${college}`, team);
+    if (st.ambiguous.has(key)) continue;
+    const prevCollege = st.seen.get(key);
+    if (prevCollege !== undefined && prevCollege !== college) {
+      // A second man of this name: the bare key can no longer say which one.
+      st.out.delete(key);
+      st.ambiguous.add(key);
+      continue;
+    }
+    st.seen.set(key, college);
+    st.out.set(key, team);
   }
+}
+
+/** All draft tables of one article -> name-keyed drafting teams (see parseTable). */
+function parseHtml(html: string, year: number): Map<string, TeamInfo> {
+  const st: ParseState = { out: new Map(), seen: new Map(), ambiguous: new Set() };
+  const tables = html.match(/<table[^>]*wikitable[\s\S]*?<\/table>/g) ?? [];
+  for (const table of tables) parseTable(table, st, year);
+  return st.out;
 }
 
 export const WikipediaTeamService = {
   /** normalized(player name) -> drafting team, for a pre-1980 NFL draft. Returns
    *  an empty map on any failure so team logos degrade gracefully to absent. */
-  async teamsByName(year: number): Promise<Map<string, TeamInfo>> {
-    const cached = memo.get(year);
-    if (cached) return cached;
-    const out = new Map<string, TeamInfo>();
-    // Prefer the baked lookup. The runtime cache lives in server/cache, which the
-    // installer does not bundle, so a shipped copy would otherwise fetch ~44
-    // Wikipedia articles live -- and this method swallows failures and returns an
-    // empty map, so a single throttled request silently blanks every team for a
-    // draft year. Every pre-1980 year fetched here failed at least once during
-    // the build purely from rate limiting, so that was not a rare edge case.
-    const baked = bakedTeams()[String(year)];
-    if (baked) {
-      for (const [key, team] of Object.entries(baked)) out.set(key, team);
-      memo.set(year, out);
-      return out;
+  async teamsByName(year: number, opts: { fresh?: boolean } = {}): Promise<Map<string, TeamInfo>> {
+    // `fresh` (the bake script) parses the article again instead of returning
+    // the baked map, so a parser change actually reaches the shipped file.
+    if (!opts.fresh) {
+      const cached = memo.get(year);
+      if (cached) return cached;
+      // Prefer the baked lookup. The runtime cache lives in server/cache, which the
+      // installer does not bundle, so a shipped copy would otherwise fetch ~44
+      // Wikipedia articles live -- and this method swallows failures and returns an
+      // empty map, so a single throttled request silently blanks every team for a
+      // draft year. Every pre-1980 year fetched here failed at least once during
+      // the build purely from rate limiting, so that was not a rare edge case.
+      const baked = bakedTeams()[String(year)];
+      if (baked) {
+        const out = new Map<string, TeamInfo>();
+        for (const [key, team] of Object.entries(baked)) out.set(key, team);
+        memo.set(year, out);
+        return out;
+      }
     }
+    let out = new Map<string, TeamInfo>();
     try {
-      const html = await fetchHtml(year);
-      const tables = html.match(/<table[^>]*wikitable[\s\S]*?<\/table>/g) ?? [];
-      for (const table of tables) parseTable(table, out, year);
+      out = parseHtml(await fetchHtml(year), year);
     } catch {
       return out;
     }
     memo.set(year, out);
     return out;
+  },
+
+  /** Parse one article's HTML (exposed for tests and the bake script). */
+  parseHtml,
+
+  /** The drafting team for a player, by `name|college` first and by bare name
+   *  only when that name is unique on the page (see parseTable). */
+  teamFor(map: Map<string, TeamInfo>, first: string, last: string, college: string | null | undefined): TeamInfo | undefined {
+    const key = normalizeName(`${first} ${last}`);
+    const c = normalizeName(college ?? '');
+    return (c ? map.get(`${key}|${c}`) : undefined) ?? map.get(key);
   },
 };

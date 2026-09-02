@@ -43,7 +43,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   for (let year = FROM; year <= TO; year++) {
     // Uncached years hit the Wikipedia API; be a polite client.
     const cached = fs.existsSync(path.join(process.env.DRAFT_TOOL_CACHE || path.join(__dirname, '..', 'cache'), `wiki_nfl_draft_${year}.html`));
-    const map = await WikipediaTeamService.teamsByName(year);
+    const map = await WikipediaTeamService.teamsByName(year, { fresh: true });
     if (!map.size) {
       empty.push(year);
       console.warn(`  ${year}: EMPTY — left out, rerun to retry`);

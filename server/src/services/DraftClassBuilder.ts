@@ -772,6 +772,11 @@ export const DraftClassBuilder = {
           ? 'generic'
           : 'asset';
       const base = capped[i];
+      // The real head this game renders for him (null for a generic), once: it
+      // names the face's provenance and, when the lookup has no PhotoID for him,
+      // the portrait the game ships with that head (a roster rookie like the
+      // 2023 Will Anderson Jr.).
+      const real = face === 'asset' ? LikenessService.realFace(base, gameVersion) : null;
       const ratings: Record<string, number> = {};
       for (const k of RATING_KEYS) ratings[k] = Number(p[k]) || 0;
       // Same seed/group/OVR the M27 writer uses, so the UI shows the DNA that exports.
@@ -803,7 +808,7 @@ export const DraftClassBuilder = {
         srcIdx: keptIdx[i],
         twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0, base.draftPick),
         face,
-        faceSource: face === 'asset' ? (LikenessService.realFace(base, gameVersion)?.source ?? 'lookup') : null,
+        faceSource: face === 'asset' ? (real?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
         genericHead: peps.startsWith('gen_') ? String(p.PEPS) : null,
         college: base.college,
@@ -828,7 +833,11 @@ export const DraftClassBuilder = {
         // belonging to somebody else. `portrait` below has the same problem
         // (it falls back to a generic head by skin tone) and so stays last.
         gamePortrait: (() => {
-          const plpo = base.photoId ? PortraitService.plpoForPid(base.photoId) : null;
+          // A roster head's own portrait counts too (the lookup has no PhotoID
+          // for a rookie matched by name), but never a legends portrait a
+          // namesake owns -- portraitFor already refused that above.
+          const pid = base.photoId || (real && real.portraitKind !== 'none' ? real.portraitPid : 0);
+          const plpo = pid ? PortraitService.plpoForPid(pid) : null;
           return plpo ? `/api/portrait/plpo/${plpo}` : null;
         })(),
         combine: base.combine ?? null,

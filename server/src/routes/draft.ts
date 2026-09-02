@@ -32,7 +32,7 @@ async function attachTeams(preview: PreviewResult, year: number, enrich: Map<num
     const wikiTeams = await WikipediaTeamService.teamsByName(year);
     if (wikiTeams.size) {
       for (const row of preview.rows) {
-        const t = wikiTeams.get(normalizeName(`${row.firstName} ${row.lastName}`));
+        const t = WikipediaTeamService.teamFor(wikiTeams, row.firstName, row.lastName, row.college);
         if (t) row.team = t;
       }
     }
