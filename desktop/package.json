@@ -1,7 +1,7 @@
 {
   "name": "madden-draft-class-generator",
   "productName": "Madden Draft Class Generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generate importable Madden 26/27 draft classes from real NFL draft history",
   "main": "main.cjs",
   "author": "amatthews",

@@ -1,18 +1,34 @@
 # Changelog
 
-## Unreleased
+## 1.1.0
 
-**Hand-picked classes.** Draft options → Hand-picked → Build class… lets you pick any players
-from the whole 1936–2026 pool (filter by position, era and league; sort by career), name the
-class, save it, and export it as `CAREERDRAFT-<NAME>`. Short classes are padded with generated
-prospects from the era of your picks.
+**Hand-picked draft classes.** Draft options → Hand-picked → Build class… opens a builder over
+the whole 1936–2026 pool of 32,140 players. Filter by position, era, league or Hall of Fame; sort
+by career, wAV, Pro Bowls, year or draft slot; add players one at a time or "Add all shown" up to
+Madden's 402 slots. Name the class, save it, come back to it, and export it as
+`CAREERDRAFT-<NAME>`. A short class is padded with generated prospects from the era of your picks
+so it imports as a full class.
 
-**Full CSV.** Export CSV now writes every player with overall, dev trait, bio, combine numbers
-and all 54 attributes, with your edits applied.
+**The overall is Madden's.** The player card no longer has an Overall box. The rating chip and
+the board's OVR column show the overall Madden will compute from the attributes on import, and
+they update as you edit. Changing position or archetype still re-solves the attributes so the
+player keeps his level.
 
-**The overall is Madden's.** The player card no longer has an Overall box. Its rating chip and
-the board's OVR column show the overall Madden will compute from the attributes on import,
-updating as you edit.
+**Full spreadsheet export.** Export CSV now writes every player with overall, dev trait,
+archetype, bio, combine numbers and all 54 attributes, with your edits applied. Opens cleanly in
+Excel.
+
+**Faster classes.** A new year no longer waits on photo lookups while it builds; the few players
+whose photograph has never been looked up get it on a later visit instead. Neighbouring years are
+built in the background, so stepping through drafts with the arrows is instant.
+
+**Faces and dev traits.** Resolved photo lookups now ship with the app instead of being repeated
+on every machine. A disc headshot is only used when the disc year matches the player's career, so
+retirees stop borrowing a namesake's face. Elite-career X-Factor promotion is capped so an
+all-time class still has a Superstar tier.
+
+**The app now lives at github.com/AMattHT/Madden-Draft-Generator.** Existing installs update to
+this version automatically.
 
 ## 1.0.0
 
