@@ -97,12 +97,19 @@ export function youngDev(items: YoungInput[], currentYear: number, classSize = i
     const s = S(p);
     const roy = p.awards.includes('OROY') || p.awards.includes('DROY');
     const big = p.awards.includes('MVP') || p.awards.includes('OPOY') || p.awards.includes('DPOY');
-    const royHeld = roy && !(s >= 3 && p.wavActual && pc < 0.4);
+    // Rookie of the Year keeps X-Factor while the award is fresh; from the third
+    // season on the career has to back it: a top-10% pace (0.7), a first-team
+    // All-Pro or a second Pro Bowl. Chase Young (pace ~0.6, one Pro Bowl in six
+    // seasons) is a Superstar, not an X-Factor; Lattimore's four Pro Bowls keep his.
+    const royHeld = roy && !(s >= 3 && p.wavActual && pc < 0.7 && p.ap1 < 1 && p.pb < 2);
     const eliteTrack = pc >= ELITE_PACE && s >= 3 && !SPECIALISTS.has(p.posGroup);
     let floor: Tier = 0;
     if (big || p.ap1 >= 2 || royHeld || eliteTrack || p.elite) floor = 3;
     else if (roy || p.ap1 >= 1 || p.pb >= 2) floor = 2;
     else if (p.pb >= 1) floor = 1;
+    // A kicker, punter or snapper tops out at Star on accolades alone (a first-team
+    // All-Pro kicker is a Star in Madden, not a Superstar); only an award lifts him.
+    if (SPECIALISTS.has(p.posGroup) && !big && !roy) floor = Math.min(floor, 1) as Tier;
     floors.set(p.key, floor);
   }
 
@@ -118,7 +125,9 @@ export function youngDev(items: YoungInput[], currentYear: number, classSize = i
   const young = items.filter((p) => S(p) > 0);
   if (young.length) {
     const medianS = [...young.map(S)].sort((a, b) => a - b)[Math.floor(young.length / 2)];
-    const ssQuota = Math.round(FULL.ss * clamp01((medianS - 1) / 3) * scale);
+    // Superstars from production grow with the seasons on record: a quarter of
+    // Madden's 14 after one season, half after two, the full shape by four.
+    const ssQuota = Math.round(FULL.ss * clamp01(medianS / 4) * scale);
     const starQuota = Math.round(FULL.star * clamp01(medianS / 2) * scale);
     const score = (p: YoungInput) => {
       const w = clamp01((MATURE_SEASONS - S(p)) / (MATURE_SEASONS - 1)); // 1 at S<=1, 0 at S>=6

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+**Young-class dev traits.** A Rookie of the Year keeps X-Factor only while the career backs it:
+from the third season on he needs a top-10% pace, a first-team All-Pro or a second Pro Bowl
+(Chase Young is a Superstar now, Lattimore's Pro Bowls keep his). One season on record earns a
+quarter of Madden's Superstar quota for the year's best producers and two seasons half, so 2025
+has five Superstars instead of one and 2024 twelve. Kickers, punters and snappers stop at Star
+on accolades alone.
+
+**Portraits for hyphenated names.** 75 players whose surname carries a hyphen (Smith-Njigba,
+Vera-Tucker, Owusu-Koramoah) had their portrait key cut at the hyphen, so thirteen of them showed
+some other Smith, Vera or Davis; they now point at their own art. 239 recent players whose row
+had no portrait id at all but an exact-name match in the portrait table (Shaquille Leonard,
+Kyle Van Noy, Amon-Ra St. Brown) now show their real portrait instead of a generic.
+
 **Careers are current through the 2025 season.** wAV, Pro Bowls, first-team All-Pros, seasons
 started and last season now come from nflverse's mirror of Pro Football Reference for every
 drafted player since 1960 (1,712 rows updated; the 2025 class no longer reads zero and 2024's

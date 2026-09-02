@@ -37,12 +37,13 @@ test('2024: Daniels and Verse (Rookies of the Year) are the X-Factors; two seaso
   assert.ok(t.ss.length >= 3 && t.ss.length <= 12, `${t.ss.length} Superstars`);
 });
 
-test('2025: only the Rookies of the Year rise above Star', skip, async () => {
+test('2025: only the Rookies of the Year are X-Factors; one season earns a few Superstars', skip, async () => {
   const t = await tiers(2025);
   assert.deepEqual([...t.xf].sort(), ['Carson Schwesinger', 'Tetairoa McMillan']);
-  // One season earns no Superstar from the quota; only an All-Pro or a second Pro
-  // Bowl floor can put a rookie there.
-  assert.ok(t.ss.length <= 2, `${t.ss.length} Superstars: ${t.ss}`);
+  // A quarter of the Superstar quota after one season (the year's best producers),
+  // plus any All-Pro or two-time Pro Bowl floor. Specialists stop at Star.
+  assert.ok(t.ss.length >= 3 && t.ss.length <= 8, `${t.ss.length} Superstars: ${t.ss}`);
+  assert.ok(!t.ss.some((n) => /Loop|Borregales|Crawshaw|Ashby/.test(n)), 'no specialist Superstar');
   // Half the Star quota (45) plus every rookie Pro Bowler's floor.
   assert.ok(t.star.length >= 30 && t.star.length <= 80, `${t.star.length} Stars`);
 });

@@ -25,22 +25,26 @@ test('X-Factor comes from awards or wAV, never from a quota', () => {
   const roy = mk({ posGroup: 'QB', awards: ['OROY'], wav: 24 }); // Stroud: 8/yr, pace 0.82
   const royNoData = mk({ posGroup: 'WR', draftYear: 2025, awards: ['OROY'], wav: null, wavActual: false }); // McMillan
   const royBust = mk({ posGroup: 'QB', awards: ['OROY'], wav: 6 }); // 2/yr over 3 seasons: the award never translated
+  const royFaded = mk({ posGroup: 'EDGE', draftYear: 2020, awards: ['DROY'], wav: 29, pb: 1 }); // Chase Young: pace ~0.6, one Pro Bowl
+  const royBacked = mk({ posGroup: 'CB', draftYear: 2017, awards: ['DROY'], wav: 43, pb: 4 }); // Lattimore: pace ~0.67 but four Pro Bowls
   const paceOnly3 = mk({ posGroup: 'RB', wav: 45 }); // 15/yr vs 10.3 over 3 seasons: pace 1.46, past ELITE_PACE
   const goodNotElite = mk({ posGroup: 'RB', wav: 40 }); // Gibbs: 13/yr, pace 1.29 -- a very good third year, not a Hall of Fame track
   const paceOnly2 = mk({ posGroup: 'QB', draftYear: 2024, wav: 30 }); // 15/yr (pace 1.53), only 2 seasons
   const punter = mk({ posGroup: 'P', wav: 9 }); // 3/yr vs 2.3: a fine punter, never an X-Factor
   const filler = Array.from({ length: 30 }, () => mk({ wav: 1 }));
-  const r = dev([mvp, twoAllPro, roy, royNoData, royBust, paceOnly3, goodNotElite, paceOnly2, punter, ...filler]);
+  const r = dev([mvp, twoAllPro, roy, royNoData, royBust, royFaded, royBacked, paceOnly3, goodNotElite, paceOnly2, punter, ...filler]);
   assert.equal(r.get(mvp.key), 3);
   assert.equal(r.get(twoAllPro.key), 3);
   assert.equal(r.get(roy.key), 3, 'Rookie of the Year is an X-Factor');
   assert.equal(r.get(royNoData.key), 3, 'even before wAV exists');
   assert.equal(r.get(royBust.key), 2, 'unless three seasons show it never translated');
+  assert.equal(r.get(royFaded.key), 2, 'a Rookie of the Year whose career stayed ordinary is a Superstar');
+  assert.equal(r.get(royBacked.key), 3, 'Pro Bowls keep the award-winner an X-Factor');
   assert.equal(r.get(paceOnly3.key), 3, 'elite pace over three seasons');
   assert.ok(r.get(goodNotElite.key)! <= 2, 'a strong but ordinary-star pace is not an X-Factor');
   assert.ok(r.get(paceOnly2.key)! <= 2, 'two seasons of elite pace stop at Superstar');
   assert.ok(r.get(punter.key)! <= 2, 'specialists never reach X-Factor on pace');
-  assert.equal([...r.values()].filter((t) => t === 3).length, 5, 'no X-Factor from the quota');
+  assert.equal([...r.values()].filter((t) => t === 3).length, 6, 'no X-Factor from the quota');
 });
 
 test('Superstar and Star floors from All-Pro and Pro Bowl counts', () => {
@@ -70,12 +74,12 @@ test('a zero-season class hands out Superstars and Stars by slot and no X-Factor
   assert.equal(r.get(items[200].key), 0);
 });
 
-test('the quota grows with seasons: none at one season, half at two, full Superstars at four', () => {
+test('the quota grows with seasons: a quarter at one season, half at two, full Superstars at four', () => {
   const cls = (year: number) => Array.from({ length: 402 }, (_, i) => mk({ draftYear: year, wav: Math.max(1, 30 - i / 10), round: Math.floor(i / 32) + 1, pick: i + 1 }));
   const count = (year: number, tier: number) => [...dev(cls(year)).values()].filter((t) => t === tier).length;
-  assert.equal(count(2025, 2), 0, 'one season: no Superstars from quota');
+  assert.equal(count(2025, 2), 4, 'one season: a quarter of the Superstars');
   assert.equal(count(2025, 1), 45, 'one season: half the Stars');
-  assert.equal(count(2024, 2), 5, 'two seasons: a third of the Superstars');
+  assert.equal(count(2024, 2), 7, 'two seasons: half the Superstars');
   assert.equal(count(2024, 1), 90);
   assert.equal(count(2022, 2), 14, 'four seasons: full Superstars');
 });

@@ -775,7 +775,7 @@
 773,Christian Darrisaw,player,plpo_DarrisawChristian,0.0,7
 774,Marquice Cole,player,plpo_ColeMarquice,0,7
 775,Jackson Carman,player,plpo_CarmanJackson,0.0,7
-776,Alijah Vera-Tucker,player,plpo_Vera,0.0,7
+776,Alijah Vera-Tucker,player,plpo_Vera-TuckerAlijah,0.0,7
 777,Trent Cole,player,plpo_ColeTrent,0,7
 778,Jaylon Moore,player,plpo_MooreJaylon,0.0,7
 779,Daryn Colledge,player,plpo_ColledgeDaryn,0,7
@@ -957,7 +957,7 @@
 955,Cameron Kinley,player,plpo_KinleyCameron,,7
 956,Zac Diles,player,plpo_DilesZac,,7
 957,Jake Andrews,player,plpo_AndrewsJake,0.0,7
-958,Felix Anudike-Uzomah,player,plpo_Anudike,0.0,7
+958,Felix Anudike-Uzomah,player,plpo_Anudike-UzomahFelix,0.0,7
 959,Chris Garrett,player,plpo_GarrettChris,,7
 960,JJ Koski,player,plpo_KoskiJJ,,7
 961,Generic Face,generic,plpo_generic_3_B_B_01,,5
@@ -1042,7 +1042,7 @@
 1040,Christian Rozeboom,player,plpo_RozeboomChristian,0.0,7
 1041,Baron Browning,player,plpo_BrowningBaron,0.0,7
 1042,Olive Sagapolu,player,plpo_SagapoluOlive,,7
-1043,William Bradley-King,player,plpo_Bradley,0.0,7
+1043,William Bradley-King,player,plpo_Bradley-KingWilliam,0.0,7
 1044,Lachavious Simmons,player,plpo_SimmonsLachavious,0.0,7
 1045,Bert Jones,player,plpo_BertJones,,7
 1046,Isaiah McDuffie,player,plpo_McDuffieIsaiah,0.0,7
@@ -1059,7 +1059,7 @@
 1057,Fred Evans,player,plpo_EvansFred,0,7
 1058,Micah Parsons,player,plpo_ParsonsMicah,0.0,7
 1059,Jahri Evans,player,plpo_EvansJahri,0,7
-1060,Jeremiah Owusu-Koramoah,player,plpo_Owusu,0.0,7
+1060,Jeremiah Owusu-Koramoah,player,plpo_Owusu-KoramoahJeremiah,0.0,7
 1061,Jeff Smith,player,plpo_SmithJeff,0,7
 1062,TJ Smith Jr,player,plpo_SmithJrFrederick,,7
 1063,Jake Funk,player,plpo_FunkJake,0.0,7
@@ -1141,7 +1141,7 @@
 1139,Matt Forte,player,plpo_ForteMatt,0,7
 1140,Matt Araiza,player,plpo_AraizaMatt,,7
 1141,Arian Foster,player,plpo_FosterArian,0,7
-1142,Jalyn Armour- Davis,player,plpo_Armour,,7
+1142,Jalyn Armour- Davis,player,plpo_Armour-DavisJalyn,,7
 1143,Mike Strachan,player,plpo_StrachanMike,0.0,7
 1144,Benjamin StJuste,player,plpo_St,0.0,7
 1145,Brian Asamoah,player,plpo_AsamoahBrian,,7
@@ -1243,7 +1243,7 @@
 1241,Micah Baskerville,player,plpo_BaskervilleMicah,,7
 1242,Pooka Williams,player,plpo_WilliamsPooka,,7
 1243,Jake Camarda,player,plpo_CamardaJake,0.0,7
-1244,Ihmir Smith-Marsette,player,plpo_Smith,0.0,7
+1244,Ihmir Smith-Marsette,player,plpo_Smith-MarsetteIhmir,0.0,7
 1245,Khalil Herbert,player,plpo_HerbertKhalil,0.0,7
 1246,Ted Ginn Jr,player,plpo_GinnJrTed,0,7
 1247,Chance Campbell,player,plpo_CampbellChance,0.0,7
@@ -1258,7 +1258,7 @@
 1256,Zach Carter,player,plpo_CarterZach,,7
 1257,Dashon Goldson,player,plpo_GoldsonDashon,0,7
 1258,Kedric Golston,player,plpo_GolstonKedric,0,7
-1259,Tariq Castro-Fields,player,plpo_Castro,0.0,7
+1259,Tariq Castro-Fields,player,plpo_Castro-FieldsTariq,0.0,7
 1260,Tony Gonzalez,legend,plpo_legends_GonzalezTony,gonzalezTony_11395,1
 1261,Kadarius Toney,player,plpo_ToneyKadarius,0.0,7
 1262,Tavares Gooden,player,plpo_GoodenTavares,0,7
@@ -1327,7 +1327,7 @@
 1325,Brent Grimes,player,plpo_GrimesBrent,0,7
 1326,DJ Davidson,player,plpo_DavidsonDJ,0.0,7
 1327,Robert Rochell,player,plpo_RochellRobert,0.0,7
-1328,Ty Davis-Price,player,plpo_Davis,,7
+1328,Ty Davis-Price,player,plpo_Davis-PriceTy,,7
 1329,Divine Deablo,player,plpo_DeabloDivine,0.0,7
 1330,Trent Green,player,plpo_GreenTrent,GreenTrent_26880,7
 1331,Rob Gronkowski,player,plpo_GronkowskiRob,GronkowskiRob_9784,1
@@ -1339,7 +1339,7 @@
 1337,Shi Smith,player,plpo_SmithShi,0.0,7
 1338,Letroy Guion,player,plpo_GuionLetroy,0,7
 1339,Rachad Wildgoose,player,plpo_WildgooseRachad,0.0,7
-1340,Shemar Jean-Charles,player,plpo_Jean,0.0,7
+1340,Shemar Jean-Charles,player,plpo_Jean-CharlesShemar,0.0,7
 1341,Elijah Molden,player,plpo_MoldenElijah,0.0,7
 1342,Shaun Wade,player,plpo_WadeShaun,0.0,7
 1343,Joe Haden,player,plpo_HadenJoe,HadenJoe_9922,7
@@ -1405,7 +1405,7 @@
 1403,David Harris,player,plpo_HarrisDavid,0,7
 1404,Aaron Brewer,player,plpo_BrewerAaron,0.0,7
 1405,Tony Brown,player,plpo_BrownTony,,7
-1406,Juwann Bushell-Beatty,player,plpo_Bushell,,7
+1406,Juwann Bushell-Beatty,player,plpo_Bushell-BeattyJuwann,,7
 1407,RonDell Carter,player,plpo_CarterRonDell,,7
 1408,Sergio Castillo,player,plpo_CastilloSergio,,7
 1409,Dan Chisena,player,plpo_ChisenaDan,,7
@@ -1429,7 +1429,7 @@
 1427,Brian Hartline,player,plpo_HartlineBrian,0,7
 1428,Kabion Ento,player,plpo_EntoKabion,,7
 1429,Ben Hartsock,player,plpo_HartsockBen,0,7
-1430,Demetrius Flannigan-Fowles,player,plpo_Flannigan,0.0,7
+1430,Demetrius Flannigan-Fowles,player,plpo_Flannigan-FowlesDemetrius,0.0,7
 1431,Sam Franklin,player,plpo_FranklinSam,,7
 1432,Reggie Gilliam,player,plpo_GilliamReggie,0.0,7
 1433,Percy Harvin,player,plpo_HarvinPercy,0,7
@@ -1492,7 +1492,7 @@
 1490,Kyle Murphy,player,plpo_MurphyKyle,,7
 1491,Gabe Nabers,player,plpo_NabersGabe,,7
 1492,Matt Nelson,player,plpo_NelsonMatt,0.0,7
-1493,Darrius Heyward-Bey,player,plpo_Heyward,0,7
+1493,Darrius Heyward-Bey,player,plpo_Heyward-BeyDarrius,0,7
 1494,Hunter Niswander,player,plpo_NiswanderHunter,,7
 1495,Chris Orr,player,plpo_OrrChris,,7
 1496,Matt Orzech,player,plpo_OrzechMatt,,7
@@ -1538,7 +1538,7 @@
 1536,Donte Vaughn,player,plpo_VaughnDonte,,7
 1537,Michael Hoomanawanui,player,plpo_HoomanawanuiMichael,HoomanawanuiMichael_9796,7
 1538,Jonathan Ward,player,plpo_WardJonathan,0.0,7
-1539,Nick Westrbook-Ikhine,player,plpo_Westrbook,,7
+1539,Nick Westrbook-Ikhine,player,plpo_Westrbook-IkhineNick,,7
 1540,Javin White,player,plpo_WhiteJavin,,7
 1541,Jace Whittaker,player,plpo_WhittakerJace,,7
 1542,Antonio Williams,player,plpo_WilliamsAntonio,,7
@@ -1738,7 +1738,7 @@
 1736,Tyler Goodson,player,plpo_GoodsonTyler,0.0,7
 1737,Akeem Jordan,player,plpo_JordanAkeem,0,7
 1738,Kyler Gordon,player,plpo_GordonKyler,0.0,7
-1739,Isaiah Graham-Mobley,player,plpo_Graham,,7
+1739,Isaiah Graham-Mobley,player,plpo_Graham-MobleyIsaiah,,7
 1740,Davin Joseph,player,plpo_JosephDavin,0,7
 1741,Danny Gray,player,plpo_GrayDanny,0.0,7
 1742,Johnathan Joseph,player,plpo_JosephJohnathan,0,7
@@ -1757,7 +1757,7 @@
 1755,Aaron Hansford,player,plpo_HansfordAaron,,7
 1756,Christian Harris,player,plpo_HarrisChristian,0.0,7
 1757,Kevin Harris,player,plpo_HarrisKevin,0.0,7
-1758,Kolby Harvell-Peel,player,plpo_Harvell,,7
+1758,Kolby Harvell-Peel,player,plpo_Harvell-PeelKolby,,7
 1759,Julius Brents,player,plpo_BrentsJulius,0.0,7
 1760,Hassan Haskins,player,plpo_HaskinsHassan,0.0,7
 1761,Blake Hayes,player,plpo_HayesBlake,,7
@@ -1884,7 +1884,7 @@
 1882,Jim Leonhard,player,plpo_LeonhardJim,0,7
 1883,EJ Perry,player,plpo_PerryEJ,,7
 1884,Andy Levitre,player,plpo_LevitreAndy,0,7
-1885,Nick Petit-Frere,player,plpo_Petit,,7
+1885,Nick Petit-Frere,player,plpo_Petit-FrereNick,,7
 1886,DeAndre Levy,player,plpo_LevyDeAndre,0,7
 1887,Kyle Philips,player,plpo_PhilipsKyle,0.0,7
 1888,George Pickens,player,plpo_PickensGeorge,0.0,7
@@ -1962,8 +1962,8 @@
 1960,Carson Strong,player,plpo_StrongCarson,,7
 1961,Pierre Strong,player,plpo_StrongPierre,,7
 1962,Andrew Stueber,player,plpo_StueberAndrew,0.0,7
-1963,Myron Tagovailoa-Amosa,player,plpo_Tagovailoa,,7
-1964,Cam Taylor-Britt,player,plpo_Taylor,0.0,7
+1963,Myron Tagovailoa-Amosa,player,plpo_Tagovailoa-AmosaMyron,,7
+1964,Cam Taylor-Britt,player,plpo_Taylor-BrittCam,0.0,7
 1965,Nick Mangold,player,plpo_MangoldNick,0,1
 1966,Logan Mankins,player,plpo_MankinsLogan,0,7
 1967,Isaac Taylor-Stuart,player,plpo_TaylorStuartIsaac,,7
@@ -1988,7 +1988,7 @@
 1986,Channing Tindall,player,plpo_TindallChanning,0.0,7
 1987,Jalen Tolbert,player,plpo_TolbertJalen,0.0,7
 1988,Zach Tom,player,plpo_TomZach,0.0,7
-1989,Delarrin Turner-Yell,player,plpo_Turner,0.0,7
+1989,Delarrin Turner-Yell,player,plpo_Turner-YellDelarrin,0.0,7
 1990,Cole Turner,player,plpo_TurnerCole,0.0,7
 1991,Tre Turner,player,plpo_TurnerTre,,7
 1992,Sherrod Martin,player,plpo_MartinSherrod,0,7
@@ -2327,7 +2327,7 @@
 2325,Generic Face,generic,plpo_generic_5_B_S_003,,7
 2326,Montell Owens,player,plpo_OwensMontell,0,7
 2327,Terrell Owens,legend,plpo_legends_OwensTerrell,owensterrell_939,7
-2328,Akwasi Owusu-Ansah,player,plpo_Owusu,,7
+2328,Akwasi Owusu-Ansah,player,plpo_Owusu-AnsahAkwasi,,7
 2329,Calvin Pace,player,plpo_PaceCalvin,0,7
 2330,Riley Moss,player,plpo_MossRiley,0.0,7
 2331,Caleb Murphy,player,plpo_MurphyCaleb,,7
@@ -2400,7 +2400,7 @@
 2398,Brandon Pettigrew,player,plpo_PettigrewBrandon,0,7
 2399,Mazi Smith,player,plpo_SmithMazi,0.0,7
 2400,John Phillips,player,plpo_PhillipsJohn,0,7
-2401,Jaxon Smith-Njigba,player,plpo_Smith,0.0,7
+2401,Jaxon Smith-Njigba,player,plpo_Smith-NjigbaJaxon,0.0,7
 2402,Nolan Smith,player,plpo_SmithNolan,,7
 2403,Terell Smith,player,plpo_SmithTerell,0.0,7
 2404,Sidy Sow,player,plpo_SowSidy,0.0,7
@@ -2409,7 +2409,7 @@
 2407,Shaun Phillips,player,plpo_PhillipsShaun,0,7
 2408,Ryan Pickett,player,plpo_PickettRyan,0,7
 2409,Tyler Steen,player,plpo_SteenTyler,0.0,7
-2410,Jason Pierre-Paul,player,plpo_Pierre,PierrePaulJason_9835,7
+2410,Jason Pierre-Paul,player,plpo_Pierre-PaulJason,PierrePaulJason_9835,7
 2411,Tyrique Stevenson,player,plpo_StevensonTyrique,0.0,7
 2412,Dante Stills,player,plpo_StillsDante,0.0,7
 2413,Ropati Pitoitua,player,plpo_PitoituaRopati,0,7
@@ -2570,7 +2570,7 @@
 2568,Courtney Roby,player,plpo_RobyCourtney,0,7
 2569,Sav Rocca,player,plpo_RoccaSav,0,7
 2570,Doug Kramer,player,plpo_KramerDoug,0.0,7
-2571,Dominique Rodgers-Cromartie,player,plpo_Rodgers,RodgersCromartieDominique_28388,7
+2571,Dominique Rodgers-Cromartie,player,plpo_Rodgers-CromartieDominique,RodgersCromartieDominique_28388,7
 2572,William Kwenkeu,player,plpo_KwenkeuWilliam,0.0,7
 2573,Kwamie Lassiter II,player,plpo_LassiterIIKwamie,0.0,7
 2574,Deane Leonard,player,plpo_LeonardDeane,0.0,7
@@ -2610,7 +2610,7 @@
 2608,Trey Palmer,player,plpo_PalmerTrey,0.0,7
 2609,Anthony Richardson,player,plpo_RichardsonAnthony,0.0,7
 2610,Benning Potoae,player,plpo_PotoaeBenning,,7
-2611,Bookie Radley-Hiles,player,plpo_Radley,,7
+2611,Bookie Radley-Hiles,player,plpo_Radley-HilesBookie,,7
 2612,Nick Ralston,player,plpo_RalstonNick,,7
 2613,Bijan Robinson,player,plpo_RobinsonBijan,0.0,7
 2614,Sam Roberts,player,plpo_RobertsSam,0.0,7
@@ -4614,7 +4614,7 @@
 4612,Generic Face,generic,plpo_generic_7_B_N_009,,7
 4613,Morgan Cox,player,plpo_CoxMorgan,CoxMorgan_10551,7
 4614,Generic Face,generic,plpo_generic_7_B_S_004,,7
-4615,DaMon Cromartie-Smith,player,plpo_Cromartie,,7
+4615,DaMon Cromartie-Smith,player,plpo_Cromartie-SmithDaMon,,7
 4616,Matt Landers,player,plpo_LandersMatt,,7
 4617,Generic Face,generic,plpo_generic_7_M_N_001,,7
 4618,Victor Cruz,player,plpo_CruzVictor,,7
@@ -4858,7 +4858,7 @@
 4856,Generic Face,generic,plpo_generic_5_062,,7
 4857,Generic Face,generic,plpo_generic_5_063,,7
 4858,Anderson Russell,player,plpo_RussellAnderson,,7
-4859,Jimmy Saddler-McQueen,player,plpo_Saddler,,7
+4859,Jimmy Saddler-McQueen,player,plpo_Saddler-McQueenJimmy,,7
 4860,Rodger Saffold III,player,plpo_SaffoldIIIRodger,,7
 4861,Brian Sanford,player,plpo_SanfordBrian,,7
 4862,Jason Poe,player,plpo_PoeJason,,7
@@ -5000,7 +5000,7 @@
 4998,DeAndre Square,player,plpo_SquareDeAndre,,7
 4999,Generic Face,generic,plpo_generic_2_022,,1
 5000,Terrelle Pryor Sr,player,plpo_PryorSrTerrelle,,7
-5001,Quddus-Isa Abdul,player,plpo_Abdul,,7
+5001,Quddus-Isa Abdul,player,plpo_Abdul-QuddusIsa,,7
 5002,Emmanuel Acho,player,plpo_AchoEmmanuel,,7
 5003,Sam Acho,player,plpo_AchoSam,AchoSam_10705,7
 5004,Generic Face,generic,plpo_generic_2_023,,1
@@ -5691,7 +5691,7 @@
 5689,Joshua Bellamy,player,plpo_BellamyJoshua,,7
 5690,Giovani Bernard,player,plpo_BernardGiovani,,7
 5691,Generic Face,generic,plpo_generic_6_039,,7
-5692,McLeod Bethel-Thompson,player,plpo_Bethel,,7
+5692,McLeod Bethel-Thompson,player,plpo_Bethel-ThompsonMcLeod,,7
 5693,Christo Bilukidi,player,plpo_BilukidiChristo,,7
 5694,Generic Face,generic,plpo_generic_6_040,,7
 5695,Valentino Blake,player,plpo_BlakeValentino,,7
@@ -5895,7 +5895,7 @@
 5893,Brandon Jenkins,player,plpo_JenkinsBrandon,,7
 5894,Jelani Jenkins,player,plpo_JenkinsJelani,,7
 5895,John Jenkins,player,plpo_JenkinsJohn,JenkinsJohn_1073,7
-5896,Tony Jerod-Eddie,player,plpo_Jerod,,7
+5896,Tony Jerod-Eddie,player,plpo_Jerod-EddieTony,,7
 5897,Luke Joeckel,player,plpo_JoeckelLuke,,7
 5898,Generic Face,generic,plpo_generic_7_018,,7
 5899,Damaris Johnson,player,plpo_JohnsonDamaris,,7
@@ -5942,7 +5942,7 @@
 5940,Generic Face,generic,plpo_generic_7_030,,7
 5941,Generic Face,generic,plpo_generic_7_B_N_06,,7
 5942,Corey Lemonier,player,plpo_LemonierCorey,,7
-5943,Kapron Lewis-Moore,player,plpo_Lewis,,7
+5943,Kapron Lewis-Moore,player,plpo_Lewis-MooreKapron,,7
 5944,Generic Face,generic,plpo_generic_7_031,,7
 5945,Zach Line,player,plpo_LineZach,,7
 5946,Generic Face,generic,plpo_generic_7_032,,7
@@ -6289,7 +6289,7 @@
 6287,Generic Face,generic,plpo_generic_2_B_B_006,,1
 6288,Earl Wolff,player,plpo_WolffEarl,,7
 6289,Khalid Wooten,player,plpo_WootenKhalid,,7
-6290,Blidi Wreh-Wilson,player,plpo_Wreh,,7
+6290,Blidi Wreh-Wilson,player,plpo_Wreh-WilsonBlidi,,7
 6291,Sam Bradford,player,plpo_BradfordSam,bradfordsam_9710,1
 6292,Drew Brees,player,plpo_BreesDrew,BreesDrew_14118,1
 6293,Jay Cutler,player,plpo_CutlerJay,0,1
@@ -6378,7 +6378,7 @@
 6376,T.J. Carrie,player,plpo_CarrieTJ,,7
 6377,Generic Face,generic,plpo_generic_7_122,,7
 6378,Will Clarke,player,plpo_ClarkeWill,,7
-6379,HaHa Clinton-Dix,player,plpo_Clinton,,7
+6379,HaHa Clinton-Dix,player,plpo_Clinton-DixHaHa,,7
 6380,Jadeveon Clowney,player,plpo_ClowneyJadeveon,,7
 6381,Ross Cockrell,player,plpo_CockrellRoss,,7
 6382,Brandon Coleman,player,plpo_ColemanBrandon,,7
@@ -6464,7 +6464,7 @@
 6462,Nic Jacobs,player,plpo_JacobsNic,,7
 6463,JaWuan James,player,plpo_JamesJaWuan,,7
 6464,Kendall James,player,plpo_JamesKendall,,7
-6465,Stanley Jean-Baptiste,player,plpo_Jean,,7
+6465,Stanley Jean-Baptiste,player,plpo_Jean-BaptisteStanley,,7
 6466,Jackson Jeffcoat,player,plpo_JeffcoatJackson,,7
 6467,Marcel Jensen,player,plpo_JensenMarcel,,7
 6468,Timmy Jernigan,player,plpo_JerniganTimmy,,7
@@ -6549,7 +6549,7 @@
 6547,Kurt Hinish,player,plpo_HinishKurt,0.0,7
 6548,Mike Pennel,player,plpo_PennelMike,,7
 6549,LaDarius Perkins,player,plpo_PerkinsLaDarius,,7
-6550,Kevin Pierre-Louis,player,plpo_Pierre,,7
+6550,Kevin Pierre-Louis,player,plpo_Pierre-LouisKevin,,7
 6551,Ronald Powell,player,plpo_PowellRonald,,7
 6552,Walter Powell,player,plpo_PowellWalter,,7
 6553,Jabari Price,player,plpo_PriceJabari,,7
@@ -6580,7 +6580,7 @@
 6578,Tom Savage,player,plpo_SavageTom,,7
 6579,Michael Schofield,player,plpo_SchofieldMichael,,7
 6580,Lache Seastrunk,player,plpo_SeastrunkLache,,7
-6581,Austin Seferian-Jenkins,player,plpo_Seferian,,7
+6581,Austin Seferian-Jenkins,player,plpo_Seferian-JenkinsAustin,,7
 6582,Connor Shaw,player,plpo_ShawConnor,,7
 6583,Ryan Shazier,player,plpo_ShazierRyan,,7
 6584,Prince Shembo,player,plpo_ShemboPrince,,7
@@ -6602,7 +6602,7 @@
 6600,James Stone,player,plpo_StoneJames,,7
 6601,Bryan Stork,player,plpo_StorkBryan,,7
 6602,Devin Street,player,plpo_StreetDevin,,7
-6603,Xavier Sua-Filo,player,plpo_Sua,,7
+6603,Xavier Sua-Filo,player,plpo_Sua-FiloXavier,,7
 6604,Vinnie Sunseri,player,plpo_SunseriVinnie,,7
 6605,Will Sutton,player,plpo_SuttonWill,,7
 6606,Travis Swanson,player,plpo_SwansonTravis,,7
@@ -6678,14 +6678,14 @@
 6676,Generic Face,generic,plpo_generic_7_BMT_M_009,,7
 6677,Demontre Hurst,player,plpo_HurstDemontre,,7
 6678,Tony Dye,player,plpo_DyeTony,,7
-6679,Chris Lewis-Harris,player,plpo_Lewis,,7
+6679,Chris Lewis-Harris,player,plpo_Lewis-HarrisChris,,7
 6680,Jayson DiManche,player,plpo_DiMancheJayson,,7
 6681,Shawn Williams,player,plpo_WilliamsShawn,,7
 6682,JK Schaffer,player,plpo_SchafferJK,,7
 6683,Generic Face,generic,plpo_generic_6_004,,7
 6684,Generic Face,generic,plpo_generic_6_005,,7
 6685,TJ Johnson,player,plpo_JohnsonTJ,,7
-6686,Nickell Robey-Coleman,player,plpo_Robey,,7
+6686,Nickell Robey-Coleman,player,plpo_Robey-ColemanNickell,,7
 6687,Jonathan Meeks,player,plpo_MeeksJonathan,,7
 6688,Johnny Adams,player,plpo_AdamsJohnny,,7
 6689,Stefan Charles,player,plpo_CharlesStefan,,7
@@ -7003,7 +7003,7 @@
 7001,Blake Annen,player,plpo_AnnenBlake,,7
 7002,Stephone Anthony,player,plpo_AnthonyStephone,,7
 7003,Arik Armstead,player,plpo_ArmsteadArik,0.0,7
-7004,Cameron Artis-Payne,player,plpo_Artis,,7
+7004,Cameron Artis-Payne,player,plpo_Artis-PayneCameron,,7
 7005,Denico Autry,player,plpo_AutryDenico,0.0,7
 7006,Marcus Ball,player,plpo_BallMarcus,,7
 7007,Neiron Ball,player,plpo_BallNeiron,,7
@@ -7095,11 +7095,11 @@
 7093,BJ Dubose,player,plpo_DuboseBJ,,7
 7094,Brandon Dunn,player,plpo_DunnBrandon,,7
 7095,Bud Dupree,player,plpo_DupreeBud,0.0,7
-7096,Laurent Duvernay-Tardif,player,plpo_Duvernay,,7
+7096,Laurent Duvernay-Tardif,player,plpo_Duvernay-TardifLaurent,,7
 7097,Michael Dyer,player,plpo_DyerMichael,,7
 7098,Jahwan Edwards,player,plpo_EdwardsJahwan,,7
 7099,Mario Edwards Jr,player,plpo_EdwardsJrMario,0.0,7
-7100,Ifo Ekpre-Olomu,player,plpo_Ekpre,,7
+7100,Ifo Ekpre-Olomu,player,plpo_Ekpre-OlomuIfo,,7
 7101,Jayrone Elliott,player,plpo_ElliottJayrone,,7
 7102,Kyle Emanuel,player,plpo_EmanuelKyle,,7
 7103,Cameron Erving,player,plpo_ErvingCameron,0.0,7
@@ -7148,7 +7148,7 @@
 7146,Garrett Grayson,player,plpo_GraysonGarrett,,7
 7147,Chaz Green,player,plpo_GreenChaz,,7
 7148,Justin Green,player,plpo_GreenJustin,0,7
-7149,Dorial Green-Beckham,player,plpo_Green,,7
+7149,Dorial Green-Beckham,player,plpo_Green-BeckhamDorial,,7
 7150,Deontay Greenberry,player,plpo_GreenberryDeontay,,7
 7151,Rashad Greene Sr,player,plpo_GreeneSrRashad,,7
 7152,Randy Gregory,player,plpo_GregoryRandy,0.0,7
@@ -7215,7 +7215,7 @@
 7213,Seth Lobato,player,plpo_LobatoSeth,,7
 7214,Tyler Lockett,player,plpo_LockettTyler,0.0,7
 7215,Deon Long,player,plpo_LongDeon,,7
-7216,Al Louis-Jean,player,plpo_Louis,,7
+7216,Al Louis-Jean,player,plpo_Louis-JeanAl,,7
 7217,Jerry Lovelocke,player,plpo_LovelockeJerry,,7
 7218,Donatella Luckett,player,plpo_LuckettDonatella,,7
 7219,Gavin Lutman,player,plpo_LutmanGavin,,7
@@ -7475,7 +7475,7 @@
 7473,Blank,player,plpo_Blank,,7
 7474,Laurence Gibson,player,plpo_GibsonLaurence,,7
 7475,Jacoby Glenn,player,plpo_GlennJacoby,,7
-7476,Tay Glover-Wright,player,plpo_Glover,,7
+7476,Tay Glover-Wright,player,plpo_Glover-WrightTay,,7
 7477,CJ Goodwin,player,plpo_GoodwinCJ,0.0,7
 7478,Blank,player,plpo_Blank,,7
 7479,Blank,player,plpo_Blank,,7
@@ -7495,7 +7495,7 @@
 7493,Dee Hart,player,plpo_HartDee,,7
 7494,Blank,player,plpo_Blank,,7
 7495,Blank,player,plpo_Blank,,7
-7496,Ricky Havili-Heimuli,player,plpo_Havili,,7
+7496,Ricky Havili-Heimuli,player,plpo_Havili-HeimuliRicky,,7
 7497,Braylon Heard,player,plpo_HeardBraylon,,7
 7498,Blank,player,plpo_Blank,,7
 7499,Javontee Herndon,player,plpo_HerndonJavontee,,7
@@ -7562,7 +7562,7 @@
 7560,Blank,player,plpo_Blank,,7
 7561,Rajion Neal,player,plpo_NealRajion,,7
 7562,Roosevelt Nix,player,plpo_NixRoosevelt,,7
-7563,Rakeem Nunez-Roches,player,plpo_Nunez,0.0,7
+7563,Rakeem Nunez-Roches,player,plpo_Nunez-RochesRakeem,0.0,7
 7564,Mark Nzeocha,player,plpo_NzeochaMark,,7
 7565,Kenny Okoro,player,plpo_OkoroKenny,,7
 7566,Lawrence Okoye,player,plpo_OkoyeLawrence,,7
@@ -7615,7 +7615,7 @@
 7613,Blank,player,plpo_Blank,,7
 7614,Eric Tomlinson,player,plpo_TomlinsonEric,,7
 7615,Lynden Trail,player,plpo_TrailLynden,,7
-7616,Louis Trinca-Pasat,player,plpo_Trinca,,7
+7616,Louis Trinca-Pasat,player,plpo_Trinca-PasatLouis,,7
 7617,Blank,player,plpo_Blank,,7
 7618,Colton Underwood,player,plpo_UnderwoodColton,,7
 7619,Uani Unga,player,plpo_UngaUani,,7
@@ -7672,7 +7672,7 @@
 7670,Generic Face,generic,plpo_generic_4_M_N_001,,5
 7671,Reshard Cliett,player,plpo_CliettReshard,,7
 7672,Brandon Copeland,player,plpo_CopelandBrandon,,7
-7673,Yannik Cudjoe-Virgil,player,plpo_Cudjoe,,7
+7673,Yannik Cudjoe-Virgil,player,plpo_Cudjoe-VirgilYannik,,7
 7674,Jerome Cunningham,player,plpo_CunninghamJerome,,7
 7675,Matt Darr,player,plpo_DarrMatt,,7
 7676,Andre Davis,player,plpo_DavisAndre,0,7
@@ -7725,7 +7725,7 @@
 7723,Isaiah Johnson,player,plpo_JohnsonIsaiah,,7
 7724,Kaleb Johnson,player,plpo_JohnsonKaleb,,7
 7725,Malcolm Johnson,player,plpo_JohnsonMalcolm,,7
-7726,Harold Jones-Quartey,player,plpo_Jones,,7
+7726,Harold Jones-Quartey,player,plpo_Jones-QuarteyHarold,,7
 7727,Generic Face,generic,plpo_generic_5_B_G_02,,7
 7728,Generic Face,generic,plpo_generic_5_036,,7
 7729,Generic Face,generic,plpo_generic_5_B_N_02,,7
@@ -8028,7 +8028,7 @@
 8026,TJ Green,player,plpo_GreenTJ,,7
 8027,Torrey Green,player,plpo_GreenTorrey,,7
 8028,Darrell Greene,player,plpo_GreeneDarrell,,7
-8029,Kamu Grugier-Hill,player,plpo_Grugier,0.0,7
+8029,Kamu Grugier-Hill,player,plpo_Grugier-HillKamu,0.0,7
 8030,Christian Hackenberg,player,plpo_HackenbergChristian,GildonJason_8166,7
 8031,Tom Hackett,player,plpo_HackettTom,,7
 8032,Joe Haeg,player,plpo_HaegJoe,,7
@@ -8058,7 +8058,7 @@
 8056,Johnny Holton,player,plpo_HoltonJohnny,,7
 8057,Austin Hooper,player,plpo_HooperAustin,0.0,7
 8058,Sione Houma,player,plpo_HoumaSione,,7
-8059,DeAndre Houston-Carson,player,plpo_Houston,,7
+8059,DeAndre Houston-Carson,player,plpo_Houston-CarsonDeAndre,,7
 8060,Jordan Howard,player,plpo_HowardJordan,,7
 8061,Xavien Howard,player,plpo_HowardXavien,0.0,7
 8062,Joey Hunt,player,plpo_HuntJoey,0.0,7
@@ -8098,7 +8098,7 @@
 8096,Miles Killebrew,player,plpo_KillebrewMiles,0.0,7
 8097,Derrick Kindred,player,plpo_KindredDerrick,,7
 8098,Denver Kirkland,player,plpo_KirklandDenver,,7
-8099,Henry Krieger-Coble,player,plpo_Krieger,,7
+8099,Henry Krieger-Coble,player,plpo_Krieger-CobleHenry,,7
 8100,Tyler Kuder,player,plpo_KuderTyler,,7
 8101,Nick Kwiatkoski,player,plpo_KwiatkoskiNick,0.0,7
 8102,Jake Lampman,player,plpo_LampmanJake,,7
@@ -8195,7 +8195,7 @@
 8193,Keenan Reynolds,player,plpo_ReynoldsKeenan,,7
 8194,Hassan Ridgeway,player,plpo_RidgewayHassan,0.0,7
 8195,Elandon Roberts,player,plpo_RobertsElandon,0.0,7
-8196,Roy Robertson-Harris,player,plpo_Robertson,0.0,7
+8196,Roy Robertson-Harris,player,plpo_Robertson-HarrisRoy,0.0,7
 8197,Allan George,player,plpo_RobinsonAShawn,,7
 8198,Demarcus Robinson,player,plpo_RobinsonDemarcus,0.0,7
 8199,Keeanu Benton,player,plpo_BentonKeeanu,0.0,7
@@ -8282,7 +8282,7 @@
 8280,Andrew Adams,player,plpo_AdamsAndrew,,7
 8281,Tyrell Adams,player,plpo_AdamsTyrell,,7
 8282,Kenton Adeyemi,player,plpo_AdeyemiKenton,,7
-8283,Jude Adjei-Barimah,player,plpo_Adjei,,7
+8283,Jude Adjei-Barimah,player,plpo_Adjei-BarimahJude,,7
 8284,Shahbaz Ahmed,player,plpo_AhmedShahbaz,,7
 8285,Bryson Albright,player,plpo_AlbrightBryson,,7
 8286,Generic Face,generic,plpo_generic_5_060,,7
@@ -8296,7 +8296,7 @@
 8294,Jered Bell,player,plpo_BellJered,,7
 8295,Jace Billingsley,player,plpo_BillingsleyJace,,7
 8296,Freddie Bishop,player,plpo_BishopFreddie,,7
-8297,Briean Boddy-Calhoun,player,plpo_Boddy,,7
+8297,Briean Boddy-Calhoun,player,plpo_Boddy-CalhounBriean,,7
 8298,Braedon Bowman,player,plpo_BowmanBraedon,,7
 8299,Travis Britz,player,plpo_BritzTravis,,7
 8300,Mack Brown,player,plpo_BrownMack,,7
@@ -8375,7 +8375,7 @@
 8373,Cory Littleton,player,plpo_LittletonCory,0.0,7
 8374,Wil Lutz,player,plpo_LutzWil,0.0,7
 8375,Chris Manhertz,player,plpo_ManhertzChris,0.0,7
-8376,Justin March-Lillard,player,plpo_March,,7
+8376,Justin March-Lillard,player,plpo_March-LillardJustin,,7
 8377,Tyler Marcordes,player,plpo_MarcordesTyler,,7
 8378,Johnny Maxey,player,plpo_MaxeyJohnny,,7
 8379,Dexter McCoil,player,plpo_McCoilDexter,,7
@@ -8545,7 +8545,7 @@
 8543,David Ellis,player,plpo_EllisDavid,,7
 8544,Jermaine Eluemunor,player,plpo_EluemunorJermaine,0.0,7
 8545,Evan Engram,player,plpo_EngramEvan,0.0,7
-8546,Amba Etta-Tawo,player,plpo_Etta,,7
+8546,Amba Etta-Tawo,player,plpo_Etta-TawoAmba,,7
 8547,Jerod Evans,player,plpo_EvansJerod,,7
 8548,Justin Evans,player,plpo_EvansJustin,0.0,7
 8549,Gerald Everett,player,plpo_EverettGerald,0.0,7
@@ -8576,7 +8576,7 @@
 8574,Sean Harlow,player,plpo_HarlowSean,,7
 8575,Charles Harris,player,plpo_HarrisCharles,0.0,7
 8576,Connor Harris,player,plpo_HarrisConnor,,7
-8577,Josh Harvey-Clemons,player,plpo_Harvey,,7
+8577,Josh Harvey-Clemons,player,plpo_Harvey-ClemonsJosh,,7
 8578,Keon Hatcher,player,plpo_HatcherKeon,,7
 8579,Carlos Henderson,player,plpo_HendersonCarlos,,7
 8580,DeAngelo Henderson,player,plpo_HendersonDeAngelo,,7
@@ -8697,7 +8697,7 @@
 8695,Michael Rector,player,plpo_RectorMichael,,7
 8696,Haason Reddick,player,plpo_ReddickHaason,0.0,7
 8697,Devine Redding,player,plpo_ReddingDevine,,7
-8698,Jalen Reeves-Maybin,player,plpo_Reeves,0.0,7
+8698,Jalen Reeves-Maybin,player,plpo_Reeves-MaybinJalen,0.0,7
 8699,Austin Rehkow,player,plpo_RehkowAustin,,7
 8700,Josh Reynolds,player,plpo_ReynoldsJoshua,0.0,7
 8701,Duke Riley,player,plpo_RileyDuke,0.0,7
@@ -8891,7 +8891,7 @@
 8889,Quinton Flowers,player,plpo_FlowersQuinton,,7
 8890,Tre Flowers,player,plpo_FlowersTre,0.0,7
 8891,Robert Foster,player,plpo_FosterRobert,,7
-8892,John Franklin-Myers,player,plpo_Franklin,0.0,7
+8892,John Franklin-Myers,player,plpo_Franklin-MyersJohn,0.0,7
 8893,Jarvion Franklin,player,plpo_FranklinJarvion,,7
 8894,Joshua Frazier,player,plpo_FrazierJoshua,,7
 8895,Royce Freeman,player,plpo_FreemanRoyce,,7
@@ -8949,7 +8949,7 @@
 8947,Danny Johnson,player,plpo_JohnsonDanny,0.0,7
 8948,Kerryon Johnson,player,plpo_JohnsonKerryon,,7
 8949,Taron Johnson,player,plpo_JohnsonTaron,0.0,7
-8950,Jaryd Jones-Smith,player,plpo_Jones,,7
+8950,Jaryd Jones-Smith,player,plpo_Jones-SmithJaryd,,7
 8951,Chris Jones,player,plpo_JonesChris,JonesChris_11702,7
 8952,Jamarco Jones,player,plpo_JonesJamarco,0.0,7
 8953,Justin Jones,player,plpo_JonesJustin,0.0,7
@@ -9040,7 +9040,7 @@
 9038,Calvin Ridley,player,plpo_RidleyCalvin,0.0,7
 9039,Korey Robertson,player,plpo_RobertsonKorey,,7
 9040,Stephen Roberts,player,plpo_RobertsStephen,,7
-9041,JaVon Rolland-Jones,player,plpo_Rolland,,7
+9041,JaVon Rolland-Jones,player,plpo_Rolland-JonesJaVon,,7
 9042,Josh Rosen,player,plpo_RosenJosh,,7
 9043,Bunmi Rotimi,player,plpo_RotimiBunmi,,7
 9044,Mason Rudolph,player,plpo_RudolphMason,0.0,7
@@ -9090,7 +9090,7 @@
 9088,Shane Tripucka,player,plpo_TripuckaShane,,7
 9089,Kemoko Turay,player,plpo_TurayKemoko,,7
 9090,Salesi Uhatafe,player,plpo_UhatafeSalesi,,7
-9091,Marquez Valdes-Scantling,player,plpo_Valdes,0.0,7
+9091,Marquez Valdes-Scantling,player,plpo_Valdes-ScantlingMarquez,0.0,7
 9092,Leighton Vander-Esch,player,plpo_VanderEschLeighton,,7
 9093,Vita Vea,player,plpo_VeaVita,0.0,5
 9094,Azeem Victor,player,plpo_VictorAzeem,,7
@@ -9185,7 +9185,7 @@
 9183,Reid Ferguson,player,plpo_FergusonReid,0.0,7
 9184,Sam Ficken,player,plpo_FickenSam,,7
 9185,John Fullington,player,plpo_FullingtonJohn,,7
-9186,Jerrol Garcia-Williams,player,plpo_Garcia,,7
+9186,Jerrol Garcia-Williams,player,plpo_Garcia-WilliamsJerrol,,7
 9187,Tanner Gentry,player,plpo_GentryTanner,,7
 9188,Jermaine Grace,player,plpo_GraceJermaine,,7
 9189,Geoff Gray,player,plpo_GrayGeoff,,7
@@ -9320,7 +9320,7 @@
 9318,Eric Wilson,player,plpo_WilsonEric,WilsonEric_12885,7
 9319,Josh Woodrum,player,plpo_WoodrumJosh,,7
 9320,Avery Gennesy,player,plpo_WoodsAntwaun,,7
-9321,Xavier Woodson-Luster,player,plpo_Woodson,,7
+9321,Xavier Woodson-Luster,player,plpo_Woodson-LusterXavier,,7
 9322,Zach Wood,player,plpo_WoodZach,0.0,7
 9323,DeAngelo Yancey,player,plpo_YanceyDeAngelo,,7
 9324,Adonis Alexander,player,plpo_AlexanderAdonis,,7
@@ -9360,16 +9360,16 @@
 9358,John Abram,player,plpo_AbramJohn,,7
 9359,Paul Adams,player,plpo_AdamsPaul,,7
 9360,Nasir Adderley,player,plpo_AdderleyNasir,,7
-9361,Azeez Al-Shaair,player,plpo_Al,0.0,7
+9361,Azeez Al-Shaair,player,plpo_Al-ShaairAzeez,0.0,7
 9362,Otaro Alaka,player,plpo_AlakaOtaro,,7
-9363,Bryson Allen-Williams,player,plpo_Allen,,7
+9363,Bryson Allen-Williams,player,plpo_Allen-WilliamsBryson,,7
 9364,Dakota Allen,player,plpo_AllenDakota,,7
 9365,Josh Hines-Allen,player,plpo_AllenJosh,,7
 9366,Zach Allen,player,plpo_AllenZach,0.0,7
 9367,Jeff Allison,player,plpo_AllisonJeff,,7
 9368,Ugo Amadi,player,plpo_AmadiUgochukwu,0.0,7
 9369,Rodney Anderson,player,plpo_AndersonRodney,,7
-9370,JJ Arcega-Whiteside,player,plpo_Arcega,0.0,7
+9370,JJ Arcega-Whiteside,player,plpo_Arcega-WhitesideJJ,0.0,7
 9371,Ryquell Armstead,player,plpo_ArmsteadRyquell,,7
 9372,Blessuan Austin,player,plpo_AustinBlessuan,,7
 9373,Jake Bailey,player,plpo_BaileyJake,0.0,7
@@ -9406,7 +9406,7 @@
 9404,Isaiah Buggs,player,plpo_BuggsIsaiah,0.0,7
 9405,Sean Murphy-Bunting,player,plpo_MurphyBuntingSean,0.0,7
 9406,Brian Burns,player,plpo_BurnsBrian,0.0,7
-9407,Ben Burr-Kirven,player,plpo_Burr,,7
+9407,Ben Burr-Kirven,player,plpo_Burr-KirvenBen,,7
 9408,Devin Bush,player,plpo_BushDevin,0,7
 9409,Emmanuel Butler,player,plpo_ButlerEmmanuel,,7
 9410,Hakeem Butler,player,plpo_ButlerHakeem,0.0,7
@@ -9465,12 +9465,12 @@
 9463,Lamont Gaillard,player,plpo_GaillardLamont,,7
 9464,Greg Gaines,player,plpo_GainesGreg,GainesGreg_20408,7
 9465,Malik Gant,player,plpo_GantMalik,,7
-9466,CJ Gardner-Johnson,player,plpo_Gardner,0.0,7
+9466,CJ Gardner-Johnson,player,plpo_Gardner-JohnsonCJ,0.0,7
 9467,Rashan Gary,player,plpo_GaryRashan,0.0,7
 9468,Myles Gaskin,player,plpo_GaskinMyles,0.0,7
 9469,Matt Gay,player,plpo_GayMatt,GayMatt_20715,7
 9470,Zach Gentry,player,plpo_GentryZach,0.0,7
-9471,Joe Giles-Harris,player,plpo_Giles,,7
+9471,Joe Giles-Harris,player,plpo_Giles-HarrisJoe,,7
 9472,Kevin Givens,player,plpo_GivensKevin,0.0,7
 9473,Dan Godsil,player,plpo_GodsilDan,,7
 9474,Terry Godwin,player,plpo_GodwinTerry,,7
@@ -9693,10 +9693,10 @@
 9691,Evan Worthington,player,plpo_WorthingtonEvan,,7
 9692,Renell Wren,player,plpo_WrenRenell,0.0,7
 9693,Oshane Ximines,player,plpo_XiminesOshane,0.0,7
-9694,Rock Ya-Sin,player,plpo_Ya,0.0,7
+9694,Rock Ya-Sin,player,plpo_Ya-SinRock,0.0,7
 9695,Rawson Thurber,player,plpo_ThurberRawson,,7
 9696,Matthew Adams,player,plpo_AdamsMatthew,0.0,7
-9697,Mo Alie-Cox,player,plpo_Alie,0.0,7
+9697,Mo Alie-Cox,player,plpo_Alie-CoxMo,0.0,7
 9698,Dejon Allen,player,plpo_AllenDejon,,7
 9699,Kyle Allen,player,plpo_AllenKyle,0.0,7
 9700,Abdullah Anderson,player,plpo_AndersonAbdullah,0.0,7
@@ -9826,7 +9826,7 @@
 9824,JJ Jones,player,plpo_JonesJJ,,7
 9825,Joseph Jones,player,plpo_JonesJoseph,,7
 9826,JTerius Jones,player,plpo_JonesJTerius,,7
-9827,Sebastian Joseph-Day,player,plpo_Joseph,0.0,7
+9827,Sebastian Joseph-Day,player,plpo_Joseph-DaySebastian,0.0,7
 9828,Greg Joseph,player,plpo_JosephGreg,0.0,7
 9829,Chad Kanoff,player,plpo_KanoffChad,,7
 9830,Jermaine Kelly Jr,player,plpo_KellyJrJermaine,,7
@@ -9944,7 +9944,7 @@
 9942,Cameron Tom,player,plpo_TomCameron,0.0,7
 9943,Robert Tonyan,player,plpo_TonyanRobert,0.0,7
 9944,Najee Toran,player,plpo_ToranNajee,,7
-9945,Jacob Tuioti-Mariner,player,plpo_Tuioti,,7
+9945,Jacob Tuioti-Mariner,player,plpo_Tuioti-MarinerJacob,,7
 9946,DeLance Turner,player,plpo_TurnerDeLance,,7
 9947,Ezekiel Turner,player,plpo_TurnerEzekiel,0.0,7
 9948,Kaare Vedvik,player,plpo_VedvikKaare,,7
