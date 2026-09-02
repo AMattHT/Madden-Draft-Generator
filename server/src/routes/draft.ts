@@ -9,6 +9,7 @@ import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
 import { normalizeName } from '../util/csv';
 import { DraftClassResponse } from '../types/player';
 import type { PreviewResult } from '../services/DraftClassBuilder';
+import { recomputeBatch, RecomputeItem } from '../services/RecomputeService';
 
 const r = Router();
 
@@ -98,6 +99,15 @@ r.post('/draft/recompute', (req, res) => {
   // gameArchetype: the archetype the game will label the prospect with (may differ
   // from the one set when another formula scores the same attributes higher).
   res.json({ gameOverall: after.overall, gameArchetype: after.archetype, beforeReconcile: before.overall, reconciled });
+});
+
+/** Board-wide version of /recompute: the game's overall for every edited prospect
+ *  in one call, so the OVR column and sort reflect attribute edits. */
+r.post('/draft/recompute-batch', (req, res) => {
+  const b = (req.body ?? {}) as { gameVersion?: string; items?: RecomputeItem[] };
+  const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
+  const items = Array.isArray(b.items) ? b.items.slice(0, 402) : [];
+  res.json({ results: recomputeBatch(items, gameVersion) });
 });
 
 r.post('/draft/custom', async (req, res) => {
