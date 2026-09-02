@@ -57,7 +57,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     let attrsMin = Infinity;
     for (const r of rookies) {
       const k = launchKey(ed.draftClass, r.first, r.last);
-      const e: LaunchEntry = { pos: r.pos, ovr: r.ovr, attrs: r.attrs };
+      const e: LaunchEntry = { pos: r.pos, college: r.college, ovr: r.ovr, attrs: r.attrs };
       (out.players[k] ??= []).push(e);
       attrsMin = Math.min(attrsMin, Object.keys(r.attrs).length);
     }

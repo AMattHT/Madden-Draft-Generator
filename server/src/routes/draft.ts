@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
-import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
+import { DraftClassBuilder, GenOptions, parseGenMode } from '../services/DraftClassBuilder';
 import { DbPositionService } from '../services/DbPositionService';
 import { gameOverall, reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
@@ -62,7 +62,7 @@ r.get('/draft/:year/generated', async (req, res) => {
   if (Number.isNaN(year)) return res.status(400).json({ error: 'invalid year' });
   const isMergeEra = year >= 1960 && year <= 1966; // separate AFL and NFL drafts; 1967-69 were one common draft
   const league = (req.query.league as string) || (isMergeEra ? 'combined' : 'NFL');
-  const mode: 'madden' | 'retro' = req.query.mode === 'retro' ? 'retro' : 'madden';
+  const mode = parseGenMode(req.query.mode);
   const gameVersion: 'm26' | 'm27' = req.query.gameVersion === 'm27' ? 'm27' : 'm26';
   const fill = req.query.fill !== '0'; // pad to a full class by default
   const include = parseInclude(req.query.include);
@@ -123,7 +123,7 @@ r.post('/draft/custom', async (req, res) => {
     strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number; include?: unknown;
     keys?: unknown; fill?: unknown; name?: unknown;
   };
-  const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
+  const mode = parseGenMode(b.mode);
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
   const opts: GenOptions = {
     strength: Number(b.strength) > 0 ? Number(b.strength) : 1,

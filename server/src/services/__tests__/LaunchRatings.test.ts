@@ -51,9 +51,15 @@ test('the baked file answers Stroud 2023 at 73 and knows which years it covers',
   assert.equal(LaunchRatingsService.hasYear(2023), true);
   assert.equal(LaunchRatingsService.hasYear(1998), false);
   assert.equal(LaunchRatingsService.edition(2023), 24);
-  // 2023 has two Byron Youngs: the Rams edge (pick 77) and the Titans tackle (pick 108).
-  const edge = LaunchRatingsService.get('Byron', 'Young', 2023, 10); // LEDG
-  const dt = LaunchRatingsService.get('Byron', 'Young', 2023, 12); // DT
-  assert.ok(edge && dt, 'both Byron Youngs resolve');
-  assert.notEqual(edge!.pos, dt!.pos);
+  // 2023 has two Byron Youngs, both front-seven: the Rams edge from Tennessee and
+  // the Titans lineman from Alabama. College tells them apart; position alone
+  // (both mapped to the edge/LB overlap) refuses to guess.
+  const rams = LaunchRatingsService.get('Byron', 'Young', 2023, 10, 'Tennessee');
+  const titans = LaunchRatingsService.get('Byron', 'Young', 2023, 10, 'Alabama');
+  assert.ok(rams && titans, 'both Byron Youngs resolve by college');
+  assert.notEqual(rams!.pos, titans!.pos);
+  // An unknown college falls back to position group: an edge asks for the LE entry;
+  // a DT (neither LE nor LOLB) gets nothing rather than a guess.
+  assert.equal(LaunchRatingsService.get('Byron', 'Young', 2023, 10, 'Nowhere State')?.pos, 'LE');
+  assert.equal(LaunchRatingsService.get('Byron', 'Young', 2023, 12, 'Nowhere State'), null);
 });

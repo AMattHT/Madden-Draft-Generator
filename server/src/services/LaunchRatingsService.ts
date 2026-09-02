@@ -17,6 +17,8 @@ export interface LaunchRookie {
   last: string;
   /** Position label as the edition wrote it (LE, ROLB, HB, …). */
   pos: string;
+  /** College as the edition wrote it ('' when the file has no column). */
+  college: string;
   ovr: number;
   /** RATING_KEYS the edition carries; older editions lack some. */
   attrs: Record<string, number>;
@@ -24,6 +26,7 @@ export interface LaunchRookie {
 
 export interface LaunchEntry {
   pos: string;
+  college: string;
   ovr: number;
   attrs: Record<string, number>;
 }
@@ -65,6 +68,7 @@ export function parseLaunchRows(headers: string[], rows: string[][]): LaunchRook
   const iLast = col('lastname');
   const iOvr = col('overall', 'overallrating', 'ovr');
   const iPos = col('position', 'pos');
+  const iCollege = col('college', 'school');
   const iYears = col('yearspro', 'experience', 'exp');
   if ((iName < 0 && (iFirst < 0 || iLast < 0)) || iOvr < 0 || iYears < 0) return [];
   const attrCols: Array<[number, string]> = [];
@@ -88,7 +92,7 @@ export function parseLaunchRows(headers: string[], rows: string[][]): LaunchRook
       const v = Number(r[i]);
       if (Number.isFinite(v) && v > 0) attrs[k] = Math.max(0, Math.min(99, Math.round(v)));
     }
-    out.push({ first, last, pos: String(r[iPos] ?? '').trim(), ovr: Math.round(ovr), attrs });
+    out.push({ first, last, pos: String(r[iPos] ?? '').trim(), college: iCollege >= 0 ? String(r[iCollege] ?? '').trim() : '', ovr: Math.round(ovr), attrs });
   }
   return out;
 }
@@ -109,13 +113,22 @@ function load(): LaunchFile | null {
 
 export const LaunchRatingsService = {
   /** The launch entry for this rookie, or null. A name two rookies of one year share
-   *  is settled by position group (the 2023 Byron Youngs: a Rams edge and a Titans DT). */
-  get(first: string, last: string, draftYear: number, posId: number): LaunchEntry | null {
+   *  (the 2023 Byron Youngs: a Rams edge from Tennessee and a Titans lineman from
+   *  Alabama) is settled by college first -- position cannot do it, since both
+   *  live in the front seven -- then by position group. */
+  get(first: string, last: string, draftYear: number, posId: number, college?: string | null): LaunchEntry | null {
     const hits = load()?.players[launchKey(draftYear, first, last)];
     if (!hits?.length) return null;
     if (hits.length === 1) return hits[0];
+    const c = normalizeName(college ?? '');
+    if (c) {
+      const byCollege = hits.filter((h) => normalizeName(h.college) === c);
+      if (byCollege.length === 1) return byCollege[0];
+    }
     const want = PositionMapper.groupFromId(posId);
-    return hits.find((h) => PositionMapper.groupFromId(PositionMapper.toM26Id(h.pos)) === want) ?? null;
+    const groupOf = (h: LaunchEntry) => PositionMapper.groupFromId(PositionMapper.toM26Id(h.pos));
+    const byGroup = hits.filter((h) => groupOf(h) === want);
+    return byGroup.length === 1 ? byGroup[0] : null;
   },
 
   hasYear(draftYear: number): boolean {

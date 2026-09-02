@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
+import { DraftClassBuilder, GenOptions, parseGenMode } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
 import { FranchiseService } from '../services/FranchiseService';
 import { M27_SAVES_DIR } from '../config/paths';
@@ -19,7 +19,7 @@ const r = Router();
 r.post('/export/mdc', async (req, res) => {
   const edits = req.body?.edits as Record<string, Record<string, number | string>> | undefined;
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
-  const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
+  const mode = parseGenMode(req.body?.mode);
   const gameVersion: 'm26' | 'm27' = req.body?.gameVersion === 'm27' ? 'm27' : 'm26';
   const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : 'year';
   const opts: GenOptions = {
