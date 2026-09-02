@@ -4,7 +4,7 @@ import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait } fr
 import { POS_NAMES, DEV_NAMES, ATTR_GROUPS, humanize, fmtHeight, keyAttrsForPosition, tierColor } from '../constants';
 import { RatingChip, DevBadge, Icon, ICONS } from './ui';
 import { RadarChart } from './RadarChart';
-import { GearEditor } from './GearEditor';
+import { GearEditor, SLOT_LABELS } from './GearEditor';
 import { AppearanceEditor } from './AppearanceEditor';
 import type { FaceScan } from '../types';
 
@@ -717,7 +717,7 @@ export function ProfileModal({
                   <span key={slot} className="inline-flex items-center gap-1.5 rounded-md bg-surface-2 px-2 py-1 text-[11px] text-neutral-300 ring-1 ring-border-strong">
                     {opt?.image && <img src={opt.image} alt="" className="h-4 w-4 object-contain" />}
                     <span className="text-muted">
-                      {slot.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())}:
+                      {SLOT_LABELS[slot] ?? slot.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())}:
                     </span>{' '}
                     {opt?.label ?? val}
                   </span>

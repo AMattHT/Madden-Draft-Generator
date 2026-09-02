@@ -64,6 +64,8 @@ const GROUPS: { group: string; slots: { slot: string; label: string }[] }[] = [
   },
 ];
 const ALL_SLOTS = GROUPS.flatMap((g) => g.slots);
+/** slot key -> display label, for anything outside the builder that names a slot. */
+export const SLOT_LABELS: Record<string, string> = Object.fromEntries(ALL_SLOTS.map((s) => [s.slot, s.label]));
 
 /** Slots that share one loadout element: picking one clears the other (as the game does). */
 const EXCLUSIVE: Record<string, string> = { playcallBand: 'handwarmer', handwarmer: 'playcallBand' };
