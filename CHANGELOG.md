@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+**Launch Day lens.** A third rating lens next to Realistic and Career. Where EA's launch roster
+for a class exists (2018–2020, 2022–2023 and 2026), every rookie it names gets the overall and
+attributes EA shipped on release day; everyone else, and every other year, is rated as Realistic.
+Launch data comes from maddenratings.net's launch-roster spreadsheets, baked into the app.
+
+**2026 draft class fixed.** Fifteen picks carried the wrong name (pick 13 read Will McFadden; it is
+Ty Simpson). All 257 picks now match the real draft.
+
+**Namesakes told apart.** Will Anderson Jr. and the other 148 current players whose asset names
+carry Jr/Sr/II/III get their real heads and portraits. The two 1964 Bob Browns no longer share a
+legends portrait or a drafting team.
+
 ## 1.1.0
 
 **Hand-picked draft classes.** Draft options → Hand-picked → Build class… opens a builder over
