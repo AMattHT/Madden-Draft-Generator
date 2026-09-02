@@ -87,11 +87,16 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const race = curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
-    const photo = await PhotoLookService.resolvePhoto(p);
+    // Cache only: a class must never wait on Wikipedia. An unseen name is
+    // queued and answered in the background, so it is ready next time.
+    const { url: photo, unknown } = PhotoLookService.cachedPhoto(p);
+    if (unknown) PhotoLookService.warmLater({ name: [p.firstName, p.lastName] });
     if (!photo) return p;
     const out: BaselinePlayer = { ...p };
     if (!out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) out.wikiImageUrl = photo;
-    out.observedGear = await PhotoLookService.observe(out);
+    const gear = PhotoLookService.cachedGear(photo);
+    if (gear) out.observedGear = gear;
+    else PhotoLookService.warmLater({ url: photo });
     return out;
   }
   const out: BaselinePlayer = { ...p };
@@ -148,12 +153,17 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
       if (!out.headshotUrl && ud.headshotUrl) out.headshotUrl = ud.headshotUrl;
     }
   }
-  const photo = await PhotoLookService.resolvePhoto(out);
+  // Same rule here: read what is known, queue what is not. Observing gear means
+  // downloading the photograph itself, which is the second half of the wait.
+  const { url: photo, unknown } = PhotoLookService.cachedPhoto(out);
+  if (unknown) PhotoLookService.warmLater({ name: [out.firstName, out.lastName] });
   if (photo && !out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) {
     out.wikiImageUrl = photo;
   }
   if (photo) {
-    out.observedGear = await PhotoLookService.observe(out);
+    const gear = PhotoLookService.cachedGear(photo);
+    if (gear) out.observedGear = gear;
+    else PhotoLookService.warmLater({ url: photo });
   }
   return out;
 }

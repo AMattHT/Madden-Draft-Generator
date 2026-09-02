@@ -72,3 +72,74 @@ export function keyAttrsForPosition(positionId: number): [string, string][] {
 export function tierColor(v: number): string {
   return v >= 90 ? '#f5c518' : v >= 80 ? '#22c55e' : v >= 70 ? '#4b89ff' : v >= 60 ? '#64748b' : '#525252';
 }
+
+/** Every rating the game carries, in Madden's own groups and abbreviations.
+ *
+ *  The general/physical block leads because it means the same thing everywhere;
+ *  after that the columns are position-specific by nature (throw power on a nose
+ *  tackle is a floor value, not a scouting signal). That is the cost of showing
+ *  all of them, and it is why the table must scroll horizontally rather than
+ *  squeeze — see the min-width on the table element. */
+export const ATTR_COLUMNS = [
+  // General / physical — meaningful at every position, so they lead.
+  { id: 'spd', label: 'SPD', key: 'speed' },
+  { id: 'acc', label: 'ACC', key: 'acceleration' },
+  { id: 'agi', label: 'AGI', key: 'agility' },
+  { id: 'cod', label: 'COD', key: 'changeOfDirection' },
+  { id: 'str', label: 'STR', key: 'strength' },
+  { id: 'jmp', label: 'JMP', key: 'jumping' },
+  { id: 'awr', label: 'AWR', key: 'awareness' },
+  { id: 'sta', label: 'STA', key: 'stamina' },
+  { id: 'tgh', label: 'TGH', key: 'toughness' },
+  { id: 'inj', label: 'INJ', key: 'injury' },
+  // Ball carrier
+  { id: 'car', label: 'CAR', key: 'carrying' },
+  { id: 'bcv', label: 'BCV', key: 'ballCarrierVision' },
+  { id: 'btk', label: 'BTK', key: 'breakTackle' },
+  { id: 'trk', label: 'TRK', key: 'trucking' },
+  { id: 'sfa', label: 'SFA', key: 'stiffArm' },
+  { id: 'spm', label: 'SPM', key: 'spinMove' },
+  { id: 'jkm', label: 'JKM', key: 'jukeMove' },
+  // Receiving
+  { id: 'cth', label: 'CTH', key: 'catching' },
+  { id: 'cit', label: 'CIT', key: 'catchInTraffic' },
+  { id: 'spc', label: 'SPC', key: 'spectacularCatch' },
+  { id: 'srr', label: 'SRR', key: 'shortRouteRunning' },
+  { id: 'mrr', label: 'MRR', key: 'mediumRouteRunning' },
+  { id: 'drr', label: 'DRR', key: 'deepRouteRunning' },
+  { id: 'rls', label: 'RLS', key: 'release' },
+  // Passing
+  { id: 'thp', label: 'THP', key: 'throwPower' },
+  { id: 'tas', label: 'TAS', key: 'throwAccuracyShort' },
+  { id: 'tam', label: 'TAM', key: 'throwAccuracyMid' },
+  { id: 'tad', label: 'TAD', key: 'throwAccuracyDeep' },
+  { id: 'tor', label: 'TOR', key: 'throwOnTheRun' },
+  { id: 'tup', label: 'TUP', key: 'throwUnderPressure' },
+  { id: 'pac', label: 'PAC', key: 'playAction' },
+  { id: 'bsk', label: 'BSK', key: 'breakSack' },
+  // Blocking
+  { id: 'pbk', label: 'PBK', key: 'passBlock' },
+  { id: 'pbp', label: 'PBP', key: 'passBlockPower' },
+  { id: 'pbf', label: 'PBF', key: 'passBlockFinesse' },
+  { id: 'rbk', label: 'RBK', key: 'runBlock' },
+  { id: 'rbp', label: 'RBP', key: 'runBlockPower' },
+  { id: 'rbf', label: 'RBF', key: 'runBlockFinesse' },
+  { id: 'lbk', label: 'LBK', key: 'leadBlock' },
+  { id: 'ibl', label: 'IBL', key: 'impactBlocking' },
+  // Defence
+  { id: 'tak', label: 'TAK', key: 'tackle' },
+  { id: 'pow', label: 'POW', key: 'hitPower' },
+  { id: 'pmv', label: 'PMV', key: 'powerMoves' },
+  { id: 'fmv', label: 'FMV', key: 'finesseMoves' },
+  { id: 'bsh', label: 'BSH', key: 'blockShedding' },
+  { id: 'pur', label: 'PUR', key: 'pursuit' },
+  { id: 'prc', label: 'PRC', key: 'playRecognition' },
+  { id: 'mcv', label: 'MCV', key: 'manCoverage' },
+  { id: 'zcv', label: 'ZCV', key: 'zoneCoverage' },
+  { id: 'prs', label: 'PRS', key: 'pressCoverage' },
+  // Special teams
+  { id: 'kpw', label: 'KPW', key: 'kickPower' },
+  { id: 'kac', label: 'KAC', key: 'kickAccuracy' },
+  { id: 'kr', label: 'KR', key: 'kickReturn' },
+  { id: 'lng', label: 'LNG', key: 'longSnap' },
+] as const;

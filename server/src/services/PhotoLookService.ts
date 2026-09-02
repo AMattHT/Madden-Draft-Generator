@@ -290,6 +290,47 @@ function gate<T>(fn: () => Promise<T>, max = 5): Promise<T> {
   });
 }
 
+/** Names waiting to be looked up, and photo URLs waiting to be inspected. A
+ *  Set each, so a name queued by four classes is still fetched once. */
+const warmNames = new Set<string>();
+const warmUrls = new Set<string>();
+let warming = false;
+
+/** Work the backlog slowly, well behind whatever the app is doing. Nothing here
+ *  is awaited by a request: the point is that a class never waits on the
+ *  network, and the answers are simply ready the next time. */
+async function drainWarmQueue(): Promise<void> {
+  if (warming) return;
+  warming = true;
+  try {
+    for (;;) {
+      const name = warmNames.values().next().value as string | undefined;
+      if (name) {
+        warmNames.delete(name);
+        const [first, last] = name.split('|');
+        try {
+          const url = await wikiPhoto(first, last);
+          if (url) warmUrls.add(url);
+        } catch { /* a miss is recorded by wikiPhoto itself */ }
+      } else {
+        const url = warmUrls.values().next().value as string | undefined;
+        if (!url) break;
+        warmUrls.delete(url);
+        try { await observeUrl(url); } catch { /* try again another day */ }
+      }
+      // Deliberately unhurried -- this is filling in tomorrow's answers. The
+      // timer is unref'd so a background drain can never hold the process open:
+      // a CLI script or a test run must still exit when its work is done.
+      await new Promise((r) => {
+        const t = setTimeout(r, 250);
+        (t as unknown as { unref?: () => void }).unref?.();
+      });
+    }
+  } finally {
+    warming = false;
+  }
+}
+
 export const PhotoLookService = {
   bestPhotoUrl,
 
@@ -306,6 +347,39 @@ export const PhotoLookService = {
     }
     saveJson(WIKI_CACHE, cache);
     return n;
+  },
+
+  /** The answer we already hold, without ever touching the network.
+   *
+   *  Resolving a photo live costs about 919ms of waiting per player behind a
+   *  5-at-a-time gate, and 98.6% of those lookups find nothing -- 266 photos
+   *  out of 19,623 names. Paying that while somebody waits for a draft class
+   *  was the whole of the 1.8-4.3s a new year used to take.
+   *
+   *  `unknown` means the name has never been looked up, so the caller can queue
+   *  it for the background instead of blocking on it. */
+  cachedPhoto(p: BaselinePlayer): { url: string | null; unknown: boolean } {
+    const have = bestPhotoUrl(p);
+    if (have) return { url: have, unknown: false };
+    if (p.source === 'generated') return { url: null, unknown: false };
+    const key = `${p.firstName}|${p.lastName}`.toLowerCase();
+    const cache = wikiMap();
+    if (Object.prototype.hasOwnProperty.call(cache, key)) return { url: cache[key], unknown: false };
+    return { url: null, unknown: true };
+  },
+
+  /** Gear already read off a photo, or null when the image has not been
+   *  inspected yet. Never downloads. */
+  cachedGear(url: string | null): ObservedGear | null {
+    if (!url) return null;
+    return gearMap()[url] ?? null;
+  },
+
+  /** Queue a name and/or a photo for the background, and start the drain. */
+  warmLater(opts: { name?: [string, string]; url?: string | null }): void {
+    if (opts.name) warmNames.add(`${opts.name[0]}|${opts.name[1]}`.toLowerCase());
+    if (opts.url) warmUrls.add(opts.url);
+    if (warmNames.size || warmUrls.size) void drainWarmQueue();
   },
 
   async resolvePhoto(p: BaselinePlayer): Promise<string | null> {

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import type { ClassEdits, GearEdits, LikenessStats, PlayerRow, GameVersion } from '../types';
 import type { DraftOpts } from '../App';
-import { DEV_NAMES } from '../constants';
+import { ATTR_COLUMNS } from '../constants';
+import { buildClassCsv } from '../csv';
 import { Icon, ICONS } from './ui';
 
 type Msg = { ok: boolean; text: string } | null;
@@ -100,20 +101,8 @@ export function ExportMenu({
   }, [msg]);
 
   function downloadCsv() {
-    const cols = ['Pick', 'First', 'Last', 'Pos', 'OVR', 'Dev', 'wAV', 'Team', 'College', 'HeightIn', 'Weight', 'Age', 'Jersey', 'Round', 'DraftPick'];
-    const esc = (v: unknown) => {
-      const s = String(v ?? '');
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines = [cols.join(',')];
-    for (const r of rows) {
-      lines.push(
-        [r.pick, r.firstName, r.lastName, r.position, r.overall, DEV_NAMES[r.devTrait] ?? r.devTrait, r.wav ?? '', r.team?.abbr ?? '', r.college, r.heightInches, r.weight, r.age, r.jersey, r.round ?? '', r.draftPick ?? '']
-          .map(esc)
-          .join(',')
-      );
-    }
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const csv = '﻿' + buildClassCsv(rows, edits);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -122,7 +111,7 @@ export function ExportMenu({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    setMsg({ ok: true, text: `Exported DraftClass_${year}_${league}.csv (${rows.length} rows).` });
+    setMsg({ ok: true, text: `Exported DraftClass_${year}_${league}.csv — ${rows.length} players with overalls and all ${ATTR_COLUMNS.length} attributes${editedCount ? `, ${editedCount} edited` : ''}.` });
   }
 
   async function downloadMdc() {
@@ -222,8 +211,9 @@ export function ExportMenu({
             onClick={() => { setOpen(false); downloadCsv(); }}
             disabled={!!busy}
             className={item}
+            title="Every player with overall, dev trait, bio, combine and all 54 attributes — edits applied. Reveals hidden ratings even with Spoilers off."
           >
-            <span>Export CSV (spreadsheet)</span>
+            <span>Export CSV (all attributes)</span>
           </button>
           {editTools && (
             <>
