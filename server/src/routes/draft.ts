@@ -5,7 +5,8 @@ import { DbPositionService } from '../services/DbPositionService';
 import { gameOverall, reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
-import { enrichedClass, allTimeGreatsClass, pickedClass } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass, pickedClass, boardClass, validateCustomPlayer } from '../services/DraftEnrichment';
+import type { BoardEntry, CustomPlayerSpec } from '../services/DraftEnrichment';
 import { classSlug } from '../services/ClassName';
 import { normalizeName } from '../util/csv';
 import { DraftClassResponse } from '../types/player';
@@ -52,6 +53,19 @@ function parseInclude(raw: unknown): number[] {
 }
 
 /** `keys`: stable player keys for a hand-picked class (array or comma list), deduped, <= 402. */
+/** Class Studio board entries: `{ key }` or `{ custom: {...} }`; anything else is dropped. */
+function parseBoard(raw: unknown): BoardEntry[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: BoardEntry[] = [];
+  for (const e of raw.slice(0, 402)) {
+    if (!e || typeof e !== 'object') continue;
+    const o = e as { key?: unknown; custom?: unknown };
+    if (typeof o.key === 'string' && o.key) out.push({ key: o.key });
+    else if (o.custom && typeof o.custom === 'object') out.push({ custom: o.custom as CustomPlayerSpec });
+  }
+  return out;
+}
+
 function parseKeys(raw: unknown): string[] {
   const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(',') : [];
   return [...new Set(list.map((x) => String(x).trim()).filter(Boolean))].slice(0, 402);
@@ -121,7 +135,7 @@ r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
     source?: 'year' | 'alltime' | 'decade' | 'picked'; year?: number; decade?: number; league?: string; mode?: string;
     strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number; include?: unknown;
-    keys?: unknown; fill?: unknown; name?: unknown;
+    keys?: unknown; fill?: unknown; name?: unknown; board?: unknown;
   };
   const mode = parseGenMode(b.mode);
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -136,9 +150,14 @@ r.post('/draft/custom', async (req, res) => {
   };
 
   if (b.source === 'picked') {
-    const keys = parseKeys(b.keys);
-    if (!keys.length) return res.status(400).json({ error: 'no players picked' });
-    const { players, generatedCount, missing, truncatedKeys } = await pickedClass(keys, { fill: b.fill !== false });
+    // A Class Studio board (real keys and custom prospects in pick order), or the
+    // 1.2.0 shape: a list of keys, treated as a board in that order.
+    const board = parseBoard(b.board) ?? parseKeys(b.keys).map((key) => ({ key }));
+    if (!board.length) return res.status(400).json({ error: 'no players picked' });
+    for (const e of board) {
+      if ('custom' in e) { const why = validateCustomPlayer(e.custom); if (why) return res.status(400).json({ error: why }); }
+    }
+    const { players, generatedCount, missing, truncatedKeys } = await boardClass(board, { fill: b.fill !== false });
     if (!players.length) return res.status(404).json({ error: 'none of the picked players were found' });
     const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
     const name = String(b.name ?? '').slice(0, 60);

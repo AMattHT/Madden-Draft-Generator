@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+**Class Studio.** A "Create class" button in the top bar opens a full-screen builder: the whole
+player pool on the left with headshots, a 402-pick draft board on the right. Add players, drag
+them into the order you want, or move one straight to a pick. It replaces the old Hand-picked
+option, and classes you saved before open in it as they were.
+
+**Custom players.** Make a prospect who never existed: name, position, college, build, overall,
+dev trait and archetype. The app generates his attributes to match and he drafts alongside the
+real players.
+
 ## 1.2.0
 
 ### Features

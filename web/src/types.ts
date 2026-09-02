@@ -120,10 +120,33 @@ export interface GeneratedClass {
 export type GameVersion = 'm26' | 'm27';
 
 /** A saved hand-picked class (player keys are stable across data refreshes). */
+/** A prospect who never existed, made in the Class Studio. The overall, dev
+ *  trait and archetype are pinned; the app generates the attributes around them. */
+export interface CustomPlayer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  position: string; // Madden label: QB, HB, ..., LEDG, MIKE, SS, K, P, LS
+  college: string;
+  heightInches: number;
+  weight: number;
+  age: number;
+  jersey?: number | null;
+  overall: number; // 40-99
+  devTrait: 0 | 1 | 2 | 3;
+  archetype: number | null;
+  skinTone: number; // 1-7
+}
+/** One board slot: a real player by lookup key, or a custom prospect. */
+export type BoardEntry = { key: string } | { custom: CustomPlayer };
+
 export interface CustomClass {
   id: string;
   name: string;
-  keys: string[];
+  /** Pick order: index = pick - 1. */
+  board: BoardEntry[];
+  /** Pre-1.3 shape (a list of keys); migrated to `board` on read. */
+  keys?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -133,6 +156,7 @@ export interface CatalogPlayer {
   key: string; first: string; last: string; pos: string; mpos: string; grp: string;
   year: number; league: string; round: number | null; pick: number | null; college: string;
   wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
+  pid: number | null;
 }
 
 /** A player the 402-slot class could not hold; `idx` is the stable source index. */

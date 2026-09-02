@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
-import { ClassBuilder } from './components/ClassBuilder';
+import { ClassStudio } from './components/ClassStudio';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -140,19 +140,19 @@ export default function App() {
       try {
         if (custom) {
           // Custom classes aren't year-cached — always generated fresh.
-          // A hand-picked class sends its saved player keys.
-          let picked: { keys: string[]; name: string } | undefined;
+          // A Class Studio class sends its board in pick order.
+          let picked: { board: import('./types').BoardEntry[]; name: string } | undefined;
           if (opts.source === 'picked') {
             const c = opts.customId ? await cache.customGet(opts.customId) : undefined;
-            if (!c) throw new Error('That hand-picked class no longer exists');
-            picked = { keys: c.keys, name: c.name };
+            if (!c) throw new Error('That class no longer exists');
+            picked = { board: c.board, name: c.name };
           }
           const live = await api.generatedCustom({
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
             hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant, include: opts.include,
-            keys: picked?.keys, fill: opts.fill !== false, name: picked?.name,
+            board: picked?.board, fill: opts.fill !== false, name: picked?.name,
             gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;
@@ -516,6 +516,7 @@ export default function App() {
       <WhatsNew open={whatsNewOpen} onClose={closeWhatsNew} />
       <UpdateBanner />
       <TopBar
+        onCreateClass={() => openBuilder(null)}
         onWhatsNew={openWhatsNew}
         view={view}
         onSetView={setView}
@@ -625,7 +626,7 @@ export default function App() {
       {showDropped && data && (
         <DroppedPanel data={data} included={draftOpts.include ?? []} onInclude={onInclude} onExclude={onExclude} onClose={() => setShowDropped(false)} busy={busy} />
       )}
-      {builder.open && <ClassBuilder initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
+      {builder.open && <ClassStudio initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
     </div>
   );
 }

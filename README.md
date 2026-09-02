@@ -75,7 +75,9 @@ turned out. *Launch Day* uses the overall and attributes EA shipped for each roo
 release day, for the 23 classes whose launch roster we have (2001–2020, 2022, 2023 and 2026, from
 [maddenratings.net](https://www.maddenratings.net/)); everyone else is rated as Realistic.
 
-**Custom classes.** Build an all-time draft, a decade, apply your own modifiers — or hand-pick
-your own class from all 32,140 players, sorted by position, era or career, up to Madden's 402
-slots. Short classes are padded with era-correct generated prospects. Export any class to a
-spreadsheet with every overall and all 54 attributes.
+**Custom classes.** Build an all-time draft, a decade, apply your own modifiers — or open the
+Class Studio ("Create class" in the top bar): the whole 32,140-player pool on the left, a
+402-pick draft board on the right. Add players in the order you want, drag to reorder, and make
+custom prospects from a short form (the app generates their attributes). Short classes are padded
+with era-correct generated prospects. Export any class to a spreadsheet with every overall and
+all 54 attributes.

@@ -152,6 +152,7 @@ export function TopBar({
   years,
   selected,
   onSelectYear,
+  onCreateClass,
   onSelectPlayer,
   cachedYears,
   recentYears = [],
@@ -175,6 +176,8 @@ export function TopBar({
   years: number[];
   selected: number | null;
   onSelectYear: (y: number) => void;
+  /** Open the Class Studio (build a class by hand, custom players included). */
+  onCreateClass?: () => void;
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
   recentYears?: number[];
@@ -211,6 +214,15 @@ export function TopBar({
               <Icon path={ICONS.shuffle} className="h-4 w-4" />
             </button>
             <PlayerSearch onSelect={onSelectPlayer} />
+            {onCreateClass && (
+              <button
+                onClick={onCreateClass}
+                title="Create your own draft class: real players in the order you want, plus custom prospects"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold transition-colors hover:bg-gold/20"
+              >
+                <Icon path={ICONS.plus} className="h-3.5 w-3.5" /> Create class
+              </button>
+            )}
           </>
         )}
       </div>

@@ -48,23 +48,12 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
               <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
               <button className={seg(source === 'decade')} onClick={() => setSource('decade')}>By decade</button>
               <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time</button>
-              <button className={seg(source === 'picked')} onClick={() => setSource('picked')}>Hand-picked</button>
             </div>
             {source === 'picked' && (
-              <>
-                <select value={customId ?? ''} onChange={(e) => setCustomId(e.target.value || undefined)}
-                  className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none">
-                  <option value="">Choose a class…</option>
-                  {customClasses.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.keys.length})</option>)}
-                </select>
-                <button onClick={() => onOpenBuilder?.(customClasses.find((c) => c.id === customId) ?? null)}
-                  className="rounded-md border border-primary/50 bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20">
-                  {customId ? 'Edit class…' : 'Build class…'}
-                </button>
-                <label className="flex items-center gap-1.5 text-xs text-neutral-300" title="Pad a short class with generated prospects from the era of your picks">
-                  <input type="checkbox" checked={fill} onChange={(e) => setFill(e.target.checked)} /> Fill to 402
-                </label>
-              </>
+              <button onClick={() => onOpenBuilder?.(customClasses.find((c) => c.id === customId) ?? null)}
+                className="rounded-md border border-gold/50 bg-gold/10 px-2.5 py-1.5 text-xs font-medium text-gold hover:bg-gold/20">
+                Open in Class Studio…
+              </button>
             )}
             {source === 'decade' && (
               <select value={decade} onChange={(e) => setDecade(Number(e.target.value))}
@@ -113,7 +102,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         )}
         <span className="ml-auto text-[11px] text-muted">
           {source === 'alltime' ? 'Best players in history, one class'
-            : source === 'picked' ? (needsClass ? 'Build or choose a hand-picked class' : 'Your hand-picked players, ranked by career')
+            : source === 'picked' ? 'Your Class Studio board, in pick order'
             : source === 'decade' ? `Greatest players drafted in the ${decade}s`
             : 'Modifiers apply to the selected year'}
         </span>

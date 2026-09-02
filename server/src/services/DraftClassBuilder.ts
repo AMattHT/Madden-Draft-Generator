@@ -140,6 +140,17 @@ const EA_POS_ID: Record<string, number> = Object.fromEntries(Array.from({ length
  *  attributes follow in toProspect. Generated fillers and anyone EA does not
  *  list keep the model's numbers. */
 function applyEaRookies(items: RankedItem[]): void {
+  // Custom prospects (Class Studio) are pinned to the overall, dev trait and
+  // position their author chose.
+  for (const it of items) {
+    const p = it.player;
+    if (p.custom) {
+      it.overall = p.custom.overall;
+      it.devTrait = p.custom.devTrait;
+      const posId = EA_POS_ID[p.position.toUpperCase()];
+      if (posId != null) it.posId = posId;
+    }
+  }
   if (!M27RookieRatingsService.available) return;
   for (const it of items) {
     const p = it.player;
@@ -152,6 +163,13 @@ function applyEaRookies(items: RankedItem[]): void {
     const posId = EA_POS_ID[hit.pos.toUpperCase()];
     if (posId != null) it.posId = posId;
   }
+}
+
+/** A custom prospect's chosen archetype, when it belongs to his position. */
+function customArchetype(player: BaselinePlayer, posName: string): number | null {
+  const id = player.custom?.archetype;
+  if (id == null) return null;
+  return (CalibrationService.archetypeOptions()[posName] ?? []).some((o) => o.id === id) ? id : null;
 }
 
 /** EA's archetype id (S_RunSupport, DE_SmallerSpeedRusher) -> the app's archetype
@@ -318,7 +336,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // Archetype from career usage when we have it (Carter = Physical, not Slot),
   // else the closest Madden height/weight profile.
   const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, player.draftPick);
-  const archetype = eaArchetype(it.ea, posName) ?? ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
+  const archetype = customArchetype(player, posName) ?? eaArchetype(it.ea, posName) ?? ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
   const { attrs, ovrMean } = CalibrationService.archetypeAttrs(posName, archetype, gameVersion);
 
   const prospect: MdcProspect = {};

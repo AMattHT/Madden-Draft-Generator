@@ -48,6 +48,9 @@ export interface BaselinePlayer {
   positionLocked?: boolean;
 
   source: string; // origin of this record (local, pfr, nflverse, wikipedia, ...)
+  /** A custom prospect from the Class Studio: the overall, dev trait and archetype
+   *  the user chose are pinned; everything else is generated around them. */
+  custom?: { overall: number; devTrait: number; archetype: number | null };
 
   /** Stable identity across data refreshes: draftYear|league|first|last|pick (see playerKey). */
   key?: string;

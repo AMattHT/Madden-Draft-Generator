@@ -1,4 +1,4 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
@@ -11,8 +11,9 @@ export interface ClassRequestOpts {
   autoStrength?: boolean;
   variant?: number;
   include?: number[];
-  /** Hand-picked class (source === 'picked'). */
+  /** Class Studio class (source === 'picked'): its board in pick order. */
   customId?: string;
+  board?: BoardEntry[];
   keys?: string[];
   fill?: boolean;
   name?: string;

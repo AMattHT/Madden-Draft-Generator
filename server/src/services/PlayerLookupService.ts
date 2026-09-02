@@ -142,6 +142,8 @@ export interface CatalogPlayer {
   key: string; first: string; last: string; pos: string; mpos: string; grp: string;
   year: number; league: string; round: number | null; pick: number | null; college: string;
   wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
+  /** Menu-portrait id, for the studio's headshots. */
+  pid: number | null;
 }
 
 let byKey: Map<string, BaselinePlayer> | null = null;
@@ -820,6 +822,7 @@ export const PlayerLookupService = {
         mpos: PositionMapper.name(posId), grp: PositionMapper.groupFromId(posId),
         year: p.draftYear, league: p.league, round: p.draftRound, pick: p.draftPick, college: p.college,
         wav: p.wav, cal: RatingService.caliber(p, posId), hof: p.isHOF, pb: p.proBowls ?? 0, ap1: p.allPro1 ?? 0,
+        pid: p.photoId,
       };
     });
     return catalogCache;

@@ -25,6 +25,13 @@ const editsKeyOf = (year: number, league: string) => `edits:${year}_${league}`;
 const includeKeyOf = (year: number, league: string) => `include:${year}_${league}`;
 const gearKeyOf = (year: number, league: string) => `gear:${year}_${league}`;
 
+/** A class saved before the Class Studio holds a key list; its order becomes the board. */
+function migrateClass(c: CustomClass): CustomClass {
+  if (Array.isArray(c.board)) return c;
+  const { keys: legacy, ...rest } = c;
+  return { ...rest, board: (legacy ?? []).map((key) => ({ key })) };
+}
+
 export const cache = {
   async get(year: number, league: string, mode: string): Promise<GeneratedClass | undefined> {
     const c = await get<GeneratedClass>(keyOf(year, league, mode));
@@ -75,11 +82,14 @@ export const cache = {
     for (const k of all) {
       if (!/^custom:/.test(String(k))) continue;
       const c = await get<CustomClass>(k);
-      if (c) out.push(c);
+      if (c) out.push(migrateClass(c));
     }
     return out.sort((a, b) => b.updatedAt - a.updatedAt);
   },
-  customGet: (id: string): Promise<CustomClass | undefined> => get<CustomClass>(`custom:${id}`),
+  customGet: async (id: string): Promise<CustomClass | undefined> => {
+    const c = await get<CustomClass>(`custom:${id}`);
+    return c ? migrateClass(c) : c;
+  },
   customSet: (c: CustomClass) => set(`custom:${c.id}`, c),
   customDel: (id: string) => del(`custom:${id}`),
 

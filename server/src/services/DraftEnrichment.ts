@@ -211,15 +211,90 @@ export async function pickedClass(
   keys: string[],
   opts: { fill?: boolean } = {}
 ): Promise<{ players: BaselinePlayer[]; generatedCount: number; missing: string[]; truncatedKeys: boolean }> {
+  return boardClass(keys.map((key) => ({ key })), opts);
+}
+
+/** A custom prospect as the Class Studio describes him. */
+export interface CustomPlayerSpec {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  position: string; // Madden label: QB, HB, ..., LEDG, MIKE, SS, K, P, LS
+  college: string;
+  heightInches: number;
+  weight: number;
+  age: number;
+  jersey?: number | null;
+  overall: number; // 40-99
+  devTrait: number; // 0 Normal, 1 Star, 2 Superstar, 3 X-Factor
+  archetype: number | null;
+  skinTone: number; // 1-7
+}
+export type BoardEntry = { key: string } | { custom: CustomPlayerSpec };
+
+const MADDEN_POSITIONS = new Set(Array.from({ length: 22 }, (_, id) => PositionMapper.name(id)));
+
+/** Why a custom player cannot be built, or null when he is fine. */
+export function validateCustomPlayer(c: Partial<CustomPlayerSpec> | null | undefined): string | null {
+  if (!c || typeof c !== 'object') return 'custom player missing';
+  if (!String(c.firstName ?? '').trim() || !String(c.lastName ?? '').trim()) return 'a custom player needs a first and last name';
+  if (!MADDEN_POSITIONS.has(String(c.position ?? '').toUpperCase())) return `unknown position "${c.position}"`;
+  const ovr = Number(c.overall);
+  if (!Number.isFinite(ovr) || ovr < 40 || ovr > 99) return 'overall must be 40-99';
+  const dev = Number(c.devTrait);
+  if (![0, 1, 2, 3].includes(dev)) return 'dev trait must be 0-3';
+  const h = Number(c.heightInches), w = Number(c.weight), age = Number(c.age);
+  if (!Number.isFinite(h) || h < 60 || h > 84) return 'height must be 60-84 inches';
+  if (!Number.isFinite(w) || w < 140 || w > 400) return 'weight must be 140-400 lb';
+  if (!Number.isFinite(age) || age < 18 || age > 45) return 'age must be 18-45';
+  return null;
+}
+
+/** The BaselinePlayer for a custom prospect, dated to the class he sits in. */
+export function customBaseline(c: CustomPlayerSpec, draftYear: number): BaselinePlayer {
+  const tone = Math.max(1, Math.min(7, Math.round(Number(c.skinTone) || 4)));
+  const first = String(c.firstName).trim().slice(0, 20);
+  const last = String(c.lastName).trim().slice(0, 20);
+  return {
+    firstName: first, lastName: last, college: String(c.college ?? '').trim().slice(0, 40), draftYear,
+    draftRound: null, draftPick: null, position: String(c.position).toUpperCase(),
+    jersey: c.jersey != null && Number.isFinite(Number(c.jersey)) ? Math.max(0, Math.min(99, Math.round(Number(c.jersey)))) : null,
+    league: 'NFL', isHOF: false, photoId: null, playerAssetsId: null, commId: null, plpo: null,
+    heightInches: Math.round(Number(c.heightInches)), weight: Math.round(Number(c.weight)), age: Math.round(Number(c.age)),
+    homeState: null, race: tone, wikiImageUrl: null, pfrImageUrl: null, headshotUrl: null,
+    careerFrom: null, careerTo: null, allPro1: null, proBowls: null, seasonsStarted: null,
+    wav: null, wavSource: 'predicted', source: 'custom',
+    key: `custom:${c.id ?? `${first}-${last}`.toLowerCase().replace(/[^a-z0-9-]/g, '')}`,
+    custom: { overall: Math.round(Number(c.overall)), devTrait: Number(c.devTrait), archetype: c.archetype == null ? null : Number(c.archetype) },
+  };
+}
+
+/**
+ * A Class Studio board: real players by lookup key and custom prospects, in the
+ * order given, which is the pick order the class is built in. Real players are
+ * enriched as usual; custom ones are built as described. A short board is padded
+ * with era-matched generated prospects when `fill` is on.
+ */
+export async function boardClass(
+  board: BoardEntry[],
+  opts: { fill?: boolean } = {}
+): Promise<{ players: BaselinePlayer[]; generatedCount: number; missing: string[]; truncatedKeys: boolean }> {
+  const keys = board.flatMap((e) => ('key' in e ? [e.key] : []));
   const { players: found, missing } = PlayerLookupService.byKeys(keys);
-  const truncatedKeys = found.length > FULL_CLASS_SIZE;
-  const picked = [...found].sort((a, b) => greatness(b) - greatness(a)).slice(0, FULL_CLASS_SIZE);
-  const real = await Promise.all(picked.map((p) => enrichOne(p)));
+  const byKey = new Map(found.map((p) => [p.key ?? '', p]));
+  const realYears = found.map((p) => p.draftYear).sort((a, b) => a - b);
+  const classYear = realYears.length ? realYears[Math.floor(realYears.length / 2)] : new Date().getFullYear();
+  const ordered: BaselinePlayer[] = [];
+  for (const e of board) {
+    if ('key' in e) { const p = byKey.get(e.key); if (p) ordered.push(p); }
+    else ordered.push(customBaseline(e.custom, classYear));
+  }
+  const truncatedKeys = ordered.length > FULL_CLASS_SIZE;
+  const picked = ordered.slice(0, FULL_CLASS_SIZE);
+  const real = await Promise.all(picked.map((p) => (p.custom ? p : enrichOne(p))));
   let fillers: BaselinePlayer[] = [];
   if (opts.fill !== false && real.length < FULL_CLASS_SIZE && real.length > 0) {
-    const years = real.map((p) => p.draftYear).sort((a, b) => a - b);
-    const medianYear = years[Math.floor(years.length / 2)];
-    fillers = GenericFillerService.build(medianYear, real);
+    fillers = GenericFillerService.build(classYear, real);
   }
   return { players: [...real, ...fillers], generatedCount: fillers.length, missing, truncatedKeys };
 }
