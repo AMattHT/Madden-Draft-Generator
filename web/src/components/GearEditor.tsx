@@ -384,8 +384,9 @@ export function GearEditor({
     if (other && asset && !/None$/.test(asset) && gearPatch[other]) onGearEdit(other, '');
   };
 
-  // Helmet compatibility support (from atlas via backend)
-  const currentHelmet = gearPatch['helmet'] || '';
+  // Helmet compatibility support (from atlas via backend). With no override the
+  // automatic helmet is the one the class writes, so its family drives the filter.
+  const currentHelmet = gearPatch['helmet'] || autoGear['helmet'] || '';
   const helmetOpt = (options['helmet'] ?? []).find((o) => o.value === currentHelmet);
   const helmetCompat = helmetOpt?.compatibility;
 

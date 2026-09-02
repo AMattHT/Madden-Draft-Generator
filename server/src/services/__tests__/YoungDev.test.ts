@@ -32,7 +32,9 @@ test('2023: the two Rookies of the Year are X-Factors and few if any join them o
 test('2024: Daniels and Verse (Rookies of the Year) are the X-Factors; two seasons earn no more', skip, async () => {
   const t = await tiers(2024);
   assert.deepEqual([...t.xf].sort(), ['Jared Verse', 'Jayden Daniels']);
-  assert.ok(t.ss.length >= 3 && t.ss.length <= 10, `${t.ss.length} Superstars`);
+  // Floors are facts (a first-team All-Pro or two Pro Bowls is a Superstar) and the
+  // 2025 season added several; the quota on top of them is season-scaled.
+  assert.ok(t.ss.length >= 3 && t.ss.length <= 12, `${t.ss.length} Superstars`);
 });
 
 test('2025: only the Rookies of the Year rise above Star', skip, async () => {

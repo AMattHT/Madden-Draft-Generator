@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+**Careers are current through the 2025 season.** wAV, Pro Bowls, first-team All-Pros, seasons
+started and last season now come from nflverse's mirror of Pro Football Reference for every
+drafted player since 1960 (1,712 rows updated; the 2025 class no longer reads zero and 2024's
+first-year numbers have grown), and `scripts/refresh-career-columns.py` repeats the update after
+each season. With a third real season on the books, the pace rule that makes a young player an
+X-Factor on production alone now asks for a Hall-of-Fame trajectory (1.35x the position's
+elite per-season norm) rather than a bar a dozen third-year starters clear; awards, All-Pros
+and the elite rule are unchanged and there is no cap, so a class with more such players keeps
+them all.
+
 **Madden 27 rookie portraits.** The 2026 rookies and every other player new to Madden 27 now show
 their real menu portrait instead of a generic face: 472 portraits exported from the game's own
 image library (via the MMC Frosty Editor's Portrait Manager) join the pack, and 529 portraits the

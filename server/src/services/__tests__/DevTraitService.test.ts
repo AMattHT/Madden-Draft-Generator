@@ -25,9 +25,9 @@ test('X-Factor comes from awards or wAV, never from a quota', () => {
   const roy = mk({ posGroup: 'QB', awards: ['OROY'], wav: 24 }); // Stroud: 8/yr, pace 0.82
   const royNoData = mk({ posGroup: 'WR', draftYear: 2025, awards: ['OROY'], wav: null, wavActual: false }); // McMillan
   const royBust = mk({ posGroup: 'QB', awards: ['OROY'], wav: 6 }); // 2/yr over 3 seasons: the award never translated
-  const paceOnly3 = mk({ posGroup: 'RB', wav: 33 }); // 11/yr vs 10.3 over 3 seasons
-  const goodNotElite = mk({ posGroup: 'RB', wav: 27 }); // Gibbs: 9/yr, pace 0.87
-  const paceOnly2 = mk({ posGroup: 'QB', draftYear: 2024, wav: 22 }); // 11/yr, only 2 seasons
+  const paceOnly3 = mk({ posGroup: 'RB', wav: 45 }); // 15/yr vs 10.3 over 3 seasons: pace 1.46, past ELITE_PACE
+  const goodNotElite = mk({ posGroup: 'RB', wav: 40 }); // Gibbs: 13/yr, pace 1.29 -- a very good third year, not a Hall of Fame track
+  const paceOnly2 = mk({ posGroup: 'QB', draftYear: 2024, wav: 30 }); // 15/yr (pace 1.53), only 2 seasons
   const punter = mk({ posGroup: 'P', wav: 9 }); // 3/yr vs 2.3: a fine punter, never an X-Factor
   const filler = Array.from({ length: 30 }, () => mk({ wav: 1 }));
   const r = dev([mvp, twoAllPro, roy, royNoData, royBust, paceOnly3, goodNotElite, paceOnly2, punter, ...filler]);
@@ -36,8 +36,8 @@ test('X-Factor comes from awards or wAV, never from a quota', () => {
   assert.equal(r.get(roy.key), 3, 'Rookie of the Year is an X-Factor');
   assert.equal(r.get(royNoData.key), 3, 'even before wAV exists');
   assert.equal(r.get(royBust.key), 2, 'unless three seasons show it never translated');
-  assert.equal(r.get(paceOnly3.key), 3, 'top-1% pace over three seasons');
-  assert.ok(r.get(goodNotElite.key)! <= 2, 'a top-10% pace is not an X-Factor');
+  assert.equal(r.get(paceOnly3.key), 3, 'elite pace over three seasons');
+  assert.ok(r.get(goodNotElite.key)! <= 2, 'a strong but ordinary-star pace is not an X-Factor');
   assert.ok(r.get(paceOnly2.key)! <= 2, 'two seasons of elite pace stop at Superstar');
   assert.ok(r.get(punter.key)! <= 2, 'specialists never reach X-Factor on pace');
   assert.equal([...r.values()].filter((t) => t === 3).length, 5, 'no X-Factor from the quota');

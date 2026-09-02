@@ -38,6 +38,15 @@ export const PACE_NORMS: Record<string, number> = {
 };
 const SPECIALISTS = new Set(['K', 'P', 'LS']);
 
+/** Pace that earns X-Factor on its own after three seasons. The norms are career
+ *  per-season figures, and a career's first seasons run hot, so 1.0 flags a dozen
+ *  third-year starters per class (2019-2023: 6, 9, 10, 12, 13). At 1.35 the same
+ *  classes flag A.J. Brown; CeeDee Lamb and Justin Jefferson; Parsons, Sewell,
+ *  Chase, St. Brown and Surtain; nobody; Nacua, Anderson and Flowers -- the
+ *  trajectories that are X-Factors, and no quota or class-relative cut, so a
+ *  class with more of them keeps every one. */
+export const ELITE_PACE = 1.35;
+
 /** Players drafted this many completed seasons ago or fewer take this path. */
 export const YOUNG_SEASONS = 8;
 /** Quotas reach Madden's full shape here; pace stops steering the order here too. */
@@ -89,7 +98,7 @@ export function youngDev(items: YoungInput[], currentYear: number, classSize = i
     const roy = p.awards.includes('OROY') || p.awards.includes('DROY');
     const big = p.awards.includes('MVP') || p.awards.includes('OPOY') || p.awards.includes('DPOY');
     const royHeld = roy && !(s >= 3 && p.wavActual && pc < 0.4);
-    const eliteTrack = pc >= 1 && s >= 3 && !SPECIALISTS.has(p.posGroup);
+    const eliteTrack = pc >= ELITE_PACE && s >= 3 && !SPECIALISTS.has(p.posGroup);
     let floor: Tier = 0;
     if (big || p.ap1 >= 2 || royHeld || eliteTrack || p.elite) floor = 3;
     else if (roy || p.ap1 >= 1 || p.pb >= 2) floor = 2;
