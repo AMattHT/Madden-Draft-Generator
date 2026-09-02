@@ -2,7 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { M27_SAVES_DIR } from '../config/paths';
-import { GEAR_SLOT_TYPES } from './GearOptionsService';
+import { GEAR_SLOT_TYPES, waistConflict } from './GearOptionsService';
 
 // madden-franchise is a CommonJS (.cjs) module; require it the way the vendored
 // draft-class parser is required. `create()` is a static async factory that returns
@@ -749,7 +749,7 @@ export const FranchiseService = {
         if (cv) {
           let changed = false;
           for (const [slot, asset] of Object.entries(e.gear)) {
-            if (!asset) continue;
+            if (!asset || waistConflict(e.gear, slot)) continue;
             if (slot === 'facemask') {
               const el = cv.els.find((x) => !x.slotType && String(x.itemAssetName || '').startsWith('GearFaceMask_'));
               if (el) el.itemAssetName = asset; else cv.els.push({ itemAssetName: asset });

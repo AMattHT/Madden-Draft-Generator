@@ -48,6 +48,7 @@ const GROUPS: { group: string; slots: { slot: string; label: string }[] }[] = [
       { slot: 'socks', label: 'Socks' },
       { slot: 'spatLeft', label: 'Left spat' },
       { slot: 'spatRight', label: 'Right spat' },
+      { slot: 'pants', label: 'Pants' },
     ],
   },
   {
@@ -56,12 +57,16 @@ const GROUPS: { group: string; slots: { slot: string; label: string }[] }[] = [
       { slot: 'jerseyStyle', label: 'Jersey sleeves' },
       { slot: 'undershirt', label: 'Undershirt' },
       { slot: 'towel', label: 'Towel' },
+      { slot: 'playcallBand', label: 'Waist playcall band' },
       { slot: 'handwarmer', label: 'Handwarmer' },
       { slot: 'handwarmerStyle', label: 'Handwarmer position' },
     ],
   },
 ];
 const ALL_SLOTS = GROUPS.flatMap((g) => g.slots);
+
+/** Slots that share one loadout element: picking one clears the other (as the game does). */
+const EXCLUSIVE: Record<string, string> = { playcallBand: 'handwarmer', handwarmer: 'playcallBand' };
 
 /** Paired slots that can mirror to the other side. */
 const MIRROR: Record<string, string> = {
@@ -369,6 +374,14 @@ export function GearEditor({
   const items = options[active] ?? [];
   const q = query.trim().toLowerCase();
 
+  // Pick an asset; an exclusive partner slot loses its pick (a playcall band and a
+  // handwarmer cannot both be worn).
+  const pick = (slot: string, asset: string) => {
+    onGearEdit(slot, asset);
+    const other = EXCLUSIVE[slot];
+    if (other && asset && !/None$/.test(asset) && gearPatch[other]) onGearEdit(other, '');
+  };
+
   // Helmet compatibility support (from atlas via backend)
   const currentHelmet = gearPatch['helmet'] || '';
   const helmetOpt = (options['helmet'] ?? []).find((o) => o.value === currentHelmet);
@@ -444,7 +457,7 @@ export function GearEditor({
                   </button>
                   {open && (
                     <div className="mt-0.5 space-y-0.5 pl-1.5">
-                      {g.slots.map(({ slot, label }) => (
+                      {g.slots.filter(({ slot }) => options[slot]).map(({ slot, label }) => (
                         <button
                           key={slot}
                           onClick={() => {
@@ -546,7 +559,7 @@ export function GearEditor({
               {filtered.map((o) => (
                 <button
                   key={o.value}
-                  onClick={() => onGearEdit(active, o.value)}
+                  onClick={() => pick(active, o.value)}
                   title={o.label + (o.compatibility ? ` (compat: ${o.compatibility})` : '')}
                   className={`flex flex-col items-center gap-1 rounded-lg border p-2 transition-colors ${
                     current === o.value ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'

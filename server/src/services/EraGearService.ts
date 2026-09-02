@@ -3,7 +3,7 @@ import path from 'path';
 import { DATA_ROOT, LOOKUPS_DIR } from '../config/paths';
 import { PositionMapper } from './PositionMapper';
 import { ObservedGear } from '../types/player';
-import { GEAR_SLOT_TYPES } from './GearOptionsService';
+import { slotOfElement } from './GearOptionsService';
 import { seededRng } from '../util/rng';
 
 /**
@@ -736,10 +736,6 @@ export const EraGearService = {
     version: 'm26' | 'm27' = 'm26',
   ): Record<string, string> {
     const els = this.loadoutElements(year, m26PosId, 'photo-match', version, observed);
-    const typeToSlot: Record<string, string> = {};
-    for (const [slot, types] of Object.entries(GEAR_SLOT_TYPES)) {
-      for (const t of types) typeToSlot[t] = slot;
-    }
     const out: Record<string, string> = {};
     for (const e of els) {
       if (!e.itemAssetName) continue;
@@ -747,7 +743,7 @@ export const EraGearService = {
         out.facemask = e.itemAssetName;
         continue;
       }
-      const slot = e.slotType ? typeToSlot[e.slotType] : undefined;
+      const slot = slotOfElement(e.slotType, e.itemAssetName);
       if (slot) out[slot] = e.itemAssetName;
     }
     return out;

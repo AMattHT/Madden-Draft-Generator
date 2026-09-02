@@ -14,7 +14,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { GEAR_SLOT_TYPES } from '../src/services/GearOptionsService';
+import { slotOfElement } from '../src/services/GearOptionsService';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const madden = require('madden-franchise');
@@ -24,14 +24,9 @@ const TEAM_TABLE_UID = 637929298;
 const CHARVISUALS_TABLE_UID = 1429178382; // CharacterVisuals (RawData = loadout JSON, table3 blob)
 const PSEUDO_TEAMS = new Set(['AFC', 'NFC', 'Free Agents', 'Free Agent', 'Rest of NFL', 'AFC Pro Bowl', 'NFC Pro Bowl']);
 
-/** slotType -> our slot key (inverse of GearOptionsService.GEAR_SLOT_TYPES). */
-const SLOTTYPE_TO_SLOT: Record<string, string> = {};
-for (const [slot, types] of Object.entries(GEAR_SLOT_TYPES)) {
-  for (const t of types) SLOTTYPE_TO_SLOT[t] = slot;
-}
 // A slotted 'FaceMask' element appears in a few roster loadouts (normally the
 // facemask is a slotless GearFaceMask_* element) — map it to the same slot.
-SLOTTYPE_TO_SLOT.FaceMask = 'facemask';
+const slotOf = (slotType: string, asset: string) => (slotType === 'FaceMask' ? 'facemask' : slotOfElement(slotType, asset));
 
 const bitsNull = (b: string) => /^0+$/.test(b);
 const num = (v: unknown) => {
@@ -122,7 +117,8 @@ async function main() {
         // Slotless elements: facemasks are the only ones we write (GearFaceMask_*).
         if (asset.startsWith('GearFaceMask_')) gear.facemask = asset;
         continue;
-      }      const slot = SLOTTYPE_TO_SLOT[e.slotType];
+      }
+      const slot = slotOf(e.slotType, asset);
       if (!slot) {
         unknownSlotTypes.set(e.slotType, (unknownSlotTypes.get(e.slotType) ?? 0) + 1);
         continue;

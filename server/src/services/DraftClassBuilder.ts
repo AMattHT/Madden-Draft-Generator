@@ -25,7 +25,7 @@ import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
 import { BaselinePlayer, CombineMeasurements } from '../types/player';
 import { TeamInfo } from './TeamService';
 import { PortraitService } from './PortraitService';
-import { GEAR_SLOT_TYPES } from './GearOptionsService';
+import { GEAR_SLOT_TYPES, slotOfElement, waistConflict } from './GearOptionsService';
 import { seededRng } from '../util/rng';
 import { MDC_BLOCK_SIZE, MDC_DATA_START } from '../config/paths';
 
@@ -441,12 +441,10 @@ function gearSlots(prospect: MdcProspect): Record<string, string> {
   const vis = prospect.visuals as { loadouts?: Array<{ loadoutType?: string; loadoutElements?: Array<{ slotType?: string; itemAssetName: string; remove?: boolean }> }> } | undefined;
   const lo = vis?.loadouts?.find((l) => l.loadoutType === 'PlayerOnField');
   if (!lo?.loadoutElements) return out;
-  const slotOfType = new Map<string, string>();
-  for (const [slot, types] of Object.entries(GEAR_SLOT_TYPES)) for (const t of types) slotOfType.set(t, slot);
   for (const el of lo.loadoutElements) {
     if (el.remove || !el.itemAssetName) continue;
     if (!el.slotType && /^GearFaceMask_/i.test(el.itemAssetName)) { out.facemask = el.itemAssetName; continue; }
-    const slot = el.slotType ? slotOfType.get(el.slotType) : undefined;
+    const slot = slotOfElement(el.slotType, el.itemAssetName);
     if (slot) out[slot] = el.itemAssetName;
   }
   return out;
@@ -627,7 +625,7 @@ export function applyGearEdits(prospects: MdcProspect[], gearEdits?: GearEdits):
     if (!loadout) continue;
     const els = (loadout.loadoutElements ??= []);
     for (const [slot, asset] of Object.entries(slots)) {
-      if (!asset) continue;
+      if (!asset || waistConflict(slots, slot)) continue;
       // Facemask is a SLOTLESS element (itemAssetName GearFaceMask_*, no slotType):
       // replace the existing prefix-matched element or push a new one.
       if (slot === 'facemask') {

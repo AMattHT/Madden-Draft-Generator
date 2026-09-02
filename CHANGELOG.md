@@ -14,6 +14,9 @@ explicit "None" for arm sleeves, elbows, thigh pads, knee pads and the towel. Se
 styles borrow the matching M26 render. Matching the game's own Legs tab, thigh pads are now one
 choice for both legs (Regular or Honeycomb, no more left and right), shoulder pads come in Small,
 Medium, Large and X-Large with a size picture, and the Guardian cap is offered in Madden 27 mode.
+Two Madden 27 slots are new: Pants (Tapered or Standard) and the Waist playcall band (black, white
+or team colour). The band and the handwarmer share one loadout element, as in the game, so picking
+one clears the other.
 
 **Dev traits for recent classes come from awards and production.** For players drafted in the
 last eight seasons, X-Factor is earned only by AP awards (MVP, Player of the Year, Rookie of the

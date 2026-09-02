@@ -97,3 +97,21 @@ test('knee pads and towel have an explicit None in Madden 27 mode', () => {
   assert.ok(o.kneePads.some((k) => k.value === 'KneePad_None'));
   assert.ok(o.towel.some((t) => t.value === 'Towel_None'));
 });
+
+test('pants and the waist playcall band are Madden 27 slots that share the game\'s loadout', () => {
+  const { slotOfElement, waistConflict, GEAR_SLOT_TYPES } = require('../GearOptionsService') as typeof import('../GearOptionsService');
+  const m27 = GearOptionsService.optionsForYear(2025, 'm27');
+  assert.deepEqual(m27.pants.map((p) => p.value).sort(), ['GearPants_Standard', 'GearPants_Tapered']);
+  assert.ok(m27.playcallBand.some((b) => b.value === 'Waist_PlaycallSheet_Black'));
+  const m26 = GearOptionsService.optionsForYear(2025, 'm26');
+  assert.ok(!('pants' in m26) && !('playcallBand' in m26), 'M26 has no OuterPants or playcall band');
+  assert.deepEqual(GEAR_SLOT_TYPES.pants, ['OuterPants']);
+  assert.deepEqual(GEAR_SLOT_TYPES.playcallBand, ['WaistWear']);
+  // Reading a loadout routes WaistWear by asset; writing drops the handwarmer when a band is worn.
+  assert.equal(slotOfElement('WaistWear', 'Waist_PlaycallSheet_White'), 'playcallBand');
+  assert.equal(slotOfElement('WaistWear', 'Handwarmer_Standard'), 'handwarmer');
+  assert.equal(slotOfElement('OuterPants', 'GearPants_Tapered'), 'pants');
+  assert.equal(slotOfElement('LeftThighWear', 'ThighPad_Nike'), 'thighPads');
+  assert.ok(waistConflict({ handwarmer: 'Handwarmer_Standard', playcallBand: 'Waist_PlaycallSheet_Black' }, 'handwarmer'));
+  assert.ok(!waistConflict({ handwarmer: 'Handwarmer_Standard', playcallBand: 'Handwarmer_None' }, 'handwarmer'));
+});

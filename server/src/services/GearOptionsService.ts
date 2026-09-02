@@ -38,6 +38,7 @@ interface SlotDef {
   none?: GearOption; // explicit "none" asset (distinct from "era default" = unset)
   extra?: GearOption[]; // assets not present in the atlas
   synthetic?: GearOption[]; // fully manual option list (no atlas category)
+  games?: Array<'m26' | 'm27'>; // offered only for these games (default: both)
 }
 const SLOTS: SlotDef[] = [
   { slot: 'helmet', label: 'Helmet', category: 'helmets', slotTypes: ['HeadWear'] },
@@ -94,6 +95,18 @@ const SLOTS: SlotDef[] = [
   { slot: 'kneePads', label: 'Knee pads', category: 'kneePads', slotTypes: ['KneeWear'], none: { value: 'KneePad_None', label: 'None' } },
   { slot: 'spatLeft', label: 'Left spat', category: 'spats', slotTypes: ['LeftSpat'] },
   { slot: 'spatRight', label: 'Right spat', category: 'spats', slotTypes: ['RightSpat'] },
+  {
+    // Madden 27 only: its career save writes OuterPants on 2,591 of 2,987 players
+    // (Tapered 2,194 / Standard 397); Madden 26 saves carry no OuterPants at all.
+    slot: 'pants',
+    label: 'Pants',
+    slotTypes: ['OuterPants'],
+    games: ['m27'],
+    synthetic: [
+      { value: 'GearPants_Tapered', label: 'Tapered' },
+      { value: 'GearPants_Standard', label: 'Standard' },
+    ],
+  },
   { slot: 'eyePaint', label: 'Eye black', category: 'eyepaint', slotTypes: ['FacePaint'] },
   { slot: 'towel', label: 'Towel', category: 'towels', slotTypes: ['Towel'], none: { value: 'Towel_None', label: 'None' } },
   // Extra slots found in real Madden draft files (all verified valid assets).
@@ -136,6 +149,22 @@ const SLOTS: SlotDef[] = [
     ],
   },
   {
+    // Madden 27 only. The playcall band shares the handwarmer's WaistWear slot
+    // (the game shows two tabs but flags the handwarmer as incompatible on the
+    // band screen); the Madden 27 career save carries White and Black, the
+    // string table adds TeamColor. Setting one clears the other (waistConflict).
+    slot: 'playcallBand',
+    label: 'Waist playcall band',
+    slotTypes: ['WaistWear'],
+    games: ['m27'],
+    synthetic: [
+      { value: 'Handwarmer_None', label: 'None' },
+      { value: 'Waist_PlaycallSheet_Black', label: 'Black' },
+      { value: 'Waist_PlaycallSheet_White', label: 'White' },
+      { value: 'Waist_PlaycallSheet_TeamColor', label: 'Team color' },
+    ],
+  },
+  {
     slot: 'handwarmerStyle',
     label: 'Handwarmer position',
     slotTypes: ['WaistWearOverride'],
@@ -150,7 +179,27 @@ const SLOTS: SlotDef[] = [
 /** Ordered slot list + labels for the UI. */
 export const GEAR_SLOTS = SLOTS.map((s) => ({ slot: s.slot, label: s.label }));
 
+const PLAYCALL_BAND = /^Waist_PlaycallSheet/;
+
+/**
+ * The editor slot a loadout element belongs to. WaistWear is shared: a
+ * Waist_PlaycallSheet_* asset is the playcall band, anything else the handwarmer.
+ */
+export function slotOfElement(slotType: string | undefined, asset: string): string | undefined {
+  if (!slotType) return undefined;
+  if (slotType === 'WaistWear') return PLAYCALL_BAND.test(asset) ? 'playcallBand' : 'handwarmer';
+  return SLOT_OF_TYPE.get(slotType);
+}
+
+/** True when `slot` must not be written because another slot owns its loadout element. */
+export function waistConflict(slots: Record<string, string | undefined>, slot: string): boolean {
+  return slot === 'handwarmer' && PLAYCALL_BAND.test(slots.playcallBand ?? '');
+}
+
 /** slot -> M26 loadout slotType(s), used by the export to write gear. */
+const SLOT_OF_TYPE = new Map<string, string>();
+for (const s of SLOTS) if (s.slot !== 'playcallBand') for (const t of s.slotTypes) SLOT_OF_TYPE.set(t, s.slot);
+
 export const GEAR_SLOT_TYPES: Record<string, string[]> = {
   // Legacy per-leg keys from gear edits saved before the thigh slot was merged:
   // still written, never offered. Listed first so slotType -> slot lookups that
@@ -174,6 +223,12 @@ const M27_VERIFIED_EXTRA = new Set<string>([
   'ThighPad_None',
   'KneePad_None',
   'Towel_None',
+  // Seen on real players in the Madden 27 career save (scripts/dump-loadout-slots.ts).
+  'GearPants_Tapered',
+  'GearPants_Standard',
+  'Waist_PlaycallSheet_Black',
+  'Waist_PlaycallSheet_White',
+  'Waist_PlaycallSheet_TeamColor',
 ]);
 
 // ---- Fallback catalog (equipment-years.json), era-filtered ----
@@ -280,6 +335,7 @@ export const GearOptionsService = {
 
       const out: Record<string, GearOption[]> = {};
       for (const s of SLOTS) {
+        if (s.games && !s.games.includes(gameVersion)) continue;
         let items: GearOption[] = s.synthetic
           ? s.synthetic.map((o) => ({ ...o }))
           : (cats[s.category ?? ""] ?? []).map((it) => {
