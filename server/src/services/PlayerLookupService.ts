@@ -4,6 +4,8 @@ import { parseCsvFile, normalizeName } from '../util/csv';
 import { BaselinePlayer } from '../types/player';
 import { HistoricalAccoladeService } from './HistoricalAccoladeService';
 import { NflverseCareerService } from './NflverseCareerService';
+import { PositionMapper } from './PositionMapper';
+import { RatingService } from './RatingService';
 
 export interface PlayerSearchResult {
   firstName: string;
@@ -130,6 +132,20 @@ function repairSurname(first: string, last: string): { first: string; last: stri
   return { first, last };
 }
 
+/** Stable identity for a merged player: year|league|first|last|pick ('u' = undrafted). */
+export function playerKey(p: Pick<BaselinePlayer, 'draftYear' | 'league' | 'firstName' | 'lastName' | 'draftPick'>): string {
+  return `${p.draftYear}|${p.league}|${normalizeName(p.firstName)}|${normalizeName(p.lastName)}|${p.draftPick ?? 'u'}`;
+}
+
+/** One compact browse row for the class builder. */
+export interface CatalogPlayer {
+  key: string; first: string; last: string; pos: string; mpos: string; grp: string;
+  year: number; league: string; round: number | null; pick: number | null; college: string;
+  wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
+}
+
+let byKey: Map<string, BaselinePlayer> | null = null;
+let catalogCache: CatalogPlayer[] | null = null;
 let byYear: Map<number, BaselinePlayer[]> | null = null;
 let byNormName: Map<string, BaselinePlayer[]> | null = null;
 const normName = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
@@ -212,6 +228,15 @@ function load(): void {
     byYear.get(p.draftYear)!.push(p);
   }
   reconstructUnorderedDrafts();
+  // Stable keys last, once the pool is final: same-key collisions (rare) are
+  // numbered in load order so every player stays addressable.
+  byKey = new Map();
+  for (const p of merged) {
+    let k = playerKey(p);
+    for (let n = 2; byKey.has(k); n++) k = `${playerKey(p)}#${n}`;
+    p.key = k;
+    byKey.set(k, p);
+  }
 }
 
 /**
@@ -761,6 +786,38 @@ export const PlayerLookupService = {
       college: p.college,
       league: p.league,
     }));
+  },
+
+  /** Players for a list of keys, in that order, deduped; unknown keys reported. */
+  byKeys(keys: string[]): { players: BaselinePlayer[]; missing: string[] } {
+    load();
+    const seen = new Set<string>();
+    const players: BaselinePlayer[] = [];
+    const missing: string[] = [];
+    for (const k of keys) {
+      if (seen.has(k)) continue;
+      seen.add(k);
+      const p = byKey!.get(k);
+      if (p) players.push(p);
+      else missing.push(k);
+    }
+    return { players, missing };
+  },
+
+  /** Every merged player as a compact browse row (built once). */
+  catalog(): CatalogPlayer[] {
+    load();
+    if (catalogCache) return catalogCache;
+    catalogCache = [...byKey!.values()].map((p) => {
+      const posId = PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight);
+      return {
+        key: p.key!, first: p.firstName, last: p.lastName, pos: p.position,
+        mpos: PositionMapper.name(posId), grp: PositionMapper.groupFromId(posId),
+        year: p.draftYear, league: p.league, round: p.draftRound, pick: p.draftPick, college: p.college,
+        wav: p.wav, cal: RatingService.caliber(p, posId), hof: p.isHOF, pb: p.proBowls ?? 0, ap1: p.allPro1 ?? 0,
+      };
+    });
+    return catalogCache;
   },
 
   /** Deduped first- and last-name pools (all eras) for generating filler names. */

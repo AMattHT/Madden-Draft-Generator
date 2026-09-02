@@ -10,4 +10,10 @@ r.get('/players/search', (req, res) => {
   res.json({ results: q ? PlayerLookupService.search(q, limit) : [] });
 });
 
+/** Every player in the pool as compact rows for the class builder (one fetch, ~3 MB). */
+r.get('/players/catalog', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ players: PlayerLookupService.catalog() });
+});
+
 export default r;

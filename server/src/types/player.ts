@@ -48,6 +48,9 @@ export interface BaselinePlayer {
   positionLocked?: boolean;
 
   source: string; // origin of this record (local, pfr, nflverse, wikipedia, ...)
+
+  /** Stable identity across data refreshes: draftYear|league|first|last|pick (see playerKey). */
+  key?: string;
 }
 
 /** How a linebacker-labeled player was placed in Madden's front seven. */
