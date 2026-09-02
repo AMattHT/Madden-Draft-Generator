@@ -210,8 +210,16 @@ function load(): void {
       const pid = parseInt(r.PID, 10);
       if (name && !Number.isNaN(pid) && !plpoPid.has(name)) plpoPid.set(name, pid);
     }
+    // Madden 27's own head items (data/lookups/m27-generic-head-items.json, the
+    // game's FootballCharacterHeadItem assets) list every generic head it ships
+    // with its menu-portrait PID: 262 heads, 69 more than its random classes ever
+    // assigned. They join the M27 pools; the random-class PIDs agree with the item
+    // data on every shared head.
+    let m27Items: Record<string, { pid: number }> = {};
+    try { m27Items = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-generic-head-items.json'), 'utf8')).heads ?? {}; } catch { /* optional */ }
     for (const version of ['m26', 'm27'] as const) {
-      const heads = catalog[version] ?? {};
+      const heads: Record<string, number> = { ...(catalog[version] ?? {}) };
+      if (version === 'm27') for (const [code, it] of Object.entries(m27Items)) if (!(code in heads) && it.pid) heads[code] = it.pid;
       const pools = new Map<number, string[]>();
       const pids = new Map<string, number>();
       for (const [code, pid] of Object.entries(heads)) {

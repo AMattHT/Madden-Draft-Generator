@@ -6,7 +6,8 @@
 their real menu portrait instead of a generic face: 472 portraits exported from the game's own
 image library (via the MMC Frosty Editor's Portrait Manager) join the pack, and 529 portraits the
 Madden 26 atlas never carried are filled in for players already mapped. `scripts/import-m27-portraits.py`
-rebuilds the pack from a fresh export.
+rebuilds the pack from a fresh export. The Madden 27 face picker now offers all 262 generic heads
+the game ships (from its own head-item data), 69 more than its random classes ever used.
 
 **Equipment pictures ship with the app.** The Equipment Builder's thumbnails (one render per
 helmet, facemask, visor, glove, cleat, sleeve, pad and eye-black style) are now bundled, so the

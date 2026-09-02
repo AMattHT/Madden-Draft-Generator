@@ -32,6 +32,9 @@ function shippedPids(): { pids: Set<number>; names: Set<string> } {
   for (const v of Object.values(roster)) if (v.portraitPid) pids.add(v.portraitPid);
   for (const p of Object.values(m27.legendPids as Record<string, number>)) pids.add(p);
   for (const p of Object.values((json('m27-field-stats.json').headPid ?? {}) as Record<string, number>)) pids.add(p);
+  // The game's own generic-head items (exported from its FootballCharacterHeadItem
+  // assets): every head it ships with its portrait id.
+  for (const h of Object.values((json('m27-generic-head-items.json').heads ?? {}) as Record<string, { pid: number }>)) if (h.pid) pids.add(h.pid);
   // Players the game keeps a portrait for by name; portraitFor is allowed to
   // use the lookup's PhotoID for exactly these.
   const names = new Set<string>((m27.playerPortraits as string[]) ?? []);

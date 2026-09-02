@@ -1,0 +1,1315 @@
+{
+ "_source": "Madden 27 content/FootballCharacter/Items/GenericHeads/Player/*_item (FootballCharacterHeadItem) exported as XML from the MMC Frosty Editor on 2026-09-02: RecipeAssetName -> Image DiscAssetId (menu-portrait PID), SkinToneBaseValue, DisplayName. Every generic head the game ships.",
+ "heads": {
+  "gen_1_BM_MB_005": {
+   "pid": 4071,
+   "skinTone": 1,
+   "displayName": "Head 264"
+  },
+  "gen_1_B_B_005": {
+   "pid": 4058,
+   "skinTone": 1,
+   "displayName": "Head 263"
+  },
+  "gen_1_B_G_01": {
+   "pid": 3455,
+   "skinTone": 1,
+   "displayName": "Head 262"
+  },
+  "gen_1_B_N_0012": {
+   "pid": 3359,
+   "skinTone": 1,
+   "displayName": "Head 261"
+  },
+  "gen_1_B_N_007": {
+   "pid": 4062,
+   "skinTone": 1,
+   "displayName": "Head 260"
+  },
+  "gen_1_B_N_01": {
+   "pid": 4060,
+   "skinTone": 1,
+   "displayName": "Head 259"
+  },
+  "gen_1_B_N_010": {
+   "pid": 10308,
+   "skinTone": 1,
+   "displayName": "Head 258"
+  },
+  "gen_1_B_N_011": {
+   "pid": 3380,
+   "skinTone": 1,
+   "displayName": "Head 257"
+  },
+  "gen_1_B_N_02": {
+   "pid": 4061,
+   "skinTone": 1,
+   "displayName": "Head 256"
+  },
+  "gen_1_B_N_03": {
+   "pid": 3360,
+   "skinTone": 1,
+   "displayName": "Head 255"
+  },
+  "gen_1_B_S_001": {
+   "pid": 4064,
+   "skinTone": 1,
+   "displayName": "Head 254"
+  },
+  "gen_1_B_S_002": {
+   "pid": 4065,
+   "skinTone": 1,
+   "displayName": "Head 253"
+  },
+  "gen_1_H_BD_01": {
+   "pid": 4074,
+   "skinTone": 1,
+   "displayName": "Head 252"
+  },
+  "gen_1_H_BD_02": {
+   "pid": 4075,
+   "skinTone": 1,
+   "displayName": "Head 251"
+  },
+  "gen_1_H_N_010": {
+   "pid": 10309,
+   "skinTone": 1,
+   "displayName": "Head 250"
+  },
+  "gen_1_H_N_015": {
+   "pid": 10310,
+   "skinTone": 1,
+   "displayName": "Head 249"
+  },
+  "gen_1_H_S_003": {
+   "pid": 10311,
+   "skinTone": 1,
+   "displayName": "Head 248"
+  },
+  "gen_1_H_S_008": {
+   "pid": 10312,
+   "skinTone": 1,
+   "displayName": "Head 247"
+  },
+  "gen_1_M_N_02": {
+   "pid": 4083,
+   "skinTone": 1,
+   "displayName": "Head 246"
+  },
+  "gen_2_BMH_G_009": {
+   "pid": 10314,
+   "skinTone": 2,
+   "displayName": "Head 245"
+  },
+  "gen_2_BMH_S_002": {
+   "pid": 4089,
+   "skinTone": 2,
+   "displayName": "Head 244"
+  },
+  "gen_2_BMH_S_003": {
+   "pid": 3756,
+   "skinTone": 2,
+   "displayName": "Head 243"
+  },
+  "gen_2_BMH_S_004": {
+   "pid": 3771,
+   "skinTone": 2,
+   "displayName": "Head 242"
+  },
+  "gen_2_BMH_S_010": {
+   "pid": 10315,
+   "skinTone": 2,
+   "displayName": "Head 241"
+  },
+  "gen_2_B_BD_03": {
+   "pid": 4184,
+   "skinTone": 2,
+   "displayName": "Head 240"
+  },
+  "gen_2_B_B_004": {
+   "pid": 4094,
+   "skinTone": 2,
+   "displayName": "Head 239"
+  },
+  "gen_2_B_B_005": {
+   "pid": 3381,
+   "skinTone": 2,
+   "displayName": "Head 238"
+  },
+  "gen_2_B_B_006": {
+   "pid": 3662,
+   "skinTone": 2,
+   "displayName": "Head 237"
+  },
+  "gen_2_B_N_0010": {
+   "pid": 3666,
+   "skinTone": 2,
+   "displayName": "Head 236"
+  },
+  "gen_2_B_N_0011": {
+   "pid": 3667,
+   "skinTone": 2,
+   "displayName": "Head 235"
+  },
+  "gen_2_B_N_0012": {
+   "pid": 3362,
+   "skinTone": 2,
+   "displayName": "Head 234"
+  },
+  "gen_2_B_N_0013": {
+   "pid": 3382,
+   "skinTone": 2,
+   "displayName": "Head 233"
+  },
+  "gen_2_B_N_0014": {
+   "pid": 3383,
+   "skinTone": 2,
+   "displayName": "Head 232"
+  },
+  "gen_2_B_N_0015": {
+   "pid": 3671,
+   "skinTone": 2,
+   "displayName": "Head 231"
+  },
+  "gen_2_B_N_0016": {
+   "pid": 3405,
+   "skinTone": 2,
+   "displayName": "Head 230"
+  },
+  "gen_2_B_N_0017": {
+   "pid": 3404,
+   "skinTone": 2,
+   "displayName": "Head 229"
+  },
+  "gen_2_B_N_0018": {
+   "pid": 3407,
+   "skinTone": 2,
+   "displayName": "Head 228"
+  },
+  "gen_2_B_N_006": {
+   "pid": 4186,
+   "skinTone": 2,
+   "displayName": "Head 227"
+  },
+  "gen_2_B_N_009": {
+   "pid": 4188,
+   "skinTone": 2,
+   "displayName": "Head 226"
+  },
+  "gen_2_B_N_01": {
+   "pid": 3363,
+   "skinTone": 2,
+   "displayName": "Head 225"
+  },
+  "gen_2_B_N_02": {
+   "pid": 3384,
+   "skinTone": 2,
+   "displayName": "Head 224"
+  },
+  "gen_2_B_N_03": {
+   "pid": 3673,
+   "skinTone": 2,
+   "displayName": "Head 223"
+  },
+  "gen_2_B_S_001": {
+   "pid": 4189,
+   "skinTone": 2,
+   "displayName": "Head 222"
+  },
+  "gen_2_B_S_005": {
+   "pid": 4190,
+   "skinTone": 2,
+   "displayName": "Head 221"
+  },
+  "gen_2_B_S_006": {
+   "pid": 3364,
+   "skinTone": 2,
+   "displayName": "Head 220"
+  },
+  "gen_2_B_S_007": {
+   "pid": 3351,
+   "skinTone": 2,
+   "displayName": "Head 219"
+  },
+  "gen_2_B_S_009": {
+   "pid": 3718,
+   "skinTone": 2,
+   "displayName": "Head 218"
+  },
+  "gen_2_H_BD_03": {
+   "pid": 4144,
+   "skinTone": 2,
+   "displayName": "Head 217"
+  },
+  "gen_2_H_B_004": {
+   "pid": 4135,
+   "skinTone": 2,
+   "displayName": "Head 216"
+  },
+  "gen_2_H_B_005": {
+   "pid": 3365,
+   "skinTone": 2,
+   "displayName": "Head 215"
+  },
+  "gen_2_H_B_010": {
+   "pid": 4193,
+   "skinTone": 2,
+   "displayName": "Head 214"
+  },
+  "gen_2_H_GM_004": {
+   "pid": 4196,
+   "skinTone": 2,
+   "displayName": "Head 213"
+  },
+  "gen_2_H_G_01": {
+   "pid": 4195,
+   "skinTone": 2,
+   "displayName": "Head 212"
+  },
+  "gen_2_H_G_02": {
+   "pid": 3806,
+   "skinTone": 2,
+   "displayName": "Head 211"
+  },
+  "gen_2_H_MB_012": {
+   "pid": 4197,
+   "skinTone": 2,
+   "displayName": "Head 210"
+  },
+  "gen_2_H_N_006": {
+   "pid": 10316,
+   "skinTone": 2,
+   "displayName": "Head 209"
+  },
+  "gen_2_H_N_007": {
+   "pid": 4200,
+   "skinTone": 2,
+   "displayName": "Head 208"
+  },
+  "gen_2_H_N_009": {
+   "pid": 4201,
+   "skinTone": 2,
+   "displayName": "Head 207"
+  },
+  "gen_2_M_B_01": {
+   "pid": 3811,
+   "skinTone": 2,
+   "displayName": "Head 206"
+  },
+  "gen_2_M_B_02": {
+   "pid": 3816,
+   "skinTone": 2,
+   "displayName": "Head 205"
+  },
+  "gen_2_M_N_007": {
+   "pid": 4203,
+   "skinTone": 2,
+   "displayName": "Head 204"
+  },
+  "gen_2_M_N_04": {
+   "pid": 4287,
+   "skinTone": 2,
+   "displayName": "Head 203"
+  },
+  "gen_2_M_N_05": {
+   "pid": 3366,
+   "skinTone": 2,
+   "displayName": "Head 202"
+  },
+  "gen_2_M_N_22": {
+   "pid": 10317,
+   "skinTone": 2,
+   "displayName": "Head 201"
+  },
+  "gen_2_M_S_011": {
+   "pid": 4204,
+   "skinTone": 2,
+   "displayName": "Head 200"
+  },
+  "gen_2_T_N_01": {
+   "pid": 3821,
+   "skinTone": 2,
+   "displayName": "Head 199"
+  },
+  "gen_2_T_N_02": {
+   "pid": 3824,
+   "skinTone": 2,
+   "displayName": "Head 198"
+  },
+  "gen_2_T_S_007": {
+   "pid": 10318,
+   "skinTone": 2,
+   "displayName": "Head 197"
+  },
+  "gen_3_B_BD_02": {
+   "pid": 10319,
+   "skinTone": 3,
+   "displayName": "Head 196"
+  },
+  "gen_3_B_B_009": {
+   "pid": 3367,
+   "skinTone": 3,
+   "displayName": "Head 195"
+  },
+  "gen_3_B_B_01": {
+   "pid": 3352,
+   "skinTone": 3,
+   "displayName": "Head 194"
+  },
+  "gen_3_B_N_004": {
+   "pid": 10320,
+   "skinTone": 3,
+   "displayName": "Head 193"
+  },
+  "gen_3_B_N_007": {
+   "pid": 3368,
+   "skinTone": 3,
+   "displayName": "Head 192"
+  },
+  "gen_3_B_N_01": {
+   "pid": 3369,
+   "skinTone": 3,
+   "displayName": "Head 191"
+  },
+  "gen_3_B_N_02": {
+   "pid": 3353,
+   "skinTone": 3,
+   "displayName": "Head 190"
+  },
+  "gen_3_B_S_010": {
+   "pid": 3871,
+   "skinTone": 3,
+   "displayName": "Head 189"
+  },
+  "gen_3_B_S_011": {
+   "pid": 3370,
+   "skinTone": 3,
+   "displayName": "Head 188"
+  },
+  "gen_3_H_BD_01": {
+   "pid": 10321,
+   "skinTone": 3,
+   "displayName": "Head 187"
+  },
+  "gen_3_H_B_008": {
+   "pid": 10322,
+   "skinTone": 3,
+   "displayName": "Head 186"
+  },
+  "gen_3_H_B_01": {
+   "pid": 3853,
+   "skinTone": 3,
+   "displayName": "Head 185"
+  },
+  "gen_3_H_MS_01": {
+   "pid": 3881,
+   "skinTone": 3,
+   "displayName": "Head 184"
+  },
+  "gen_3_H_N_01": {
+   "pid": 3854,
+   "skinTone": 3,
+   "displayName": "Head 183"
+  },
+  "gen_3_H_S_001": {
+   "pid": 3915,
+   "skinTone": 3,
+   "displayName": "Head 182"
+  },
+  "gen_3_M_N_01": {
+   "pid": 10323,
+   "skinTone": 3,
+   "displayName": "Head 181"
+  },
+  "gen_3_T_N_004": {
+   "pid": 10324,
+   "skinTone": 3,
+   "displayName": "Head 180"
+  },
+  "gen_3_T_N_01": {
+   "pid": 3856,
+   "skinTone": 3,
+   "displayName": "Head 179"
+  },
+  "gen_4_BHM_S_01": {
+   "pid": 3909,
+   "skinTone": 4,
+   "displayName": "Head 178"
+  },
+  "gen_4_BM_B_001": {
+   "pid": 3903,
+   "skinTone": 4,
+   "displayName": "Head 177"
+  },
+  "gen_4_B_BM_01": {
+   "pid": 3372,
+   "skinTone": 4,
+   "displayName": "Head 176"
+  },
+  "gen_4_B_B_004": {
+   "pid": 3371,
+   "skinTone": 4,
+   "displayName": "Head 175"
+  },
+  "gen_4_B_G_003": {
+   "pid": 3882,
+   "skinTone": 4,
+   "displayName": "Head 174"
+  },
+  "gen_4_B_G_004": {
+   "pid": 3883,
+   "skinTone": 4,
+   "displayName": "Head 173"
+  },
+  "gen_4_B_MS_01": {
+   "pid": 3422,
+   "skinTone": 4,
+   "displayName": "Head 172"
+  },
+  "gen_4_B_MS_02": {
+   "pid": 3911,
+   "skinTone": 4,
+   "displayName": "Head 171"
+  },
+  "gen_4_B_MS_03": {
+   "pid": 3901,
+   "skinTone": 4,
+   "displayName": "Head 170"
+  },
+  "gen_4_B_M_01": {
+   "pid": 3884,
+   "skinTone": 4,
+   "displayName": "Head 169"
+  },
+  "gen_4_B_N_002": {
+   "pid": 3900,
+   "skinTone": 4,
+   "displayName": "Head 168"
+  },
+  "gen_4_B_N_003": {
+   "pid": 3373,
+   "skinTone": 4,
+   "displayName": "Head 167"
+  },
+  "gen_4_B_N_004": {
+   "pid": 3386,
+   "skinTone": 4,
+   "displayName": "Head 166"
+  },
+  "gen_4_B_N_005": {
+   "pid": 10325,
+   "skinTone": 4,
+   "displayName": "Head 165"
+  },
+  "gen_4_B_N_01": {
+   "pid": 3913,
+   "skinTone": 4,
+   "displayName": "Head 164"
+  },
+  "gen_4_B_N_02": {
+   "pid": 3907,
+   "skinTone": 4,
+   "displayName": "Head 163"
+  },
+  "gen_4_H_BD_01": {
+   "pid": 3902,
+   "skinTone": 4,
+   "displayName": "Head 162"
+  },
+  "gen_4_H_N_003": {
+   "pid": 3374,
+   "skinTone": 4,
+   "displayName": "Head 161"
+  },
+  "gen_4_H_N_004": {
+   "pid": 3872,
+   "skinTone": 4,
+   "displayName": "Head 160"
+  },
+  "gen_4_H_N_005": {
+   "pid": 3912,
+   "skinTone": 4,
+   "displayName": "Head 159"
+  },
+  "gen_4_M_BD_02": {
+   "pid": 3895,
+   "skinTone": 4,
+   "displayName": "Head 158"
+  },
+  "gen_4_M_M_005": {
+   "pid": 10326,
+   "skinTone": 4,
+   "displayName": "Head 157"
+  },
+  "gen_4_M_N_01": {
+   "pid": 3905,
+   "skinTone": 4,
+   "displayName": "Head 156"
+  },
+  "gen_4_T_G_01": {
+   "pid": 3375,
+   "skinTone": 4,
+   "displayName": "Head 155"
+  },
+  "gen_4_T_N_006": {
+   "pid": 3908,
+   "skinTone": 4,
+   "displayName": "Head 154"
+  },
+  "gen_4_T_N_007": {
+   "pid": 3354,
+   "skinTone": 4,
+   "displayName": "Head 153"
+  },
+  "gen_5_BHM_M_002": {
+   "pid": 3937,
+   "skinTone": 5,
+   "displayName": "Head 152"
+  },
+  "gen_5_BHTM_GS_001": {
+   "pid": 3938,
+   "skinTone": 5,
+   "displayName": "Head 151"
+  },
+  "gen_5_BTM_N_004": {
+   "pid": 3939,
+   "skinTone": 5,
+   "displayName": "Head 150"
+  },
+  "gen_5_B_BD_02": {
+   "pid": 3945,
+   "skinTone": 7,
+   "displayName": "Head 149"
+  },
+  "gen_5_B_BD_03": {
+   "pid": 3946,
+   "skinTone": 5,
+   "displayName": "Head 148"
+  },
+  "gen_5_B_G_01": {
+   "pid": 3355,
+   "skinTone": 5,
+   "displayName": "Head 147"
+  },
+  "gen_5_B_G_02": {
+   "pid": 3924,
+   "skinTone": 5,
+   "displayName": "Head 146"
+  },
+  "gen_5_B_MS_02": {
+   "pid": 3955,
+   "skinTone": 5,
+   "displayName": "Head 145"
+  },
+  "gen_5_B_N_01": {
+   "pid": 3947,
+   "skinTone": 5,
+   "displayName": "Head 144"
+  },
+  "gen_5_B_N_02": {
+   "pid": 3926,
+   "skinTone": 5,
+   "displayName": "Head 143"
+  },
+  "gen_5_B_N_03": {
+   "pid": 3377,
+   "skinTone": 5,
+   "displayName": "Head 142"
+  },
+  "gen_5_B_S_002": {
+   "pid": 3943,
+   "skinTone": 5,
+   "displayName": "Head 141"
+  },
+  "gen_5_B_S_003": {
+   "pid": 3356,
+   "skinTone": 5,
+   "displayName": "Head 140"
+  },
+  "gen_5_H_BD_01": {
+   "pid": 10327,
+   "skinTone": 5,
+   "displayName": "Head 139"
+  },
+  "gen_5_H_BD_02": {
+   "pid": 10328,
+   "skinTone": 7,
+   "displayName": "Head 138"
+  },
+  "gen_5_H_G_01": {
+   "pid": 3952,
+   "skinTone": 5,
+   "displayName": "Head 137"
+  },
+  "gen_5_H_N_01": {
+   "pid": 3950,
+   "skinTone": 5,
+   "displayName": "Head 136"
+  },
+  "gen_5_M_BD_02": {
+   "pid": 3957,
+   "skinTone": 5,
+   "displayName": "Head 135"
+  },
+  "gen_5_M_B_001": {
+   "pid": 3970,
+   "skinTone": 5,
+   "displayName": "Head 134"
+  },
+  "gen_5_M_M_005": {
+   "pid": 10329,
+   "skinTone": 5,
+   "displayName": "Head 133"
+  },
+  "gen_5_M_N_009": {
+   "pid": 3942,
+   "skinTone": 5,
+   "displayName": "Head 132"
+  },
+  "gen_5_M_N_01": {
+   "pid": 3977,
+   "skinTone": 5,
+   "displayName": "Head 131"
+  },
+  "gen_5_M_N_02": {
+   "pid": 3917,
+   "skinTone": 5,
+   "displayName": "Head 130"
+  },
+  "gen_5_T_GM_003": {
+   "pid": 3963,
+   "skinTone": 5,
+   "displayName": "Head 129"
+  },
+  "gen_5_T_G_01": {
+   "pid": 3378,
+   "skinTone": 5,
+   "displayName": "Head 128"
+  },
+  "gen_6_BHM_BM_004": {
+   "pid": 3761,
+   "skinTone": 6,
+   "displayName": "Head 127"
+  },
+  "gen_6_BHM_B_01": {
+   "pid": 4070,
+   "skinTone": 6,
+   "displayName": "Head 126"
+  },
+  "gen_6_BHM_G_002": {
+   "pid": 10330,
+   "skinTone": 6,
+   "displayName": "Head 125"
+  },
+  "gen_6_BMH_G_010": {
+   "pid": 3765,
+   "skinTone": 6,
+   "displayName": "Head 124"
+  },
+  "gen_6_BMH_N_003": {
+   "pid": 3845,
+   "skinTone": 6,
+   "displayName": "Head 123"
+  },
+  "gen_6_BM_MG_008": {
+   "pid": 3763,
+   "skinTone": 6,
+   "displayName": "Head 122"
+  },
+  "gen_6_BM_N_009": {
+   "pid": 3764,
+   "skinTone": 6,
+   "displayName": "Head 121"
+  },
+  "gen_6_BTM_BM_001": {
+   "pid": 3766,
+   "skinTone": 6,
+   "displayName": "Head 120"
+  },
+  "gen_6_B_G_005": {
+   "pid": 3466,
+   "skinTone": 6,
+   "displayName": "Head 119"
+  },
+  "gen_6_B_G_01": {
+   "pid": 3965,
+   "skinTone": 6,
+   "displayName": "Head 118"
+  },
+  "gen_6_B_G_03": {
+   "pid": 3350,
+   "skinTone": 6,
+   "displayName": "Head 117"
+  },
+  "gen_6_B_G_04": {
+   "pid": 3357,
+   "skinTone": 6,
+   "displayName": "Head 116"
+  },
+  "gen_6_B_G_05": {
+   "pid": 3402,
+   "skinTone": 6,
+   "displayName": "Head 115"
+  },
+  "gen_6_B_G_06": {
+   "pid": 3403,
+   "skinTone": 6,
+   "displayName": "Head 114"
+  },
+  "gen_6_B_MS_01": {
+   "pid": 3755,
+   "skinTone": 6,
+   "displayName": "Head 113"
+  },
+  "gen_6_B_N_0010": {
+   "pid": 3358,
+   "skinTone": 6,
+   "displayName": "Head 112"
+  },
+  "gen_6_B_N_0011": {
+   "pid": 3406,
+   "skinTone": 6,
+   "displayName": "Head 111"
+  },
+  "gen_6_B_N_003": {
+   "pid": 3975,
+   "skinTone": 6,
+   "displayName": "Head 110"
+  },
+  "gen_6_B_N_004": {
+   "pid": 3760,
+   "skinTone": 6,
+   "displayName": "Head 109"
+  },
+  "gen_6_B_N_005": {
+   "pid": 4059,
+   "skinTone": 6,
+   "displayName": "Head 108"
+  },
+  "gen_6_B_N_006": {
+   "pid": 4066,
+   "skinTone": 6,
+   "displayName": "Head 107"
+  },
+  "gen_6_B_N_007": {
+   "pid": 3400,
+   "skinTone": 6,
+   "displayName": "Head 106"
+  },
+  "gen_6_B_N_008": {
+   "pid": 4067,
+   "skinTone": 6,
+   "displayName": "Head 105"
+  },
+  "gen_6_B_N_009": {
+   "pid": 3410,
+   "skinTone": 6,
+   "displayName": "Head 104"
+  },
+  "gen_6_B_N_01": {
+   "pid": 3757,
+   "skinTone": 6,
+   "displayName": "Head 103"
+  },
+  "gen_6_B_N_02": {
+   "pid": 3758,
+   "skinTone": 6,
+   "displayName": "Head 102"
+  },
+  "gen_6_B_N_03": {
+   "pid": 3759,
+   "skinTone": 6,
+   "displayName": "Head 101"
+  },
+  "gen_6_B_S_02": {
+   "pid": 4069,
+   "skinTone": 6,
+   "displayName": "Head 100"
+  },
+  "gen_6_H_BD_01": {
+   "pid": 3768,
+   "skinTone": 6,
+   "displayName": "Head 099"
+  },
+  "gen_6_H_BM_02": {
+   "pid": 4076,
+   "skinTone": 6,
+   "displayName": "Head 098"
+  },
+  "gen_6_H_B_002": {
+   "pid": 10331,
+   "skinTone": 6,
+   "displayName": "Head 097"
+  },
+  "gen_6_H_G_01": {
+   "pid": 3660,
+   "skinTone": 6,
+   "displayName": "Head 096"
+  },
+  "gen_6_H_G_012": {
+   "pid": 10332,
+   "skinTone": 6,
+   "displayName": "Head 095"
+  },
+  "gen_6_H_MS_01": {
+   "pid": 10333,
+   "skinTone": 6,
+   "displayName": "Head 094"
+  },
+  "gen_6_H_N_001": {
+   "pid": 10334,
+   "skinTone": 6,
+   "displayName": "Head 093"
+  },
+  "gen_6_H_N_006": {
+   "pid": 4077,
+   "skinTone": 8,
+   "displayName": "Head 092"
+  },
+  "gen_6_H_N_01": {
+   "pid": 10335,
+   "skinTone": 6,
+   "displayName": "Head 091"
+  },
+  "gen_6_H_N_20": {
+   "pid": 10336,
+   "skinTone": 6,
+   "displayName": "Head 090"
+  },
+  "gen_6_M_G_01": {
+   "pid": 4080,
+   "skinTone": 6,
+   "displayName": "Head 089"
+  },
+  "gen_6_M_MB_011": {
+   "pid": 3711,
+   "skinTone": 6,
+   "displayName": "Head 088"
+  },
+  "gen_6_M_N_009": {
+   "pid": 3491,
+   "skinTone": 6,
+   "displayName": "Head 087"
+  },
+  "gen_6_M_N_01": {
+   "pid": 3638,
+   "skinTone": 6,
+   "displayName": "Head 086"
+  },
+  "gen_6_M_N_02": {
+   "pid": 3704,
+   "skinTone": 6,
+   "displayName": "Head 085"
+  },
+  "gen_6_N_MG_009": {
+   "pid": 4082,
+   "skinTone": 6,
+   "displayName": "Head 084"
+  },
+  "gen_6_T_G_005": {
+   "pid": 3769,
+   "skinTone": 6,
+   "displayName": "Head 083"
+  },
+  "gen_6_T_MG_006": {
+   "pid": 3770,
+   "skinTone": 6,
+   "displayName": "Head 082"
+  },
+  "gen_6_T_N_009": {
+   "pid": 3737,
+   "skinTone": 6,
+   "displayName": "Head 081"
+  },
+  "gen_7_BHM_MG_001": {
+   "pid": 3851,
+   "skinTone": 7,
+   "displayName": "Head 080"
+  },
+  "gen_7_BHM_MG_007": {
+   "pid": 3858,
+   "skinTone": 7,
+   "displayName": "Head 079"
+  },
+  "gen_7_BHM_N_002": {
+   "pid": 3866,
+   "skinTone": 7,
+   "displayName": "Head 077"
+  },
+  "gen_7_BHM_N_004": {
+   "pid": 10338,
+   "skinTone": 7,
+   "displayName": "Head 076"
+  },
+  "gen_7_BHM_S_010": {
+   "pid": 3787,
+   "skinTone": 7,
+   "displayName": "Head 075"
+  },
+  "gen_7_BMH_B_006": {
+   "pid": 10339,
+   "skinTone": 7,
+   "displayName": "Head 074"
+  },
+  "gen_7_BMH_GS_005": {
+   "pid": 3468,
+   "skinTone": 7,
+   "displayName": "Head 073"
+  },
+  "gen_7_BMH_GS_011": {
+   "pid": 10340,
+   "skinTone": 7,
+   "displayName": "Head 072"
+  },
+  "gen_7_BMH_MB_019": {
+   "pid": 3657,
+   "skinTone": 7,
+   "displayName": "Head 071"
+  },
+  "gen_7_BMH_MG_001": {
+   "pid": 3581,
+   "skinTone": 7,
+   "displayName": "Head 070"
+  },
+  "gen_7_BMH_MG_003": {
+   "pid": 10341,
+   "skinTone": 7,
+   "displayName": "Head 069"
+  },
+  "gen_7_BMH_MG_008": {
+   "pid": 10342,
+   "skinTone": 7,
+   "displayName": "Head 068"
+  },
+  "gen_7_BMH_MG_020": {
+   "pid": 3819,
+   "skinTone": 7,
+   "displayName": "Head 067"
+  },
+  "gen_7_BMH_S_008": {
+   "pid": 3651,
+   "skinTone": 7,
+   "displayName": "Head 066"
+  },
+  "gen_7_BMTH_N_003": {
+   "pid": 3846,
+   "skinTone": 7,
+   "displayName": "Head 065"
+  },
+  "gen_7_BMT_BM_012": {
+   "pid": 10343,
+   "skinTone": 7,
+   "displayName": "Head 064"
+  },
+  "gen_7_BMT_M_009": {
+   "pid": 10344,
+   "skinTone": 7,
+   "displayName": "Head 063"
+  },
+  "gen_7_BTM_B_021": {
+   "pid": 3860,
+   "skinTone": 7,
+   "displayName": "Head 062"
+  },
+  "gen_7_BTM_MG_006": {
+   "pid": 3861,
+   "skinTone": 7,
+   "displayName": "Head 061"
+  },
+  "gen_7_BTM_N_007": {
+   "pid": 10345,
+   "skinTone": 7,
+   "displayName": "Head 060"
+  },
+  "gen_7_B_B_001": {
+   "pid": 3554,
+   "skinTone": 7,
+   "displayName": "Head 059"
+  },
+  "gen_7_B_B_002": {
+   "pid": 4084,
+   "skinTone": 7,
+   "displayName": "Head 058"
+  },
+  "gen_7_B_B_005": {
+   "pid": 10346,
+   "skinTone": 7,
+   "displayName": "Head 057"
+  },
+  "gen_7_B_B_009": {
+   "pid": 10347,
+   "skinTone": 7,
+   "displayName": "Head 056"
+  },
+  "gen_7_B_G_0010": {
+   "pid": 4086,
+   "skinTone": 7,
+   "displayName": "Head 055"
+  },
+  "gen_7_B_G_004": {
+   "pid": 3385,
+   "skinTone": 7,
+   "displayName": "Head 054"
+  },
+  "gen_7_B_G_005": {
+   "pid": 3782,
+   "skinTone": 7,
+   "displayName": "Head 053"
+  },
+  "gen_7_B_G_007": {
+   "pid": 10348,
+   "skinTone": 7,
+   "displayName": "Head 052"
+  },
+  "gen_7_B_G_008": {
+   "pid": 3789,
+   "skinTone": 7,
+   "displayName": "Head 051"
+  },
+  "gen_7_B_G_009": {
+   "pid": 3777,
+   "skinTone": 7,
+   "displayName": "Head 050"
+  },
+  "gen_7_B_N_0010": {
+   "pid": 4087,
+   "skinTone": 7,
+   "displayName": "Head 049"
+  },
+  "gen_7_B_N_0011": {
+   "pid": 3379,
+   "skinTone": 7,
+   "displayName": "Head 048"
+  },
+  "gen_7_B_N_0012": {
+   "pid": 4090,
+   "skinTone": 7,
+   "displayName": "Head 047"
+  },
+  "gen_7_B_N_0013": {
+   "pid": 4091,
+   "skinTone": 7,
+   "displayName": "Head 046"
+  },
+  "gen_7_B_N_0014": {
+   "pid": 4092,
+   "skinTone": 7,
+   "displayName": "Head 045"
+  },
+  "gen_7_B_N_007": {
+   "pid": 3828,
+   "skinTone": 7,
+   "displayName": "Head 044"
+  },
+  "gen_7_B_N_009": {
+   "pid": 3830,
+   "skinTone": 7,
+   "displayName": "Head 043"
+  },
+  "gen_7_B_N_011": {
+   "pid": 4093,
+   "skinTone": 7,
+   "displayName": "Head 042"
+  },
+  "gen_7_B_N_012": {
+   "pid": 4187,
+   "skinTone": 7,
+   "displayName": "Head 041"
+  },
+  "gen_7_B_N_013": {
+   "pid": 4191,
+   "skinTone": 7,
+   "displayName": "Head 040"
+  },
+  "gen_7_B_N_014": {
+   "pid": 4198,
+   "skinTone": 7,
+   "displayName": "Head 039"
+  },
+  "gen_7_B_N_015": {
+   "pid": 3401,
+   "skinTone": 7,
+   "displayName": "Head 038"
+  },
+  "gen_7_B_N_016": {
+   "pid": 4202,
+   "skinTone": 7,
+   "displayName": "Head 037"
+  },
+  "gen_7_B_N_017": {
+   "pid": 4205,
+   "skinTone": 7,
+   "displayName": "Head 036"
+  },
+  "gen_7_B_N_018": {
+   "pid": 4206,
+   "skinTone": 7,
+   "displayName": "Head 035"
+  },
+  "gen_7_B_N_019": {
+   "pid": 4207,
+   "skinTone": 7,
+   "displayName": "Head 034"
+  },
+  "gen_7_B_N_06": {
+   "pid": 3566,
+   "skinTone": 7,
+   "displayName": "Head 033"
+  },
+  "gen_7_B_N_07": {
+   "pid": 3696,
+   "skinTone": 7,
+   "displayName": "Head 032"
+  },
+  "gen_7_B_N_08": {
+   "pid": 10349,
+   "skinTone": 7,
+   "displayName": "Head 031"
+  },
+  "gen_7_B_N_09": {
+   "pid": 4211,
+   "skinTone": 7,
+   "displayName": "Head 030"
+  },
+  "gen_7_B_S_004": {
+   "pid": 3832,
+   "skinTone": 7,
+   "displayName": "Head 029"
+  },
+  "gen_7_B_S_005": {
+   "pid": 4212,
+   "skinTone": 7,
+   "displayName": "Head 028"
+  },
+  "gen_7_H_BD_03": {
+   "pid": 3473,
+   "skinTone": 7,
+   "displayName": "Head 027"
+  },
+  "gen_7_H_BMS_013": {
+   "pid": 10350,
+   "skinTone": 7,
+   "displayName": "Head 026"
+  },
+  "gen_7_H_B_010": {
+   "pid": 4215,
+   "skinTone": 7,
+   "displayName": "Head 025"
+  },
+  "gen_7_H_G_004": {
+   "pid": 10351,
+   "skinTone": 7,
+   "displayName": "Head 024"
+  },
+  "gen_7_H_G_009": {
+   "pid": 3480,
+   "skinTone": 7,
+   "displayName": "Head 023"
+  },
+  "gen_7_H_G_02": {
+   "pid": 10352,
+   "skinTone": 7,
+   "displayName": "Head 022"
+  },
+  "gen_7_H_N_006": {
+   "pid": 3674,
+   "skinTone": 7,
+   "displayName": "Head 021"
+  },
+  "gen_7_H_N_01": {
+   "pid": 3611,
+   "skinTone": 7,
+   "displayName": "Head 020"
+  },
+  "gen_7_M_BD_01": {
+   "pid": 3807,
+   "skinTone": 7,
+   "displayName": "Head 019"
+  },
+  "gen_7_M_BD_02": {
+   "pid": 10353,
+   "skinTone": 7,
+   "displayName": "Head 018"
+  },
+  "gen_7_M_BM_014": {
+   "pid": 3809,
+   "skinTone": 7,
+   "displayName": "Head 017"
+  },
+  "gen_7_M_B_01": {
+   "pid": 4222,
+   "skinTone": 7,
+   "displayName": "Head 016"
+  },
+  "gen_7_M_GS_015": {
+   "pid": 3571,
+   "skinTone": 7,
+   "displayName": "Head 015"
+  },
+  "gen_7_M_G_004": {
+   "pid": 3810,
+   "skinTone": 7,
+   "displayName": "Head 014"
+  },
+  "gen_7_M_G_005": {
+   "pid": 3346,
+   "skinTone": 7,
+   "displayName": "Head 013"
+  },
+  "gen_7_M_MB_009": {
+   "pid": 3522,
+   "skinTone": 7,
+   "displayName": "Head 012"
+  },
+  "gen_7_M_MG_025": {
+   "pid": 10354,
+   "skinTone": 7,
+   "displayName": "Head 011"
+  },
+  "gen_7_M_N_001": {
+   "pid": 3842,
+   "skinTone": 7,
+   "displayName": "Head 010"
+  },
+  "gen_7_M_N_005": {
+   "pid": 3347,
+   "skinTone": 7,
+   "displayName": "Head 009"
+  },
+  "gen_7_M_N_006": {
+   "pid": 3348,
+   "skinTone": 7,
+   "displayName": "Head 008"
+  },
+  "gen_7_M_N_024": {
+   "pid": 3869,
+   "skinTone": 7,
+   "displayName": "Head 007"
+  },
+  "gen_7_T_B_006": {
+   "pid": 3349,
+   "skinTone": 7,
+   "displayName": "Head 006"
+  },
+  "gen_7_T_G_004": {
+   "pid": 3852,
+   "skinTone": 7,
+   "displayName": "Head 005"
+  },
+  "gen_7_T_G_007": {
+   "pid": 10355,
+   "skinTone": 7,
+   "displayName": "Head 004"
+  },
+  "gen_7_T_N_001": {
+   "pid": 10356,
+   "skinTone": 7,
+   "displayName": "Head 003"
+  },
+  "gen_7_T_N_009": {
+   "pid": 10357,
+   "skinTone": 7,
+   "displayName": "Head 002"
+  }
+ }
+}
