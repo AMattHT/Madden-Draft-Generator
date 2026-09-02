@@ -13,8 +13,8 @@ the game ships (from its own head-item data), 69 more than its random classes ev
 **Equipment pictures ship with the app.** The Equipment Builder's thumbnails are now bundled, so
 the installed app shows them without a Madden Editor Suite install next to it, and they are the
 game's own Madden 27 icons: 698 renders exported from its vanity image library cover every gear
-option except the seven novelty helmets and three eye-black styles the game itself has no icon
-for. 183 items the Suite atlas never listed (masks, gloves, cleats, sleeves, wristbands) are now
+option except three eye-black styles the game itself has no icon for (the pumpkin and snowman
+helmets use their event icons; the Schutt Vengeance Pro shows its shell under a plain 3-bar mask). 183 items the Suite atlas never listed (masks, gloves, cleats, sleeves, wristbands) are now
 selectable with the game's picture. Names were checked
 against the renders and the game's own asset list: the Oakley Prizm visor is now the asset real
 rosters wear (the old entry showed a clear visor), the VICIS Zero1 masks are named by helmet, and

@@ -3,13 +3,13 @@
   "source": "Madden Editor Suite gear-atlas.json + gear-sprites, curated by scripts/import-gear-sprites.ts",
   "importedAt": "2026-09-02",
   "sprites": 540,
-  "m27Icons": "698 icons from the Madden 27 vanity library (scripts/import-m27-gear-icons.py)"
+  "m27Icons": "741 icons from the Madden 27 vanity library (scripts/import-m27-gear-icons.py)"
  },
  "helmets": [
   {
    "value": "GearHelmet_v_DOD_PumpkinDefender",
    "label": "Day of the Dead Pumpkin",
-   "image": null
+   "image": "vnty_dayofthedead_GearFaceMask_PumpkinDefender.png"
   },
   {
    "value": "GearHelmet_LightGladiator",
@@ -24,12 +24,12 @@
   {
    "value": "GearHelmet_PumpkinDefender",
    "label": "Pumpkin Defender",
-   "image": null
+   "image": "vnty_maddenween_GearHelmet_PumpkinDefender.png"
   },
   {
    "value": "GearHelmet_PumpkinInvader",
    "label": "Pumpkin Invader",
-   "image": null
+   "image": "vnty_maddenween_GearHelmet_PumpkinInvader.png"
   },
   {
    "value": "GearHelmet_Riddell360",
@@ -94,7 +94,7 @@
   {
    "value": "GearHelmet_SchuttVeng",
    "label": "Schutt Vengeance Pro",
-   "image": null
+   "image": "vnty_nflgear_GearFaceMask_Vengeance3Bar.png"
   },
   {
    "value": "GearHelmet_VengeanceZ10",
@@ -104,17 +104,17 @@
   {
    "value": "GearHelmet_SnowmanEvader",
    "label": "Snowman Evader",
-   "image": null
+   "image": "vnty_zerochill2025_GearHelmet_SnowmanEvader.png"
   },
   {
    "value": "GearHelmet_SnowmanFrontline",
    "label": "Snowman Frontline",
-   "image": null
+   "image": "vnty_zerochill2025_GearHelmet_SnowmanFrontline.png"
   },
   {
    "value": "GearHelmet_SnowmanInterceptor",
    "label": "Snowman Interceptor",
-   "image": null
+   "image": "vnty_zerochill2025_GearHelmet_SnowmanInterceptor.png"
   },
   {
    "value": "GearHelmet_VicisZero1",
@@ -1625,9 +1625,19 @@
    "image": "vnty_oakleyprizm_OakleyPrizmBlue_Visor.png"
   },
   {
+   "value": "OakleyPrizmChrome_Visor",
+   "label": "Oakley Prizm Chrome Visor",
+   "image": "vnty_oakleyprizm_OakleyPrizmChrome_Visor.png"
+  },
+  {
    "value": "OakleyPrizmJade_Visor",
    "label": "Oakley Prizm Jade",
    "image": "vnty_oakleyprizm_OakleyPrizmJade_Visor.png"
+  },
+  {
+   "value": "OakleyPrizmSaphire_Visor",
+   "label": "Oakley Prizm Saphire Visor",
+   "image": "vnty_oakleyprizm_OakleyPrizmSaphire_Visor.png"
   },
   {
    "value": "OakleyPrizmTorch_Visor",
@@ -3669,6 +3679,11 @@
    "value": "GearFootwear_shoe_mid_NikeLebronIV",
    "label": "Nike Lebron IV Mid",
    "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeLebronIV.png"
+  },
+  {
+   "value": "shoe_mid_NikeVaporEdgeDunk",
+   "label": "Nike Vapor Edge Dunk Mid",
+   "image": "vnty_nikedunk_shoe_mid_NikeVaporEdgeDunk.png"
   },
   {
    "value": "GearFootwear_shoe_low_NikeVaporEdge_zebra",

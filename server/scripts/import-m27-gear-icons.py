@@ -93,11 +93,27 @@ def family_for(asset: str) -> str:
     return 'universal'
 
 
+_by_suffix: dict = {}
+# Helmets the game has no icon of their own for: the facemask icons render the
+# mask on that helmet's shell, so the plain mask of the family shows the helmet.
+FALLBACK_ICON = {
+    'GearHelmet_SchuttVeng': 'vnty_nflgear_GearFaceMask_Vengeance3Bar',  # Vengeance shell, 3-bar mask
+    'GearHelmet_v_DOD_PumpkinDefender': 'vnty_dayofthedead_GearFaceMask_PumpkinDefender',  # Day of the Dead pumpkin shell
+}
+
+
 def icon_name(asset: str, names: dict) -> str | None:
-    for cand in (PAD_ICON.get(asset), f'vnty_nflgear_{asset}', f'vnty_styles_eyepaint_facetape_{asset}', f'vnty_standardbackplate_{asset}'):
+    """The library texture for an asset: nflgear first, then any event library
+    (vnty_maddenween_GearHelmet_PumpkinDefender, vnty_zerochill2025_GearHelmet_SnowmanEvader)."""
+    for cand in (PAD_ICON.get(asset), FALLBACK_ICON.get(asset), f'vnty_nflgear_{asset}', f'vnty_styles_eyepaint_facetape_{asset}', f'vnty_standardbackplate_{asset}'):
         if cand and cand in names:
             return cand
-    return None
+    if not _by_suffix:
+        for n in names:
+            m = re.match(r'vnty_[a-z0-9]+_(.+)$', n)
+            if m:
+                _by_suffix.setdefault(m.group(1).lower(), n)
+    return _by_suffix.get(asset.lower()) or _by_suffix.get(f'gearhelmet_{asset[len("GearHelmet_v_"):]}'.lower() if asset.startswith('GearHelmet_v_') else '')
 
 
 def main() -> None:
