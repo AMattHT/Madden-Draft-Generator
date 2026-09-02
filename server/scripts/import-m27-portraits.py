@@ -75,7 +75,7 @@ def names_mode(xml_dir: str) -> None:
         reader = csv.DictReader(f)
         fields = reader.fieldnames
         rows = list(reader)
-    id_to_asset = {}
+    id_to_asset, asset_ids = {}, {}
     for fname in os.listdir(xml_dir):
         if not fname.endswith('.xml') or 'assetlibrary' in fname:
             continue
@@ -83,30 +83,52 @@ def names_mode(xml_dir: str) -> None:
         if 'type="ImageLibraryTexture"' not in text:
             continue
         m = re.search(r'<field name="Name">([^<]+)</field>', text)
-        ids = re.findall(r'<item>(\d+)</item>', text)
+        ids = [int(i) for i in re.findall(r'<item>(\d+)</item>', text)]
         if not m or not ids:
             continue
         asset = m.group(1).rsplit('/', 1)[1]
+        asset_ids[asset.lower()] = ids
         for pid in ids:
-            id_to_asset.setdefault(int(pid), asset)
-    used = {r['Portrait'].strip().lower() for r in rows}
-    renamed = named = collided = 0
+            id_to_asset.setdefault(pid, asset)
+    rows_by_name = {}
+    for r in rows:
+        rows_by_name.setdefault(r['Portrait'].strip().lower(), []).append(r)
+
+    def move(src_key: str, dst_key: str) -> None:
+        src = os.path.join(PACK, f'{src_key}.jpg')
+        if os.path.exists(src):
+            os.replace(src, os.path.join(PACK, f'{dst_key}.jpg'))
+
+    renamed = shared = displaced = named = 0
     for r in rows:
         if not r['Portrait'].startswith('plpo_m27_'):
             continue
-        asset = id_to_asset.get(int(r['PID']))
+        pid = int(r['PID'])
+        asset = id_to_asset.get(pid)
         if not asset:
             continue
-        if asset.lower() not in used:
-            old, new = os.path.join(PACK, f"{r['Portrait']}.jpg"), os.path.join(PACK, f'{asset}.jpg')
-            if os.path.exists(old):
-                os.replace(old, new)
-            used.discard(r['Portrait'].lower())
-            used.add(asset.lower())
-            r['Portrait'] = asset
+        holders = [h for h in rows_by_name.get(asset.lower(), []) if h is not r]
+        if not holders:
+            move(r['Portrait'], asset)
             renamed += 1
+        elif any(int(h['PID']) in asset_ids[asset.lower()] for h in holders):
+            # The game's texture serves the old id too: one image, two ids. Share
+            # the existing pack file and drop the duplicate.
+            dup = os.path.join(PACK, f"{r['Portrait']}.jpg")
+            if os.path.exists(dup):
+                os.remove(dup)
+            shared += 1
         else:
-            collided += 1
+            # The game reuses the name for a different portrait and no longer has
+            # the old id: the old (Madden 26) art keeps serving its own id under
+            # <name>_<oldpid>; the game's name goes to the id the game gives it.
+            for h in holders:
+                move(h['Portrait'].strip(), f"{asset}_{h['PID']}")
+                h['Portrait'] = f"{asset}_{h['PID']}"
+            move(r['Portrait'], asset)
+            displaced += 1
+        rows_by_name.setdefault(asset.lower(), []).append(r)
+        r['Portrait'] = asset
         if not r['Player Name'].strip():
             guess = name_from_asset(asset)
             if guess:
@@ -117,7 +139,8 @@ def names_mode(xml_dir: str) -> None:
         w.writeheader()
         w.writerows(rows)
     print(f'{len(id_to_asset)} portrait ids named by the XML export; renamed {renamed} rows to the game asset name, '
-          f'{collided} kept plpo_m27_<pid> (name already used by another PID), filled {named} blank player names')
+          f'{shared} share an existing portrait (same texture, two ids), {displaced} displaced an older Madden 26 '
+          f'portrait to <name>_<pid>, filled {named} blank player names')
 
 
 def main() -> None:
