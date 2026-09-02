@@ -5,7 +5,8 @@ import { DbPositionService } from '../services/DbPositionService';
 import { gameOverall, reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
-import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass, pickedClass } from '../services/DraftEnrichment';
+import { classSlug } from '../services/ClassName';
 import { normalizeName } from '../util/csv';
 import { DraftClassResponse } from '../types/player';
 import type { PreviewResult } from '../services/DraftClassBuilder';
@@ -48,6 +49,12 @@ r.get('/draft/years', (_req, res) => {
 function parseInclude(raw: unknown): number[] {
   const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(',') : [];
   return [...new Set(list.map((x) => Number(x)).filter((n) => Number.isInteger(n) && n >= 0))].slice(0, 402);
+}
+
+/** `keys`: stable player keys for a hand-picked class (array or comma list), deduped, <= 402. */
+function parseKeys(raw: unknown): string[] {
+  const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(',') : [];
+  return [...new Set(list.map((x) => String(x).trim()).filter(Boolean))].slice(0, 402);
 }
 
 r.get('/draft/:year/generated', async (req, res) => {
@@ -112,8 +119,9 @@ r.post('/draft/recompute-batch', (req, res) => {
 
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
-    source?: 'year' | 'alltime' | 'decade'; year?: number; decade?: number; league?: string; mode?: string;
+    source?: 'year' | 'alltime' | 'decade' | 'picked'; year?: number; decade?: number; league?: string; mode?: string;
     strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number; include?: unknown;
+    keys?: unknown; fill?: unknown; name?: unknown;
   };
   const mode: 'madden' | 'retro' = b.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -126,6 +134,18 @@ r.post('/draft/custom', async (req, res) => {
     variant: Math.max(0, Math.round(Number(b.variant) || 0)),
     include: parseInclude(b.include),
   };
+
+  if (b.source === 'picked') {
+    const keys = parseKeys(b.keys);
+    if (!keys.length) return res.status(400).json({ error: 'no players picked' });
+    const { players, generatedCount, missing, truncatedKeys } = await pickedClass(keys, { fill: b.fill !== false });
+    if (!players.length) return res.status(404).json({ error: 'none of the picked players were found' });
+    const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
+    const name = String(b.name ?? '').slice(0, 60);
+    // The client re-keys `league` to its saved class id so edits follow the class,
+    // not its current name.
+    return res.json({ year: 0, league: `custom:${classSlug(name)}`, mode, gameVersion, source: 'picked', name, generatedCount, missing, truncatedKeys, pickedCount: players.length - generatedCount, ...preview });
+  }
 
   if (b.source === 'alltime' || b.source === 'decade') {
     const decade = Math.floor(Number(b.decade) / 10) * 10;

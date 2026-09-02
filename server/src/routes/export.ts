@@ -5,7 +5,8 @@ import { DraftClassBuilder, GenOptions } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
 import { FranchiseService } from '../services/FranchiseService';
 import { M27_SAVES_DIR } from '../config/paths';
-import { enrichedClass, allTimeGreatsClass } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass, pickedClass } from '../services/DraftEnrichment';
+import { classSlug } from '../services/ClassName';
 
 const r = Router();
 
@@ -20,7 +21,7 @@ r.post('/export/mdc', async (req, res) => {
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode: 'madden' | 'retro' = req.body?.mode === 'retro' ? 'retro' : 'madden';
   const gameVersion: 'm26' | 'm27' = req.body?.gameVersion === 'm27' ? 'm27' : 'm26';
-  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : 'year';
+  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : 'year';
   const opts: GenOptions = {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
     studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
@@ -32,7 +33,13 @@ r.post('/export/mdc', async (req, res) => {
   };
 
   let players; let filename: string;
-  if (source === 'alltime' || source === 'decade') {
+  if (source === 'picked') {
+    const raw = req.body?.keys;
+    const keys = [...new Set((Array.isArray(raw) ? raw : []).map((x: unknown) => String(x).trim()).filter(Boolean))].slice(0, 402);
+    if (!keys.length) return res.status(400).json({ error: 'no players picked' });
+    ({ players } = await pickedClass(keys, { fill: req.body?.fill !== false }));
+    filename = `CAREERDRAFT-${classSlug(String(req.body?.name ?? ''))}`;
+  } else if (source === 'alltime' || source === 'decade') {
     const decade = Math.floor(Number(req.body?.decade) / 10) * 10;
     const range = source === 'decade' && decade > 0 ? { from: decade, to: decade + 9 } : undefined;
     ({ players } = await allTimeGreatsClass(range));

@@ -1,7 +1,7 @@
 import { PlayerLookupService } from './PlayerLookupService';
 import { TeamService, PickEnrichment } from './TeamService';
 import { CuratedDbPositions } from './CuratedDbPositions';
-import { GenericFillerService } from './GenericFillerService';
+import { GenericFillerService, FULL_CLASS_SIZE } from './GenericFillerService';
 import { CombineService } from './CombineService';
 import { PositionMapper } from './PositionMapper';
 import { FrontSevenService } from './FrontSevenService';
@@ -196,4 +196,30 @@ export async function allTimeGreatsClass(range?: { from: number; to: number }): 
   const baseline = PlayerLookupService.allTimeGreats(402, range);
   const players = await Promise.all(baseline.map((p) => enrichOne(p)));
   return { players, generatedCount: 0 };
+}
+
+/** Greatness score the All-Time class ranks by (wAV + accolades + HOF bonus). */
+const greatness = (p: BaselinePlayer) => (p.wav ?? 0) + 4 * (p.allPro1 ?? 0) + 2 * (p.proBowls ?? 0) + (p.isHOF ? 40 : 0);
+
+/**
+ * A hand-picked class: the players behind `keys` (unknown keys reported, at most
+ * 402 kept), ordered best-first by career greatness so pick 1 is the best player
+ * chosen, enriched like any other class, and - when `fill` - padded to a full
+ * class with generics from the era of the picks (their median draft year).
+ */
+export async function pickedClass(
+  keys: string[],
+  opts: { fill?: boolean } = {}
+): Promise<{ players: BaselinePlayer[]; generatedCount: number; missing: string[]; truncatedKeys: boolean }> {
+  const { players: found, missing } = PlayerLookupService.byKeys(keys);
+  const truncatedKeys = found.length > FULL_CLASS_SIZE;
+  const picked = [...found].sort((a, b) => greatness(b) - greatness(a)).slice(0, FULL_CLASS_SIZE);
+  const real = await Promise.all(picked.map((p) => enrichOne(p)));
+  let fillers: BaselinePlayer[] = [];
+  if (opts.fill !== false && real.length < FULL_CLASS_SIZE && real.length > 0) {
+    const years = real.map((p) => p.draftYear).sort((a, b) => a - b);
+    const medianYear = years[Math.floor(years.length / 2)];
+    fillers = GenericFillerService.build(medianYear, real);
+  }
+  return { players: [...real, ...fillers], generatedCount: fillers.length, missing, truncatedKeys };
 }
