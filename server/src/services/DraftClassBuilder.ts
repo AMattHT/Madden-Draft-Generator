@@ -21,6 +21,8 @@ import { EraGearService } from './EraGearService';
 import { PhotoLookService } from './PhotoLookService';
 import { PortraitSlotService } from './PortraitSlotService';
 import { LaunchRatingsService, LaunchEntry } from './LaunchRatingsService';
+import { AwardsService } from './AwardsService';
+import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
 import { BaselinePlayer, CombineMeasurements } from '../types/player';
 import { TeamInfo } from './TeamService';
 import { PortraitService } from './PortraitService';
@@ -30,6 +32,8 @@ import { MDC_BLOCK_SIZE, MDC_DATA_START } from '../config/paths';
 
 /** Logical draft-class size the M26 template ships with (blocks 0..401). */
 const LOGICAL_CAPACITY = 402;
+/** Season arithmetic for young careers (completed seasons = last season - draft year + 1). */
+const CURRENT_YEAR = new Date().getFullYear();
 
 /** Rating mode: 'madden' = match Madden's realistic-rookie curve (default);
  *  'retro' = career-retrospective (OVR reflects how good they actually turned
@@ -749,23 +753,52 @@ export const DraftClassBuilder = {
       );
       // ...while the overall order blends outcome with what the draft slot said.
       const boardScore = (it: RankedItem) => hindsight * it.caliber + (1 - hindsight) * RatingService.slotCaliber(it.player, it.posId);
-      [...items]
-        .sort((a, b) => boardScore(b) - boardScore(a))
-        .forEach((it, rank) => {
-          const topFrac = (rank + 0.5) / N; // 0 = best player on the board
-          const outcomeFrac = ((outcomeRank.get(it) ?? rank) + 0.5) / N;
-          const base = CalibrationService.ovrAtPercentile(1 - topFrac, gameVersion);
-          it.overall = Math.min(capMax, Math.round(base * strength));
-          it.devTrait = promoted.has(it) ? 3 : CalibrationService.devForTopFraction(outcomeFrac, gameVersion);
-          if (rank < studs) {
-            it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
-            it.devTrait = Math.max(it.devTrait, 2);
-          }
-          if (opts.generational && rank === 0) {
-            it.overall = Math.max(it.overall, 90); // a can't-miss #1
-            it.devTrait = 3;
-          }
+      const board = [...items].sort((a, b) => boardScore(b) - boardScore(a));
+      board.forEach((it, rank) => {
+        const topFrac = (rank + 0.5) / N; // 0 = best player on the board
+        const outcomeFrac = ((outcomeRank.get(it) ?? rank) + 0.5) / N;
+        const base = CalibrationService.ovrAtPercentile(1 - topFrac, gameVersion);
+        it.overall = Math.min(capMax, Math.round(base * strength));
+        it.devTrait = promoted.has(it) ? 3 : CalibrationService.devForTopFraction(outcomeFrac, gameVersion);
+      });
+      // Young careers (drafted within the last YOUNG_SEASONS completed seasons): two
+      // seasons of wAV are not an outcome, so their dev traits come from AP awards,
+      // All-Pro / Pro Bowl counts and wAV production pace instead of the ranking
+      // above. X-Factor is earned by awards or wAV alone -- never by quota or slot.
+      // Single-year classes only: in an all-time or hand-picked class a 2018 draftee
+      // is ranked against whole careers, and the class keeps Madden's tier shape.
+      const singleYear = new Set(items.map((it) => it.player.draftYear)).size === 1;
+      const young = singleYear ? items.filter((it) => it.player.source !== 'generated' && it.player.draftYear >= CURRENT_YEAR - YOUNG_SEASONS) : [];
+      if (young.length) {
+        const inputs: YoungInput[] = young.map((it) => {
+          const p = it.player;
+          const grp = PositionMapper.groupFromId(it.posId);
+          return {
+            key: String(it.index), posGroup: grp, draftYear: p.draftYear, careerTo: p.careerTo,
+            wav: p.wav, wavActual: p.wavSource === 'actual' && p.wav != null,
+            ap1: p.allPro1 ?? 0, pb: p.proBowls ?? 0,
+            awards: AwardsService.awardsFor(p.firstName, p.lastName, p.draftYear, grp, p.careerTo),
+            round: p.draftRound, pick: p.draftPick, caliber: it.caliber, elite: isElite(p),
+          };
         });
+        // Quotas scale against the whole class, generated fillers included.
+        const devs = youngDev(inputs, CURRENT_YEAR, N);
+        for (const it of young) {
+          const d = devs.get(String(it.index));
+          if (d != null) it.devTrait = d;
+        }
+      }
+      // The user's own modifiers have the last word.
+      board.forEach((it, rank) => {
+        if (rank < studs) {
+          it.overall = Math.max(it.overall, 80); // guaranteed first-round caliber
+          it.devTrait = Math.max(it.devTrait, 2);
+        }
+        if (opts.generational && rank === 0) {
+          it.overall = Math.max(it.overall, 90); // a can't-miss #1
+          it.devTrait = 3;
+        }
+      });
     }
 
     // Launch Day lens: EA's release-day overall for every rookie the edition's

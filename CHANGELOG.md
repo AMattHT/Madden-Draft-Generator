@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+**Dev traits for recent classes come from awards and production.** For players drafted in the
+last eight seasons, X-Factor is earned only by AP awards (MVP, Player of the Year, Rookie of the
+Year), two first-team All-Pros, or a top-1% wAV pace over three or more seasons; nobody gets it
+from a quota or a draft slot. First-team All-Pro or two Pro Bowls floor a player at Superstar, one
+Pro Bowl at Star, and the remaining Superstar and Star slots scale with how many seasons the class
+has played. 2023 now carries Stroud, Will Anderson, Smith-Njigba and LaPorta as X-Factors instead
+of five leaders of a two-season sample; 2026 has none until its rookies produce. Classes through
+2017 are unchanged. Awards come from Wikipedia's AP award tables, baked into the app.
+
 **Launch Day lens.** A third rating lens next to Realistic and Career. Where EA's launch roster
 for a class exists (2018–2020, 2022–2023 and 2026), every rookie it names gets the overall and
 attributes EA shipped on release day; everyone else, and every other year, is rated as Realistic.
