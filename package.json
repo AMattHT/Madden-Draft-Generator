@@ -21,16 +21,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/amatthewsHT/Madden-Draft-Generator.git"
+    "url": "git+https://github.com/AMattHT/Madden-Draft-Generator.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/amatthewsHT/Madden-Draft-Generator/issues"
+    "url": "https://github.com/AMattHT/Madden-Draft-Generator/issues"
   },
-  "homepage": "https://github.com/amatthewsHT/Madden-Draft-Generator#readme",
+  "homepage": "https://github.com/AMattHT/Madden-Draft-Generator#readme",
   "devDependencies": {
     "concurrently": "^10.0.5"
   }

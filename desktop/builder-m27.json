@@ -55,7 +55,7 @@
   "publish": [
     {
       "provider": "github",
-      "owner": "amatthewsHT",
+      "owner": "AMattHT",
       "repo": "Madden-Draft-Generator",
       "channel": "m27"
     }

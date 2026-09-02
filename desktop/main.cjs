@@ -104,7 +104,7 @@ async function start() {
 /** Last state pushed to the page, so a reload can ask for it instead of
  *  waiting for an event that already fired. */
 let updateState = { phase: 'idle' };
-const RELEASES_URL = 'https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest';
+const RELEASES_URL = 'https://github.com/AMattHT/Madden-Draft-Generator/releases/latest';
 
 /**
  * Update check against the GitHub releases this app publishes to (see

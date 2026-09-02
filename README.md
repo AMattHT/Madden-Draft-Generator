@@ -6,7 +6,7 @@ Pick a year, and the whole class is built for you — real players, rated from w
 in the NFL, with era-correct builds, gear, faces and real drafting teams. Export it, start a
 franchise, and draft Barry Sanders yourself.
 
-**[Download the latest release](https://github.com/amatthewsHT/Madden-Draft-Generator/releases/latest) Madden-27-Draft-Class-Generator-Setup-1.0.0.exe**
+**[Download the latest release](https://github.com/AMattHT/Madden-Draft-Generator/releases/latest) Madden-27-Draft-Class-Generator-Setup-1.0.0.exe**
 
 <img width="2000" height="1087" alt="image" src="https://github.com/user-attachments/assets/44dfa85b-c675-47f9-aec8-0d6feeec3f1c" />
 
