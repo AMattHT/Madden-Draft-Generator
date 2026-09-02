@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+**Equipment pictures ship with the app.** The Equipment Builder's thumbnails (one render per
+helmet, facemask, visor, glove, cleat, sleeve, pad and eye-black style) are now bundled, so the
+installed app shows them without a Madden Editor Suite install next to it. Names were checked
+against the renders and the game's own asset list: the Oakley Prizm visor is now the asset real
+rosters wear (the old entry showed a clear visor), the VICIS Zero1 masks are named by helmet, and
+45 assets the game assigns but the builder never offered are now selectable with names and
+pictures, including the Schutt F7 Pro masks, twelve SpeedFlex and VICIS Zero2 mask styles,
+secondary-colour gloves and sleeves, Jordan 5 and Adizero 11 Turbo cleats, wrinkle socks, and an
+explicit "None" for arm sleeves and elbows. Seven M27 eye-black styles borrow the matching M26 render.
+
 **Dev traits for recent classes come from awards and production.** For players drafted in the
 last eight seasons, X-Factor is earned only by AP awards (MVP, Player of the Year, Rookie of the
 Year), two first-team All-Pros, or a top-1% wAV pace over three or more seasons; nobody gets it

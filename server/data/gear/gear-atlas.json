@@ -1,0 +1,3058 @@
+{
+ "_meta": {
+  "source": "Madden Editor Suite gear-atlas.json + gear-sprites, curated by scripts/import-gear-sprites.ts",
+  "importedAt": "2026-09-02",
+  "sprites": 536
+ },
+ "helmets": [
+  {
+   "value": "GearHelmet_v_DOD_PumpkinDefender",
+   "label": "Day of the Dead Pumpkin",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_LightGladiator",
+   "label": "Light Gladiator",
+   "image": "vnty_nflgear_GearHelmet_LightGladiator.png"
+  },
+  {
+   "value": "GearHelmet_LightLS2",
+   "label": "Light LS2",
+   "image": "vnty_nflgear_GearHelmet_LightLS2.png"
+  },
+  {
+   "value": "GearHelmet_PumpkinDefender",
+   "label": "Pumpkin Defender",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_PumpkinInvader",
+   "label": "Pumpkin Invader",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_Riddell360",
+   "label": "Riddell 360",
+   "image": "vnty_nflgear_GearHelmet_Riddell360.png"
+  },
+  {
+   "value": "GearHelmet_Axiom",
+   "label": "Riddell Axiom",
+   "image": "vnty_nflgear_GearHelmet_Axiom.png"
+  },
+  {
+   "value": "GearHelmet_Revolution",
+   "label": "Riddell Revolution",
+   "image": "vnty_nflgear_GearHelmet_Revolution.png"
+  },
+  {
+   "value": "GearHelmet_RevolutionSpeed",
+   "label": "Riddell Revolution Speed",
+   "image": "vnty_nflgear_GearHelmet_RevolutionSpeed.png"
+  },
+  {
+   "value": "GearHelmet_Speed_Flex",
+   "label": "Riddell SpeedFlex",
+   "image": "vnty_nflgear_GearHelmet_Speed_Flex.png"
+  },
+  {
+   "value": "GearHelmet_RiddellTK",
+   "label": "Riddell TK",
+   "image": "vnty_nflgear_GearHelmet_RiddellTK.png"
+  },
+  {
+   "value": "GearHelmet_Standard",
+   "label": "Riddell VSR4",
+   "image": "vnty_nflgear_GearHelmet_Standard.png"
+  },
+  {
+   "value": "GearHelmet_standardBrady",
+   "label": "Riddell VSR4 Softcup",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_Schutt",
+   "label": "Schutt Air Advantage",
+   "image": "vnty_nflgear_GearHelmet_Schutt.png"
+  },
+  {
+   "value": "GearHelmet_AirXP",
+   "label": "Schutt Air XP PRO VTD",
+   "image": "vnty_nflgear_GearHelmet_AirXP.png"
+  },
+  {
+   "value": "GearHelmet_SchuttF7",
+   "label": "Schutt F7",
+   "image": "vnty_nflgear_GearHelmet_SchuttF7.png"
+  },
+  {
+   "value": "GearHelmet_SchuttF7Pro",
+   "label": "Schutt F7 Pro",
+   "image": "vnty_nflgear_GearHelmet_SchuttF7Pro.png"
+  },
+  {
+   "value": "GearHelmet_SchuttVeng",
+   "label": "Schutt Vengeance Pro",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_VengeanceZ10",
+   "label": "Schutt Vengeance Z10",
+   "image": "vnty_nflgear_GearHelmet_VengeanceZ10.png"
+  },
+  {
+   "value": "GearHelmet_SnowmanEvader",
+   "label": "Snowman Evader",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_SnowmanFrontline",
+   "label": "Snowman Frontline",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_SnowmanInterceptor",
+   "label": "Snowman Interceptor",
+   "image": null
+  },
+  {
+   "value": "GearHelmet_VicisZero1",
+   "label": "VICIS Zero1",
+   "image": "vnty_nflgear_GearHelmet_VicisZero1.png"
+  },
+  {
+   "value": "GearHelmet_VicisZero2",
+   "label": "VICIS Zero2",
+   "image": "vnty_nflgear_GearHelmet_VicisZero2.png"
+  },
+  {
+   "value": "GearHelmet_VicisZero2Trench",
+   "label": "VICIS Zero2 Trench",
+   "image": "vnty_nflgear_GearHelmet_VicisZero2Trench.png"
+  },
+  {
+   "value": "GearHelmet_XenithEpic",
+   "label": "Xenith Epic",
+   "image": "vnty_nflgear_GearHelmet_XenithEpic.png"
+  },
+  {
+   "value": "GearHelmet_XenithOrbit",
+   "label": "Xenith Orbit",
+   "image": "vnty_nflgear_GearHelmet_XenithOrbit.png"
+  },
+  {
+   "value": "GearHelmet_XenithShadow",
+   "label": "Xenith Shadow",
+   "image": "vnty_nflgear_GearHelmet_XenithShadow.png"
+  },
+  {
+   "value": "GearHelmet_X2E",
+   "label": "Xenith X2E",
+   "image": "vnty_nflgear_GearHelmet_X2E.png"
+  }
+ ],
+ "facemasks": [
+  {
+   "value": "GearFaceMask_2Bar",
+   "label": "2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_2Bar.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_2BarNose",
+   "label": "2 Bar Nose",
+   "image": "vnty_nflgear_GearFaceMask_2BarNose.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_2BarQBBull",
+   "label": "2 Bar QB Bull",
+   "image": "vnty_nflgear_GearFaceMask_2BarQBBull.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_2BarQBSingle",
+   "label": "2 Bar QB Single",
+   "image": "vnty_nflgear_GearFaceMask_2BarQBSingle.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_2BarSingle",
+   "label": "2 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_2BarSingle.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_Standard2BarWR",
+   "label": "2 Bar WR",
+   "image": "vnty_nflgear_GearFaceMask_Standard2BarWR.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3Bar",
+   "label": "3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_3Bar.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarNose",
+   "label": "3 Bar Nose",
+   "image": "vnty_nflgear_GearFaceMask_3BarNose.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarQB",
+   "label": "3 Bar QB",
+   "image": "vnty_nflgear_GearFaceMask_3BarQB.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarQBSingle",
+   "label": "3 Bar QB Single",
+   "image": "vnty_nflgear_GearFaceMask_3BarQBSingle.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarRB",
+   "label": "3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_3BarRB.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarRBJagged",
+   "label": "3 Bar RB Jagged",
+   "image": "vnty_nflgear_GearFaceMask_3BarRBJagged.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_3BarSingle",
+   "label": "3 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_3BarSingle.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_Riddell3603BarLB",
+   "label": "360 3 Bar LB",
+   "image": "vnty_nflgear_GearFaceMask_Riddell3603BarLB.png",
+   "compatibility": "riddell360"
+  },
+  {
+   "value": "GearFaceMask_Riddell360FullCage",
+   "label": "360 Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_Riddell360FullCage.png",
+   "compatibility": "riddell360"
+  },
+  {
+   "value": "GearFaceMask_Riddell360Robot",
+   "label": "360 Robot",
+   "image": "vnty_nflgear_GearFaceMask_Riddell360Robot.png",
+   "compatibility": "riddell360"
+  },
+  {
+   "value": "GearFaceMask_Riddell360Robot2",
+   "label": "360 Robot 2",
+   "image": "vnty_nflgear_GearFaceMask_Riddell360Robot2.png",
+   "compatibility": "riddell360"
+  },
+  {
+   "value": "GearFaceMask_Axiom2BarJagged",
+   "label": "Axiom 2 Bar Jagged",
+   "image": "vnty_nflgear_GearFaceMask_Axiom2BarJagged.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom2barsingle",
+   "label": "Axiom 2 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_Axiom2barsingle.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarDouble",
+   "label": "Axiom 3 Bar Double",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarDouble.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarJagged",
+   "label": "Axiom 3 Bar Jagged",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarJagged.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarLBSingle",
+   "label": "Axiom 3 Bar LB Single",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarLBSingle.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarRB",
+   "label": "Axiom 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarRB.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarSingle",
+   "label": "Axiom 3 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarSingle.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_Axiom808",
+   "label": "Axiom 808",
+   "image": "vnty_nflgear_GearFaceMask_Axiom808.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomFullcage",
+   "label": "Axiom Fullcage",
+   "image": "vnty_nflgear_GearFaceMask_AxiomFullcage.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomGrid",
+   "label": "Axiom Grid",
+   "image": "vnty_nflgear_GearFaceMask_AxiomGrid.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomJRCross",
+   "label": "Axiom JR Cross",
+   "image": "vnty_nflgear_GearFaceMask_AxiomJRCross.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomRobot808",
+   "label": "Axiom Robot 808",
+   "image": "vnty_nflgear_GearFaceMask_AxiomRobot808.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomRobotCage",
+   "label": "Axiom Robot Cage",
+   "image": "vnty_nflgear_GearFaceMask_AxiomRobotCage.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomRobotJagged",
+   "label": "Axiom Robot Jagged",
+   "image": "vnty_nflgear_GearFaceMask_AxiomRobotJagged.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_AxiomSpyder",
+   "label": "Axiom Spyder",
+   "image": "vnty_nflgear_GearFaceMask_AxiomSpyder.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_BullRB",
+   "label": "Bull RB",
+   "image": "vnty_nflgear_GearFaceMask_BullRB.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_StdBulldog",
+   "label": "Bulldog",
+   "image": "vnty_nflgear_GearFaceMask_StdBulldog.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_FlatHalfCage",
+   "label": "Flat Half Cage",
+   "image": "vnty_nflgear_GearFaceMask_FlatHalfCage.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_FullCage",
+   "label": "Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_FullCage.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_FullCage2",
+   "label": "Full Cage 2",
+   "image": "vnty_nflgear_GearFaceMask_FullCage2.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_FullCageRobot",
+   "label": "Full Cage Robot",
+   "image": "vnty_nflgear_GearFaceMask_FullCageRobot.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_HalfCage",
+   "label": "Half Cage",
+   "image": "vnty_nflgear_GearFaceMask_HalfCage.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_HalfCage2",
+   "label": "Half Cage 2",
+   "image": "vnty_nflgear_GearFaceMask_HalfCage2.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_HalfCage3",
+   "label": "Half Cage 3",
+   "image": "vnty_nflgear_GearFaceMask_HalfCage3.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_Kicker",
+   "label": "Kicker",
+   "image": "vnty_nflgear_GearFaceMask_Kicker.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_LightKicker",
+   "label": "Light Kicker",
+   "image": "vnty_nflgear_GearFaceMask_LightKicker.png",
+   "compatibility": "light"
+  },
+  {
+   "value": "GearFaceMask_revospeed2bar",
+   "label": "Revo Speed 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_revospeed2bar.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revospeed2barSingle",
+   "label": "Revo Speed 2 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_revospeed2barSingle.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_Revospeed2BarWR",
+   "label": "Revo Speed 2 Bar WR",
+   "image": "vnty_nflgear_GearFaceMask_Revospeed2BarWR.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_Revospeed3bar",
+   "label": "Revo Speed 3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_Revospeed3bar.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeed3barLb",
+   "label": "Revo Speed 3 Bar LB",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeed3barLb.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_Revospeed3BarQB",
+   "label": "Revo Speed 3 Bar QB",
+   "image": "vnty_nflgear_GearFaceMask_Revospeed3BarQB.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeed3barSingle",
+   "label": "Revo Speed 3 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeed3barSingle.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_Revospeed808",
+   "label": "Revo Speed 808",
+   "image": "vnty_nflgear_GearFaceMask_Revospeed808.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeedFullCage",
+   "label": "Revo Speed Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeedFullCage.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_RevospeedHalfCage",
+   "label": "Revo Speed Half Cage",
+   "image": "vnty_nflgear_GearFaceMask_RevospeedHalfCage.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revospeedKicker",
+   "label": "Revo Speed Kicker",
+   "image": "vnty_nflgear_GearFaceMask_revospeedKicker.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeedRobot",
+   "label": "Revo Speed Robot",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeedRobot.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeedRobotRB",
+   "label": "Revo Speed Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeedRobotRB.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_Robot",
+   "label": "Robot",
+   "image": "vnty_nflgear_GearFaceMask_Robot.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_RobotRB",
+   "label": "Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_RobotRB.png",
+   "compatibility": "universal"
+  },
+  {
+   "value": "GearFaceMask_F72Bar",
+   "label": "Schutt F7 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_F72Bar.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F73Bar",
+   "label": "Schutt F7 3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_F73Bar.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F73BarRB",
+   "label": "Schutt F7 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_F73BarRB.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7808",
+   "label": "Schutt F7 808",
+   "image": "vnty_nflgear_GearFaceMask_F7808.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7FullCage",
+   "label": "Schutt F7 Fullcage",
+   "image": "vnty_nflgear_GearFaceMask_F7FullCage.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7JRCross",
+   "label": "Schutt F7 JR Cross",
+   "image": "vnty_nflgear_GearFaceMask_F7JRCross.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7Kicker",
+   "label": "Schutt F7 Kicker",
+   "image": "vnty_nflgear_GearFaceMask_F7Kicker.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7Robot",
+   "label": "Schutt F7 Robot",
+   "image": "vnty_nflgear_GearFaceMask_F7Robot.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_F7RobotRB",
+   "label": "Schutt F7 Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_F7RobotRB.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_Speedflex2Bar",
+   "label": "SpeedFlex 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex2Bar.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex2BarQB",
+   "label": "SpeedFlex 2 Bar QB",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex2BarQB.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex2BarSingle",
+   "label": "SpeedFlex 2 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex2BarSingle.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex_2_Bar_WR",
+   "label": "SpeedFlex 2 Bar WR",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex_2_Bar_WR.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3Bar",
+   "label": "SpeedFlex 3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3Bar.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarLB",
+   "label": "SpeedFlex 3 Bar LB",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarLB.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarQB",
+   "label": "SpeedFlex 3 Bar QB",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarQB.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarRB",
+   "label": "SpeedFlex 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarRB.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarSingle",
+   "label": "SpeedFlex 3 Bar Single",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarSingle.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedFlex808",
+   "label": "SpeedFlex 808",
+   "image": "vnty_nflgear_GearFaceMask_SpeedFlex808.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexCage",
+   "label": "SpeedFlex Cage",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexCage.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexFullcage",
+   "label": "SpeedFlex Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexFullcage.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexHalfCage",
+   "label": "SpeedFlex Half Cage",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexHalfCage.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexJRCross",
+   "label": "SpeedFlex JR Cross",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexJRCross.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedFlexKicker",
+   "label": "SpeedFlex Kicker",
+   "image": "vnty_nflgear_GearFaceMask_SpeedFlexKicker.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexRobot",
+   "label": "SpeedFlex Robot",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexRobot.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexRobotRB",
+   "label": "SpeedFlex Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexRobotRB.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_VengeanceQB",
+   "label": "Vengeance 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceQB.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_Vengeance3Bar",
+   "label": "Vengeance 3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_Vengeance3Bar.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_Vengeance3BarRB",
+   "label": "Vengeance 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_Vengeance3BarRB.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_VengeanceFullCage",
+   "label": "Vengeance Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceFullCage.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_VengeanceKicker",
+   "label": "Vengeance Kicker",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceKicker.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_VengeanceRobot",
+   "label": "Vengeance Robot",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceRobot.png",
+   "compatibility": "vengeance"
+  },
+  {
+   "value": "GearFaceMask_VengeanceZ102Bar",
+   "label": "Vengeance Z10 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceZ102Bar.png",
+   "compatibility": "vengeancez10"
+  },
+  {
+   "value": "GearFaceMask_VengeanceZ10Cage",
+   "label": "Vengeance Z10 Cage",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceZ10Cage.png",
+   "compatibility": "vengeancez10"
+  },
+  {
+   "value": "GearFaceMask_VengeanceZ10Robot",
+   "label": "Vengeance Z10 Robot",
+   "image": "vnty_nflgear_GearFaceMask_VengeanceZ10Robot.png",
+   "compatibility": "vengeancez10"
+  },
+  {
+   "value": "GearFaceMask_VicisZero12Bar",
+   "label": "VICIS Zero1 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero12Bar.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero13Bar",
+   "label": "VICIS Zero1 3 Bar",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero13Bar.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero13BarLB",
+   "label": "VICIS Zero1 3 Bar LB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero13BarLB.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero13BarRB",
+   "label": "VICIS Zero1 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero13BarRB.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero1BullRB",
+   "label": "VICIS Zero1 Bull RB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero1BullRB.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero1Fullcage",
+   "label": "VICIS Zero1 Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero1Fullcage.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_Vicis_Kicker",
+   "label": "VICIS Kicker",
+   "image": "vnty_nflgear_GearFaceMask_Vicis_Kicker.png",
+   "compatibility": "vicis"
+  },
+  {
+   "value": "GearFaceMask_VicisZero1Robot",
+   "label": "VICIS Zero1 Robot",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero1Robot.png",
+   "compatibility": "viciszero1"
+  },
+  {
+   "value": "GearFaceMask_VicisZero2BAR",
+   "label": "VICIS Zero2 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero2BAR.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VicisZero2Kicker",
+   "label": "VICIS Zero2 Kicker",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero2Kicker.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VicisZero2Robot",
+   "label": "VICIS Zero2 Robot",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero2Robot.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VintageHalfCage",
+   "label": "Vintage Half Cage",
+   "image": "vnty_nflgear_GearFaceMask_VintageHalfCage.png",
+   "compatibility": "vintage"
+  },
+  {
+   "value": "GearFaceMask_VintageKicker",
+   "label": "Vintage Kicker",
+   "image": "vnty_nflgear_GearFaceMask_VintageKicker.png",
+   "compatibility": "vintage"
+  },
+  {
+   "value": "GearFaceMask_VintageOneBar",
+   "label": "Vintage One Bar",
+   "image": "vnty_nflgear_GearFaceMask_VintageOneBar.png",
+   "compatibility": "vintage"
+  },
+  {
+   "value": "GearFaceMask_VintageStandard",
+   "label": "Vintage Standard",
+   "image": "vnty_nflgear_GearFaceMask_VintageStandard.png",
+   "compatibility": "vintage"
+  },
+  {
+   "value": "GearFaceMask_VintageTwoBar",
+   "label": "Vintage Two Bar",
+   "image": "vnty_nflgear_GearFaceMask_VintageTwoBar.png",
+   "compatibility": "vintage"
+  },
+  {
+   "value": "GearFaceMask_Xenith2Bar",
+   "label": "Xenith 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_Xenith2Bar.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_Xenith3barrb",
+   "label": "Xenith 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_Xenith3barrb.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithFullcage",
+   "label": "Xenith Full Cage",
+   "image": "vnty_nflgear_GearFaceMask_XenithFullcage.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithKicker",
+   "label": "Xenith Kicker",
+   "image": "vnty_nflgear_GearFaceMask_XenithKicker.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithOrbit2Bar",
+   "label": "Xenith Orbit 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_XenithOrbit2Bar.png",
+   "compatibility": "xenithorbit"
+  },
+  {
+   "value": "GearFaceMask_XenithOrbit3barrb",
+   "label": "Xenith Orbit 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_XenithOrbit3barrb.png",
+   "compatibility": "xenithorbit"
+  },
+  {
+   "value": "GearFaceMask_XenithOrbitRobot",
+   "label": "Xenith Orbit Robot",
+   "image": "vnty_nflgear_GearFaceMask_XenithOrbitRobot.png",
+   "compatibility": "xenithorbit"
+  },
+  {
+   "value": "GearFaceMask_XenithPredator",
+   "label": "Xenith Predator",
+   "image": "vnty_nflgear_GearFaceMask_XenithPredator.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithPrism",
+   "label": "Xenith Prism",
+   "image": "vnty_nflgear_GearFaceMask_XenithPrism.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_Xenith_Prowl",
+   "label": "Xenith Prowl",
+   "image": "vnty_nflgear_GearFaceMask_Xenith_Prowl.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithRobot",
+   "label": "Xenith Robot",
+   "image": "vnty_nflgear_GearFaceMask_XenithRobot.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_XenithRobotrb",
+   "label": "Xenith Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_XenithRobotrb.png",
+   "compatibility": "xenith"
+  },
+  {
+   "value": "GearFaceMask_Axiom3BarLBJagged",
+   "label": "Axiom 3 Bar LB Jagged",
+   "image": "vnty_nflgear_GearFaceMask_Axiom3BarLBJagged.png",
+   "compatibility": "axiom"
+  },
+  {
+   "value": "GearFaceMask_F7Pro2Bar",
+   "label": "Schutt F7 Pro 2 Bar",
+   "image": "vnty_nflgear_GearFaceMask_F7Pro2Bar.png",
+   "compatibility": "f7pro"
+  },
+  {
+   "value": "GearFaceMask_F7ProRobot",
+   "label": "Schutt F7 Pro Robot",
+   "image": "vnty_nflgear_GearFaceMask_F7ProRobot.png",
+   "compatibility": "f7pro"
+  },
+  {
+   "value": "GearFaceMask_F7ProRobotJagged",
+   "label": "Schutt F7 Pro Robot Jagged",
+   "image": "vnty_nflgear_GearFaceMask_F7ProRobotJagged.png",
+   "compatibility": "f7pro"
+  },
+  {
+   "value": "GearFaceMask_F7RobotRB2",
+   "label": "Schutt F7 Robot RB 2",
+   "image": "vnty_nflgear_GearFaceMask_F7RobotRB2.png",
+   "compatibility": "f7"
+  },
+  {
+   "value": "GearFaceMask_Revospeed_RC",
+   "label": "Revo Speed RC",
+   "image": "vnty_nflgear_GearFaceMask_Revospeed_RC.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revoSpeedRobot2",
+   "label": "Revo Speed Robot 2",
+   "image": "vnty_nflgear_GearFaceMask_revoSpeedRobot2.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revospeed3BarLBStraight",
+   "label": "Revo Speed 3 Bar LB Straight",
+   "image": "vnty_nflgear_GearFaceMask_revospeed3BarLBStraight.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_revospeed3barstraight",
+   "label": "Revo Speed 3 Bar Straight",
+   "image": "vnty_nflgear_GearFaceMask_revospeed3barstraight.png",
+   "compatibility": "revospeed"
+  },
+  {
+   "value": "GearFaceMask_SpeedFlex3BarRBSingle",
+   "label": "SpeedFlex 3 Bar RB Single",
+   "image": "vnty_nflgear_GearFaceMask_SpeedFlex3BarRBSingle.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedFlexRobotCage",
+   "label": "SpeedFlex Robot Cage",
+   "image": "vnty_nflgear_GearFaceMask_SpeedFlexRobotCage.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarJagged",
+   "label": "SpeedFlex 3 Bar Jagged",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarJagged.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex3BarRBJagged",
+   "label": "SpeedFlex 3 Bar RB Jagged",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex3BarRBJagged.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexRBBull",
+   "label": "SpeedFlex RB Bull",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexRBBull.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexRobot808",
+   "label": "SpeedFlex Robot 808",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexRobot808.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_SpeedflexRobotRBJagged",
+   "label": "SpeedFlex Robot RB Jagged",
+   "image": "vnty_nflgear_GearFaceMask_SpeedflexRobotRBJagged.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex_3_Bar_LB_Jewel",
+   "label": "SpeedFlex 3 Bar LB Jewel",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex_3_Bar_LB_Jewel.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_Speedflex_Robot_Z",
+   "label": "SpeedFlex Robot Z",
+   "image": "vnty_nflgear_GearFaceMask_Speedflex_Robot_Z.png",
+   "compatibility": "speedflex"
+  },
+  {
+   "value": "GearFaceMask_VicisZero23BARLB",
+   "label": "VICIS Zero2 3 Bar LB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero23BARLB.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VicisZero23BARRB",
+   "label": "VICIS Zero2 3 Bar RB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero23BARRB.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VicisZero2RobotLB",
+   "label": "VICIS Zero2 Robot LB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero2RobotLB.png",
+   "compatibility": "viciszero2"
+  },
+  {
+   "value": "GearFaceMask_VicisZero2RobotRB",
+   "label": "VICIS Zero2 Robot RB",
+   "image": "vnty_nflgear_GearFaceMask_VicisZero2RobotRB.png",
+   "compatibility": "viciszero2"
+  }
+ ],
+ "visors": [
+  {
+   "value": "v_ROD_Visor_GRE",
+   "label": "Aaron Rodgers",
+   "image": "vnty_rodgers_v_ROD_Visor_GRE.png"
+  },
+  {
+   "value": "G_Visor_Berlin_B",
+   "label": "Berlin",
+   "image": "vnty_berlingermaneagle_G_Visor_Berlin_B.png"
+  },
+  {
+   "value": "G_Visor_BlackOut_NIN_B",
+   "label": "Black Out",
+   "image": "vnty_blackout_G_Visor_BlackOut_NIN_B.png"
+  },
+  {
+   "value": "GearVisor_visorClear",
+   "label": "Clear",
+   "image": "vnty_nflgear_GearVisor_visorClear.png"
+  },
+  {
+   "value": "GearVisor_visorDark",
+   "label": "Dark",
+   "image": "vnty_nflgear_GearVisor_visorDark.png"
+  },
+  {
+   "value": "v_DHEN_Visor",
+   "label": "Derrick Henry",
+   "image": "vnty_derrickhenry_v_DHEN_Visor.png"
+  },
+  {
+   "value": "G_Visor_Elites",
+   "label": "Elites",
+   "image": "vnty_elites_G_Visor_Elites.png"
+  },
+  {
+   "value": "v_GTD_Grn_Visor",
+   "label": "Gatorade Green",
+   "image": "vnty_gatorade_v_GTD_Grn_Visor.png"
+  },
+  {
+   "value": "v_GTD_Combo_Visor",
+   "label": "Gatorade Multicolor",
+   "image": "vnty_gatorade_v_GTD_Combo_Visor.png"
+  },
+  {
+   "value": "v_GTD_Orng_Visor",
+   "label": "Gatorade Orange",
+   "image": "vnty_gatorade_v_GTD_Orng_Visor.png"
+  },
+  {
+   "value": "v_GTD_Red_Visor",
+   "label": "Gatorade Red",
+   "image": "vnty_gatorade_v_GTD_Red_Visor.png"
+  },
+  {
+   "value": "G_Visor_Hermes",
+   "label": "Hermes",
+   "image": "vnty_hermes_G_Visor_Hermes.png"
+  },
+  {
+   "value": "v_JCH_Visor_PUR",
+   "label": "Ja'Marr Chase",
+   "image": "vnty_jch_v_JCH_Visor_PUR.png"
+  },
+  {
+   "value": "v_NXJ_Visor_BLA",
+   "label": "Jordan Black",
+   "image": "vnty_nikexjordan_v_NXJ_Visor_BLA.png"
+  },
+  {
+   "value": "v_NXJ_Visor_LBLU",
+   "label": "Jordan Blue",
+   "image": "vnty_nikexjordan_v_NXJ_Visor_LBLU.png"
+  },
+  {
+   "value": "v_JPO_Visor_HempBrown",
+   "label": "Jordan Brown",
+   "image": "vnty_jpo_v_JPO_Visor_HempBrown.png"
+  },
+  {
+   "value": "v_JPO_Visor_IronGray",
+   "label": "Jordan Gray",
+   "image": "vnty_jpo_v_JPO_Visor_IronGray.png"
+  },
+  {
+   "value": "v_JPO_Visor_WHI",
+   "label": "Jordan Navy",
+   "image": "vnty_jpo_v_JPO_Visor_WHI.png"
+  },
+  {
+   "value": "v_LAWT_Visor",
+   "label": "Lawrence Taylor",
+   "image": "vnty_lawrencetaylor_v_LAWT_Visor.png"
+  },
+  {
+   "value": "G_Visor_Tron_B_BLU",
+   "label": "Light Speed Blue",
+   "image": "vnty_lightspeed_G_Visor_Tron_B_BLU.png"
+  },
+  {
+   "value": "G_Visor_Tron_B_PRP",
+   "label": "Light Speed Purple",
+   "image": "vnty_lightspeed_G_Visor_Tron_B_PRP.png"
+  },
+  {
+   "value": "GearVisor_visorDarkLight",
+   "label": "Light Tint",
+   "image": "vnty_nflgear_GearVisor_visorDarkLight.png"
+  },
+  {
+   "value": "G_Visor_Miami80s_B",
+   "label": "Miami Underground",
+   "image": null
+  },
+  {
+   "value": "v_MVK_Visor",
+   "label": "Michael Vick",
+   "image": "vnty_michealvick_v_MVK_Visor.png"
+  },
+  {
+   "value": "G_Visor_99Club_B_WHI",
+   "label": "Nike 99 Club Black",
+   "image": "vnty_99club_G_Visor_99Club_B_WHI.png"
+  },
+  {
+   "value": "G_Visor_99Club_B_GOL",
+   "label": "Nike 99 Club Gold",
+   "image": "vnty_99club_G_Visor_99Club_B_GOL.png"
+  },
+  {
+   "value": "G_Visor_Brotherhood_BLA",
+   "label": "Nike Brotherhood Black",
+   "image": "vnty_nikebrotherhood_G_Visor_Brotherhood_BLA.png"
+  },
+  {
+   "value": "G_Visor_Brotherhood_ORA",
+   "label": "Nike Brotherhood Orange",
+   "image": "vnty_nikebrotherhood_G_Visor_Brotherhood_ORA.png"
+  },
+  {
+   "value": "G_Visor_ChristianMcCaffery_BLA",
+   "label": "Nike X McCaffrey",
+   "image": "vnty_mccaffrey_G_Visor_ChristianMcCaffery_BLA.png"
+  },
+  {
+   "value": "G_Visor_SaquonBarkley_BLA",
+   "label": "Nike X Saquon Barkley",
+   "image": null
+  },
+  {
+   "value": "GearVisor_visorOakley_clear",
+   "label": "Oakley Clear",
+   "image": "vnty_nflgear_GearVisor_visorOakley_clear.png"
+  },
+  {
+   "value": "GearVisor_visorOakley_Dark",
+   "label": "Oakley Dark",
+   "image": "vnty_nflgear_GearVisor_visorOakley_Dark.png"
+  },
+  {
+   "value": "GearVisor_visorOakley_DarkLight",
+   "label": "Oakley Light Tint",
+   "image": "vnty_nflgear_GearVisor_visorOakley_DarkLight.png"
+  },
+  {
+   "value": "OakleyPrizm24K_Visor",
+   "label": "Oakley Prizm 24K",
+   "image": "vnty_oakleyprizm_OakleyPrizm24K_Visor.png"
+  },
+  {
+   "value": "OakleyPrizm60Gray_Visor",
+   "label": "Oakley Prizm 60 Gray",
+   "image": "vnty_oakleyprizm_OakleyPrizm60Gray_Visor.png"
+  },
+  {
+   "value": "OakleyPrizmBlue_Visor",
+   "label": "Oakley Prizm Blue",
+   "image": "vnty_oakleyprizm_OakleyPrizmBlue_Visor.png"
+  },
+  {
+   "value": "OakleyPrizmJade_Visor",
+   "label": "Oakley Prizm Jade",
+   "image": "vnty_oakleyprizm_OakleyPrizmJade_Visor.png"
+  },
+  {
+   "value": "OakleyPrizmTorch_Visor",
+   "label": "Oakley Prizm Torch",
+   "image": "vnty_oakleyprizm_OakleyPrizmTorch_Visor.png"
+  },
+  {
+   "value": "v_OCH_Visor_YEL",
+   "label": "Ochocinco",
+   "image": "vnty_ochocinco_v_OCH_Visor_YEL.png"
+  },
+  {
+   "value": "V_MOSS_Visor_GOL",
+   "label": "Randy Moss",
+   "image": "vnty_randymoss_V_MOSS_Visor_GOL.png"
+  },
+  {
+   "value": "v_RYL_Visor_GRE",
+   "label": "Ray Lewis",
+   "image": "vnty_raylewis_v_RYL_Visor_GRE.png"
+  },
+  {
+   "value": "v_SQN_2021_Visor",
+   "label": "Saquon Barkley",
+   "image": "vnty_saquon_v_SQN_2021_Visor.png"
+  },
+  {
+   "value": "GearVisor_visorOakley_Prizm",
+   "label": "Oakley Prizm",
+   "image": "vnty_nflgear_GearVisor_visorOakley_Prizm.png"
+  }
+ ],
+ "mouthpieces": [
+  {
+   "value": "GearMouthpiece_PacifierDual_Black",
+   "label": "Black",
+   "image": "vnty_nflgear_GearMouthpiece_PacifierDual_Black.png"
+  },
+  {
+   "value": "GearMouthpiece_PacifierDual_SecondaryColor",
+   "label": "Secondary Color",
+   "image": "vnty_nflgear_GearMouthpiece_PacifierDual_SecondaryColor.png"
+  },
+  {
+   "value": "GearMouthpiece_PacifierDual_TeamColor",
+   "label": "Team Color",
+   "image": "vnty_nflgear_GearMouthpiece_PacifierDual_TeamColor.png"
+  },
+  {
+   "value": "GearMouthpiece_PacifierDual_White",
+   "label": "White",
+   "image": "vnty_nflgear_GearMouthpiece_PacifierDual_White.png"
+  }
+ ],
+ "neckpads": [
+  {
+   "value": "GearNeckpad_ButterflyNeckRoll",
+   "label": "Butterfly Neck Roll",
+   "image": "vnty_nflgear_GearNeckpad_ButterflyNeckRoll.png"
+  },
+  {
+   "value": "GearNeckpad_CowboyCollarNeckRoll",
+   "label": "Cowboy Collar",
+   "image": "vnty_nflgear_GearNeckpad_CowboyCollarNeckRoll.png"
+  }
+ ],
+ "guardianCaps": [
+  {
+   "value": "GuardianCap_guardianXTsleeve",
+   "label": "Guardian XT",
+   "image": "vnty_nflgear_GuardianCap_guardianXTsleeve.png"
+  }
+ ],
+ "armSleeves": [
+  {
+   "value": "GearArmSleeve_Baggy_Black",
+   "label": "Baggy - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Baggy_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Baggy_SecondaryColor",
+   "label": "Baggy - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Baggy_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Baggy_TeamColor",
+   "label": "Baggy - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Baggy_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Baggy_White",
+   "label": "Baggy - White",
+   "image": "vnty_nflgear_GearArmSleeve_Baggy_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Full_sleeveLongUnderarmor_normal_Black",
+   "label": "Full - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Full_sleeveLongUnderarmor_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Full_sleeveLongUnderarmor_normal_SecondaryColor",
+   "label": "Full - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Full_sleeveLongUnderarmor_normal_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Full_sleeveLongUnderarmor_normal_TeamColor",
+   "label": "Full - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Full_sleeveLongUnderarmor_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Full_sleeveLongUnderarmor_normal_White",
+   "label": "Full - White",
+   "image": "vnty_nflgear_GearArmSleeve_Full_sleeveLongUnderarmor_normal_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Half_sleeveLongUnderarmor_normal_Black",
+   "label": "Half - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Half_sleeveLongUnderarmor_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Half_sleeveLongUnderarmor_normal_TeamColor",
+   "label": "Half - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Half_sleeveLongUnderarmor_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Half_sleeveLongUnderarmor_normal_White",
+   "label": "Half - White",
+   "image": "vnty_nflgear_GearArmSleeve_Half_sleeveLongUnderarmor_normal_White.png"
+  },
+  {
+   "value": "GearArmSleeve_McDavidPaddedCompressionSleeve_Black",
+   "label": "McDavid Padded - Black",
+   "image": "vnty_nflgear_GearArmSleeve_McDavidPaddedCompressionSleeve_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_McDavidPaddedCompressionSleeve_SecondaryColor",
+   "label": "McDavid Padded - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_McDavidPaddedCompressionSleeve_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_McDavidPaddedCompressionSleeve_TeamColor",
+   "label": "McDavid Padded - Team",
+   "image": "vnty_nflgear_GearArmSleeve_McDavidPaddedCompressionSleeve_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_McDavidPaddedCompressionSleeve_White",
+   "label": "McDavid Padded - White",
+   "image": "vnty_nflgear_GearArmSleeve_McDavidPaddedCompressionSleeve_White.png"
+  },
+  {
+   "value": "GearArmSleeve_NikePaddedElbowCompressionSleeve_Black",
+   "label": "Nike Padded - Black",
+   "image": "vnty_nflgear_GearArmSleeve_NikePaddedElbowCompressionSleeve_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_NikePaddedElbowCompressionSleeve_SecondaryColor",
+   "label": "Nike Padded - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_NikePaddedElbowCompressionSleeve_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_NikePaddedElbowCompressionSleeve_White",
+   "label": "Nike Padded - White",
+   "image": "vnty_nflgear_GearArmSleeve_NikePaddedElbowCompressionSleeve_White.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeProDriFitSleeve_Black",
+   "label": "Nike Pro - Black",
+   "image": "vnty_nflgear_GearArmSleeve_NikeProDriFitSleeve_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeProDriFitSleeve_SecondaryColor",
+   "label": "Nike Pro - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_NikeProDriFitSleeve_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeProDriFitSleeve_TeamColor",
+   "label": "Nike Pro - Team",
+   "image": "vnty_nflgear_GearArmSleeve_NikeProDriFitSleeve_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeProDriFitSleeve_White",
+   "label": "Nike Pro - White",
+   "image": "vnty_nflgear_GearArmSleeve_NikeProDriFitSleeve_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_Black",
+   "label": "Quarter - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_SecondaryColor",
+   "label": "Quarter - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_TeamColor",
+   "label": "Quarter - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_White",
+   "label": "Quarter - White",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_sleeveLongUnderarmor_normal_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_armTape_normal_Black",
+   "label": "Quarter Tape - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_armTape_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_armTape_normal_OffWhite",
+   "label": "Quarter Tape - Off White",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_armTape_normal_OffWhite.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_armTape_normal_TeamColor",
+   "label": "Quarter Tape - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_armTape_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_CompressionRolledUpShirt_Black",
+   "label": "Rolled Up - Black",
+   "image": "vnty_nflgear_GearArmSleeve_CompressionRolledUpShirt_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_CompressionRolledUpShirt_TeamColor",
+   "label": "Rolled Up - Team",
+   "image": "vnty_nflgear_GearArmSleeve_CompressionRolledUpShirt_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_CompressionRolledUpShirt_White",
+   "label": "Rolled Up - White",
+   "image": "vnty_nflgear_GearArmSleeve_CompressionRolledUpShirt_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_Black",
+   "label": "Shooter - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_SecondaryColor",
+   "label": "Shooter - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_TeamColor",
+   "label": "Shooter - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_White",
+   "label": "Shooter - White",
+   "image": "vnty_nflgear_GearArmSleeve_Shooter_sleeveLongUnderarmor_normal_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_armTape_normal_Black",
+   "label": "Tape - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_armTape_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_armTape_normal_OffWhite",
+   "label": "Tape - Off White",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_armTape_normal_OffWhite.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_armTape_normal_TeamColor",
+   "label": "Tape - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_armTape_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_Black",
+   "label": "Undershirt - Black",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_Secondary",
+   "label": "Undershirt - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_Secondary.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_TeamColor",
+   "label": "Undershirt - Team",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_TeamColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_White",
+   "label": "Undershirt - White",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_sleeveLongUnderarmor_normal_White.png"
+  },
+  {
+   "value": "GearArmSleeve_CompressionRolledUpShirt_SecondaryColor",
+   "label": "Rolled Up - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_CompressionRolledUpShirt_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Half_sleeveLongUnderarmor_normal_SecondaryColor",
+   "label": "Half - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Half_sleeveLongUnderarmor_normal_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeHyperstrongPaddedSleeve_Black",
+   "label": "Nike Hyperstrong Padded - Black",
+   "image": "vnty_nflgear_GearArmSleeve_NikeHyperstrongPaddedSleeve_Black.png"
+  },
+  {
+   "value": "GearArmSleeve_NikeHyperstrongPaddedSleeve_White",
+   "label": "Nike Hyperstrong Padded - White",
+   "image": "vnty_nflgear_GearArmSleeve_NikeHyperstrongPaddedSleeve_White.png"
+  },
+  {
+   "value": "GearArmSleeve_Quarter_armTape_normal_SecondaryColor",
+   "label": "Quarter Tape - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Quarter_armTape_normal_SecondaryColor.png"
+  },
+  {
+   "value": "GearArmSleeve_Undershirt_armTape_normal_SecondaryColor",
+   "label": "Tape - Secondary",
+   "image": "vnty_nflgear_GearArmSleeve_Undershirt_armTape_normal_SecondaryColor.png"
+  }
+ ],
+ "elbowGear": [
+  {
+   "value": "ElbowGear_armBraceSmall",
+   "label": "Arm Brace Small",
+   "image": "vnty_nflgear_ElbowGear_armBraceSmall.png"
+  },
+  {
+   "value": "ElbowGear_elbowBrace_TeamColor",
+   "label": "Elbow Brace - Team",
+   "image": "vnty_nflgear_ElbowGear_elbowBrace_TeamColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowpad_Black",
+   "label": "Elbow Pad - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowpad_Black.png"
+  },
+  {
+   "value": "ElbowGear_elbowpad_TeamColor",
+   "label": "Elbow Pad - Team",
+   "image": "vnty_nflgear_ElbowGear_elbowpad_TeamColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowpad_White",
+   "label": "Elbow Pad - White",
+   "image": "vnty_nflgear_ElbowGear_elbowpad_White.png"
+  },
+  {
+   "value": "ElbowGear_elbowpad_Stripe_Black",
+   "label": "Elbow Pad Stripe - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowpad_Stripe_Black.png"
+  },
+  {
+   "value": "ElbowGear_elbowpad_Stripe_White",
+   "label": "Elbow Pad Stripe - White",
+   "image": "vnty_nflgear_ElbowGear_elbowpad_Stripe_White.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandFull_Black",
+   "label": "Full Band - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandFull_Black.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandFull_SecondaryColor",
+   "label": "Full Band - Secondary",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandFull_SecondaryColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandFull_TeamColor",
+   "label": "Full Band - Team",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandFull_TeamColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandFull_White",
+   "label": "Full Band - White",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandFull_White.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandMedium_Black",
+   "label": "Medium Band - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandMedium_Black.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandMedium_SecondaryColor",
+   "label": "Medium Band - Secondary",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandMedium_SecondaryColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandMedium_TeamColor",
+   "label": "Medium Band - Team",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandMedium_TeamColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandMedium_White",
+   "label": "Medium Band - White",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandMedium_White.png"
+  },
+  {
+   "value": "ElbowGear_elbowpadRubber_Black",
+   "label": "Rubber Pad - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowpadRubber_Black.png"
+  },
+  {
+   "value": "ElbowGear_bicepShoulderStabilizer",
+   "label": "Shoulder Stabilizer",
+   "image": "vnty_nflgear_ElbowGear_bicepShoulderStabilizer.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandThin_Black",
+   "label": "Thin Band - Black",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandThin_Black.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandThin_SecondaryColor",
+   "label": "Thin Band - Secondary",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandThin_SecondaryColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandThin_TeamColor",
+   "label": "Thin Band - Team",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandThin_TeamColor.png"
+  },
+  {
+   "value": "ElbowGear_elbowSweatbandThin_White",
+   "label": "Thin Band - White",
+   "image": "vnty_nflgear_ElbowGear_elbowSweatbandThin_White.png"
+  },
+  {
+   "value": "ElbowGear_VintageBeastWrap_White",
+   "label": "Vintage Beast Wrap",
+   "image": "vnty_nflgear_ElbowGear_VintageBeastWrap_White.png"
+  }
+ ],
+ "wristGear": [
+  {
+   "value": "GearWrist_wristBandNormal_Black",
+   "label": "Band - Black",
+   "image": "vnty_nflgear_GearWrist_wristBandNormal_Black.png"
+  },
+  {
+   "value": "GearWrist_wristBandNormal_SecondaryColor",
+   "label": "Band - Secondary",
+   "image": "vnty_nflgear_GearWrist_wristBandNormal_SecondaryColor.png"
+  },
+  {
+   "value": "GearWrist_wristBandNormal_TeamColor",
+   "label": "Band - Team",
+   "image": "vnty_nflgear_GearWrist_wristBandNormal_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_wristBandNormal_White",
+   "label": "Band - White",
+   "image": "vnty_nflgear_GearWrist_wristBandNormal_White.png"
+  },
+  {
+   "value": "GearWrist_wristBandCoach_Black",
+   "label": "Coach Band - Black",
+   "image": "vnty_nflgear_GearWrist_wristBandCoach_Black.png"
+  },
+  {
+   "value": "GearWrist_wristBandCoach_TeamColor",
+   "label": "Coach Band - Team",
+   "image": "vnty_nflgear_GearWrist_wristBandCoach_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_wristBandCoach_White",
+   "label": "Coach Band - White",
+   "image": "vnty_nflgear_GearWrist_wristBandCoach_White.png"
+  },
+  {
+   "value": "GearWrist_wristbrace_CompressShort_Black",
+   "label": "Compression Short - Black",
+   "image": "vnty_nflgear_GearWrist_wristbrace_CompressShort_Black.png"
+  },
+  {
+   "value": "GearWrist_wristBandDouble_Black",
+   "label": "Double Band - Black",
+   "image": "vnty_nflgear_GearWrist_wristBandDouble_Black.png"
+  },
+  {
+   "value": "GearWrist_wristBandDouble_White",
+   "label": "Double Band - White",
+   "image": "vnty_nflgear_GearWrist_wristBandDouble_White.png"
+  },
+  {
+   "value": "GearWrist_gloveTapedNormal_Black",
+   "label": "Glove Tape - Black",
+   "image": "vnty_nflgear_GearWrist_gloveTapedNormal_Black.png"
+  },
+  {
+   "value": "GearWrist_gloveTapedNormal_White",
+   "label": "Glove Tape - White",
+   "image": "vnty_nflgear_GearWrist_gloveTapedNormal_White.png"
+  },
+  {
+   "value": "GearWrist_gloveTapedLarge_Black",
+   "label": "Glove Tape Large - Black",
+   "image": "vnty_nflgear_GearWrist_gloveTapedLarge_Black.png"
+  },
+  {
+   "value": "GearWrist_gloveTapedLarge_White",
+   "label": "Glove Tape Large - White",
+   "image": "vnty_nflgear_GearWrist_gloveTapedLarge_White.png"
+  },
+  {
+   "value": "GearWrist_armgear_playbookWristbandOpen_white",
+   "label": "Playbook Band - White",
+   "image": "vnty_nflgear_GearWrist_armgear_playbookWristbandOpen_white.png"
+  },
+  {
+   "value": "GearWrist_wristTapedNormal_Black",
+   "label": "Tape - Black",
+   "image": "vnty_nflgear_GearWrist_wristTapedNormal_Black.png"
+  },
+  {
+   "value": "GearWrist_wristTapedNormal_SecondaryColor",
+   "label": "Tape - Secondary",
+   "image": "vnty_nflgear_GearWrist_wristTapedNormal_SecondaryColor.png"
+  },
+  {
+   "value": "GearWrist_wristTapedNormal_TeamColor",
+   "label": "Tape - Team",
+   "image": "vnty_nflgear_GearWrist_wristTapedNormal_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_wristTapedNormal_White",
+   "label": "Tape - White",
+   "image": "vnty_nflgear_GearWrist_wristTapedNormal_White.png"
+  },
+  {
+   "value": "GearWrist_wristTapedLite_Black",
+   "label": "Tape Lite - Black",
+   "image": "vnty_nflgear_GearWrist_wristTapedLite_Black.png"
+  },
+  {
+   "value": "GearWrist_wristTapedLite_TeamColor",
+   "label": "Tape Lite - Team",
+   "image": "vnty_nflgear_GearWrist_wristTapedLite_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_wristTapedLite_White",
+   "label": "Tape Lite - White",
+   "image": "vnty_nflgear_GearWrist_wristTapedLite_White.png"
+  },
+  {
+   "value": "GearWrist_wristTapedMax_Black",
+   "label": "Tape Max - Black",
+   "image": "vnty_nflgear_GearWrist_wristTapedMax_Black.png"
+  },
+  {
+   "value": "GearWrist_wristTapedMax_TeamColor",
+   "label": "Tape Max - Team",
+   "image": "vnty_nflgear_GearWrist_wristTapedMax_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_wristTapedMax_White",
+   "label": "Tape Max - White",
+   "image": "vnty_nflgear_GearWrist_wristTapedMax_White.png"
+  },
+  {
+   "value": "G_WristTaped_Max_TeamColor",
+   "label": "Tape Max Alt - Team",
+   "image": "vnty_nflgear_G_WristTaped_Max_TeamColor.png"
+  },
+  {
+   "value": "GearWrist_gloveWristBrace_Black",
+   "label": "Wrist Brace - Black",
+   "image": "vnty_nflgear_GearWrist_gloveWristBrace_Black.png"
+  },
+  {
+   "value": "GearWrist_wristTapedMax_SecondaryColor",
+   "label": "Tape Max - Secondary",
+   "image": "vnty_nflgear_GearWrist_wristTapedMax_SecondaryColor.png"
+  }
+ ],
+ "gloves": [
+  {
+   "value": "GearHand_glove_AdidasFreak_Black",
+   "label": "Adidas Freak - Black",
+   "image": "vnty_nflgear_GearHand_glove_AdidasFreak_Black.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasFreak_SecondaryColor",
+   "label": "Adidas Freak - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_AdidasFreak_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasFreak_TeamColor",
+   "label": "Adidas Freak - Team",
+   "image": "vnty_nflgear_GearHand_glove_AdidasFreak_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasFreak_White",
+   "label": "Adidas Freak - White",
+   "image": "vnty_nflgear_GearHand_glove_AdidasFreak_White.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasImpact2_Black",
+   "label": "Adidas Impact 2 - Black",
+   "image": "vnty_nflgear_GearHand_glove_AdidasImpact2_Black.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasImpact2_TeamColor",
+   "label": "Adidas Impact 2 - Team",
+   "image": "vnty_nflgear_GearHand_glove_AdidasImpact2_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_AdidasImpact2_White",
+   "label": "Adidas Impact 2 - White",
+   "image": "vnty_nflgear_GearHand_glove_AdidasImpact2_White.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13_Black",
+   "label": "Adizero 13 - Black",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13_Black.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13_SecondaryColor",
+   "label": "Adizero 13 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13_TeamColor",
+   "label": "Adizero 13 - Team",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13_White",
+   "label": "Adizero 13 - White",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13_White.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13MistmatchDSG_Black",
+   "label": "Adizero 13 DSG - Black",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13MistmatchDSG_Black.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13MistmatchDSG_TeamColor",
+   "label": "Adizero 13 DSG - Team",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13MistmatchDSG_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13MistmatchDSG_White",
+   "label": "Adizero 13 DSG - White",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13MistmatchDSG_White.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15Electric_Black",
+   "label": "Adizero 15 Electric - Black",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15Electric_Black.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15Electric_SecondaryColor",
+   "label": "Adizero 15 Electric - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15Electric_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15Electric_TeamColor",
+   "label": "Adizero 15 Electric - Team",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15Electric_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15Electric_White",
+   "label": "Adizero 15 Electric - White",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15Electric_White.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15ElectricExoticDSG_SecondaryColor",
+   "label": "Adizero 15 Exotic - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15ElectricExoticDSG_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15ElectricExoticDSG_TeamColor",
+   "label": "Adizero 15 Exotic - Team",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15ElectricExoticDSG_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero15ElectricExoticDSG_White",
+   "label": "Adizero 15 Exotic - White",
+   "image": "vnty_nflgear_GearHand_glove_Adizero15ElectricExoticDSG_White.png"
+  },
+  {
+   "value": "GearHand_glove_GenericCutter_Black",
+   "label": "Cutter - Black",
+   "image": "vnty_nflgear_GearHand_glove_GenericCutter_Black.png"
+  },
+  {
+   "value": "GearHand_glove_GenericCutter_SecondaryColor",
+   "label": "Cutter - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_GenericCutter_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_GenericCutter_TeamColor",
+   "label": "Cutter - Team",
+   "image": "vnty_nflgear_GearHand_glove_GenericCutter_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_GenericCutter_White",
+   "label": "Cutter - White",
+   "image": "vnty_nflgear_GearHand_glove_GenericCutter_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeDTack_Black",
+   "label": "D-Tack - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeDTack_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeDTack_White",
+   "label": "D-Tack - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeDTack_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeDTack7FG_Black",
+   "label": "D-Tack 7 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeDTack7FG_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeDTack7FG_White",
+   "label": "D-Tack 7 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeDTack7FG_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeHyperBeast_Black",
+   "label": "HyperBeast - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeHyperBeast_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeHyperBeast_White",
+   "label": "HyperBeast - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeHyperBeast_White.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlyLock_Black",
+   "label": "Jordan Fly Lock - Black",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlyLock_Black.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlyLock_SecondaryColor",
+   "label": "Jordan Fly Lock - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlyLock_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlyLock_TeamColor",
+   "label": "Jordan Fly Lock - Team",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlyLock_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlyLock_White",
+   "label": "Jordan Fly Lock - White",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlyLock_White.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlylock2_TeamColor",
+   "label": "Jordan Fly Lock 2 - Team",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlylock2_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanFlyLock2_White",
+   "label": "Jordan Fly Lock 2 - White",
+   "image": "vnty_nflgear_GearHand_glove_JordanFlyLock2_White.png"
+  },
+  {
+   "value": "GearHand_glove_JordanSuperbad6_Black",
+   "label": "Jordan Superbad 6 - Black",
+   "image": "vnty_nflgear_GearHand_glove_JordanSuperbad6_Black.png"
+  },
+  {
+   "value": "GearHand_glove_JordanSuperbad6_TeamColor",
+   "label": "Jordan Superbad 6 - Team",
+   "image": "vnty_nflgear_GearHand_glove_JordanSuperbad6_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanSuperbad6_White",
+   "label": "Jordan Superbad 6 - White",
+   "image": "vnty_nflgear_GearHand_glove_JordanSuperbad6_White.png"
+  },
+  {
+   "value": "GearHand_glove_JordanVaporJet7_Black",
+   "label": "Jordan Vapor Jet 7 - Black",
+   "image": "vnty_nflgear_GearHand_glove_JordanVaporJet7_Black.png"
+  },
+  {
+   "value": "GearHand_glove_JordanVaporJet7_TeamColor",
+   "label": "Jordan Vapor Jet 7 - Team",
+   "image": "vnty_nflgear_GearHand_glove_JordanVaporJet7_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanVaporJet7_White",
+   "label": "Jordan Vapor Jet 7 - White",
+   "image": "vnty_nflgear_GearHand_glove_JordanVaporJet7_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad3_Black",
+   "label": "Superbad 3 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad3_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad3_TeamColor",
+   "label": "Superbad 3 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad3_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad3_White",
+   "label": "Superbad 3 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad3_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad5_Black",
+   "label": "Superbad 5 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad5_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad5_SecondaryColor",
+   "label": "Superbad 5 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad5_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad5_TeamColor",
+   "label": "Superbad 5 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad5_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperBad5_White",
+   "label": "Superbad 5 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperBad5_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad5_2019_Black",
+   "label": "Superbad 5 2019 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad5_2019_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad5_2019_SecondaryColor",
+   "label": "Superbad 5 2019 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad5_2019_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad5_2019_TeamColor",
+   "label": "Superbad 5 2019 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad5_2019_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad5_2019_White",
+   "label": "Superbad 5 2019 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad5_2019_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad6_Black",
+   "label": "Superbad 6 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad6_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad6_SecondaryColor",
+   "label": "Superbad 6 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad6_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad6_TeamColor",
+   "label": "Superbad 6 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad6_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad6_White",
+   "label": "Superbad 6 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad6_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad7_Black",
+   "label": "Superbad 7 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad7_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad7_SecondaryColor",
+   "label": "Superbad 7 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad7_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad7_TeamColor",
+   "label": "Superbad 7 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad7_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeSuperbad7_White",
+   "label": "Superbad 7 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeSuperbad7_White.png"
+  },
+  {
+   "value": "GearHand_tapedHandCombo_White",
+   "label": "Taped Combo",
+   "image": "vnty_nflgear_GearHand_tapedHandCombo_White.png"
+  },
+  {
+   "value": "GearHand_tapedHandFinger_Black",
+   "label": "Taped Fingers - Black",
+   "image": "vnty_nflgear_GearHand_tapedHandFinger_Black.png"
+  },
+  {
+   "value": "GearHand_tapedHandFinger_TeamColor",
+   "label": "Taped Fingers - Team",
+   "image": "vnty_nflgear_GearHand_tapedHandFinger_TeamColor.png"
+  },
+  {
+   "value": "GearHand_tapedHandFinger_White",
+   "label": "Taped Fingers - White",
+   "image": "vnty_nflgear_GearHand_tapedHandFinger_White.png"
+  },
+  {
+   "value": "GearHand_tapedHandMax_White",
+   "label": "Taped Max",
+   "image": "vnty_nflgear_GearHand_tapedHandMax_White.png"
+  },
+  {
+   "value": "GearHand_tapedHandNormal_White",
+   "label": "Taped Normal",
+   "image": "vnty_nflgear_GearHand_tapedHandNormal_White.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourCombat_Black",
+   "label": "UA Combat - Black",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourCombat_Black.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourCombat_TeamColor",
+   "label": "UA Combat - Team",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourCombat_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourCombat_White",
+   "label": "UA Combat - White",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourCombat_White.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF6_SecondaryColor",
+   "label": "UA F6 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF6_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF6_TeamColor",
+   "label": "UA F6 - Team",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF6_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF9_Black",
+   "label": "UA F9 - Black",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF9_Black.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF9_SecondaryColor",
+   "label": "UA F9 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF9_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF9_TeamColor",
+   "label": "UA F9 - Team",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF9_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourF9_White",
+   "label": "UA F9 - White",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourF9_White.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourInfrared_SecondaryColor",
+   "label": "UA Infrared - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourInfrared_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourInfrared_TeamColor",
+   "label": "UA Infrared - Team",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourInfrared_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourSpotlight2019_SecondaryColor",
+   "label": "UA Spotlight 2019 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourSpotlight2019_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourSpotlight2019_TeamColor",
+   "label": "UA Spotlight 2019 - Team",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourSpotlight2019_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_UnderArmourSpotlight2019_White",
+   "label": "UA Spotlight 2019 - White",
+   "image": "vnty_nflgear_GearHand_glove_UnderArmourSpotlight2019_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet_SecondaryColor",
+   "label": "Vapor Jet - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet_White",
+   "label": "Vapor Jet - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet4_Black",
+   "label": "Vapor Jet 4 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet4_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet4_TeamColor",
+   "label": "Vapor Jet 4 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet4_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet4_White",
+   "label": "Vapor Jet 4 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet4_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet5_Black",
+   "label": "Vapor Jet 5 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet5_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet5_SecondaryColor",
+   "label": "Vapor Jet 5 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet5_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet5_TeamColor",
+   "label": "Vapor Jet 5 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet5_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet5_White",
+   "label": "Vapor Jet 5 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet5_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet6_Black",
+   "label": "Vapor Jet 6 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet6_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet6_SecondaryColor",
+   "label": "Vapor Jet 6 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet6_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet6_TeamColor",
+   "label": "Vapor Jet 6 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet6_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet6_White",
+   "label": "Vapor Jet 6 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet6_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet7_Black",
+   "label": "Vapor Jet 7 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet7_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet7_SecondaryColor",
+   "label": "Vapor Jet 7 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet7_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet7_TeamColor",
+   "label": "Vapor Jet 7 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet7_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet7_White",
+   "label": "Vapor Jet 7 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet7_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet8_Black",
+   "label": "Vapor Jet 8 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet8_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet8_SecondaryColor",
+   "label": "Vapor Jet 8 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet8_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet8_TeamColor",
+   "label": "Vapor Jet 8 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet8_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet8_White",
+   "label": "Vapor Jet 8 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet8_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit_TeamColor",
+   "label": "Vapor Knit - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit2_Black",
+   "label": "Vapor Knit 2 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit2_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit2_TeamColor",
+   "label": "Vapor Knit 2 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit2_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit2_White",
+   "label": "Vapor Knit 2 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit2_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit3_Black",
+   "label": "Vapor Knit 3 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit3_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit3_SecondaryColor",
+   "label": "Vapor Knit 3 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit3_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit3_TeamColor",
+   "label": "Vapor Knit 3 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit3_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit3_White",
+   "label": "Vapor Knit 3 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit3_White.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit4_Black",
+   "label": "Vapor Knit 4 - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit4_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit4_SecondaryColor",
+   "label": "Vapor Knit 4 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit4_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit4_TeamColor",
+   "label": "Vapor Knit 4 - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit4_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit4_White",
+   "label": "Vapor Knit 4 - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit4_White.png"
+  },
+  {
+   "value": "GearHand_glove_Adizero13MistmatchDSG_SecondaryColor",
+   "label": "Adizero 13 DSG - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_Adizero13MistmatchDSG_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanSuperbad6_SecondaryColor",
+   "label": "Jordan Superbad 6 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_JordanSuperbad6_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_JordanVaporJet7_SecondaryColor",
+   "label": "Jordan Vapor Jet 7 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_JordanVaporJet7_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet4_SecondaryColor",
+   "label": "Vapor Jet 4 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet4_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporJet_TeamColor",
+   "label": "Vapor Jet - Team",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporJet_TeamColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit2_SecondaryColor",
+   "label": "Vapor Knit 2 - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit2_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit_Black",
+   "label": "Vapor Knit - Black",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit_Black.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit_SecondaryColor",
+   "label": "Vapor Knit - Secondary",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit_SecondaryColor.png"
+  },
+  {
+   "value": "GearHand_glove_NikeVaporKnit_White",
+   "label": "Vapor Knit - White",
+   "image": "vnty_nflgear_GearHand_glove_NikeVaporKnit_White.png"
+  }
+ ],
+ "undershirts": [
+  {
+   "value": "G_CompressionT_Crew_ShortSleeve_Basic_BLA",
+   "label": "Compression - Black",
+   "image": null
+  },
+  {
+   "value": "G_CompressionT_Crew_ShortSleeve_Basic_SEC",
+   "label": "Compression - Secondary",
+   "image": null
+  },
+  {
+   "value": "G_CompressionT_Crew_ShortSleeve_Basic_PRI",
+   "label": "Compression - Team",
+   "image": null
+  },
+  {
+   "value": "G_CompressionT_Crew_ShortSleeve_Basic_WHI",
+   "label": "Compression - White",
+   "image": null
+  },
+  {
+   "value": "Undershirt_Untucked",
+   "label": "Untucked",
+   "image": "vnty_nflgear_Undershirt_Untucked.png"
+  }
+ ],
+ "backplates": [
+  {
+   "value": "Backplate_Standard",
+   "label": "Standard",
+   "image": null
+  }
+ ],
+ "flakJackets": [
+  {
+   "value": "Flakjacket_On",
+   "label": "On",
+   "image": "vnty_nflgear_Flakjacket_On.png"
+  }
+ ],
+ "towels": [
+  {
+   "value": "Towel_South",
+   "label": "Back Center",
+   "image": "vnty_nflgear_Towel_South.png"
+  },
+  {
+   "value": "Towel_SouthWest",
+   "label": "Back Left",
+   "image": "vnty_nflgear_Towel_SouthWest.png"
+  },
+  {
+   "value": "Towel_SouthEast",
+   "label": "Back Right",
+   "image": "vnty_nflgear_Towel_SouthEast.png"
+  },
+  {
+   "value": "Towel_North",
+   "label": "Front Center",
+   "image": "vnty_nflgear_Towel_North.png"
+  },
+  {
+   "value": "Towel_NorthWest",
+   "label": "Front Left",
+   "image": "vnty_nflgear_Towel_NorthWest.png"
+  },
+  {
+   "value": "Towel_NorthEast",
+   "label": "Front Right",
+   "image": "vnty_nflgear_Towel_NorthEast.png"
+  },
+  {
+   "value": "Towel_West",
+   "label": "Left",
+   "image": "vnty_nflgear_Towel_West.png"
+  },
+  {
+   "value": "Towel_East",
+   "label": "Right",
+   "image": "vnty_nflgear_Towel_East.png"
+  }
+ ],
+ "handwarmers": [
+  {
+   "value": "Handwarmer_Standard",
+   "label": "Standard",
+   "image": "vnty_nflgear_Handwarmer_Standard.png"
+  }
+ ],
+ "shoes": [
+  {
+   "value": "GearFootwear_shoe_high_Adidas_AdizeroChaos",
+   "label": "Adizero Chaos High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_Adidas_AdizeroChaos.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Adidas_AdizeroElectric1",
+   "label": "Adizero Electric 1 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_Adidas_AdizeroElectric1.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AdizeroElectric2",
+   "label": "Adizero Electric 2 Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Adidas_AdizeroElectricExoticSpeed",
+   "label": "Adizero Electric Exotic Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_Adidas_AdizeroElectricExoticSpeed.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Adidas_AdizeroElectric",
+   "label": "Adizero Electric Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Adidas_AdizeroElectricPlus",
+   "label": "Adizero Electric Plus Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_Adidas_AdizeroImpact2",
+   "label": "Adizero Impact 2 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_Adidas_AdizeroImpact2.png"
+  },
+  {
+   "value": "shoe_mid_Adidas_AdizeroImpact",
+   "label": "Adizero Impact Mid",
+   "image": "vnty_nflgear_shoe_mid_Adidas_AdizeroImpact.png"
+  },
+  {
+   "value": "shoe_mid_Adidas_AdizeroImpactPlus",
+   "label": "Adizero Impact Plus Mid",
+   "image": "vnty_nflgear_shoe_mid_Adidas_AdizeroImpactPlus.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_Adidas_AdizeroImpactSnake",
+   "label": "Adizero Impact Snake Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_AdidasFreakInline23.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AdidasAdizero_LTA58",
+   "label": "Adizero LT Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AdidasAdizero_LTA58.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AdidasAdizeroPrimeKnit",
+   "label": "Adizero Primeknit Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasAdizeroPrimeKnit.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_NikeAlphaMenaceElite2",
+   "label": "Alpha Menace Elite 2 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_NikeAlphaMenaceElite2.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeAlphaMenaceElite3",
+   "label": "Alpha Menace Elite 3 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeAlphaMenaceElite3.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Low_NikeAlphaMenaceElite",
+   "label": "Alpha Menace Elite Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_Low_NikeAlphaMenaceElite.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeAlphaMenacePro2",
+   "label": "Alpha Menace Pro 2 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeAlphaMenacePro2.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeAlphaMenacePro3WDP",
+   "label": "Alpha Menace Pro 3 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeAlphaMenacePro3WDP.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeAlphaMenacePro4",
+   "label": "Alpha Menace Pro 4 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeAlphaMenacePro4.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeAlphaMenacePro",
+   "label": "Alpha Menace Pro Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeAlphaMenacePro.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeAlphaMenaceStrong",
+   "label": "Alpha Menace Strong Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasAdizeroPrimeKnit.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Mid_NikeAlphaPro34TD",
+   "label": "Alpha Pro 3/4 TD Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_Mid_NikeAlphaPro34TD.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Mid_NikeCodeEliteProShark",
+   "label": "Code Elite Pro Shark Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_Mid_NikeCodeEliteProShark.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeDiamondTURF",
+   "label": "Air Diamond Turf Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeDiamondTURF.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeFieldGeneral",
+   "label": "Field General Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeFieldGeneral.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_NikeForceSavageElite2",
+   "label": "Force Savage Elite 2 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_NikeForceSavageElite2.png"
+  },
+  {
+   "value": "GearFootwear_shoe_High_NikeForceSavageEliteTDW",
+   "label": "Force Savage Elite TD High",
+   "image": "vnty_nflgear_GearFootwear_shoe_High_NikeForceSavageEliteTDW.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeForceSavagePro2",
+   "label": "Force Savage Pro 2 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeForceSavagePro2.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AdidasFreak22",
+   "label": "Freak 22 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AdidasFreak22.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_AdidasFreakInline23",
+   "label": "Freak Inline 23 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_AdidasFreakInline23.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AdidasFreak",
+   "label": "Freak Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasFreak.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_AdidasFreakUltra22",
+   "label": "Freak Ultra 22 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_AdidasFreakUltra22.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_AdidasFreakUltra23",
+   "label": "Freak Ultra 23 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_AdidasFreakUltra23.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AdidasFreakUltraCleat",
+   "label": "Freak Ultra Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasFreakUltraCleat.png"
+  },
+  {
+   "value": "Shoe_Mid_AdidasSMFreakXCarbon",
+   "label": "Freak X Carbon Mid",
+   "image": "vnty_nflgear_Shoe_Mid_AdidasSMFreakXCarbon.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AirJordan1VaporEdge",
+   "label": "Jordan 1 Vapor Edge Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_Jordan11TD",
+   "label": "Jordan 11 TD Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_Jordan11TD.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AirJordan3Cement",
+   "label": "Jordan 3 Cement Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasAdizeroPrimeKnit.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Jordan5_99Club",
+   "label": "Jordan 5 99 Club Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_Jordan5_99Club.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_Jordan7",
+   "label": "Jordan 7 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_Jordan7.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_Jordan7",
+   "label": "Jordan 7 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_Jordan7.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AirJordanRetro1",
+   "label": "Jordan Retro 1 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AirJordanRetro1.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AirJordanRetro1",
+   "label": "Jordan Retro 1 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AirJordanRetro1.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AirJordanRetroCement",
+   "label": "Jordan Retro Cement Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AirJordanRetroCement.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AirJordanX",
+   "label": "Jordan X Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AirJordanX",
+   "label": "Jordan X Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AirJordanX.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AirJordanXI",
+   "label": "Jordan XI Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AirJordanXI.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Mid_NikeLunarBeast",
+   "label": "Lunar Beast Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_Mid_NikeLunarBeast.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_AdidasNasty",
+   "label": "Nasty Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasNasty.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeEquinox",
+   "label": "Nike Equinox Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeEquinox.png"
+  },
+  {
+   "value": "GearFootwear_shoeLowVintage_nike",
+   "label": "Nike Vintage Low",
+   "image": "vnty_nflgear_GearFootwear_shoeLowVintage_nike.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_UnderArmourBlurPro2025",
+   "label": "UA Blur Pro 2025 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_UnderArmourBlurPro2025.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_UnderArmourBlurSmoke2024",
+   "label": "UA Blur Smoke 2024 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_UnderArmourBlurSmoke2024.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_UnderArmourC1N2019",
+   "label": "UA C1N 2019 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_UnderArmourC1N2019.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_UnderArmourCloneFlow2025",
+   "label": "UA Clone Flow 2025 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_UnderArmourCloneFlow2025.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_UnderArmourHammer2024",
+   "label": "UA Hammer 2024 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_UnderArmourHammer2024.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_UnderArmourHighlight2019",
+   "label": "UA Highlight 2019 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_UnderArmourHighlight2019.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Low_UnderArmourSpotlight2018",
+   "label": "UA Spotlight 2018 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_Low_UnderArmourSpotlight2018.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_UnderArmourSpotlightClone2024",
+   "label": "UA Spotlight Clone 2024 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_UnderArmourSpotlightClone2024.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_UnderArmourSpotlightSuedeRevamp2025",
+   "label": "UA Spotlight Suede 2025 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_UnderArmourSpotlightSuedeRevamp2025.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AdidasUltraboostMono",
+   "label": "Ultraboost Mono Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AdidasUltraboostMono.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Low_NikeVaporCarbonEliteTD",
+   "label": "Vapor Carbon Elite TD Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_Low_NikeVaporCarbonEliteTD.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Mid_NikeVaporEdge360Untouchable",
+   "label": "Vapor Edge 360 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_AdidasAdizeroPrimeKnit.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_NikeVaporEdgeDunk",
+   "label": "Vapor Edge Dunk Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_NikeVaporEdgeDunk.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporEdge",
+   "label": "Vapor Edge Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporEdge.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporEdgePro3602",
+   "label": "Vapor Edge Pro 360 2 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporEdgePro3602.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporEdgeSpeed3062",
+   "label": "Vapor Edge Speed 360 2 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporEdgeSpeed3062.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporSpeed3",
+   "label": "Vapor Speed 3 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporSpeed3.png"
+  },
+  {
+   "value": "GearFootwear_shoe_Low_NikeVaporUntouchable2",
+   "label": "Vapor Untouchable 2 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_Low_NikeVaporUntouchable2.png"
+  },
+  {
+   "value": "GearFootwear_shoe_high_NikeVaporUntouchablePro3",
+   "label": "Vapor Untouchable Pro 3 High",
+   "image": "vnty_nflgear_GearFootwear_shoe_high_NikeVaporUntouchablePro3.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporUntouchablePro3",
+   "label": "Vapor Untouchable Pro 3 Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporUntouchablePro3.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_NikeVaporUntouchablePro",
+   "label": "Vapor Untouchable Pro Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_NikeVaporUntouchablePro.png"
+  },
+  {
+   "value": "GearFootwear_shoe_low_AdidasAdizone11Turbo",
+   "label": "Adizero 11 Turbo Low",
+   "image": "vnty_nflgear_GearFootwear_shoe_low_AdidasAdizone11Turbo.png"
+  },
+  {
+   "value": "GearFootwear_shoe_mid_Jordan5",
+   "label": "Jordan 5 Mid",
+   "image": "vnty_nflgear_GearFootwear_shoe_mid_Jordan5.png"
+  }
+ ],
+ "spats": [
+  {
+   "value": "GearSpats_spatThin_Black",
+   "label": "Black",
+   "image": "vnty_nflgear_GearSpats_spatThin_Black.png"
+  },
+  {
+   "value": "GearSpats_none",
+   "label": "None",
+   "image": "vnty_nflgear_GearSpats_none.png"
+  },
+  {
+   "value": "GearSpats_spatThin_SecondaryColor",
+   "label": "Secondary Color",
+   "image": "vnty_nflgear_GearSpats_spatThin_SecondaryColor.png"
+  },
+  {
+   "value": "GearSpats_spatThin_TeamColor",
+   "label": "Team Color",
+   "image": "vnty_nflgear_GearSpats_spatThin_TeamColor.png"
+  },
+  {
+   "value": "GearSpats_spatThin_White",
+   "label": "White",
+   "image": "vnty_nflgear_GearSpats_spatThin_White.png"
+  }
+ ],
+ "kneePads": [
+  {
+   "value": "KneePad_Nike",
+   "label": "Nike",
+   "image": "vnty_nflgear_KneePad_Nike.png"
+  },
+  {
+   "value": "KneePad_Regular",
+   "label": "Regular",
+   "image": "vnty_nflgear_KneePad_Regular.png"
+  }
+ ],
+ "thighPads": [
+  {
+   "value": "ThighPad_Nike",
+   "label": "Nike",
+   "image": "vnty_nflgear_ThighPad_Nike.png"
+  },
+  {
+   "value": "ThighPad_Regular",
+   "label": "Regular",
+   "image": "vnty_nflgear_ThighPad_Regular.png"
+  }
+ ],
+ "shoulderPads": [
+  {
+   "value": "Large_Pads",
+   "label": "Large",
+   "image": null
+  },
+  {
+   "value": "Medium_Pads",
+   "label": "Medium",
+   "image": null
+  },
+  {
+   "value": "Small_Pads",
+   "label": "Small",
+   "image": null
+  }
+ ],
+ "helmetCompatibility": {
+  "GearHelmet_Speed_Flex": "speedflex",
+  "GearHelmet_RevolutionSpeed": "revospeed",
+  "GearHelmet_Revolution": "revolution",
+  "GearHelmet_Axiom": "axiom",
+  "GearHelmet_SchuttF7": "f7",
+  "GearHelmet_SchuttF7Pro": "f7pro",
+  "GearHelmet_VicisZero1": "viciszero1",
+  "GearHelmet_VicisZero2": "viciszero2",
+  "GearHelmet_VicisZero2Trench": "vicistrench",
+  "GearHelmet_XenithShadow": "xenith",
+  "GearHelmet_XenithEpic": "xenith",
+  "GearHelmet_XenithOrbit": "xenithorbit",
+  "GearHelmet_VengeanceZ10": "vengeancez10",
+  "GearHelmet_SchuttVeng": "vengeance",
+  "GearHelmet_Riddell360": "riddell360",
+  "GearHelmet_LightGladiator": "light",
+  "GearHelmet_LightLS2": "light",
+  "GearHelmet_Standard": "universal",
+  "GearHelmet_standardBrady": "universal",
+  "GearHelmet_Schutt": "universal",
+  "GearHelmet_RiddellTK": "vintage",
+  "GearHelmet_AirXP": "universal",
+  "GearHelmet_X2E": "vengeance",
+  "GearHelmet_PumpkinDefender": "universal"
+ },
+ "eyepaint": [
+  {
+   "value": "FaceMarks_None",
+   "label": "None",
+   "image": null
+  },
+  {
+   "value": "FaceMarks_EyePaint",
+   "label": "Eye Black",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease.png"
+  },
+  {
+   "value": "FaceMarks_EyePaint2",
+   "label": "Eye Black 2",
+   "image": null
+  },
+  {
+   "value": "FaceMarks_EyePaint3",
+   "label": "Eye Black 3",
+   "image": null
+  },
+  {
+   "value": "FaceMarks_EyePaintCross",
+   "label": "Eye Black Cross",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_Crosses.png"
+  },
+  {
+   "value": "EyeBlack_Grease",
+   "label": "Eye Black Grease",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease.png"
+  },
+  {
+   "value": "EyeBlack_Grease_Crosses",
+   "label": "Eye Black Grease Crosses",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_Crosses.png"
+  },
+  {
+   "value": "EyeBlack_Grease_Mask",
+   "label": "Eye Black Grease Mask",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_Mask.png"
+  },
+  {
+   "value": "EyeBlack_Grease_Smear",
+   "label": "Eye Black Grease Smear",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_Smear.png"
+  },
+  {
+   "value": "EyeBlack_Sticker",
+   "label": "Eye Black Sticker",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Sticker.png"
+  },
+  {
+   "value": "EyeBlack_L_Sticker",
+   "label": "Eye Black Left Sticker",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_L_Sticker.png"
+  },
+  {
+   "value": "EyeBlack_R_Sticker",
+   "label": "Eye Black Right Sticker",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_R_Sticker.png"
+  },
+  {
+   "value": "FaceMarks_EyeTape",
+   "label": "Eye Tape",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Sticker.png"
+  },
+  {
+   "value": "FaceMarks_EyeTapeLeft",
+   "label": "Eye Tape Left",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_L_Sticker.png"
+  },
+  {
+   "value": "FaceMarks_EyeTapeRight",
+   "label": "Eye Tape Right",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_R_Sticker.png"
+  },
+  {
+   "value": "FaceMarks_NoseTape",
+   "label": "Nose Tape",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_NoseStrip.png"
+  },
+  {
+   "value": "EyeBlack_NoseStrip",
+   "label": "Nose Strip",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_NoseStrip.png"
+  },
+  {
+   "value": "EyeBlack_NoseStripXL",
+   "label": "Nose Strip XL",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_NoseStripXL.png"
+  },
+  {
+   "value": "FaceMarks_NoseEyeTape",
+   "label": "Nose & Eye Tape",
+   "image": null
+  },
+  {
+   "value": "FaceMarks_NoseTapeEyePaint",
+   "label": "Nose Tape + Eye Black",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_NoseStrip.png"
+  },
+  {
+   "value": "EyeBlack_Grease_NoseStrip",
+   "label": "Eye Black + Nose Strip",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_Grease_NoseStrip.png"
+  },
+  {
+   "value": "EyeBlack_GreaseSmear_NoseStripXL",
+   "label": "Eye Black Smear + Nose XL",
+   "image": "vnty_styles_eyepaint_facetape_EyeBlack_GreaseSmear_NoseStripXL.png"
+  }
+ ]
+}

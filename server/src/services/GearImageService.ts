@@ -1,17 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import { SERVER_ROOT } from '../config/paths';
+import { DATA_ROOT, SERVER_ROOT } from '../config/paths';
 
 /**
- * Serves gear thumbnail PNGs for the visual equipment builder. The Madden Editor
- * Suite ships one PNG per gear item under gear-sprites/, indexed by gear-atlas.json
- * ({ <slot>: [{ value, label, image }] }). We read them in place (335MB, not
- * duplicated). If the Suite data dir is absent, gear images are simply unavailable.
+ * Serves gear thumbnail PNGs for the visual equipment builder. A gear dir holds
+ * gear-atlas.json ({ <category>: [{ value, label, image, compatibility? }] })
+ * and gear-sprites/<image>.png. The app ships a curated copy under data/gear
+ * (built by scripts/import-gear-sprites.ts from a Madden Editor Suite install);
+ * MADDEN_EDITOR_DATA_DIR or a sibling Suite install can override it.
  */
 
 function resolveDataDir(): string | null {
   const candidates = [
     process.env.MADDEN_EDITOR_DATA_DIR,
+    path.join(DATA_ROOT, 'gear'),
     path.resolve(SERVER_ROOT, '..', '..', 'Madden Editor Suite', 'resources', 'app', '.vite', 'build', 'data'),
   ].filter(Boolean) as string[];
   for (const c of candidates) {
@@ -72,10 +74,14 @@ function ensureSpriteIndex(): Set<string> {
   return spriteNames;
 }
 
-/** The sprite filename for an asset: the atlas image, else `<value>.png` (many
- *  assets — e.g. Gear_Socks_High — have a same-named sprite not in the atlas). */
-function spriteFile(value: string): string {
-  return valueToImage!.get(value) ?? `${value}.png`;
+/** The sprite filename for an asset: the atlas image, else the same-named
+ *  nflgear sprite (synthetic slots such as Gear_Socks_High have one). */
+function spriteFile(value: string): string | null {
+  const atlas = valueToImage!.get(value);
+  if (atlas) return path.basename(atlas);
+  const index = ensureSpriteIndex();
+  for (const f of [`vnty_nflgear_${value}.png`, `${value}.png`]) if (index.has(f)) return f;
+  return null;
 }
 
 export const GearImageService = {
@@ -97,15 +103,16 @@ export const GearImageService = {
   /** Whether a gear asset has a thumbnail available (atlas or a same-named sprite). */
   has(value: string): boolean {
     if (!load()) return false;
-    return ensureSpriteIndex().has(path.basename(spriteFile(value)));
+    const name = spriteFile(value);
+    return !!name && ensureSpriteIndex().has(name);
   },
 
   /** Absolute path to the gear thumbnail PNG for an asset value, or null. */
   filePath(value: string): string | null {
     if (!load()) return null;
     // Guard against traversal: only serve a plain filename inside gear-sprites.
-    const name = path.basename(spriteFile(value));
-    if (!ensureSpriteIndex().has(name)) return null;
+    const name = spriteFile(value);
+    if (!name || !ensureSpriteIndex().has(name)) return null;
     return path.join(SPRITES_DIR, name);
   },
 };

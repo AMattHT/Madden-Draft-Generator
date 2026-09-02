@@ -14,6 +14,7 @@
     "test": "node --import tsx --test \"src/**/*.test.ts\"",
     "data:refresh": "tsx scripts/refresh-data.ts",
     "data:depth": "tsx scripts/build-depth-slots.ts",
+    "data:gear": "tsx scripts/import-gear-sprites.ts",
     "verify": "node scripts/verify-export.js 2003 && node scripts/verify-export.js 1965 && node scripts/verify-m27.js",
     "verify:franchise": "tsx scripts/verify-franchise.ts"
   },
