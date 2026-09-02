@@ -111,6 +111,7 @@ export interface GeneratedClass {
   missing?: string[]; // picked keys the data no longer has
   truncatedKeys?: boolean; // more than 402 keys were sent
   pickedCount?: number; // real (non-filler) players in a picked class
+  launchCount?: number; // rows rated from EA's launch roster (Launch Day lens)
   fetchedAt?: number; // stamped client-side when pulled
   _v?: number; // cache schema/logic version (see cache.ts)
   _gen?: string; // backend generator fingerprint the class was built by (see cache.ts)

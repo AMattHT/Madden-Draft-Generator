@@ -64,7 +64,7 @@ export function ClassView({
   onResetPlayer: (id: number) => void;
   editTools?: EditTools;
   archetypeOptions: Record<string, ArchetypeOption[]>;
-  mode: 'madden' | 'retro';
+  mode: 'madden' | 'retro' | 'launch';
   focusPlayer: string | null;
   draftOpts: DraftOpts;
   decades: number[];
@@ -252,9 +252,17 @@ export function ClassView({
             ) : (
               <Pill tone="primary">Freshly pulled</Pill>
             )}
-            <Pill tone={mode === 'retro' ? 'legend' : 'neutral'}>
-              {mode === 'retro' ? 'Career lens' : 'Realistic lens'}
+            <Pill tone={mode === 'retro' ? 'legend' : mode === 'launch' ? 'gold' : 'neutral'}>
+              {mode === 'retro' ? 'Career lens' : mode === 'launch' ? 'Launch-day lens' : 'Realistic lens'}
             </Pill>
+            {mode === 'launch' && (data.launchCount ?? 0) === 0 && (
+              <span title="No launch roster covers this class (EA's launch files exist for 2018–2020, 2022–2023 and 2026), so it is rated exactly as Realistic.">
+                <Pill tone="neutral">no launch data for this year</Pill>
+              </span>
+            )}
+            {mode === 'launch' && (data.launchCount ?? 0) > 0 && (
+              <Pill tone="gold">{data.launchCount} at EA's launch rating</Pill>
+            )}
             {editedCount > 0 && <Pill tone="gold">{editedCount} edited</Pill>}
             {data.source === 'picked' && <Pill tone="neutral">{data.pickedCount ?? data.count} picked</Pill>}
             {data.missing && data.missing.length > 0 && (

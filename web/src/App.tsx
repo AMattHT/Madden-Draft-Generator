@@ -35,7 +35,8 @@ export const isCustomDraft = (o: DraftOpts) =>
 
 const isMergeEra = (y: number) => y >= 1960 && y <= 1966; // 1967-69: one common draft
 const leagueFor = (y: number) => (isMergeEra(y) ? 'combined' : 'NFL');
-export type GenMode = 'madden' | 'retro';
+/** Rating lens: Realistic rookie curve, Career outcome, or EA's launch-day numbers. */
+export type GenMode = 'madden' | 'retro' | 'launch';
 
 export default function App() {
   const [years, setYears] = useState<number[]>([]);
