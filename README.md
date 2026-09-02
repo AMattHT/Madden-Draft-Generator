@@ -72,8 +72,8 @@ see. Hidden columns can't be sorted by, either.
 **Three ways to rate a class.** *Realistic* rates players the way a draft board would have seen them
 at the time, with a slider for how much hindsight to allow. *Career* rates them purely on how they
 turned out. *Launch Day* uses the overall and attributes EA shipped for each rookie on the game's
-release day, for the classes whose launch roster we have (2018–2020, 2022–2023 and 2026, from
-[maddenratings.net](https://www.maddenratings.net/)); everyone else is rated as Realistic.
+release day, for the 22 classes whose launch roster we have (2001–2009, 2011–2020, 2022, 2023 and
+2026, from [maddenratings.net](https://www.maddenratings.net/)); everyone else is rated as Realistic.
 
 **Custom classes.** Build an all-time draft, a decade, apply your own modifiers — or hand-pick
 your own class from all 32,140 players, sorted by position, era or career, up to Madden's 402

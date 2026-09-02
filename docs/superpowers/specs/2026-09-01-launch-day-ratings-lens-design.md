@@ -98,3 +98,19 @@ pass as today and never override a launch overall. `PreviewResult` gains
 
 Dev traits (a separate design), the 2021/2024/2025 gaps, archetype from the file,
 per-team files for pre-2018 editions.
+
+## Coverage update (2026-09-02)
+
+The bake now takes every edition on the site. Full launch files: Madden 2002, 2004, 13,
+25 (2013), 15–21, 23, 24, 27. Per-team files (32 per edition, stitched by the script):
+Madden 2003, 2005, 06–10, 12. Editions whose files have no years-pro column (2003–2010
+era, 13, 15–17) identify rookies by matching name, position group and drafting team
+against that year's draft class in the lookup — name alone pulled in veterans (the 2012
+roster's Brandon Marshall at 91, the 2009 Zach Miller at 86). Older editions carry fewer
+attributes (about 25 in 2002; a single Throw Accuracy stands for all three modern ones),
+and the overlay keeps the generated value for anything an edition lacks.
+
+Not available: Madden 11 (binary .xls, 2010 class), Madden 22 (final-season roster only,
+2021), the 2024-edition Madden 25 and Madden 26 (not on the site: 2024, 2025).
+
+Result: 22 classes — 2001–2009, 2011–2020, 2022, 2023, 2026 — 5,104 rookie names.

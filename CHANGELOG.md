@@ -12,9 +12,11 @@ of five leaders of a two-season sample; 2026 has none until its rookies produce.
 2017 are unchanged. Awards come from Wikipedia's AP award tables, baked into the app.
 
 **Launch Day lens.** A third rating lens next to Realistic and Career. Where EA's launch roster
-for a class exists (2018–2020, 2022–2023 and 2026), every rookie it names gets the overall and
-attributes EA shipped on release day; everyone else, and every other year, is rated as Realistic.
-Launch data comes from maddenratings.net's launch-roster spreadsheets, baked into the app.
+for a class exists (22 classes: 2001–2009, 2011–2020, 2022, 2023 and 2026), every rookie it names
+gets the overall and attributes EA shipped on release day; everyone else, and every other year, is
+rated as Realistic. Launch data comes from maddenratings.net's launch-roster spreadsheets, baked
+into the app. Not covered: 2010 (Madden 11's files are the old binary Excel format), 2021 (only a
+final-season roster exists) and 2024–2025 (those editions are not on the site).
 
 **2026 draft class fixed.** Fifteen picks carried the wrong name (pick 13 read Will McFadden; it is
 Ty Simpson). All 257 picks now match the real draft.

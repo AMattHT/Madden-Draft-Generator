@@ -6,6 +6,13 @@ import { unzipSync, strFromU8 } from 'fflate';
  * ignores styles, formulas and every other sheet. Enough for a ratings export.
  */
 export function readFirstSheet(buf: Uint8Array): { headers: string[]; rows: string[][] } {
+  const table = readSheetRows(buf);
+  const [headers = [], ...rows] = table;
+  return { headers: headers.map((h) => h.trim()), rows };
+}
+
+/** Every row of the first worksheet as strings (the caller finds the header). */
+export function readSheetRows(buf: Uint8Array): string[][] {
   const files = unzipSync(buf);
   const shared: string[] = [];
   const ssXml = files['xl/sharedStrings.xml'];
@@ -15,7 +22,7 @@ export function readFirstSheet(buf: Uint8Array): { headers: string[]; rows: stri
     }
   }
   const sheetName = Object.keys(files).filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort()[0];
-  if (!sheetName) return { headers: [], rows: [] };
+  if (!sheetName) return [];
   const xml = strFromU8(files[sheetName]);
   const table: string[][] = [];
   for (const row of xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)) {
@@ -34,10 +41,9 @@ export function readFirstSheet(buf: Uint8Array): { headers: string[]; rows: stri
       while (cells.length < col) cells.push('');
       cells[col] = value;
     }
-    table.push(cells);
+    table.push(cells.map((c) => c.trim()));
   }
-  const [headers = [], ...rows] = table;
-  return { headers: headers.map((h) => h.trim()), rows };
+  return table;
 }
 
 function colIndex(ref: string): number {

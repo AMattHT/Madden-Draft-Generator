@@ -22,6 +22,11 @@ export interface LaunchRookie {
   ovr: number;
   /** RATING_KEYS the edition carries; older editions lack some. */
   attrs: Record<string, number>;
+  /** Years pro as the file says; null when the edition has no such column (the
+   *  bake then keeps the rows whose names sit in that year's draft class). */
+  yearsPro: number | null;
+  /** Team as the file writes it ('Ravens', 'San Francisco 49ers'; '' when absent). */
+  team: string;
 }
 
 export interface LaunchEntry {
@@ -34,20 +39,27 @@ export interface LaunchEntry {
 export interface LaunchFile {
   _source: string;
   _built: string;
-  editions: Record<string, { madden: number; rookies: number }>;
+  editions: Record<string, { madden: number; rookies: number; source?: 'full' | 'teams' }>;
   players: Record<string, LaunchEntry[]>;
 }
 
-/** Header cell -> comparable stem: lowercase letters only, trailing "rating" dropped. */
-const stem = (h: string) => h.toLowerCase().replace(/[^a-z]/g, '').replace(/rating$/, '');
+/** Header cell -> comparable stem: lowercase letters only, the 2006-era `PLYR_`
+ *  prefix and a trailing "rating" dropped. */
+const stem = (h: string) => h.toLowerCase().replace(/[^a-z]/g, '').replace(/^plyr/, '').replace(/rating$/, '');
 
 /** Header stems the editions use for each RATING_KEYS attribute (besides the key itself). */
 const HEADER_ALIASES: Record<string, string> = {
   stength: 'strength', // the 2013 file's typo
   bcvision: 'ballCarrierVision',
+  bcv: 'ballCarrierVision',
   press: 'pressCoverage',
   hitpower: 'hitPower',
   longsnap: 'longSnap',
+  tackling: 'tackle',
+  runblocking: 'runBlock',
+  passblocking: 'passBlock',
+  throwaccuracy: 'throwAccuracyShort', // pre-2012 single accuracy; fanned out to mid/deep below
+  kickreturns: 'kickReturn',
 };
 const ATTR_BY_STEM: Record<string, string> = (() => {
   const m: Record<string, string> = {};
@@ -56,26 +68,32 @@ const ATTR_BY_STEM: Record<string, string> = (() => {
   return m;
 })();
 
-/** Launch-roster rows -> rookies (years pro 0), attributes mapped onto RATING_KEYS.
- *  Tolerates every header style seen 2013–2026: `Full Name` / `Name` /
- *  `First Name`+`Last Name`; `Overall Rating` / `Overall` / `OverallRating`;
- *  `Speed` / `SpeedRating`; `Years Pro` / `YearsPro`. */
+/** Launch-roster rows -> players with attributes mapped onto RATING_KEYS. Tolerates
+ *  every header style seen 2001–2026: `Full Name` / `Name` / `First Name`+`Last Name`
+ *  / `First_Name` / `First`+`Last`; `Overall Rating` / `Overall` / `OverallRating` /
+ *  `OVR`; `Speed` / `SpeedRating`; `Years Pro` / `YearsPro` (optional -- when the
+ *  edition has no such column every row comes back with `yearsPro: null`, and the
+ *  bake keeps the ones whose names sit in that year's draft class). With a years-pro
+ *  column, only rookies (0) are returned. */
 export function parseLaunchRows(headers: string[], rows: string[][]): LaunchRookie[] {
   const stems = headers.map(stem);
   const col = (...names: string[]) => { for (const n of names) { const i = stems.indexOf(n); if (i >= 0) return i; } return -1; };
-  const iName = col('fullname', 'name', 'playername');
-  const iFirst = col('firstname');
-  const iLast = col('lastname');
-  const iOvr = col('overall', 'overallrating', 'ovr');
+  const iName = col('fullname', 'name', 'playername', 'player');
+  const iFirst = col('firstname', 'first');
+  const iLast = col('lastname', 'last');
+  const iOvr = col('overall', 'overallrating', 'ovr', 'ovr');
   const iPos = col('position', 'pos');
   const iCollege = col('college', 'school');
-  const iYears = col('yearspro', 'experience', 'exp');
-  if ((iName < 0 && (iFirst < 0 || iLast < 0)) || iOvr < 0 || iYears < 0) return [];
+  const iTeam = col('team', 'teamname');
+  const iYears = col('yearspro', 'experience', 'exp', 'yrspro', 'yrs');
+  if ((iName < 0 && (iFirst < 0 || iLast < 0)) || iOvr < 0) return [];
   const attrCols: Array<[number, string]> = [];
   stems.forEach((s, i) => { const k = ATTR_BY_STEM[s]; if (k && i !== iOvr) attrCols.push([i, k]); });
   const out: LaunchRookie[] = [];
   for (const r of rows) {
-    if (String(r[iYears] ?? '').trim() !== '0') continue;
+    const yearsRaw = iYears >= 0 ? String(r[iYears] ?? '').trim() : '';
+    const yearsPro = iYears >= 0 && yearsRaw !== '' && Number.isFinite(Number(yearsRaw)) ? Number(yearsRaw) : null;
+    if (iYears >= 0 && yearsPro !== 0) continue;
     let first = '', last = '';
     if (iName >= 0) {
       const parts = String(r[iName] ?? '').trim().split(/\s+/);
@@ -92,9 +110,31 @@ export function parseLaunchRows(headers: string[], rows: string[][]): LaunchRook
       const v = Number(r[i]);
       if (Number.isFinite(v) && v > 0) attrs[k] = Math.max(0, Math.min(99, Math.round(v)));
     }
-    out.push({ first, last, pos: String(r[iPos] ?? '').trim(), college: iCollege >= 0 ? String(r[iCollege] ?? '').trim() : '', ovr: Math.round(ovr), attrs });
+    // A single pre-2012 "Throw Accuracy" stands for all three modern accuracies.
+    if (attrs.throwAccuracyShort != null && attrs.throwAccuracyMid == null && attrs.throwAccuracyDeep == null) {
+      attrs.throwAccuracyMid = attrs.throwAccuracyShort;
+      attrs.throwAccuracyDeep = attrs.throwAccuracyShort;
+    }
+    out.push({
+      first, last, pos: String(r[iPos] ?? '').trim(),
+      college: iCollege >= 0 ? String(r[iCollege] ?? '').trim() : '',
+      team: iTeam >= 0 ? String(r[iTeam] ?? '').trim() : '',
+      ovr: Math.round(ovr), attrs, yearsPro,
+    });
   }
   return out;
+}
+
+/** A whole sheet: the header is the first row that names an overall column and a
+ *  player name (some team files open with a title row). */
+export function parseLaunchSheet(table: string[][]): LaunchRookie[] {
+  const isHeader = (row: string[]) => {
+    const s = row.map(stem);
+    return s.some((x) => ['overall', 'overallrating', 'ovr'].includes(x)) && s.some((x) => ['name', 'fullname', 'playername', 'player', 'firstname', 'first', 'lastname', 'last'].includes(x));
+  };
+  const h = table.findIndex(isHeader);
+  if (h < 0) return [];
+  return parseLaunchRows(table[h], table.slice(h + 1));
 }
 
 export const launchKey = (draftYear: number, first: string, last: string) =>

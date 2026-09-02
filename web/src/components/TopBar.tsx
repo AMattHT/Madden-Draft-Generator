@@ -76,7 +76,7 @@ function ModeToggle({ mode, onSetMode }: { mode: GenMode; onSetMode: (m: GenMode
       <button
         onClick={() => onSetMode('launch')}
         aria-pressed={mode === 'launch'}
-        title="EA's launch-day rookie ratings where a launch roster exists (2018–2020, 2022–2023, 2026); everyone else as Realistic"
+        title="EA's launch-day rookie ratings wherever that Madden edition's launch roster exists (most classes since 2001); everyone else as Realistic"
         className={`rounded-md px-3 py-1.5 transition-colors ${
           mode === 'launch' ? 'bg-gold text-black shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
         }`}

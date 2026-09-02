@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
 import { LOOKUPS_DIR } from '../../config/paths';
-import { parseLaunchRows, LaunchRatingsService } from '../LaunchRatingsService';
+import { parseLaunchRows, parseLaunchSheet, LaunchRatingsService } from '../LaunchRatingsService';
 
 const hasFile = fs.existsSync(path.join(LOOKUPS_DIR, 'rookie-launch-ratings.json'));
 const skipWithoutFile = hasFile ? undefined : { skip: 'rookie-launch-ratings.json not baked' };
@@ -62,4 +62,46 @@ test('the baked file answers Stroud 2023 at 73 and knows which years it covers',
   // a DT (neither LE nor LOLB) gets nothing rather than a guess.
   assert.equal(LaunchRatingsService.get('Byron', 'Young', 2023, 10, 'Nowhere State')?.pos, 'LE');
   assert.equal(LaunchRatingsService.get('Byron', 'Young', 2023, 12, 'Nowhere State'), null);
+});
+
+test('older editions: underscored headers, a single Name with no years-pro, and First/Last/OVR/POS', () => {
+  const m08 = parseLaunchRows(
+    ['First_Name', 'Last_Name', 'Position', 'Jersey_#', 'Overall_Rating', 'Speed', 'Man_Coverage'],
+    [['Jeff', 'Saturday', 'C', '63', '96', '58', '29']]
+  );
+  assert.equal(m08.length, 1);
+  assert.equal(m08[0].last, 'Saturday');
+  assert.equal(m08[0].ovr, 96);
+  assert.equal(m08[0].attrs.speed, 58);
+  assert.equal(m08[0].attrs.manCoverage, 29);
+  assert.equal(m08[0].yearsPro, null, 'no years-pro column: every row comes back, flagged null');
+
+  const m03 = parseLaunchRows(['Team', 'Position', 'Number', 'Name', 'Overall Rating'], [['Steelers', 'C', '#64', 'Jeff Hartings', '87']]);
+  assert.deepEqual([m03[0].first, m03[0].last, m03[0].pos, m03[0].ovr, m03[0].yearsPro], ['Jeff', 'Hartings', 'C', 87, null]);
+
+  const m10 = parseLaunchRows(['Team', 'First', 'Last', 'OVR', 'POS', 'Age', 'College', 'Speed'], [['Steelers', 'A.Q.', 'Shipley  ', '66', 'C', '23', 'Penn State', '70']]);
+  assert.deepEqual([m10[0].first, m10[0].last, m10[0].pos, m10[0].ovr, m10[0].college], ['A.Q.', 'Shipley', 'C', 66, 'Penn State']);
+});
+
+test('parseLaunchSheet finds the header below a title row', () => {
+  const rows = parseLaunchSheet([['Pittsburgh Steelers - Madden NFL 2003'], [], ['Team', 'Position', 'Number', 'Name', 'Overall Rating'], ['Steelers', 'QB', '#7', 'Tommy Maddox', '84']]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].last, 'Maddox');
+});
+
+test('Madden 07 team files: PLYR_ prefixes, a single Throw Accuracy fanned out, team captured', () => {
+  const rows = parseLaunchRows(
+    ['Team', 'PLYR_FIRSTNAME', 'PLYR_LASTNAME', 'Position', 'PLYR_JERSEYNUM', 'PLYR_OVERALLRATING', 'PLYR_SPEED', 'PLYR_THROWPOWER', 'PLYR_THROWACCURACY', 'PLYR_TACKLING'],
+    [['Cardinals', 'Matt', 'Leinart', 'QB', '7', '78', '60', '88', '84', '20']]
+  );
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].last, 'Leinart');
+  assert.equal(rows[0].team, 'Cardinals');
+  assert.equal(rows[0].ovr, 78);
+  assert.equal(rows[0].attrs.speed, 60);
+  assert.equal(rows[0].attrs.throwPower, 88);
+  assert.equal(rows[0].attrs.throwAccuracyShort, 84);
+  assert.equal(rows[0].attrs.throwAccuracyMid, 84);
+  assert.equal(rows[0].attrs.throwAccuracyDeep, 84);
+  assert.equal(rows[0].attrs.tackle, 20);
 });

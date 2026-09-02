@@ -256,7 +256,7 @@ export function ClassView({
               {mode === 'retro' ? 'Career lens' : mode === 'launch' ? 'Launch-day lens' : 'Realistic lens'}
             </Pill>
             {mode === 'launch' && (data.launchCount ?? 0) === 0 && (
-              <span title="No launch roster covers this class (EA's launch files exist for 2018–2020, 2022–2023 and 2026), so it is rated exactly as Realistic.">
+              <span title="No launch roster covers this class (EA launch files exist for most classes since 2001, but not 2010, 2021, 2024 or 2025, and nothing before Madden 2002), so it is rated exactly as Realistic.">
                 <Pill tone="neutral">no launch data for this year</Pill>
               </span>
             )}
