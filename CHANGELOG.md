@@ -1,105 +1,41 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 
-**Launch day ratings.** A third lens in the top bar rates every rookie at the overall and
-attributes EA shipped on that Madden edition's release day, baked from maddenratings.net's launch
-rosters (credit to that site): 23 classes, Madden 2002 through Madden 27, now including Madden
-11's binary spreadsheets converted with Excel (the 2010 class). Classes with no launch roster on
-the site (2021, 2024, 2025) fall back to Realistic, and the 2026 class uses EA's own ratings site.
-Dev traits are untouched by the lens.
+### Features
 
-**The 2026 class is rated as Madden 27 ships it.** Every 2026 rookie on EA's ratings site (334
-players, Launch Ratings) gets EA's own overall, all 54 published attributes, position, archetype,
-height, weight and jersey number, and the development trait the game assigns (from
-madden-school.com's rookie dev list: six Superstars, 107 Stars, no X-Factors). Undrafted rookies
-EA does not list keep the app's model, and every other draft year is unchanged.
+**Launch day ratings.** A new lens that rates rookies exactly how EA did on release day, for 23
+classes going back to Madden 2002. Data from maddenratings.net.
 
-**Positions follow the game's roster.** 196 current players whose lookup position had drifted
-from where Madden 27 actually plays them are corrected where the game's label is unambiguous:
-edges the game moved inside to DT (Solomon Thomas, Cameron Heyward, DeForest Buckner, Leonard
-Williams), and corners the game lists at safety or safeties at corner (Harrison Smith and Jalen
-Ramsey at FS, Jordan Poyer at SS). The 2025 and 2026 rookies follow the roster too (126 rows:
-Caleb Downs at SS, Travis Hunter at CB, side and guard/tackle assignments as the game has them)
-and 32 rookies picked up their portrait id.
+**The 2026 class, straight from EA.** Every rookie carries EA's Madden 27 overall, attributes and
+dev trait. Downs and Love at 82, six Superstars, no X-Factors, just like the game.
 
-**Young-class dev traits.** A Rookie of the Year keeps X-Factor only while the career backs it:
-from the third season on he needs a top-10% pace, a first-team All-Pro or a second Pro Bowl
-(Chase Young is a Superstar now, Lattimore's Pro Bowls keep his). One season on record earns a
-quarter of Madden's Superstar quota for the year's best producers and two seasons half, so 2025
-has five Superstars instead of one and 2024 twelve. Kickers, punters and snappers stop at Star
-on accolades alone.
+**Equipment Builder.** You can now build out a player's equipment, from helmet and facemask down
+to cleats, pants and the waist playcall band.
 
-**Portraits for hyphenated names.** 75 players whose surname carries a hyphen (Smith-Njigba,
-Vera-Tucker, Owusu-Koramoah) had their portrait key cut at the hyphen, so thirteen of them showed
-some other Smith, Vera or Davis; they now point at their own art. 239 recent players whose row
-had no portrait id at all but an exact-name match in the portrait table (Shaquille Leonard,
-Kyle Van Noy, Amon-Ra St. Brown) now show their real portrait instead of a generic, and 628
-players from 2012 on whose portrait id names a head scan the game ships now export with that
-scan instead of a generic head.
+**Madden 27 rookie portraits.** The 2026 rookies and every other new face in Madden 27 show
+their real menu portrait. The face picker has all 262 of the game's generic heads.
 
-**Careers are current through the 2025 season.** wAV, Pro Bowls, first-team All-Pros, seasons
-started and last season now come from nflverse's mirror of Pro Football Reference for every
-drafted player since 1960 (1,712 rows updated; the 2025 class no longer reads zero and 2024's
-first-year numbers have grown), and `scripts/refresh-career-columns.py` repeats the update after
-each season. With a third real season on the books, the pace rule that makes a young player an
-X-Factor on production alone now asks for a Hall-of-Fame trajectory (1.35x the position's
-elite per-season norm) rather than a bar a dozen third-year starters clear; awards, All-Pros
-and the elite rule are unchanged and there is no cap, so a class with more such players keeps
-them all.
+**Careers caught up through 2025.** wAV, Pro Bowls and All-Pros are current for everyone drafted
+since 1960, so the 2025 class finally has real numbers.
 
-**Madden 27 rookie portraits.** The 2026 rookies and every other player new to Madden 27 now show
-their real menu portrait instead of a generic face: 472 portraits exported from the game's own
-image library (via the MMC Frosty Editor's Portrait Manager) join the pack, and 529 portraits the
-Madden 26 atlas never carried are filled in for players already mapped. `scripts/import-m27-portraits.py`
-rebuilds the pack from a fresh export, and names every new portrait from the game's own asset
-names. The Madden 27 face picker now offers all 262 generic heads
-the game ships (from its own head-item data), 69 more than its random classes ever used.
+**Smarter young-class dev traits.** X-Factor only comes from awards or a genuine Hall of Fame
+pace. Rookies of the Year keep it only if the career backs it up (sorry, Chase Young), kickers
+top out at Star, and one or two seasons earn a few Superstars instead of none.
 
-**Equipment pictures ship with the app.** The Equipment Builder's thumbnails are now bundled, so
-the installed app shows them without a Madden Editor Suite install next to it, and they are the
-game's own Madden 27 icons: 698 renders exported from its vanity image library cover every gear
-option except three eye-black styles the game itself has no icon for (the pumpkin and snowman
-helmets use their event icons; the Schutt Vengeance Pro shows its shell under a plain 3-bar mask). 183 items the Suite atlas never listed (masks, gloves, cleats, sleeves, wristbands) are now
-selectable with the game's picture. Names were checked
-against the renders and the game's own asset list: the Oakley Prizm visor is now the asset real
-rosters wear (the old entry showed a clear visor), the VICIS Zero1 masks are named by helmet, and
-45 assets the game assigns but the builder never offered are now selectable with names and
-pictures, including the Schutt F7 Pro masks, twelve SpeedFlex and VICIS Zero2 mask styles,
-secondary-colour gloves and sleeves, Jordan 5 and Adizero 11 Turbo cleats, wrinkle socks, and an
-explicit "None" for arm sleeves, elbows, thigh pads, knee pads and the towel. Seven M27 eye-black
-styles borrow the matching M26 render. Matching the game's own Legs tab, thigh pads are now one
-choice for both legs (Regular or Honeycomb, no more left and right), shoulder pads come in Small,
-Medium, Large and X-Large with a size picture, and the Guardian cap is offered in Madden 27 mode.
-Madden 27 mode now accepts every equippable gear item in the game's own item catalog (972
-standard items) rather than only the assets its random classes happened to assign, so the
-builder offers 857 options in M27 mode instead of 320 (143 facemasks, 125 gloves, 73 cleats).
-Two Madden 27 slots are new: Pants (Tapered or Standard) and the Waist playcall band (black, white
-or team colour). The band and the handwarmer share one loadout element, as in the game, so picking
-one clears the other.
+### Bug fixes
 
-**Dev traits for recent classes come from awards and production.** For players drafted in the
-last eight seasons, X-Factor is earned only by AP awards (MVP, Player of the Year, Rookie of the
-Year), two first-team All-Pros, or a top-1% wAV pace over three or more seasons; nobody gets it
-from a quota or a draft slot. First-team All-Pro or two Pro Bowls floor a player at Superstar, one
-Pro Bowl at Star, and the remaining Superstar and Star slots scale with how many seasons the class
-has played. 2023 now carries Stroud, Will Anderson, Smith-Njigba and LaPorta as X-Factors instead
-of five leaders of a two-season sample; 2026 has none until its rookies produce. Classes through
-2017 are unchanged. Awards come from Wikipedia's AP award tables, baked into the app.
-
-**Launch Day lens.** A third rating lens next to Realistic and Career. Where EA's launch roster
-for a class exists (22 classes: 2001–2009, 2011–2020, 2022, 2023 and 2026), every rookie it names
-gets the overall and attributes EA shipped on release day; everyone else, and every other year, is
-rated as Realistic. Launch data comes from maddenratings.net's launch-roster spreadsheets, baked
-into the app. Not covered: 2010 (Madden 11's files are the old binary Excel format), 2021 (only a
-final-season roster exists) and 2024–2025 (those editions are not on the site).
-
-**2026 draft class fixed.** Fifteen picks carried the wrong name (pick 13 read Will McFadden; it is
-Ty Simpson). All 257 picks now match the real draft.
-
-**Namesakes told apart.** Will Anderson Jr. and the other 148 current players whose asset names
-carry Jr/Sr/II/III get their real heads and portraits. The two 1964 Bob Browns no longer share a
-legends portrait or a drafting team.
+- Fifteen 2026 picks had the wrong name. All 257 match the real draft now.
+- 196 players were listed at positions Madden 27 no longer plays them at (Heyward and Buckner at
+  DT, Ramsey at FS, and so on). They match the roster now, rookies included.
+- Thigh pads were split into left and right. The game has one slot, so now we do too.
+- Hyphenated names like Smith-Njigba and Vera-Tucker were showing somebody else's face.
+- Shaquille Leonard, Kyle Van Noy and about 240 others had no portrait link at all, and 628 more
+  export with a generic head when the game has their scan. Both fixed.
+- The Oakley Prizm visor showed a clear one, the VICIS Zero1 masks had no helmet in their names,
+  and the novelty helmets had no pictures.
+- Will Anderson Jr. and 148 other players with Jr/Sr/III in their name get their real face, and
+  the two 1964 Bob Browns stop sharing one.
 
 ## 1.1.0
 
