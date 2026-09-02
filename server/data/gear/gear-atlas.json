@@ -2,7 +2,7 @@
  "_meta": {
   "source": "Madden Editor Suite gear-atlas.json + gear-sprites, curated by scripts/import-gear-sprites.ts",
   "importedAt": "2026-09-02",
-  "sprites": 536
+  "sprites": 540
  },
  "helmets": [
   {
@@ -2891,7 +2891,7 @@
  "thighPads": [
   {
    "value": "ThighPad_Nike",
-   "label": "Nike",
+   "label": "Honeycomb",
    "image": "vnty_nflgear_ThighPad_Nike.png"
   },
   {
@@ -2904,17 +2904,22 @@
   {
    "value": "Large_Pads",
    "label": "Large",
-   "image": null
+   "image": "drawn_Large_Pads.png"
   },
   {
    "value": "Medium_Pads",
    "label": "Medium",
-   "image": null
+   "image": "drawn_Medium_Pads.png"
   },
   {
    "value": "Small_Pads",
    "label": "Small",
-   "image": null
+   "image": "drawn_Small_Pads.png"
+  },
+  {
+   "value": "XLarge_Pads",
+   "label": "X-Large",
+   "image": "drawn_XLarge_Pads.png"
   }
  ],
  "helmetCompatibility": {

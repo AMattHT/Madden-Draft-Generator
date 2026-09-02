@@ -44,6 +44,13 @@ function load(): RealGearDb | null {
   }
 }
 
+/** The database predates the merged thigh slot: fold thighLeft/thighRight into thighPads. */
+function normalizeSlots(gear: Record<string, string>): Record<string, string> {
+  const { thighLeft, thighRight, ...rest } = gear;
+  const thigh = thighLeft ?? thighRight;
+  return thigh && !rest.thighPads ? { ...rest, thighPads: thigh } : rest;
+}
+
 const summary = (p: RealGearDb['players'][number], id: number): RealGearPlayerSummary => ({
   id,
   name: p.name,
@@ -92,6 +99,6 @@ export const RealPlayerGearService = {
     const d = load();
     if (!d || id < 0 || id >= d.players.length) return null;
     const p = d.players[id];
-    return { ...summary(p, id), gear: p.gear };
+    return { ...summary(p, id), gear: normalizeSlots(p.gear) };
   },
 };

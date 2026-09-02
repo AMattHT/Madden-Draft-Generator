@@ -67,3 +67,33 @@ test('M27 assets with a sprite get a picture in M27 mode', () => {
   const bare = all.filter((o) => !o.image && !/None$|^Era/i.test(o.value) && GearImageService.has(o.value));
   assert.deepEqual(bare.map((o) => o.value), []);
 });
+
+test('shoulder pads come in Small, Medium, Large and X-Large with a drawn picture, both games', () => {
+  for (const gv of ['m26', 'm27'] as const) {
+    const pads = GearOptionsService.optionsForYear(2025, gv).shoulderPads;
+    assert.deepEqual(pads.map((p) => p.value).sort(), ['Large_Pads', 'Medium_Pads', 'Small_Pads', 'XLarge_Pads'], gv);
+    for (const p of pads) assert.ok(p.image, `${gv} ${p.value} has no picture`);
+  }
+});
+
+test('the guardian cap is offered with its picture in Madden 27 mode', () => {
+  const caps = GearOptionsService.optionsForYear(2025, 'm27').guardianCap;
+  const cap = caps.find((c) => c.value === 'GuardianCap_guardianXTsleeve');
+  assert.ok(cap?.image, 'guardian cap missing or without picture');
+});
+
+test('thigh pads are one slot that dresses both legs, with the game\'s names', () => {
+  const { GEAR_SLOT_TYPES, GEAR_SLOTS } = require('../GearOptionsService') as typeof import('../GearOptionsService');
+  assert.deepEqual(GEAR_SLOT_TYPES.thighPads, ['LeftThighWear', 'RightThighWear']);
+  assert.ok(!GEAR_SLOTS.some((s) => s.slot === 'thighLeft' || s.slot === 'thighRight'));
+  // Edits saved before the merge still write.
+  assert.deepEqual(GEAR_SLOT_TYPES.thighLeft, ['LeftThighWear']);
+  const thigh = GearOptionsService.optionsForYear(2025, 'm27').thighPads.map((t) => `${t.value}=${t.label}`).sort();
+  assert.deepEqual(thigh, ['ThighPad_Nike=Honeycomb', 'ThighPad_None=None', 'ThighPad_Regular=Regular']);
+});
+
+test('knee pads and towel have an explicit None in Madden 27 mode', () => {
+  const o = GearOptionsService.optionsForYear(2025, 'm27');
+  assert.ok(o.kneePads.some((k) => k.value === 'KneePad_None'));
+  assert.ok(o.towel.some((t) => t.value === 'Towel_None'));
+});

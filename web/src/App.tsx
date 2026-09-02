@@ -13,6 +13,17 @@ import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
 import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, GameVersion } from './types';
 
+/** Gear edits saved before the thigh slot was merged carry thighLeft/thighRight;
+ *  the builder now has one thighPads slot that dresses both legs. */
+function normalizeGearPatch(patch: Record<string, string>): Record<string, string> {
+  const { thighLeft, thighRight, ...rest } = patch;
+  const thigh = thighLeft ?? thighRight;
+  return thigh && !rest.thighPads ? { ...rest, thighPads: thigh } : rest;
+}
+function normalizeGearEdits(gear: GearEdits): GearEdits {
+  return Object.fromEntries(Object.entries(gear).map(([id, patch]) => [Number(id), normalizeGearPatch(patch)]));
+}
+
 export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
@@ -185,7 +196,7 @@ export default function App() {
         editKeyRef.current = { year: ekYear, league };
         historyRef.current = { past: [], future: [] };
         const loadedEdits = await cache.editsGet(ekYear, league);
-        const loadedGear = await cache.gearEditsGet(ekYear, league);
+        const loadedGear = normalizeGearEdits(await cache.gearEditsGet(ekYear, league));
         editsRef.current = loadedEdits;
         gearRef.current = loadedGear;
         setEdits(loadedEdits);
@@ -425,7 +436,7 @@ export default function App() {
     for (const [idStr, patch] of Object.entries(doc.gearEdits ?? {})) {
       const id = Number(idStr);
       if (doc.names?.[id] && byId.get(id) !== doc.names[id]) { skipped++; continue; }
-      gear[id] = patch;
+      gear[id] = normalizeGearPatch(patch);
     }
     commitEdits({ ...editsRef.current, ...edits }, { ...gearRef.current, ...gear });
     return skipped ? `Imported; ${skipped} entries skipped (player names did not match)` : null;

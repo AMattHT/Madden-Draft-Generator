@@ -88,13 +88,14 @@ const SLOTS: SlotDef[] = [
   { slot: 'elbowRight', label: 'Right elbow', category: 'elbowGear', slotTypes: ['RightElbowWear'], none: { value: 'ElbowGear_None', label: 'None' } },
   { slot: 'wristLeft', label: 'Left wrist', category: 'wristGear', slotTypes: ['LeftWristWear'] },
   { slot: 'wristRight', label: 'Right wrist', category: 'wristGear', slotTypes: ['RightWristWear'] },
-  { slot: 'thighLeft', label: 'Left thigh pad', category: 'thighPads', slotTypes: ['LeftThighWear'] },
-  { slot: 'thighRight', label: 'Right thigh pad', category: 'thighPads', slotTypes: ['RightThighWear'] },
-  { slot: 'kneePads', label: 'Knee pads', category: 'kneePads', slotTypes: ['KneeWear'] },
+  // The game has one thigh-pad choice that dresses both legs (Madden 27's Legs tab),
+  // so one slot writes both loadout elements.
+  { slot: 'thighPads', label: 'Thigh pads', category: 'thighPads', slotTypes: ['LeftThighWear', 'RightThighWear'], none: { value: 'ThighPad_None', label: 'None' } },
+  { slot: 'kneePads', label: 'Knee pads', category: 'kneePads', slotTypes: ['KneeWear'], none: { value: 'KneePad_None', label: 'None' } },
   { slot: 'spatLeft', label: 'Left spat', category: 'spats', slotTypes: ['LeftSpat'] },
   { slot: 'spatRight', label: 'Right spat', category: 'spats', slotTypes: ['RightSpat'] },
   { slot: 'eyePaint', label: 'Eye black', category: 'eyepaint', slotTypes: ['FacePaint'] },
-  { slot: 'towel', label: 'Towel', category: 'towels', slotTypes: ['Towel'] },
+  { slot: 'towel', label: 'Towel', category: 'towels', slotTypes: ['Towel'], none: { value: 'Towel_None', label: 'None' } },
   // Extra slots found in real Madden draft files (all verified valid assets).
   { slot: 'mouthpiece', label: 'Mouthpiece', category: 'mouthpieces', slotTypes: ['MouthWear'], none: { value: 'GearMouthpiece_None', label: 'None' } },
   { slot: 'guardianCap', label: 'Guardian cap', category: 'guardianCaps', slotTypes: ['GuardianCap'], none: { value: 'GuardianCap_None', label: 'None' } },
@@ -150,7 +151,30 @@ const SLOTS: SlotDef[] = [
 export const GEAR_SLOTS = SLOTS.map((s) => ({ slot: s.slot, label: s.label }));
 
 /** slot -> M26 loadout slotType(s), used by the export to write gear. */
-export const GEAR_SLOT_TYPES: Record<string, string[]> = Object.fromEntries(SLOTS.map((s) => [s.slot, s.slotTypes]));
+export const GEAR_SLOT_TYPES: Record<string, string[]> = {
+  // Legacy per-leg keys from gear edits saved before the thigh slot was merged:
+  // still written, never offered. Listed first so slotType -> slot lookups that
+  // iterate this map resolve both thigh types to thighPads.
+  thighLeft: ['LeftThighWear'],
+  thighRight: ['RightThighWear'],
+  ...Object.fromEntries(SLOTS.map((s) => [s.slot, s.slotTypes])),
+};
+
+/**
+ * Assets in Madden 27's own string table (madden-franchise interned-strings/27)
+ * that the game never hands to a random rookie, so they are missing from
+ * m27-game-gear-assets.json (which was mined from game-generated classes) but
+ * are real in-game options: the guardian cap, the big shoulder pads, and the
+ * explicit "none" of each pad/towel slot.
+ */
+const M27_VERIFIED_EXTRA = new Set<string>([
+  'GuardianCap_guardianXTsleeve',
+  'Large_Pads',
+  'XLarge_Pads',
+  'ThighPad_None',
+  'KneePad_None',
+  'Towel_None',
+]);
 
 // ---- Fallback catalog (equipment-years.json), era-filtered ----
 
@@ -275,6 +299,7 @@ export const GearOptionsService = {
           items = items.filter((o) =>
             !o.value ||
             m27Valid.has(o.value) ||
+            M27_VERIFIED_EXTRA.has(o.value) ||
             /_None$|None$|^none$/i.test(o.value) ||
             /none|auto|era default/i.test(o.label || "")
           );

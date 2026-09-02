@@ -37,7 +37,7 @@ const SLOT_TYPES = {
   helmet: 'HeadWear', visor: 'Visor', towel: 'Towel', jerseyStyle: 'OuterShirt', socks: 'InnerSocks',
   gloveLeft: 'LeftHandWear', cleatLeft: 'LeftShoe', wristLeft: 'LeftWristWear', elbowLeft: 'LeftElbowWear',
   shoulderPads: 'Shoulderpads', mouthpiece: 'MouthWear', neckRoll: 'Neckpad', flakJacket: 'FlakJacket',
-  handwarmer: 'WaistWear', undershirt: 'InnerShirt', spatLeft: 'LeftSpat', thighLeft: 'LeftThighWear', kneePads: 'KneeWear',
+  handwarmer: 'WaistWear', undershirt: 'InnerShirt', spatLeft: 'LeftSpat', thighPads: 'LeftThighWear', kneePads: 'KneeWear',
 };
 
 let pass = 0, fail = 0;

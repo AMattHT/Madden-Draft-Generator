@@ -13,6 +13,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 const SERVER_ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(SERVER_ROOT, 'data', 'gear');
@@ -54,7 +55,29 @@ const RELABEL: Record<string, string> = {
   GearFootwear_shoe_low_NikeVaporEdgePro3602: 'Vapor Edge Pro 360 2 Low',
   GearFootwear_shoe_low_NikeVaporEdgeSpeed3062: 'Vapor Edge Speed 360 2 Low',
   GearFootwear_shoe_mid_NikeDiamondTURF: 'Air Diamond Turf Mid',
+  // Madden 27's Legs tab calls the Nike pad "Honeycomb Thigh Pad" (the render is
+  // the hex-pattern pad) and the other "Regular".
+  ThighPad_Nike: 'Honeycomb',
+  ThighPad_Regular: 'Regular',
 };
+
+/**
+ * Shoulder pads have no render in the Suite; the game shows a jersey with the
+ * size letter, so we draw the same. value -> letter.
+ */
+const DRAWN_PADS: Record<string, string> = { Small_Pads: 'S', Medium_Pads: 'M', Large_Pads: 'L', XLarge_Pads: 'XL' };
+function drawnSpriteName(value: string): string {
+  return `drawn_${value}.png`;
+}
+async function drawPads(letter: string, outFile: string): Promise<void> {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+  <path d="M150 70 L212 44 Q256 84 300 44 L362 70 L478 134 L436 226 L372 196 L372 472 L140 472 L140 196 L76 226 L34 134 Z"
+        fill="#e6e6e6" stroke="#8a8a8a" stroke-width="8" stroke-linejoin="round"/>
+  <text x="256" y="${letter.length > 1 ? 352 : 362}" font-family="Arial, Helvetica, sans-serif" font-weight="bold"
+        font-size="${letter.length > 1 ? 150 : 190}" text-anchor="middle" fill="#1a1a1a">${letter}</text>
+</svg>`;
+  await sharp(Buffer.from(svg)).png().toFile(outFile);
+}
 
 /**
  * Assets the game assigns (m27-game-gear-assets.json, also present in real M26
@@ -86,6 +109,7 @@ const ADD: Record<string, Item[]> = {
     { value: 'GearFaceMask_VicisZero2RobotRB', label: 'VICIS Zero2 Robot RB', image: null, compatibility: 'viciszero2' },
   ],
   visors: [{ value: 'GearVisor_visorOakley_Prizm', label: 'Oakley Prizm', image: null }],
+  shoulderPads: [{ value: 'XLarge_Pads', label: 'X-Large', image: null }],
   shoes: [
     { value: 'GearFootwear_shoe_low_AdidasAdizone11Turbo', label: 'Adizero 11 Turbo Low', image: null },
     { value: 'GearFootwear_shoe_mid_Jordan5', label: 'Jordan 5 Mid', image: null },
@@ -142,7 +166,7 @@ function nflgearSprite(value: string): string | null {
   return fs.existsSync(path.join(SUITE_SPRITES, f)) ? f : null;
 }
 
-function main() {
+async function main() {
   const atlasPath = path.join(SUITE_DIR, 'gear-atlas.json');
   if (!fs.existsSync(atlasPath) || !fs.existsSync(SUITE_SPRITES)) {
     console.error(`No gear-atlas.json + gear-sprites/ under ${SUITE_DIR}`);
@@ -170,12 +194,13 @@ function main() {
         else item.image = twin.image;
       }
       if (!item.image) item.image = nflgearSprite(item.value);
+      if (DRAWN_PADS[item.value]) item.image = drawnSpriteName(item.value);
       list.push(item);
       seen.add(item.value);
     }
     for (const add of ADD[category] ?? []) {
       if (seen.has(add.value)) { problems.push(`${add.value}: already in atlas ${category}`); continue; }
-      const image = nflgearSprite(add.value);
+      const image = DRAWN_PADS[add.value] ? drawnSpriteName(add.value) : nflgearSprite(add.value);
       if (!image) problems.push(`${add.value}: no nflgear sprite`);
       list.push({ ...add, image });
     }
@@ -192,8 +217,9 @@ function main() {
     if (f) wanted.add(f);
   }
 
+  const drawn = new Set(Object.keys(DRAWN_PADS).map(drawnSpriteName));
   for (const f of wanted) {
-    if (!fs.existsSync(path.join(SUITE_SPRITES, f))) problems.push(`sprite missing in Suite: ${f}`);
+    if (!drawn.has(f) && !fs.existsSync(path.join(SUITE_SPRITES, f))) problems.push(`sprite missing in Suite: ${f}`);
   }
   if (problems.length) {
     console.error('Import aborted:\n  ' + problems.join('\n  '));
@@ -203,9 +229,11 @@ function main() {
   fs.mkdirSync(OUT_SPRITES, { recursive: true });
   let copied = 0;
   for (const f of wanted) {
+    if (drawn.has(f)) continue;
     fs.copyFileSync(path.join(SUITE_SPRITES, f), path.join(OUT_SPRITES, f));
     copied++;
   }
+  for (const [value, letter] of Object.entries(DRAWN_PADS)) await drawPads(letter, path.join(OUT_SPRITES, drawnSpriteName(value)));
   let removed = 0;
   for (const f of fs.readdirSync(OUT_SPRITES)) {
     if (!wanted.has(f)) { fs.unlinkSync(path.join(OUT_SPRITES, f)); removed++; }
@@ -223,7 +251,7 @@ function main() {
   const items = Object.values(out).filter(Array.isArray).reduce((n, l) => n + l.length, 0);
   const withImage = Object.values(out).filter(Array.isArray).reduce((n, l) => n + l.filter((i) => i.image).length, 0);
   console.log(`atlas: ${items} items, ${withImage} with a picture`);
-  console.log(`sprites: ${copied} copied (${(bytes / 1048576).toFixed(1)} MB), ${removed} stale removed -> ${OUT_SPRITES}`);
+  console.log(`sprites: ${copied} copied + ${drawn.size} drawn (${(bytes / 1048576).toFixed(1)} MB), ${removed} stale removed -> ${OUT_SPRITES}`);
 }
 
-main();
+main().catch((e) => { console.error(e); process.exit(1); });

@@ -10,7 +10,10 @@ rosters wear (the old entry showed a clear visor), the VICIS Zero1 masks are nam
 45 assets the game assigns but the builder never offered are now selectable with names and
 pictures, including the Schutt F7 Pro masks, twelve SpeedFlex and VICIS Zero2 mask styles,
 secondary-colour gloves and sleeves, Jordan 5 and Adizero 11 Turbo cleats, wrinkle socks, and an
-explicit "None" for arm sleeves and elbows. Seven M27 eye-black styles borrow the matching M26 render.
+explicit "None" for arm sleeves, elbows, thigh pads, knee pads and the towel. Seven M27 eye-black
+styles borrow the matching M26 render. Matching the game's own Legs tab, thigh pads are now one
+choice for both legs (Regular or Honeycomb, no more left and right), shoulder pads come in Small,
+Medium, Large and X-Large with a size picture, and the Guardian cap is offered in Madden 27 mode.
 
 **Dev traits for recent classes come from awards and production.** For players drafted in the
 last eight seasons, X-Factor is earned only by AP awards (MVP, Player of the Year, Rookie of the

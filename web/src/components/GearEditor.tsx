@@ -24,8 +24,7 @@ const GROUPS: { group: string; slots: { slot: string; label: string }[] }[] = [
       { slot: 'flakJacket', label: 'Flak jacket' },
       { slot: 'neckRoll', label: 'Neck roll' },
       { slot: 'kneePads', label: 'Knee pads' },
-      { slot: 'thighLeft', label: 'Left thigh pad' },
-      { slot: 'thighRight', label: 'Right thigh pad' },
+      { slot: 'thighPads', label: 'Thigh pads' },
     ],
   },
   {
@@ -71,7 +70,6 @@ const MIRROR: Record<string, string> = {
   armLeft: 'armRight', armRight: 'armLeft',
   elbowLeft: 'elbowRight', elbowRight: 'elbowLeft',
   wristLeft: 'wristRight', wristRight: 'wristLeft',
-  thighLeft: 'thighRight', thighRight: 'thighLeft',
   spatLeft: 'spatRight', spatRight: 'spatLeft',
 };
 
