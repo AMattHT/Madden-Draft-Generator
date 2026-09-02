@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+**Hand-picked classes.** Draft options → Hand-picked → Build class… lets you pick any players
+from the whole 1936–2026 pool (filter by position, era and league; sort by career), name the
+class, save it, and export it as `CAREERDRAFT-<NAME>`. Short classes are padded with generated
+prospects from the era of your picks.
+
+**Full CSV.** Export CSV now writes every player with overall, dev trait, bio, combine numbers
+and all 54 attributes, with your edits applied.
+
+**The overall is Madden's.** The player card no longer has an Overall box. Its rating chip and
+the board's OVR column show the overall Madden will compute from the attributes on import,
+updating as you edit.
+
 ## 1.0.0
 
 First public release. Turn any real NFL draft from 1936 to 2026 into a class you can import into

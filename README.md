@@ -73,5 +73,7 @@ see. Hidden columns can't be sorted by, either.
 the time, with a slider for how much hindsight to allow. *Career* rates them purely on how they
 turned out.
 
-**Custom classes.** Build an all-time draft, a decade, or apply your own modifiers instead of taking
-a single year as-is.
+**Custom classes.** Build an all-time draft, a decade, apply your own modifiers — or hand-pick
+your own class from all 32,140 players, sorted by position, era or career, up to Madden's 402
+slots. Short classes are padded with era-correct generated prospects. Export any class to a
+spreadsheet with every overall and all 54 attributes.
