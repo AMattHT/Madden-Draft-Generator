@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ClassEdits, GearEdits, GeneratedClass, PlayerRow } from '../types';
+import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, PlayerRow } from '../types';
 import type { ArchetypeOption } from '../api';
 import { api } from '../api';
 import type { DraftOpts } from '../App';
@@ -47,6 +47,8 @@ export function ClassView({
   draftOpts,
   decades,
   onApplyDraftOpts,
+  customClasses = [],
+  onOpenBuilder,
 }: {
   data: GeneratedClass;
   source: 'cache' | 'live';
@@ -67,6 +69,8 @@ export function ClassView({
   draftOpts: DraftOpts;
   decades: number[];
   onApplyDraftOpts: (o: DraftOpts) => void;
+  customClasses?: CustomClass[];
+  onOpenBuilder?: (c: CustomClass | null) => void;
 }) {
   const [search, setSearch] = useState('');
   const [pos, setPos] = useState('ALL');
@@ -208,6 +212,12 @@ export function ClassView({
 
   const editedCount = Object.keys(edits).length;
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
+  // A hand-picked class exports by its saved player keys and name.
+  const exportOpts = useMemo(() => {
+    if (draftOpts.source !== 'picked') return draftOpts;
+    const c = customClasses.find((x) => x.id === draftOpts.customId);
+    return { ...draftOpts, keys: c?.keys ?? [], name: data.name ?? c?.name ?? '' };
+  }, [draftOpts, customClasses, data.name]);
 
   // Prev/next player navigation inside the profile modal, walking the board in
   // its current filter+sort order (what you see is what you step through).
@@ -224,7 +234,9 @@ export function ClassView({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-xl font-bold tracking-tight">
-              {allTime ? (
+              {data.source === 'picked' ? (
+                <span className="text-gold">Custom · {data.name || 'My class'}</span>
+              ) : allTime ? (
                 <span className="text-gold">All-Time Greats</span>
               ) : decade ? (
                 <span className="text-gold">Greatest of the {decade}</span>
@@ -244,6 +256,12 @@ export function ClassView({
               {mode === 'retro' ? 'Career lens' : 'Realistic lens'}
             </Pill>
             {editedCount > 0 && <Pill tone="gold">{editedCount} edited</Pill>}
+            {data.source === 'picked' && <Pill tone="neutral">{data.pickedCount ?? data.count} picked</Pill>}
+            {data.missing && data.missing.length > 0 && (
+              <span title={`Not in the current data:\n${data.missing.join('\n')}`}>
+                <Pill tone="gold">{data.missing.length} not found</Pill>
+              </span>
+            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -289,7 +307,7 @@ export function ClassView({
             editedCount={editedCount}
             mode={mode}
             rows={effRows}
-            draftOpts={draftOpts}
+            draftOpts={exportOpts}
             gameVersion={data.gameVersion ?? 'm26'}
             editTools={editTools}
           />
@@ -297,7 +315,7 @@ export function ClassView({
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-3">
-        {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} />}
+        {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} customClasses={customClasses} onOpenBuilder={onOpenBuilder} />}
         <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} onShowDropped={onShowDropped} spoilers={spoilers} />
 
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">

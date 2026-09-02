@@ -1,5 +1,5 @@
 import { get, set, keys, del } from 'idb-keyval';
-import type { GeneratedClass, ClassEdits, GearEdits } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, CustomClass } from './types';
 
 /** Persisted board view state per class. */
 export interface TableFilters {
@@ -66,6 +66,22 @@ export const cache = {
   filtersGet: (year: number, league: string): Promise<TableFilters | null> =>
     get<TableFilters>(`filters:${year}_${league}`).then((f) => f ?? null),
   filtersSet: (year: number, league: string, filters: TableFilters) => set(`filters:${year}_${league}`, filters),
+
+  // Hand-picked classes: one record per class under custom:<id> (cachedYears
+  // matches ^class: so these never read as years).
+  async customList(): Promise<CustomClass[]> {
+    const all = (await keys()) as string[];
+    const out: CustomClass[] = [];
+    for (const k of all) {
+      if (!/^custom:/.test(String(k))) continue;
+      const c = await get<CustomClass>(k);
+      if (c) out.push(c);
+    }
+    return out.sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+  customGet: (id: string): Promise<CustomClass | undefined> => get<CustomClass>(`custom:${id}`),
+  customSet: (c: CustomClass) => set(`custom:${c.id}`, c),
+  customDel: (id: string) => del(`custom:${id}`),
 
   // Recently viewed draft years (most recent first, capped), for the year picker.
   recentYearsGet: (): Promise<number[]> => get<number[]>('recentDraftYears').then((a) => a ?? []),

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { api } from '../api';
+import { api, classFileName, type ClassRequestOpts } from '../api';
 import type { ClassEdits, GearEdits, LikenessStats, PlayerRow, GameVersion } from '../types';
-import type { DraftOpts } from '../App';
 import { ATTR_COLUMNS } from '../constants';
 import { buildClassCsv } from '../csv';
 import { Icon, ICONS } from './ui';
@@ -44,7 +43,7 @@ export function ExportMenu({
   editedCount: number;
   mode: 'madden' | 'retro';
   rows: PlayerRow[];
-  draftOpts: DraftOpts;
+  draftOpts: ClassRequestOpts;
   gameVersion?: GameVersion;
   editTools?: EditTools;
 }) {
@@ -122,7 +121,7 @@ export function ExportMenu({
       const savesHint = gameVersion === 'm27' ? 'Documents\\Madden NFL 27\\saves' : 'Documents\\Madden NFL 26\\Saves';
       setMsg({
         ok: true,
-        text: `Downloaded CAREERDRAFT-${year}DRAFT — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.`,
+        text: `Downloaded ${draftOpts.source === 'picked' ? classFileName(draftOpts.name) : draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS` : `CAREERDRAFT-${year}DRAFT`} — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Export failed: ${(e as Error).message}` });

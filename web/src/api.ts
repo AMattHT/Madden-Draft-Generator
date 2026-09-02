@@ -1,4 +1,28 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer } from './types';
+
+/** Generation options every class request carries (see App.DraftOpts). */
+export interface ClassRequestOpts {
+  source: 'year' | 'alltime' | 'decade' | 'picked';
+  decade?: number;
+  strength: number;
+  studs: number;
+  generational: boolean;
+  hindsight?: number;
+  autoStrength?: boolean;
+  variant?: number;
+  include?: number[];
+  /** Hand-picked class (source === 'picked'). */
+  customId?: string;
+  keys?: string[];
+  fill?: boolean;
+  name?: string;
+}
+
+/** CAREERDRAFT-<SLUG> for a hand-picked class (mirrors the server's classSlug). */
+export const classFileName = (name: string | undefined) =>
+  `CAREERDRAFT-${(name ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 16) || 'CUSTOM'}`;
+
+let catalogCache: CatalogPlayer[] | null = null;
 
 /** Backend-proxied image URL (avoids hotlink/CORS blocks on Wikipedia/PFR). */
 export const imageUrl = (url: string) => `/api/image?url=${encodeURIComponent(url)}`;
@@ -331,6 +355,14 @@ export const api = {
   /** Selectable M27 persona DNA traits (id + name) for the persona editor. */
   personaDnaTraits: () => jget<{ traits: PersonaTrait[] }>('/api/lookups/persona-dna').then((r) => r.traits),
 
+  /** The whole player pool for the class builder; fetched once per session. */
+  async catalog(): Promise<CatalogPlayer[]> {
+    if (catalogCache) return catalogCache;
+    const r = await jget<{ players: CatalogPlayer[] }>('/api/players/catalog');
+    catalogCache = r.players;
+    return catalogCache;
+  },
+
   playerSearch: (query: string, limit = 40) =>
     jget<{ results: PlayerSearchResult[] }>(
       `/api/players/search?q=${encodeURIComponent(query)}&limit=${limit}`
@@ -380,19 +412,11 @@ export const api = {
     jget<GeneratedClass>(`/api/draft/${year}/generated?league=${league}&mode=${mode}&gameVersion=${gameVersion}`),
 
   /** Custom class: All-Time Greats / by-decade source and/or generation modifiers. */
-  generatedCustom: (opts: {
-    source: 'year' | 'alltime' | 'decade';
+  generatedCustom: (opts: Partial<ClassRequestOpts> & {
+    source: 'year' | 'alltime' | 'decade' | 'picked';
     year?: number;
-    decade?: number;
     league?: string;
     mode: string;
-    strength?: number;
-    studs?: number;
-    generational?: boolean;
-    hindsight?: number;
-    autoStrength?: boolean;
-    variant?: number;
-    include?: number[];
     gameVersion?: GameVersion;
   }) =>
     fetch('/api/draft/custom', {
@@ -411,7 +435,7 @@ export const api = {
     edits?: ClassEdits,
     mode?: string,
     gearEdits?: GearEdits,
-    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean; variant?: number; include?: number[] },
+    draftOpts?: ClassRequestOpts,
     gameVersion: GameVersion = 'm26'
   ) {
     const res = await fetch('/api/export/mdc', {
@@ -427,7 +451,8 @@ export const api = {
     // Match Madden's own save naming (extensionless CAREERDRAFT-*) so the file
     // drops straight into the Saves folder and shows up in "Load Draft Class".
     a.download =
-      draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
+      draftOpts?.source === 'picked' ? classFileName(draftOpts.name)
+      : draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
       : draftOpts?.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS`
       : `CAREERDRAFT-${year}DRAFT`;
     document.body.appendChild(a);
@@ -448,7 +473,7 @@ export const api = {
     edits: ClassEdits | undefined,
     mode: string | undefined,
     gearEdits: GearEdits | undefined,
-    draftOpts?: { source: 'year' | 'alltime' | 'decade'; decade?: number; strength: number; studs: number; generational: boolean; hindsight?: number; autoStrength?: boolean; variant?: number; include?: number[] },
+    draftOpts?: ClassRequestOpts,
     gameVersion: GameVersion = 'm26'
   ): Promise<SaveMdcResult> {
     const res = await fetch('/api/export/mdc', {

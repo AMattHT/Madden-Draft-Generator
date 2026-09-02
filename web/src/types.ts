@@ -106,12 +106,33 @@ export interface GeneratedClass {
   degraded?: boolean; // built before the backend's data caches were ready (not cached client-side)
   dropped?: DroppedPlayer[]; // players that did not fit (years with more than 402 rows)
   included?: number[]; // source indexes forced in (DraftOpts.include echo)
+  source?: 'year' | 'alltime' | 'decade' | 'picked';
+  name?: string; // hand-picked class name
+  missing?: string[]; // picked keys the data no longer has
+  truncatedKeys?: boolean; // more than 402 keys were sent
+  pickedCount?: number; // real (non-filler) players in a picked class
   fetchedAt?: number; // stamped client-side when pulled
   _v?: number; // cache schema/logic version (see cache.ts)
   _gen?: string; // backend generator fingerprint the class was built by (see cache.ts)
 }
 
 export type GameVersion = 'm26' | 'm27';
+
+/** A saved hand-picked class (player keys are stable across data refreshes). */
+export interface CustomClass {
+  id: string;
+  name: string;
+  keys: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** One row of the whole-pool catalog the class builder browses. */
+export interface CatalogPlayer {
+  key: string; first: string; last: string; pos: string; mpos: string; grp: string;
+  year: number; league: string; round: number | null; pick: number | null; college: string;
+  wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
+}
 
 /** A player the 402-slot class could not hold; `idx` is the stable source index. */
 export interface DroppedPlayer {

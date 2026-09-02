@@ -1,11 +1,19 @@
 import { useEffect, useState } from 'react';
 import type { DraftOpts } from '../App';
 import { DEFAULT_DRAFT_OPTS } from '../App';
+import type { CustomClass } from '../types';
 
-/** Draft-class generation controls: source (this year vs all-time greats) plus
- *  modifiers (class strength, guaranteed studs, a generational #1). Applied on
- *  demand so slider drags don't trigger a regenerate per tick. */
-export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts; decades: number[]; busy: boolean; onApply: (o: DraftOpts) => void }) {
+/** Draft-class generation controls: source (this year, greats, or a hand-picked
+ *  class) plus modifiers (class strength, guaranteed studs, a generational #1).
+ *  Applied on demand so slider drags don't trigger a regenerate per tick. */
+export function DraftOptions({ opts, decades, busy, onApply, customClasses = [], onOpenBuilder }: {
+  opts: DraftOpts;
+  decades: number[];
+  busy: boolean;
+  onApply: (o: DraftOpts) => void;
+  customClasses?: CustomClass[];
+  onOpenBuilder?: (c: CustomClass | null) => void;
+}) {
   const [source, setSource] = useState(opts.source);
   const [decade, setDecade] = useState(opts.decade);
   const [strength, setStrength] = useState(opts.strength);
@@ -13,13 +21,16 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
   const [generational, setGenerational] = useState(opts.generational);
   const [hindsight, setHindsight] = useState(opts.hindsight ?? 1);
   const [autoStrength, setAutoStrength] = useState(!!opts.autoStrength);
+  const [customId, setCustomId] = useState(opts.customId);
+  const [fill, setFill] = useState(opts.fill !== false);
 
   useEffect(() => {
     setSource(opts.source); setDecade(opts.decade); setStrength(opts.strength); setStuds(opts.studs); setGenerational(opts.generational);
-    setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength);
+    setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength); setCustomId(opts.customId); setFill(opts.fill !== false);
   }, [opts]);
 
-  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength, variant: opts.variant ?? 0 };
+  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength, variant: opts.variant ?? 0, customId, fill };
+  const needsClass = source === 'picked' && !customId;
   const hindsightLabel = hindsight <= 0.05 ? 'Draft day' : hindsight >= 0.95 ? 'Career outcome' : `${Math.round(hindsight * 100)}% outcome`;
   const dirty = JSON.stringify(next) !== JSON.stringify(opts);
   const strengthLabel = strength < 0.95 ? 'Weaker' : strength > 1.05 ? 'Stronger' : 'Normal';
@@ -37,7 +48,24 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
               <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
               <button className={seg(source === 'decade')} onClick={() => setSource('decade')}>By decade</button>
               <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time</button>
+              <button className={seg(source === 'picked')} onClick={() => setSource('picked')}>Hand-picked</button>
             </div>
+            {source === 'picked' && (
+              <>
+                <select value={customId ?? ''} onChange={(e) => setCustomId(e.target.value || undefined)}
+                  className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none">
+                  <option value="">Choose a class…</option>
+                  {customClasses.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.keys.length})</option>)}
+                </select>
+                <button onClick={() => onOpenBuilder?.(customClasses.find((c) => c.id === customId) ?? null)}
+                  className="rounded-md border border-primary/50 bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20">
+                  {customId ? 'Edit class…' : 'Build class…'}
+                </button>
+                <label className="flex items-center gap-1.5 text-xs text-neutral-300" title="Pad a short class with generated prospects from the era of your picks">
+                  <input type="checkbox" checked={fill} onChange={(e) => setFill(e.target.checked)} /> Fill to 402
+                </label>
+              </>
+            )}
             {source === 'decade' && (
               <select value={decade} onChange={(e) => setDecade(Number(e.target.value))}
                 className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none">
@@ -74,7 +102,7 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <button onClick={() => onApply(next)} disabled={busy || !dirty}
+        <button onClick={() => onApply(next)} disabled={busy || !dirty || needsClass}
           className="rounded-md bg-primary px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50">
           {busy ? 'Generating…' : 'Generate'}
         </button>
@@ -85,6 +113,7 @@ export function DraftOptions({ opts, decades, busy, onApply }: { opts: DraftOpts
         )}
         <span className="ml-auto text-[11px] text-muted">
           {source === 'alltime' ? 'Best players in history, one class'
+            : source === 'picked' ? (needsClass ? 'Build or choose a hand-picked class' : 'Your hand-picked players, ranked by career')
             : source === 'decade' ? `Greatest players drafted in the ${decade}s`
             : 'Modifiers apply to the selected year'}
         </span>

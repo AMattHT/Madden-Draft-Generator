@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
+import { ClassBuilder } from './components/ClassBuilder';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -10,13 +11,13 @@ import { schedulePrewarm, cancelPrewarm } from './prewarm';
 import { UpdateBanner } from './components/UpdateBanner';
 import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
-import type { ClassEdits, GearEdits, GeneratedClass, GameVersion } from './types';
+import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, GameVersion } from './types';
 
 export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
-  source: 'year' | 'alltime' | 'decade';
+  source: 'year' | 'alltime' | 'decade' | 'picked';
   decade: number; // used when source === 'decade' (e.g. 1990)
   strength: number; // OVR curve multiplier (1 = normal)
   studs: number; // guaranteed first-round-caliber prospects
@@ -25,6 +26,8 @@ export interface DraftOpts {
   autoStrength: boolean; // scale the curve by how good the class really was
   variant: number; // 0 = canonical class; N re-rolls faces/gear/attribute noise
   include?: number[]; // source indexes forced into an over-capacity year (per class, persisted)
+  customId?: string; // hand-picked class id (source === 'picked')
+  fill?: boolean; // pad a short hand-picked class to 402 (default true)
 }
 export const DEFAULT_DRAFT_OPTS: DraftOpts = { source: 'year', decade: 2010, strength: 1, studs: 0, generational: false, hindsight: 1, autoStrength: false, variant: 0 };
 export const isCustomDraft = (o: DraftOpts) =>
@@ -67,6 +70,9 @@ export default function App() {
   const [leagueOverride, setLeagueOverride] = useState<string | null>(null);
   const [draftOpts, setDraftOpts] = useState<DraftOpts>(DEFAULT_DRAFT_OPTS);
   const [showDropped, setShowDropped] = useState(false);
+  // Hand-picked classes: the saved list (for Draft options) and the builder dialog.
+  const [customClasses, setCustomClasses] = useState<CustomClass[]>([]);
+  const [builder, setBuilder] = useState<{ open: boolean; initial: CustomClass | null }>({ open: false, initial: null });
   const editKeyRef = useRef<{ year: number; league: string } | null>(null);
   // Backend liveness: poll /api/health every 15 s (the dot used to mirror the
   // last request's error state, which said "connected" with the server down).
@@ -94,14 +100,17 @@ export default function App() {
     async (year: number, force = false, useMode: GenMode = mode, useLeague?: string, useOpts?: DraftOpts, useVersion: GameVersion = gameVersion) => {
       const baseOpts = useOpts ?? draftOpts;
       // Greats classes key their edits/cache under a fixed pseudo-year / decade label.
-      const league = baseOpts.source === 'alltime' ? 'all-time' : baseOpts.source === 'decade' ? `${baseOpts.decade}s` : useLeague ?? effLeague(year);
+      const league = baseOpts.source === 'alltime' ? 'all-time'
+        : baseOpts.source === 'decade' ? `${baseOpts.decade}s`
+        : baseOpts.source === 'picked' ? `custom:${baseOpts.customId ?? 'none'}`
+        : useLeague ?? effLeague(year);
       // The include list lives with the class (not the global options): load it for
       // this year so a forced-in player survives re-selecting the year.
       const storedInclude = year > 0 && baseOpts.source === 'year' ? await cache.includeGet(year, league) : [];
       const opts: DraftOpts = { ...baseOpts, include: useOpts?.include ?? storedInclude };
       if ((opts.include?.length ?? 0) !== (baseOpts.include?.length ?? 0)) setDraftOpts(opts);
       const custom = isCustomDraft(opts);
-      const ekYear = opts.source === 'alltime' ? 0 : opts.source === 'decade' ? opts.decade : year;
+      const ekYear = opts.source === 'alltime' || opts.source === 'picked' ? 0 : opts.source === 'decade' ? opts.decade : year;
       // M27 classes are cached under a versioned key so M26/M27 views never collide.
       const cacheMode = useVersion === 'm27' ? `${useMode}-m27` : useMode;
       const req = ++reqRef.current;
@@ -119,16 +128,25 @@ export default function App() {
       try {
         if (custom) {
           // Custom classes aren't year-cached — always generated fresh.
+          // A hand-picked class sends its saved player keys.
+          let picked: { keys: string[]; name: string } | undefined;
+          if (opts.source === 'picked') {
+            const c = opts.customId ? await cache.customGet(opts.customId) : undefined;
+            if (!c) throw new Error('That hand-picked class no longer exists');
+            picked = { keys: c.keys, name: c.name };
+          }
           const live = await api.generatedCustom({
             source: opts.source, year, decade: opts.decade,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
             hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant, include: opts.include,
+            keys: picked?.keys, fill: opts.fill !== false, name: picked?.name,
             gameVersion: useVersion,
           });
           if (req !== reqRef.current) return;
           live.fetchedAt = Date.now();
           live.gameVersion = useVersion;
+          if (picked) live.league = league; // edits key on the saved class id, not its name
           setData(live);
           setSource('live');
           cancelPrewarm();
@@ -209,12 +227,27 @@ export default function App() {
       setDraftOpts(next);
       setFocusPlayer(null);
       const year =
-        next.source === 'alltime' ? 0
+        next.source === 'alltime' || next.source === 'picked' ? 0
         : next.source === 'decade' ? next.decade
         : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
       select(year, true, mode, undefined, next);
     },
     [selected, years, mode, select]
+  );
+
+  const openBuilder = useCallback((c: CustomClass | null) => setBuilder({ open: true, initial: c }), []);
+  const closeBuilder = useCallback(() => {
+    setBuilder({ open: false, initial: null });
+    cache.customList().then(setCustomClasses);
+  }, []);
+  // Save & generate from the builder: the class is already persisted; show it.
+  const generatePicked = useCallback(
+    async (c: CustomClass, fill: boolean) => {
+      setBuilder({ open: false, initial: null });
+      setCustomClasses(await cache.customList());
+      applyDraftOpts({ ...draftOpts, source: 'picked', customId: c.id, fill });
+    },
+    [draftOpts, applyDraftOpts]
   );
 
   const inRange = useCallback(
@@ -439,6 +472,7 @@ export default function App() {
     cache.cachedYears().then(setCachedYears);
     cache.usedYearsGet().then((a) => setUsedYears(new Set(a)));
     cache.recentYearsGet().then(setRecentYears);
+    cache.customList().then(setCustomClasses);
     api.archetypesByPosition().then(setArchetypeOptions).catch(() => {});
     (async () => {
       // Deployment shape first, so a pinned per-game build never pulls its
@@ -565,6 +599,8 @@ export default function App() {
               draftOpts={draftOpts}
               decades={[...new Set(years.map((y) => Math.floor(y / 10) * 10))].sort((a, b) => a - b)}
               onApplyDraftOpts={applyDraftOpts}
+              customClasses={customClasses}
+              onOpenBuilder={openBuilder}
               onRefresh={() => selected != null && select(selected, true)}
               onVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: (draftOpts.variant ?? 0) + 1 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
               onResetVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: 0 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
@@ -577,6 +613,7 @@ export default function App() {
       {showDropped && data && (
         <DroppedPanel data={data} included={draftOpts.include ?? []} onInclude={onInclude} onExclude={onExclude} onClose={() => setShowDropped(false)} busy={busy} />
       )}
+      {builder.open && <ClassBuilder initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
     </div>
   );
 }
