@@ -315,6 +315,11 @@ export const api = {
   recompute: (body: { gameVersion: GameVersion; positionId: number; archetype: number; overall: number; ratings: Record<string, number>; reconcile: boolean }) =>
     fetch('/api/draft/recompute', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then((r) => r.json() as Promise<{ gameOverall: number | null; gameArchetype?: number; beforeReconcile: number | null; reconciled: Record<string, number> | null }>),
+  /** The game's overall for every edited prospect on the board (see /recompute). */
+  recomputeBatch: (body: { gameVersion: GameVersion; items: { id: number; positionId: number; archetype: number; ratings: Record<string, number>; overall?: number }[] }) =>
+    fetch('/api/draft/recompute-batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then((r) => r.json() as Promise<{ results: { id: number; overall: number | null; archetype: number }[] }>)
+      .then((r) => r.results),
   genericHeads: (gameVersion: GameVersion = 'm26') => jget<Record<string, string[]>>(`/api/lookups/generic-heads?gameVersion=${gameVersion}`),
 
   /** Real face-scan catalog for the target game (M26 vs M27). */

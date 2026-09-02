@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ClassEdits, GearEdits, GeneratedClass, PlayerRow } from '../types';
 import type { ArchetypeOption } from '../api';
+import { api } from '../api';
 import type { DraftOpts } from '../App';
 import { cache } from '../cache';
 import { POS_NAMES, groupForId } from '../constants';
@@ -14,6 +15,10 @@ import { ProfileModal } from './ProfileModal';
 import { Pill, Icon, ICONS } from './ui';
 
 export type DisplayRow = PlayerRow & { edited?: boolean };
+
+/** Edit keys that never change the game's overall (everything else - ratings,
+ *  position, archetype, a legacy overall target - does). */
+const BIO_KEYS = new Set(['firstName', 'lastName', 'homeTown', 'devTrait', 'college', 'homeState', 'heightInches', 'weight', 'age', 'jerseyNum', 'bodyType', 'personaDNA', 'skinTone', 'faceAsset', 'genericHeadName']);
 
 /** Attribute column id -> ratings key, so sorting an attribute column reads the
  *  rating the header names. Derived from the table's own column list so the two
@@ -111,6 +116,38 @@ export function ClassView({
     }
   }, [focusPlayer]);
 
+  // Madden recomputes the overall from the attributes on import, so an edited
+  // player shows the game's number, not the generated target (debounced, edited
+  // rows only). Bio-only edits do not move it.
+  const [gameOvr, setGameOvr] = useState<Record<number, number>>({});
+  useEffect(() => {
+    const ids = Object.keys(edits).map(Number).filter((id) => {
+      const e = edits[id];
+      return !!e && Object.keys(e).some((k) => !BIO_KEYS.has(k));
+    });
+    if (!ids.length) { setGameOvr({}); return; }
+    const t = setTimeout(() => {
+      const items = ids.flatMap((id) => {
+        const r = data.rows.find((x) => x.id === id);
+        if (!r) return [];
+        const e = edits[id];
+        const ratings: Record<string, number> = { ...r.ratings };
+        for (const k of Object.keys(ratings)) if (e[k] != null && e[k] !== '') ratings[k] = Number(e[k]);
+        return [{
+          id,
+          positionId: e.position != null ? Number(e.position) : r.positionId,
+          archetype: e.archetype != null ? Number(e.archetype) : r.archetype,
+          ratings,
+          overall: e.overall != null ? Number(e.overall) : undefined,
+        }];
+      });
+      api.recomputeBatch({ gameVersion: data.gameVersion ?? 'm26', items })
+        .then((res) => setGameOvr(Object.fromEntries(res.filter((x) => x.overall != null).map((x) => [x.id, x.overall as number]))))
+        .catch(() => {});
+    }, 250);
+    return () => clearTimeout(t);
+  }, [edits, data]);
+
   // Apply user edits to get the effective values shown in the table.
   const effRows: DisplayRow[] = useMemo(
     () =>
@@ -122,14 +159,14 @@ export function ClassView({
           ...r,
           firstName: typeof e.firstName === 'string' ? e.firstName : r.firstName,
           lastName: typeof e.lastName === 'string' ? e.lastName : r.lastName,
-          overall: e.overall != null ? Number(e.overall) : r.overall,
+          overall: gameOvr[r.id] ?? (e.overall != null ? Number(e.overall) : r.overall),
           devTrait: e.devTrait != null ? Number(e.devTrait) : r.devTrait,
           positionId,
           position: POS_NAMES[positionId] ?? r.position,
           edited: true,
         };
       }),
-    [data, edits]
+    [data, edits, gameOvr]
   );
 
   const positions = useMemo(

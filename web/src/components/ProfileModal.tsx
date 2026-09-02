@@ -389,16 +389,13 @@ export function ProfileModal({
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{posName}</span>
-              <RatingChip ovr={overall} size="sm" hidden={!spoilers} />
-              {gameView && gameView.overall != null && (gameView.overall !== overall || (gameView.archetype != null && gameView.archetype !== archetype)) && (
+              <RatingChip ovr={gameView?.overall ?? overall} size="sm" hidden={!spoilers} />
+              {gameView && gameView.archetype != null && gameView.archetype !== archetype && (
                 <span
                   className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
-                  title={gameView.reconciled
-                    ? 'Madden recomputes the overall from the attributes on import (under whichever of its archetypes scores highest); the export re-solves the skill attributes to land on your overall, and this is where it lands.'
-                    : 'Madden recomputes the overall from the attributes on import, under whichever of its archetypes scores highest; with these attributes it will show this.'}
+                  title="Madden labels a prospect with whichever of its archetypes scores his attributes highest."
                 >
-                  game shows {gameView.overall}
-                  {gameView.archetype != null && gameView.archetype !== archetype && ` as ${archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}`}
+                  as {archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}
                 </span>
               )}
               <DevBadge dev={dev} size="lg" hidden={!spoilers} />
@@ -488,7 +485,7 @@ export function ProfileModal({
             <>
               <RadarChart
                 data={keyAttrsForPosition(posId).map(([k, label]) => ({ label, value: eff(k) }))}
-                color={tierColor(overall)}
+                color={tierColor(gameView?.overall ?? overall)}
               />
               <p className="mt-1 text-center text-[11px] text-muted">
                 Signature {posName} attributes — dashed gold ring = elite (90+)
@@ -533,11 +530,7 @@ export function ProfileModal({
           })()}
 
         <div ref={ratingsRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
-          <div className="grid grid-cols-3 gap-3">
-            <label className="text-xs text-neutral-400">
-              Overall
-              <div className="mt-1">{num('overall')}</div>
-            </label>
+          <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               Position
               <select
