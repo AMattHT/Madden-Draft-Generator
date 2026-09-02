@@ -22,6 +22,9 @@ explicit "None" for arm sleeves, elbows, thigh pads, knee pads and the towel. Se
 styles borrow the matching M26 render. Matching the game's own Legs tab, thigh pads are now one
 choice for both legs (Regular or Honeycomb, no more left and right), shoulder pads come in Small,
 Medium, Large and X-Large with a size picture, and the Guardian cap is offered in Madden 27 mode.
+Madden 27 mode now accepts every equippable gear item in the game's own item catalog (972
+standard items) rather than only the assets its random classes happened to assign, so the
+builder offers 857 options in M27 mode instead of 320 (143 facemasks, 125 gloves, 73 cleats).
 Two Madden 27 slots are new: Pants (Tapered or Standard) and the Waist playcall band (black, white
 or team colour). The band and the handwarmer share one loadout element, as in the game, so picking
 one clears the other.

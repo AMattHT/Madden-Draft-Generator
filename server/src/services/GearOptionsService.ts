@@ -311,12 +311,18 @@ function withImages(opts: GearOption[]): GearOption[] {
 }
 
 let m27ValidCache: Set<string> | null | undefined;
+/** Assets Madden 27 accepts: the game's own gear item catalog (every equippable
+ *  item, data/lookups/m27-gear-items.json) plus the assets its random classes
+ *  assign (m27-game-gear-assets.json, which also covers body types). */
 function loadM27Valid(): Set<string> | null {
   if (m27ValidCache !== undefined) return m27ValidCache;
   try {
-    const pth = path.join(DATA_ROOT, "lookups", "m27-game-gear-assets.json");
-    const raw = JSON.parse(fs.readFileSync(pth, "utf8")) as string[];
+    const raw = JSON.parse(fs.readFileSync(path.join(DATA_ROOT, "lookups", "m27-game-gear-assets.json"), "utf8")) as string[];
     m27ValidCache = new Set(raw);
+    try {
+      const items = JSON.parse(fs.readFileSync(path.join(DATA_ROOT, "lookups", "m27-gear-items.json"), "utf8")) as { categories: Record<string, string[]> };
+      for (const list of Object.values(items.categories)) for (const a of list) m27ValidCache.add(a);
+    } catch { /* item catalog optional */ }
   } catch {
     m27ValidCache = null;
   }
