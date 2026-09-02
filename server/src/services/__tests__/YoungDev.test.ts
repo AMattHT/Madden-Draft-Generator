@@ -48,11 +48,15 @@ test('2025: only the Rookies of the Year are X-Factors; one season earns a few S
   assert.ok(t.star.length >= 30 && t.star.length <= 80, `${t.star.length} Stars`);
 });
 
-test('2026 (no seasons yet): Superstars and Stars by slot, no X-Factors', skip, async () => {
+test('2026 (no seasons yet): dev traits as Madden 27 ships them, no X-Factors', skip, async () => {
   const t = await tiers(2026);
   assert.equal(t.xf.length, 0);
-  assert.equal(t.ss.length, 12);
+  // EA's launch list: six Superstars (Downs, Love, Bailey, Bain, Reese, Mendoza), 107 Stars.
+  assert.equal(t.ss.length, 6, `${t.ss}`);
   assert.ok(t.ss.includes('Fernando Mendoza'), 'pick 1 is a Superstar');
+  assert.ok(t.ss.includes('Caleb Downs'));
+  // EA's 107 Stars plus a handful of slot-based Stars for rookies EA does not list.
+  assert.ok(t.star.length >= 105 && t.star.length <= 125, `${t.star.length} Stars`);
 });
 
 test('1998 keeps the full Madden shape (5 / 14 / 90)', skip, async () => {

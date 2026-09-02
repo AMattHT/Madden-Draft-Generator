@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+**The 2026 class is rated as Madden 27 ships it.** Every 2026 rookie on EA's ratings site (334
+players, Launch Ratings) gets EA's own overall, all 54 published attributes, position, archetype,
+height, weight and jersey number, and the development trait the game assigns (from
+madden-school.com's rookie dev list: six Superstars, 107 Stars, no X-Factors). Undrafted rookies
+EA does not list keep the app's model, and every other draft year is unchanged.
+
 **Positions follow the game's roster.** 196 current players whose lookup position had drifted
 from where Madden 27 actually plays them are corrected where the game's label is unambiguous:
 edges the game moved inside to DT (Solomon Thomas, Cameron Heyward, DeForest Buckner, Leonard

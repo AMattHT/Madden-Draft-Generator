@@ -2,6 +2,7 @@ import { MdcService, MdcProspect } from './MdcService';
 import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
+import { M27RookieRatingsService, type EaRookie } from './M27RookieRatingsService';
 import { genericHeadPid } from './M27Fields';
 import { EraBioService } from './EraBioService';
 import { PlayerLookupService } from './PlayerLookupService';
@@ -121,6 +122,41 @@ interface RankedItem {
   caliber: number;
   overall: number;
   devTrait: number;
+  /** EA's own Madden 27 launch entry (2026 rookies): overall, attributes, dev trait. */
+  ea?: EaRookie;
+}
+
+/** The class EA's Madden 27 launch ratings cover. */
+const EA_LAUNCH_YEAR = 2026;
+const EA_POS_ID: Record<string, number> = Object.fromEntries(Array.from({ length: 22 }, (_, id) => [PositionMapper.name(id), id]));
+
+/** Rate the 2026 rookies exactly as Madden 27 ships them: EA's launch overall,
+ *  position and dev trait (madden-school's list) replace the model's; the
+ *  attributes follow in toProspect. Generated fillers and anyone EA does not
+ *  list keep the model's numbers. */
+function applyEaRookies(items: RankedItem[]): void {
+  if (!M27RookieRatingsService.available) return;
+  for (const it of items) {
+    const p = it.player;
+    if (p.source === 'generated' || p.draftYear !== EA_LAUNCH_YEAR) continue;
+    const hit = M27RookieRatingsService.get(p.firstName, p.lastName, PositionMapper.groupFromId(it.posId));
+    if (!hit) continue;
+    it.ea = hit;
+    it.overall = hit.ovr;
+    if (hit.devTrait != null) it.devTrait = hit.devTrait;
+    const posId = EA_POS_ID[hit.pos.toUpperCase()];
+    if (posId != null) it.posId = posId;
+  }
+}
+
+/** EA's archetype id (S_RunSupport, DE_SmallerSpeedRusher) -> the app's archetype
+ *  number for this position, matched on the name with punctuation ignored. */
+function eaArchetype(ea: EaRookie | undefined, posName: string): number | null {
+  if (!ea?.archetype) return null;
+  const want = ea.archetype.replace(/^[A-Za-z]+_/, '').toLowerCase().replace(/[^a-z]/g, '');
+  const options = CalibrationService.archetypeOptions()[posName] ?? [];
+  const hit = options.find((o) => o.name.toLowerCase().replace(/[^a-z]/g, '') === want);
+  return hit ? hit.id : null;
 }
 
 /** Split the CSV "Home State" (really a "City, State" hometown) into a Madden
@@ -269,15 +305,15 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // Missing measurements come from the player's own era, not today's norms (a 1952
   // tackle is ~235 lb, not 318).
   const eraBuild = player.heightInches == null || player.weight == null ? EraBioService.sample(player.draftYear, PositionMapper.groupFromId(posId), rand, gameVersion) : null;
-  const heightInches = player.heightInches ?? eraBuild!.heightInches;
-  const weight = Math.max(150, player.weight ?? eraBuild!.weight);
+  const heightInches = it.ea?.heightInches ?? player.heightInches ?? eraBuild!.heightInches;
+  const weight = Math.max(150, it.ea?.weight ?? player.weight ?? eraBuild!.weight);
 
   // Archetype from the real build (heavy back -> Power, lean end -> Speed Rusher),
   // then attributes from THAT archetype's profile so ratings match the role.
   // Archetype from career usage when we have it (Carter = Physical, not Slot),
   // else the closest Madden height/weight profile.
   const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, player.draftPick);
-  const archetype = ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
+  const archetype = eaArchetype(it.ea, posName) ?? ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
   const { attrs, ovrMean } = CalibrationService.archetypeAttrs(posName, archetype, gameVersion);
 
   const prospect: MdcProspect = {};
@@ -297,6 +333,13 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId, player.draftPick);
   if (twoWay) TwoWayService.apply(prospect as Record<string, number>, twoWay.roles, overall);
   reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
+  // EA's own launch attributes for a 2026 rookie replace the generated ones (all
+  // but long snap, which the site does not publish); the reconcile then lands the
+  // game's recompute on EA's launch overall under EA's archetype.
+  if (it.ea) {
+    for (const [k, v] of Object.entries(it.ea.attrs)) if (RATING_KEYS.includes(k)) (prospect as Record<string, number>)[k] = v;
+    reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
+  }
 
   // Identity.
   prospect.firstName = player.firstName || 'Player';
@@ -310,7 +353,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.heightInches = heightInches;
   prospect.weight = weight;
   const group = PositionMapper.groupFromId(posId);
-  prospect.jerseyNum = (player.jersey || null) ?? (career?.jersey || null) ?? jerseyFor(group, rand, player.draftYear); // 0 = unknown in the source
+  prospect.jerseyNum = (it.ea?.jersey || null) ?? (player.jersey || null) ?? (career?.jersey || null) ?? jerseyFor(group, rand, player.draftYear); // 0 = unknown in the source
   prospect.bodyType = bodyTypeFor(posName, weight, rand); // the game's build mix for the position/weight
   prospect.draftable = 1;
   prospect.draftRound = player.draftRound ?? 63; // 63 = UDFA
@@ -770,6 +813,7 @@ export const DraftClassBuilder = {
           if (d != null) it.devTrait = d;
         }
       }
+      applyEaRookies(items);
       // The user's own modifiers have the last word.
       board.forEach((it, rank) => {
         if (rank < studs) {
@@ -781,6 +825,7 @@ export const DraftClassBuilder = {
           it.devTrait = 3;
         }
       });
+      applyEaRookies(items);
     }
 
     const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion, mode, opts.variant ?? 0));
