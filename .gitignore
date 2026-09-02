@@ -22,3 +22,6 @@ M26Writer_debug.log
 .impeccable/
 .DS_Store
 Thumbs.db
+
+# Python helper scripts
+__pycache__/

@@ -15,10 +15,19 @@ Pack format matches scripts/build-portrait-pack.ts: 128x128 JPEG q78. The DDS
 has a transparent background; it is flattened onto the pack's background colour.
 
     python scripts/import-m27-portraits.py <exportDir>
+    python scripts/import-m27-portraits.py --names <xmlDir>
+
+The second form reads the XML export of the same library's textures
+(content/ui/ImageAssetLibraries/global/Portraits/PlayerPortraits/assets, EBX to
+XML): each ImageLibraryTexture carries its AssetIdList, i.e. the portrait PID.
+Rows the first form named plpo_m27_<pid> are renamed to the game's own plpo_*
+asset name (pack file included) when that name is free, and blank player names
+are filled from the asset name (LastFirst -> "First Last", a best-effort split).
 """
 import csv
 import json
 import os
+import re
 import sys
 
 from PIL import Image
@@ -34,7 +43,89 @@ def title_name(key: str) -> str:
     return ' '.join(w[:1].upper() + w[1:] for w in key.split())
 
 
+SUFFIX = re.compile(r'[-_](?:[a-z]{1,4}|[A-Z]{2,4})$')  # position disambiguators: plpo_AllenJosh-qb, plpo_JonesMatt_WILL
+CAMEL = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z][a-z']+|[A-Z]+|[a-z']+")
+
+
+def name_from_asset(asset: str) -> str:
+    """plpo_AbneyIIKeith -> 'Keith Abney II'. Empty when the asset is all one case
+    (no way to split it) so a blank stays blank rather than wrong."""
+    stem = SUFFIX.sub('', asset[5:] if asset.startswith('plpo_') else asset)
+    if stem.lower() == stem or stem.upper() == stem:
+        return ''
+    # Hyphenated surnames (Al-ShaairAzeez, St-JusteMarcus): every chunk but the
+    # last is surname, plus the first camel token of the last chunk.
+    chunks = stem.split('-')
+    parts = CAMEL.findall(chunks[-1])
+    if len(parts) < 2:
+        return ''
+    # Particles that camel-splitting separates from the surname (McCaffrey, OConnell, VanNoy).
+    particles = {'Mc', 'Mac', 'O', 'De', 'Di', 'Da', 'Van', 'Von', 'La', 'Le', 'St', 'Del', 'DeLa', 'Dela'}
+    while len(parts) > 2 and parts[0] in particles:
+        parts[0:2] = [parts[0] + parts[1]]
+    suffixes = {'II', 'III', 'IV', 'Jr', 'Sr'}
+    last, rest = '-'.join(chunks[:-1] + [parts[0]]), parts[1:]
+    tail = [p for p in rest if p in suffixes]
+    first = [p for p in rest if p not in suffixes]
+    return ' '.join(first + [last] + tail)
+
+
+def names_mode(xml_dir: str) -> None:
+    with open(MAPPING, encoding='utf-8-sig', newline='') as f:
+        reader = csv.DictReader(f)
+        fields = reader.fieldnames
+        rows = list(reader)
+    id_to_asset = {}
+    for fname in os.listdir(xml_dir):
+        if not fname.endswith('.xml') or 'assetlibrary' in fname:
+            continue
+        text = open(os.path.join(xml_dir, fname), encoding='utf-8-sig').read()
+        if 'type="ImageLibraryTexture"' not in text:
+            continue
+        m = re.search(r'<field name="Name">([^<]+)</field>', text)
+        ids = re.findall(r'<item>(\d+)</item>', text)
+        if not m or not ids:
+            continue
+        asset = m.group(1).rsplit('/', 1)[1]
+        for pid in ids:
+            id_to_asset.setdefault(int(pid), asset)
+    used = {r['Portrait'].strip().lower() for r in rows}
+    renamed = named = collided = 0
+    for r in rows:
+        if not r['Portrait'].startswith('plpo_m27_'):
+            continue
+        asset = id_to_asset.get(int(r['PID']))
+        if not asset:
+            continue
+        if asset.lower() not in used:
+            old, new = os.path.join(PACK, f"{r['Portrait']}.jpg"), os.path.join(PACK, f'{asset}.jpg')
+            if os.path.exists(old):
+                os.replace(old, new)
+            used.discard(r['Portrait'].lower())
+            used.add(asset.lower())
+            r['Portrait'] = asset
+            renamed += 1
+        else:
+            collided += 1
+        if not r['Player Name'].strip():
+            guess = name_from_asset(asset)
+            if guess:
+                r['Player Name'] = guess
+                named += 1
+    with open(MAPPING, 'w', encoding='utf-8-sig', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows(rows)
+    print(f'{len(id_to_asset)} portrait ids named by the XML export; renamed {renamed} rows to the game asset name, '
+          f'{collided} kept plpo_m27_<pid> (name already used by another PID), filled {named} blank player names')
+
+
 def main() -> None:
+    if len(sys.argv) > 2 and sys.argv[1] == '--names':
+        if not os.path.isdir(sys.argv[2]):
+            sys.exit('usage: import-m27-portraits.py --names <xmlDir>')
+        names_mode(sys.argv[2])
+        return
     export = sys.argv[1] if len(sys.argv) > 1 else None
     if not export or not os.path.isdir(export):
         sys.exit('usage: import-m27-portraits.py <exportDir>')
