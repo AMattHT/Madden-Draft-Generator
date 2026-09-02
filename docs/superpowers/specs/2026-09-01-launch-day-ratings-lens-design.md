@@ -114,3 +114,9 @@ Not available: Madden 11 (binary .xls, 2010 class), Madden 22 (final-season rost
 2021), the 2024-edition Madden 25 and Madden 26 (not on the site: 2024, 2025).
 
 Result: 22 classes — 2001–2009, 2011–2020, 2022, 2023, 2026 — 5,104 rookie names.
+
+## Status update (2026-09-02)
+
+Withdrawn from the app at the user's request: the lens, the `launch` mode, the pills and
+tag, and the shipped lookup are removed; a different approach is wanted. The xlsx reader,
+`LaunchRatingsService` parser and the bake script stay in the repo, unshipped, for reuse.

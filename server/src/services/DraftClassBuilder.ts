@@ -20,7 +20,6 @@ import { LikenessService, LikenessKind } from './LikenessService';
 import { EraGearService } from './EraGearService';
 import { PhotoLookService } from './PhotoLookService';
 import { PortraitSlotService } from './PortraitSlotService';
-import { LaunchRatingsService, LaunchEntry } from './LaunchRatingsService';
 import { AwardsService } from './AwardsService';
 import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
 import { BaselinePlayer, CombineMeasurements } from '../types/player';
@@ -37,14 +36,12 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 /** Rating mode: 'madden' = match Madden's realistic-rookie curve (default);
  *  'retro' = career-retrospective (OVR reflects how good they actually turned
- *  out, uncapped); 'launch' = the Realistic class, except every rookie the
- *  edition's launch roster names gets EA's release-day overall and attributes
- *  (LaunchRatingsService; years without a launch file are plain Realistic). */
-export type GenMode = 'madden' | 'retro' | 'launch';
+ *  out, uncapped). */
+export type GenMode = 'madden' | 'retro';
 
 /** Query/body value -> GenMode (anything unrecognised is Realistic). */
 export function parseGenMode(raw: unknown): GenMode {
-  return raw === 'retro' ? 'retro' : raw === 'launch' ? 'launch' : 'madden';
+  return raw === 'retro' ? 'retro' : 'madden';
 }
 
 /** Optional generation modifiers for custom draft classes (madden mode):
@@ -124,8 +121,6 @@ interface RankedItem {
   caliber: number;
   overall: number;
   devTrait: number;
-  /** Launch Day lens: EA's release-day rating for this rookie (overall already applied). */
-  launch?: LaunchEntry;
 }
 
 /** Split the CSV "Home State" (really a "City, State" hometown) into a Madden
@@ -301,13 +296,6 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // kicks, a 1940s end covers), then the primary overall is re-solved around it.
   const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId, player.draftPick);
   if (twoWay) TwoWayService.apply(prospect as Record<string, number>, twoWay.roles, overall);
-  // Launch Day lens: EA's own release-day attributes replace the generated ones
-  // wherever the edition recorded them (older editions lack a few keys, which
-  // keep the generated value); the reconcile then lands the game's recompute on
-  // EA's launch overall under this archetype.
-  if (it.launch) {
-    for (const [k, v] of Object.entries(it.launch.attrs)) if (RATING_KEYS.includes(k)) (prospect as Record<string, number>)[k] = v;
-  }
   reconcileToTarget(prospect as Record<string, number>, posId, archetype, overall, gameVersion);
 
   // Identity.
@@ -474,8 +462,6 @@ export interface PreviewResult {
   dropped: DroppedPlayer[];
   /** Source-row indexes that were forced in (echo of GenOptions.include). */
   included: number[];
-  /** Rows rated from EA's launch roster (0 unless the Launch Day lens found data). */
-  launchCount: number;
 }
 
 export interface DroppedPlayer {
@@ -679,8 +665,6 @@ export const DraftClassBuilder = {
     dropped: DroppedPlayer[];
     included: number[];
     likeness: LikenessStats;
-    /** Prospect indexes rated from EA's launch roster (Launch Day lens only). */
-    launchIdx: number[];
   } {
     const { kept: capped, dropped, included } = fitToCapacity(players, opts.include ?? []);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
@@ -801,19 +785,6 @@ export const DraftClassBuilder = {
       });
     }
 
-    // Launch Day lens: EA's release-day overall for every rookie the edition's
-    // launch roster names. The Realistic curve stands for everyone else, for the
-    // generated fillers, and for whole years with no launch file. Dev traits are
-    // untouched: the launch rosters do not record them.
-    if (mode === 'launch') {
-      for (const it of items) {
-        if (it.player.source === 'generated') continue;
-        const hit = LaunchRatingsService.get(it.player.firstName, it.player.lastName, it.player.draftYear, it.posId, it.player.college);
-        if (hit) { it.overall = hit.ovr; it.launch = hit; }
-      }
-    }
-    const launchIdx = items.filter((it) => it.launch).map((it) => it.index);
-
     const built = items.map((it) => toProspect(it, portraitMap.get(it.index), gameVersion, mode, opts.variant ?? 0));
     const likeness: LikenessStats = {
       asset: built.filter((b) => b.kind === 'asset').length,
@@ -821,7 +792,7 @@ export const DraftClassBuilder = {
       withPortrait: capped.filter((p) => p.photoId != null).length,
       customPortrait: portraitMap.size,
     };
-    return { prospects: built.map((b) => b.prospect), truncated: dropped.length > 0, dropped, included, likeness, launchIdx };
+    return { prospects: built.map((b) => b.prospect), truncated: dropped.length > 0, dropped, included, likeness };
   },
 
   /** Full JSON preview of the generated class for the UI: per-player bio, photo,
@@ -830,8 +801,7 @@ export const DraftClassBuilder = {
   preview(players: BaselinePlayer[], mode: GenMode = 'madden', opts: GenOptions = {}, gameVersion: 'm26' | 'm27' = 'm26'): PreviewResult {
     const { kept: capped, keptIdx } = fitToCapacity(players, opts.include ?? []);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
-    const { prospects, likeness, dropped, included, launchIdx } = this.buildProspects(players, mode, opts, gameVersion);
-    const launched = new Set(launchIdx);
+    const { prospects, likeness, dropped, included } = this.buildProspects(players, mode, opts, gameVersion);
     const rows: PreviewRow[] = prospects.map((p, i) => {
       const peps = String(p.PEPS || '').toLowerCase();
       const face: 'asset' | 'generic' | 'photo' = portraitMap.has(i)
@@ -872,8 +842,7 @@ export const DraftClassBuilder = {
         // Predicted players (pre-1960 / missing wAV): show the draft-slot estimate
         // (matches what actually drives their OVR) instead of the raw/absent value.
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
-        // 'launch' = overall and attributes are EA's release-day numbers (Launch Day lens).
-        wavSource: launched.has(i) ? 'launch' : base.wavSource,
+        wavSource: base.wavSource,
         srcIdx: keptIdx[i],
         twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0, base.draftPick),
         face,
@@ -918,7 +887,7 @@ export const DraftClassBuilder = {
         ratings,
       };
     });
-    return { rows, likeness, count: rows.length, dropped, included, launchCount: launched.size };
+    return { rows, likeness, count: rows.length, dropped, included };
   },
 
   /** Build a complete, importable .mdc buffer from baseline players, applying

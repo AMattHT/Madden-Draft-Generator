@@ -90,7 +90,7 @@ function build() {
     if (Number(p.PID) > 0) withPortrait++;
   }
   cache = {
-    result: { rows, likeness: { asset, generic, withPortrait, customPortrait: 0 }, count: rows.length, dropped: [], included: [], launchCount: 0 },
+    result: { rows, likeness: { asset, generic, withPortrait, customPortrait: 0 }, count: rows.length, dropped: [], included: [] },
     ordered,
   };
   return cache;
