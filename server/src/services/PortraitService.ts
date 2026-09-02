@@ -101,6 +101,17 @@ function load(): boolean {
   }
   for (const list of genericByTone.values()) list.sort(); // stable order for deterministic picks
 
+  // Portraits that exist only in the pack (imported from the Madden 27 game data,
+  // scripts/import-m27-portraits.py) are served from the pack even when the
+  // Suite atlas is present.
+  if (packAvailable()) {
+    for (const f of fs.readdirSync(PACK_DIR)) {
+      if (!f.endsWith('.jpg')) continue;
+      const key = f.slice(0, -4);
+      if (!byPlpo.has(key)) byPlpo.set(key, { sheet: -1, x: 0, y: 0, width: 128, height: 128, category: 'player' });
+    }
+  }
+
   loadPidMap();
   return true;
 }

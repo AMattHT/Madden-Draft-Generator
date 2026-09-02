@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+**Madden 27 rookie portraits.** The 2026 rookies and every other player new to Madden 27 now show
+their real menu portrait instead of a generic face: 472 portraits exported from the game's own
+image library (via the MMC Frosty Editor's Portrait Manager) join the pack, and 529 portraits the
+Madden 26 atlas never carried are filled in for players already mapped. `scripts/import-m27-portraits.py`
+rebuilds the pack from a fresh export.
+
 **Equipment pictures ship with the app.** The Equipment Builder's thumbnails (one render per
 helmet, facemask, visor, glove, cleat, sleeve, pad and eye-black style) are now bundled, so the
 installed app shows them without a Madden Editor Suite install next to it. Names were checked
