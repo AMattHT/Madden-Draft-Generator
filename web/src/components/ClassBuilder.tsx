@@ -192,11 +192,11 @@ export function ClassBuilder({ initial, onClose, onGenerate }: {
                       <th className={th}>{sortBtn('pos', 'Pos')}</th>
                       <th className={th}>{sortBtn('year', 'Year')}</th>
                       <th className={th}>{sortBtn('pick', 'Drafted')}</th>
-                      <th className={th}>College</th>
+                      <th className={`${th} hidden xl:table-cell`}>College</th>
                       <th className={`${th} text-right`}>{sortBtn('wav', 'wAV')}</th>
                       <th className={`${th} text-right`}>{sortBtn('cal', 'Career')}</th>
-                      <th className={`${th} text-right`}>{sortBtn('pb', 'PB')}</th>
-                      <th className={th}></th>
+                      <th className={`${th} hidden text-right xl:table-cell`}>{sortBtn('pb', 'PB')}</th>
+                      <th className={`${th} sticky right-0 bg-surface-2`}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -204,20 +204,20 @@ export function ClassBuilder({ initial, onClose, onGenerate }: {
                       const inClass = picked.has(p.key);
                       return (
                         <tr key={p.key} className={`border-t border-border/50 ${inClass ? 'bg-success/5' : 'hover:bg-surface-2/50'}`}>
-                          <td className="px-3 py-1.5 text-neutral-100">
+                          <td className="whitespace-nowrap px-2 py-1.5 text-neutral-100">
                             {p.first} {p.last}
                             {p.hof && <span className="ml-1.5 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                           </td>
-                          <td className="px-3 py-1.5 text-neutral-300">{p.mpos}</td>
-                          <td className="px-3 py-1.5 tabular-nums text-neutral-300">
+                          <td className="px-2 py-1.5 text-neutral-300">{p.mpos}</td>
+                          <td className="px-2 py-1.5 tabular-nums text-neutral-300">
                             {p.year}{p.league !== 'NFL' ? <span className="ml-1 text-[10px] text-muted">{p.league}</span> : null}
                           </td>
-                          <td className="px-3 py-1.5 text-neutral-300">{p.round != null ? `Rd ${p.round}${p.pick != null ? `, #${p.pick}` : ''}` : 'Undrafted'}</td>
-                          <td className="px-3 py-1.5 text-neutral-400">{p.college}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-neutral-300">{p.wav ?? '–'}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-neutral-300">{p.cal}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-neutral-400">{p.pb || ''}</td>
-                          <td className="px-3 py-1.5 text-right">
+                          <td className="px-2 py-1.5 text-neutral-300">{p.round != null ? `Rd ${p.round}${p.pick != null ? `, #${p.pick}` : ''}` : 'Undrafted'}</td>
+                          <td className="hidden px-2 py-1.5 text-neutral-400 xl:table-cell">{p.college}</td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-neutral-300">{p.wav ?? '–'}</td>
+                          <td className="px-2 py-1.5 text-right tabular-nums text-neutral-300" title={p.pb ? `${p.pb} Pro Bowls · ${p.ap1} first-team All-Pro` : undefined}>{p.cal}</td>
+                          <td className="hidden px-2 py-1.5 text-right tabular-nums text-neutral-400 xl:table-cell">{p.pb || ''}</td>
+                          <td className={`sticky right-0 px-2 py-1.5 text-right ${inClass ? 'bg-surface-1' : 'bg-surface-1'}`}>
                             {inClass ? (
                               <button onClick={() => remove(p.key)} className="rounded-md border border-border px-2 py-0.5 text-xs text-neutral-300 hover:text-red-300">Remove</button>
                             ) : (
