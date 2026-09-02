@@ -6,7 +6,9 @@
 from where Madden 27 actually plays them are corrected where the game's label is unambiguous:
 edges the game moved inside to DT (Solomon Thomas, Cameron Heyward, DeForest Buckner, Leonard
 Williams), and corners the game lists at safety or safeties at corner (Harrison Smith and Jalen
-Ramsey at FS, Jordan Poyer at SS).
+Ramsey at FS, Jordan Poyer at SS). The 2025 and 2026 rookies follow the roster too (126 rows:
+Caleb Downs at SS, Travis Hunter at CB, side and guard/tackle assignments as the game has them)
+and 32 rookies picked up their portrait id.
 
 **Young-class dev traits.** A Rookie of the Year keeps X-Factor only while the career backs it:
 from the third season on he needs a top-10% pace, a first-team All-Pro or a second Pro Bowl
