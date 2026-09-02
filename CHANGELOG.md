@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+**Launch day ratings.** A third lens in the top bar rates every rookie at the overall and
+attributes EA shipped on that Madden edition's release day, baked from maddenratings.net's launch
+rosters (credit to that site): 23 classes, Madden 2002 through Madden 27, now including Madden
+11's binary spreadsheets converted with Excel (the 2010 class). Classes with no launch roster on
+the site (2021, 2024, 2025) fall back to Realistic, and the 2026 class uses EA's own ratings site.
+Dev traits are untouched by the lens.
+
 **The 2026 class is rated as Madden 27 ships it.** Every 2026 rookie on EA's ratings site (334
 players, Launch Ratings) gets EA's own overall, all 54 published attributes, position, archetype,
 height, weight and jersey number, and the development trait the game assigns (from
@@ -79,6 +86,13 @@ Pro Bowl at Star, and the remaining Superstar and Star slots scale with how many
 has played. 2023 now carries Stroud, Will Anderson, Smith-Njigba and LaPorta as X-Factors instead
 of five leaders of a two-season sample; 2026 has none until its rookies produce. Classes through
 2017 are unchanged. Awards come from Wikipedia's AP award tables, baked into the app.
+
+**Launch Day lens.** A third rating lens next to Realistic and Career. Where EA's launch roster
+for a class exists (22 classes: 2001–2009, 2011–2020, 2022, 2023 and 2026), every rookie it names
+gets the overall and attributes EA shipped on release day; everyone else, and every other year, is
+rated as Realistic. Launch data comes from maddenratings.net's launch-roster spreadsheets, baked
+into the app. Not covered: 2010 (Madden 11's files are the old binary Excel format), 2021 (only a
+final-season roster exists) and 2024–2025 (those editions are not on the site).
 
 **2026 draft class fixed.** Fifteen picks carried the wrong name (pick 13 read Will McFadden; it is
 Ty Simpson). All 257 picks now match the real draft.

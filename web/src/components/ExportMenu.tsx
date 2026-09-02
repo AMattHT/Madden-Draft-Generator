@@ -41,7 +41,7 @@ export function ExportMenu({
   edits: ClassEdits;
   gearEdits: GearEdits;
   editedCount: number;
-  mode: 'madden' | 'retro';
+  mode: 'madden' | 'retro' | 'launch';
   rows: PlayerRow[];
   draftOpts: ClassRequestOpts;
   gameVersion?: GameVersion;

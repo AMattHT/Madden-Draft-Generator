@@ -41,7 +41,9 @@ const EDITIONS: Array<{ draftClass: number; madden: string; source: Source }> = 
   { draftClass: 2007, madden: '08', source: { kind: 'teams', page: 'madden-nfl-08.html' } },
   { draftClass: 2008, madden: '09', source: { kind: 'teams', page: 'madden-nfl-09.html' } },
   { draftClass: 2009, madden: '10', source: { kind: 'teams', page: 'madden-nfl-10.html' } },
-  // 2010 (Madden 11): binary .xls only -- not readable here.
+  // 2010 (Madden 11): the site has binary .xls only; scripts/convert-xls.ps1 turns the
+  // downloaded copies into .xlsx (Excel automation) and the bake reads those.
+  { draftClass: 2010, madden: '11', source: { kind: 'teams', page: 'madden-nfl-11.html' } },
   { draftClass: 2011, madden: '12', source: { kind: 'teams', page: 'madden-nfl-12.html' } },
   { draftClass: 2012, madden: '13', source: { kind: 'full', file: 'madden_nfl_13_-_full_player_ratings.xlsx' } },
   { draftClass: 2013, madden: '25', source: { kind: 'full', file: 'madden_nfl_25_-_full_player_ratings.xlsx' } },
@@ -52,7 +54,9 @@ const EDITIONS: Array<{ draftClass: number; madden: string; source: Source }> = 
   { draftClass: 2018, madden: '19', source: { kind: 'full', file: 'madden_nfl_19_-_full_player_ratings_1.xlsx' } },
   { draftClass: 2019, madden: '20', source: { kind: 'full', file: 'madden_nfl_20_-_full_player_ratings.xlsx' } },
   { draftClass: 2020, madden: '21', source: { kind: 'full', file: 'madden_nfl_21_-_full_player_ratings.xlsx' } },
-  // 2021 (Madden 22): final-season roster only. 2024, 2025: editions not on the site.
+  // 2021 (Madden 22): the site has a final-season roster only. 2024 (the 2024 "Madden
+  // NFL 25"): no page -- the site's Madden NFL 25 page is the 2013 game, baked as 2013
+  // above. 2025 (Madden 26): no page.
   { draftClass: 2022, madden: '23', source: { kind: 'full', file: 'madden_nfl_23_player_ratings.xlsx' } },
   { draftClass: 2023, madden: '24', source: { kind: 'full', file: 'maddennfl24fullplayerratings.xlsx' } },
   { draftClass: 2026, madden: '27', source: { kind: 'full', file: 'madden_nfl_27_-_full_player_ratings__official_launch_roster_.xlsx' } },
@@ -62,9 +66,17 @@ const only = process.argv.find((a) => a.startsWith('--only='))?.split('=')[1];
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const DL_DIR = path.join(CACHE_DIR, 'launch-rosters');
 
-/** Download once into the cache; a re-bake reads from disk. */
+/** Download once into the cache; a re-bake reads from disk. A binary .xls is
+ *  read from its converted .xlsx sibling (scripts/convert-xls.ps1). */
 async function download(url: string): Promise<Uint8Array | null> {
   fs.mkdirSync(DL_DIR, { recursive: true });
+  if (/\.xls$/i.test(url)) {
+    const converted = path.join(DL_DIR, path.basename(url) + 'x');
+    if (fs.existsSync(converted) && fs.statSync(converted).size > 0) return new Uint8Array(fs.readFileSync(converted));
+    console.log(`
+    ${path.basename(url)}: .xls not converted yet (run scripts/convert-xls.ps1) — skipped`);
+    return null;
+  }
   const local = path.join(DL_DIR, path.basename(url));
   if (fs.existsSync(local) && fs.statSync(local).size > 0) return new Uint8Array(fs.readFileSync(local));
   const res = await fetch(url, { headers: { 'User-Agent': UA } });
@@ -82,7 +94,7 @@ async function teamFiles(page: string): Promise<string[]> {
   if (!res.ok) throw new Error(`${page}: HTTP ${res.status}`);
   const html = await res.text();
   // Weebly writes these links with single quotes, sometimes absolute.
-  const hrefs = [...html.matchAll(/href=['"]([^'"]*\/uploads\/1\/4\/0\/9\/14097292\/[^'"]+\.xlsx)['"]/gi)].map((m) => m[1]);
+  const hrefs = [...html.matchAll(/href=['"]([^'"]*\/uploads\/1\/4\/0\/9\/14097292\/[^'"]+\.xlsx?)['"]/gi)].map((m) => m[1]);
   const skip = /roster_update|canton|all-?25|all_time|pro_bowl|team_rice|team_sanders|full_player|legends|expansion/i;
   return [...new Set(hrefs)].filter((h) => !skip.test(h)).map((h) => (h.startsWith('http') ? h : SITE + h));
 }

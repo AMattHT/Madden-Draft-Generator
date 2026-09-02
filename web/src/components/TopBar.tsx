@@ -74,6 +74,16 @@ function ModeToggle({ mode, onSetMode }: { mode: GenMode; onSetMode: (m: GenMode
   return (
     <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
       <button
+        onClick={() => onSetMode('launch')}
+        aria-pressed={mode === 'launch'}
+        title="EA's launch-day rookie ratings wherever that Madden edition's launch roster exists (most classes since 2001); everyone else as Realistic"
+        className={`rounded-md px-3 py-1.5 transition-colors ${
+          mode === 'launch' ? 'bg-gold text-black shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+        }`}
+      >
+        Launch day ratings
+      </button>
+      <button
         onClick={() => onSetMode('madden')}
         aria-pressed={mode === 'madden'}
         title="Match a real Madden class — realistic rookies, capped at 84"

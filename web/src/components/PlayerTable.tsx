@@ -27,6 +27,8 @@ function wavTag(source: string): { label: string; cls: string; title: string } {
   if (source === 'actual') return { label: 'A', cls: 'text-info', title: 'actual career wAV' };
   if (source === 'preset')
     return { label: 'EA', cls: 'text-gold', title: "EA's official rookie rating — no career wAV yet" };
+  if (source === 'launch')
+    return { label: 'EA', cls: 'text-gold', title: "EA's launch-day rating for this rookie (overall and attributes as shipped)" };
   return { label: 'P', cls: 'text-muted', title: 'predicted from draft slot / era' };
 }
 
