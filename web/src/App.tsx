@@ -6,6 +6,7 @@ import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
 import { TopBar } from './components/TopBar';
+import { schedulePrewarm, cancelPrewarm } from './prewarm';
 import { UpdateBanner } from './components/UpdateBanner';
 import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
@@ -36,6 +37,10 @@ export type GenMode = 'madden' | 'retro';
 export default function App() {
   const [years, setYears] = useState<number[]>([]);
   const [cachedYears, setCachedYears] = useState<Set<number>>(new Set());
+  // The loader needs the year list to pick neighbours to pre-warm, but adding
+  // `years` to its dependency array would rebuild the callback; a ref keeps the
+  // deps as they are.
+  const yearsRef = useRef<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [data, setData] = useState<GeneratedClass | null>(null);
   const [edits, setEdits] = useState<ClassEdits>({});
@@ -126,6 +131,7 @@ export default function App() {
           live.gameVersion = useVersion;
           setData(live);
           setSource('live');
+          cancelPrewarm();
         } else {
           const cached = force ? undefined : await cache.get(year, league, cacheMode);
           if (req !== reqRef.current) return; // a newer selection superseded this one
@@ -143,6 +149,17 @@ export default function App() {
             setSource('live');
             setCachedYears((prev) => new Set(prev).add(year));
           }
+          // This class is on screen now, so the next second is free: build the
+          // neighbouring years so stepping through with the arrows is instant
+          // instead of paying the first-build cost each time.
+          schedulePrewarm({
+            year,
+            years: yearsRef.current,
+            league,
+            mode: cacheMode,
+            gameVersion: useVersion,
+            onCached: (y) => setCachedYears((prev) => new Set(prev).add(y)),
+          });
         }
         // Edits are keyed by the class actually shown (Greats classes use a pseudo
         // year / decade label), so every later save must use this same key.
@@ -415,6 +432,8 @@ export default function App() {
       else setRange({ from: lo, to: hi });
     });
   }, [years]);
+
+  useEffect(() => { yearsRef.current = years; }, [years]);
 
   useEffect(() => {
     cache.cachedYears().then(setCachedYears);
