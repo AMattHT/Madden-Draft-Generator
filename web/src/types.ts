@@ -20,6 +20,10 @@ export interface PlayerRow {
   faceSource?: string | null; // real-head provenance: bundle | roster | legend-portrait | preset | lookup…
   skinTone?: number; // 1-8, for the face picker's per-tone pool
   genericHead?: string | null; // current generic head code (gen_*), null if a real asset
+  /** Where the skin tone came from: override | curated | era | portrait | headshot | wiki | csv | prior. */
+  toneSource?: string | null;
+  /** The user recorded a likeness fix for this player (applies in every class). */
+  likenessFixed?: boolean;
   college: string;
   age: number;
   heightInches: number;
@@ -120,6 +124,29 @@ export interface GeneratedClass {
 export type GameVersion = 'm26' | 'm27';
 
 /** A saved hand-picked class (player keys are stable across data refreshes). */
+/** A likeness fix recorded against a real player (server-side, every class). */
+export interface LikenessOverride {
+  key: string;
+  firstName: string;
+  lastName: string;
+  draftYear: number;
+  skinTone?: number;
+  faceAsset?: string | null;
+  bodyType?: string;
+  note?: string;
+  updatedAt: number;
+}
+
+/** What a photo says about a player's skin tone. */
+export interface ToneFromPhoto {
+  tone: number; // 1-7, weighed against the position/era prior
+  rawTone: number | null; // the photo's own reading
+  ita: number | null;
+  greyL: number | null;
+  greyscale: boolean;
+  heads: string[]; // this tone's generic heads that look most like the photo
+}
+
 /** One of today's 32 franchises (a "By team" all-time draft). */
 export interface TeamFranchise {
   key: string; // nflverse abbreviation: DAL, GNB, KAN, ...

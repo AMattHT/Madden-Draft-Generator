@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { RealPlayerGearService } from '../services/RealPlayerGearService';
 import { PhotoLookService } from '../services/PhotoLookService';
 import { EraGearService } from '../services/EraGearService';
+import { readPhotoInput, PhotoInputError } from '../util/photoInput';
 
 const r = Router();
 
@@ -35,36 +36,13 @@ r.post('/gear/from-photo', async (req, res) => {
   if (!Number.isFinite(year) || !Number.isFinite(positionId)) {
     return res.status(400).json({ error: 'year and positionId required' });
   }
-  let buf: Buffer | null = null;
-  const b64 = String(req.body?.imageBase64 || '');
-  const url = String(req.body?.imageUrl || '');
-  if (b64) {
-    const raw = b64.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, '');
-    try { buf = Buffer.from(raw, 'base64'); } catch { buf = null; }
-  } else if (url) {
-    try {
-      const target = new URL(url);
-      if (target.protocol !== 'http:' && target.protocol !== 'https:') {
-        return res.status(400).json({ error: 'URL must be http(s)' });
-      }
-      const upstream = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) MaddenDraftClassGenerator/0.1',
-          Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-        },
-        redirect: 'follow',
-      });
-      if (!upstream.ok) return res.status(502).json({ error: `image URL returned HTTP ${upstream.status}` });
-      const ct = (upstream.headers.get('content-type') || '').toLowerCase();
-      if (ct.includes('text/html')) {
-        return res.status(400).json({ error: 'that URL is a web page, not an image — right-click the photo and copy image address' });
-      }
-      buf = Buffer.from(await upstream.arrayBuffer());
-    } catch {
-      buf = null;
-    }
+  let buf: Buffer;
+  try {
+    buf = await readPhotoInput(req.body);
+  } catch (e) {
+    const pe = e as PhotoInputError;
+    return res.status(pe.status || 400).json({ error: pe.message });
   }
-  if (!buf || buf.length < 800) return res.status(400).json({ error: 'need a photo (upload or url)' });
   const observed = await PhotoLookService.observeBytes(buf);
   const slots = observed.onField
     ? EraGearService.slotsFromObserved(year, positionId, observed, gameVersion)

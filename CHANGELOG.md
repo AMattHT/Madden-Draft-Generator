@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+**Likeness fixes that stick.** Open a player's Appearance builder, pick the right skin tone or
+face, and hit "Fix everywhere": the fix is recorded against the player himself, so his year
+class, All-Time, By team and Studio classes all use it, and it survives updates. Undo it any
+time. The builder now shows his real photo beside the faces, and the board has an
+"Unverified faces" filter that lists only the players whose tone is a guess, each next to his
+photo, so a class can be checked in a minute.
+
+**Tone from a photo.** Paste an image address or upload a picture and the builder reads the
+skin tone off it (and suggests the closest generic heads).
+
 ## 1.2.1
 
 ### Features

@@ -38,6 +38,7 @@ export function ClassView({
   edits,
   gearEdits,
   onEdit,
+  onClearEdits,
   onGearEdit,
   onResetPlayer,
   editTools,
@@ -60,6 +61,7 @@ export function ClassView({
   edits: ClassEdits;
   gearEdits: GearEdits;
   onEdit: (id: number, field: string, value: number | string) => void;
+  onClearEdits?: (id: number, fields: string[]) => void;
   onGearEdit: (id: number, slot: string, asset: string) => void;
   onResetPlayer: (id: number) => void;
   editTools?: EditTools;
@@ -78,6 +80,10 @@ export function ClassView({
   // Blind-scouting mode, OFF by default: a class opens with overall, dev trait,
   // wAV and attributes masked, and you tick Spoilers to reveal them.
   const [spoilers, setSpoilers] = useState(false);
+  // Likeness review: only the generic faces whose tone is a guess (no photo
+  // evidence) and that the user has not fixed yet.
+  const [unverified, setUnverified] = useState(false);
+  const isUnverified = (r: PlayerRow) => r.face !== 'asset' && (r.toneSource === 'prior' || r.toneSource === 'csv') && !r.likenessFixed;
   const [showOpts, setShowOpts] = useState(false);
   const allTime = data.league === 'all-time';
   const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
@@ -187,6 +193,7 @@ export function ClassView({
       const q = search.toLowerCase();
       r = r.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
     }
+    if (unverified) r = r.filter(isUnverified);
     const sorted = [...r];
     const desc = sort.startsWith('-');
     const col = desc ? sort.slice(1) : sort;
@@ -208,7 +215,7 @@ export function ClassView({
       return cmp * dir || a.pick - b.pick;
     });
     return sorted;
-  }, [effRows, pos, search, sort]);
+  }, [effRows, pos, search, sort, unverified]);
 
   const editedCount = Object.keys(edits).length;
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
@@ -342,9 +349,12 @@ export function ClassView({
             total={data.count}
             spoilers={spoilers}
             setSpoilers={setSpoilers}
+            unverified={unverified}
+            setUnverified={setUnverified}
+            unverifiedCount={effRows.filter(isUnverified).length}
           />
           <div className="min-h-0 flex-1 overflow-auto">
-            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} />
+            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} showReference={unverified} />
           </div>
         </section>
       </div>
@@ -359,10 +369,12 @@ export function ClassView({
           gameVersion={data.gameVersion ?? "m26"}
           spoilers={spoilers}
           onEdit={(f, v) => onEdit(selectedRow.id, f, v)}
+          onClearEdits={onClearEdits ? (fields) => onClearEdits(selectedRow.id, fields) : undefined}
           onGearEdit={(slot, asset) => onGearEdit(selectedRow.id, slot, asset)}
           onReset={() => onResetPlayer(selectedRow.id)}
           onClose={() => setSelectedId(null)}
           onNavigate={navigatePlayer}
+          onLikenessChanged={onRefresh}
           canPrev={selectedIndex > 0}
           canNext={selectedIndex >= 0 && selectedIndex < rows.length - 1}
         />

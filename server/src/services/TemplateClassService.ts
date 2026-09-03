@@ -71,6 +71,8 @@ function build() {
       faceSource: null,
       skinTone: tone,
       genericHead: gh,
+      toneSource: null,
+      likenessFixed: false,
       college: LookupService.idToName('college', Number(p.college)) || '',
       age: Number(p.age) || 0,
       heightInches: Number(p.heightInches) || 0,

@@ -93,6 +93,12 @@ export function MetaStrip({
     if (r.overall > ovrMax) ovrMax = r.overall;
   }
   const avg = Math.round(ovrSum / (data.rows.length || 1));
+  // A face is "verified" when it is a real scan, when its tone rests on evidence
+  // (portrait, headshot, Wikipedia photo, curated record) or when the user fixed it.
+  // Generated fillers have no identity to verify, so they sit outside the count.
+  const realFaces = data.rows.filter((r) => r.toneSource != null || r.face === 'asset');
+  const verified = realFaces.filter((r) => r.face === 'asset' || r.likenessFixed || (r.toneSource !== 'prior' && r.toneSource !== 'csv')).length;
+  const fixedCount = data.rows.filter((r) => r.likenessFixed).length;
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border bg-surface-1 px-3 py-2">
@@ -121,6 +127,13 @@ export function MetaStrip({
       <span className="h-4 w-px bg-border" />
       <span className="text-[11px] text-neutral-400" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`}>
         <b className="tabular-nums text-neutral-200">{data.likeness.asset}</b> real faces
+      </span>
+      <span className="h-4 w-px bg-border" />
+      <span
+        className="text-[11px] text-neutral-400"
+        title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, a curated record, or your own fix)${fixedCount ? ` · ${fixedCount} fixed by you` : ''}. Tick "Unverified faces" in the toolbar to review the rest.`}
+      >
+        <b className="tabular-nums text-neutral-200">{verified}</b>/{data.rows.length} faces verified
       </span>
       {data.dropped && data.dropped.length > 0 && (
         <>

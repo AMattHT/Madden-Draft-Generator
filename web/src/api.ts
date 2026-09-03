@@ -1,4 +1,4 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
@@ -92,6 +92,18 @@ async function jget<T>(url: string): Promise<T> {
   }
   return res.json();
 }
+
+async function jsend<T>(method: 'POST' | 'PUT' | 'DELETE', url: string, body: unknown): Promise<T> {
+  const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const b = await res.json().catch(() => ({}));
+    throw new Error(b.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/** Identity of a real player for a likeness fix. */
+export interface LikenessWho { firstName: string; lastName: string; draftYear: number }
 
 export interface ArchetypeOption {
   id: number;
@@ -361,6 +373,15 @@ export const api = {
   /** The whole player pool for the class builder; fetched once per session. */
   /** The 32 franchises a "By team" class can be built for. */
   franchises: async (): Promise<TeamFranchise[]> => (await jget<{ franchises: TeamFranchise[] }>('/api/draft/franchises')).franchises,
+
+  /** Likeness fixes: recorded against the player, applied in every class. */
+  likenessOverrides: () => jget<{ overrides: LikenessOverride[]; stamp: string }>('/api/likeness/overrides'),
+  setLikenessOverride: (body: LikenessWho & { skinTone?: number; faceAsset?: string | null; bodyType?: string; note?: string }) =>
+    jsend<{ override: LikenessOverride; stamp: string }>('PUT', '/api/likeness/overrides', body),
+  removeLikenessOverride: (body: LikenessWho) => jsend<{ removed: boolean; stamp: string }>('DELETE', '/api/likeness/overrides', body),
+  /** Read a skin tone (and the closest generic heads) off a photo. */
+  toneFromPhoto: (body: { imageUrl?: string; imageBase64?: string; position?: string; draftYear?: number; gameVersion?: GameVersion }) =>
+    jsend<ToneFromPhoto>('POST', '/api/likeness/tone-from-photo', body),
 
   async catalog(): Promise<CatalogPlayer[]> {
     if (catalogCache) return catalogCache;

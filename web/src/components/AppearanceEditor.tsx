@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { FaceScan } from '../types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FaceScan, ToneFromPhoto } from '../types';
 import { Icon, ICONS } from './ui';
 export type { FaceScan };
 
@@ -30,10 +30,27 @@ function FaceThumb({ src, className = 'h-16 w-16' }: { src?: string; className?:
   );
 }
 
+/** The player's real photo, walking a source chain until one loads. */
+function ReferencePhoto({ chain }: { chain: string[] }) {
+  const [i, setI] = useState(0);
+  useEffect(() => setI(0), [chain.join('|')]);
+  const src = chain[i];
+  if (!src) {
+    return (
+      <div className="grid h-28 w-full place-items-center rounded-md border border-dashed border-border text-center text-[10px] leading-tight text-muted">
+        No photo on file
+      </div>
+    );
+  }
+  return <img src={src} alt="" onError={() => setI((n) => n + 1)} className="h-28 w-full rounded-md object-cover object-top" />;
+}
+
 /**
  * Appearance builder — same chrome as Equipment Builder.
- * Left: Generic faces (by skin tone) / Face scans (M26 or M27 catalog) / Body.
- * Right: searchable thumbnail grid. Picks write into the same edit patch as export.
+ * Left: the player's reference photo, then Generic faces (by skin tone) / Face
+ * scans (M26 or M27 catalog) / Body. Right: searchable thumbnail grid. Picks
+ * write into the same edit patch as export; "Fix everywhere" also records them
+ * against the player so every class he appears in gets the same look.
  */
 export function AppearanceEditor({
   playerName,
@@ -48,6 +65,12 @@ export function AppearanceEditor({
   generatedTone,
   generatedBody,
   isRealFace,
+  referencePhotos = [],
+  canFix = false,
+  fixed = false,
+  onFixEverywhere,
+  onUndoFix,
+  onToneFromPhoto,
   onEdit,
   onClose,
 }: {
@@ -63,6 +86,15 @@ export function AppearanceEditor({
   generatedTone: number;
   generatedBody: string;
   isRealFace: boolean;
+  /** Real photos of the player, best first (displayPortraitChain). */
+  referencePhotos?: string[];
+  /** Real players only: the fix can be pinned to the man, not just this class. */
+  canFix?: boolean;
+  /** A fix is already recorded for him. */
+  fixed?: boolean;
+  onFixEverywhere?: () => Promise<void>;
+  onUndoFix?: () => Promise<void>;
+  onToneFromPhoto?: (input: { imageUrl?: string; imageBase64?: string }) => Promise<ToneFromPhoto>;
   onEdit: (field: string, value: string | number) => void;
   onClose: () => void;
 }) {
@@ -71,6 +103,13 @@ export function AppearanceEditor({
   );
   const [tone, setTone] = useState(currentTone || 4);
   const [query, setQuery] = useState('');
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoErr, setPhotoErr] = useState<string | null>(null);
+  const [suggest, setSuggest] = useState<ToneFromPhoto | null>(null);
+  const [fixState, setFixState] = useState<'idle' | 'busy' | 'saved' | 'undone' | 'error'>('idle');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } };
@@ -103,12 +142,52 @@ export function AppearanceEditor({
     onEdit('faceAsset', asset);
     onEdit('genericHeadName', '');
   };
+  const pickTone = (t: number) => {
+    // A tone on its own: the generator keeps choosing the head, from this tone's pool.
+    onEdit('skinTone', t);
+    setTone(t);
+  };
   const resetGenerated = () => {
     onEdit('faceAsset', '');
     if (generatedHead && /^gen_/i.test(generatedHead)) onEdit('genericHeadName', generatedHead);
     onEdit('skinTone', generatedTone);
     onEdit('bodyType', generatedBody);
     setTone(generatedTone);
+  };
+
+  const readPhoto = async (input: { imageUrl?: string; imageBase64?: string }) => {
+    if (!onToneFromPhoto) return;
+    setPhotoBusy(true);
+    setPhotoErr(null);
+    setSuggest(null);
+    try {
+      const r = await onToneFromPhoto(input);
+      setSuggest(r);
+      setTone(r.tone);
+      setTab('generic');
+    } catch (e) {
+      setPhotoErr((e as Error).message);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+  const onFile = (f: File | undefined) => {
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => readPhoto({ imageBase64: String(reader.result) });
+    reader.readAsDataURL(f);
+  };
+
+  const runFix = async (fn: (() => Promise<void>) | undefined, done: 'saved' | 'undone') => {
+    if (!fn) return;
+    setFixState('busy');
+    try {
+      await fn();
+      setFixState(done);
+      setTimeout(() => setFixState('idle'), 2000);
+    } catch {
+      setFixState('error');
+    }
   };
 
   const usingScan = !!(currentAsset && !/^gen_/i.test(currentAsset));
@@ -122,7 +201,7 @@ export function AppearanceEditor({
         aria-label="Appearance editor"
         tabIndex={-1}
         ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
-        className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
+        className="flex h-[80vh] w-[940px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
@@ -133,6 +212,11 @@ export function AppearanceEditor({
               <span className="ml-1 rounded bg-gold/20 px-1 text-[9px] font-semibold text-gold">
                 {gameVersion === 'm27' ? 'M27' : 'M26'}
               </span>
+              {fixed && (
+                <span className="ml-1.5 rounded bg-success/20 px-1 text-[9px] font-semibold text-success-light" title="A likeness fix is recorded for this player and applies in every class">
+                  FIXED EVERYWHERE
+                </span>
+              )}
             </div>
           </div>
           <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
@@ -141,7 +225,11 @@ export function AppearanceEditor({
         </div>
 
         <div className="flex min-h-0 flex-1">
-          <div className="w-48 shrink-0 overflow-auto border-r border-border p-2">
+          <div className="w-52 shrink-0 overflow-auto border-r border-border p-2">
+            <div className="mb-2 border-b border-border pb-2">
+              <div className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">Reference photo</div>
+              <ReferencePhoto chain={referencePhotos} />
+            </div>
             {(
               [
                 ['generic', 'Generic faces'],
@@ -161,7 +249,18 @@ export function AppearanceEditor({
             ))}
             {tab === 'generic' && (
               <div className="mt-2 space-y-0.5 border-t border-border pt-2">
-                <div className="px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">Skin tone</div>
+                <div className="flex items-center justify-between px-2.5 pb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Skin tone</span>
+                  {onToneFromPhoto && (
+                    <button
+                      onClick={() => setPhotoOpen((v) => !v)}
+                      className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${photoOpen ? 'bg-primary/20 text-primary-light' : 'text-primary hover:bg-primary/10'}`}
+                      title="Read the skin tone off a photo"
+                    >
+                      From photo…
+                    </button>
+                  )}
+                </div>
                 {TONES.map((t) => {
                   const n = (heads[String(t)] ?? []).length;
                   if (!n && t === 8) return null;
@@ -173,11 +272,20 @@ export function AppearanceEditor({
                         tone === t ? 'bg-surface-3 text-neutral-100' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
                       }`}
                     >
-                      <span>Tone {t}</span>
+                      <span>Tone {t}{currentTone === t && <span className="ml-1 text-[9px] text-muted">current</span>}{suggest?.tone === t && <span className="ml-1 text-[9px] text-success-light">photo</span>}</span>
                       <span className="tabular-nums text-[10px] text-muted">{n}</span>
                     </button>
                   );
                 })}
+                {tone !== currentTone && (
+                  <button
+                    onClick={() => pickTone(tone)}
+                    className="mt-1 w-full rounded-md border border-primary/50 bg-primary/10 px-2 py-1.5 text-[11px] font-medium text-primary-light hover:bg-primary/20"
+                    title="Keep the generated head style but use this tone's pool"
+                  >
+                    Use tone {tone}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -196,6 +304,68 @@ export function AppearanceEditor({
                     className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                   />
                 </div>
+              </div>
+            )}
+
+            {tab === 'generic' && photoOpen && onToneFromPhoto && (
+              <div className="border-b border-border bg-surface-2/40 px-3 py-2.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    value={photoUrl}
+                    onChange={(e) => setPhotoUrl(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && photoUrl.trim()) readPhoto({ imageUrl: photoUrl.trim() }); }}
+                    placeholder="Paste an image address (right-click a photo → Copy image address)"
+                    className="min-w-[240px] flex-1 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                  />
+                  <button
+                    onClick={() => photoUrl.trim() && readPhoto({ imageUrl: photoUrl.trim() })}
+                    disabled={photoBusy || !photoUrl.trim()}
+                    className="rounded-md bg-primary px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark disabled:opacity-50"
+                  >
+                    {photoBusy ? 'Reading…' : 'Read tone'}
+                  </button>
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    disabled={photoBusy}
+                    className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-2 disabled:opacity-50"
+                  >
+                    Upload…
+                  </button>
+                  <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => onFile(e.target.files?.[0])} />
+                  {referencePhotos[0] && (
+                    <button
+                      onClick={() => readPhoto({ imageUrl: referencePhotos[0].startsWith('/api/image?url=') ? decodeURIComponent(referencePhotos[0].slice('/api/image?url='.length)) : new URL(referencePhotos[0], window.location.origin).toString() })}
+                      disabled={photoBusy}
+                      className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-2 disabled:opacity-50"
+                      title="Use the reference photo on the left"
+                    >
+                      Use reference
+                    </button>
+                  )}
+                </div>
+                {photoErr && <div className="mt-1.5 text-[11px] text-red-300">{photoErr}</div>}
+                {suggest && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-neutral-300">
+                    <span>
+                      Photo reads <b className="text-neutral-100">tone {suggest.tone}</b>
+                      {suggest.rawTone != null && suggest.rawTone !== suggest.tone && <span className="text-muted"> (raw {suggest.rawTone}, weighed against the era)</span>}
+                      {suggest.greyscale && <span className="text-muted"> · black-and-white photo, less certain</span>}
+                    </span>
+                    <button onClick={() => pickTone(suggest.tone)} className="rounded-md border border-success/50 bg-success/10 px-2 py-1 text-[11px] font-medium text-success-light hover:bg-success/20">
+                      Use tone {suggest.tone}
+                    </button>
+                    {suggest.heads.length > 0 && (
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-muted">closest heads:</span>
+                        {suggest.heads.map((code) => (
+                          <button key={code} onClick={() => pickGeneric(code)} title={code} className={`overflow-hidden rounded-md border ${currentHead === code ? 'border-primary' : 'border-border hover:border-border-strong'}`}>
+                            <FaceThumb src={`/api/portrait/generic-head/${encodeURIComponent(code)}`} className="h-10 w-10" />
+                          </button>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -275,9 +445,9 @@ export function AppearanceEditor({
             ) : currentHead ? (
               <>Head <span className="text-neutral-200">{currentHead}</span> · tone {currentTone}</>
             ) : isRealFace ? (
-              <span>Real face asset (generated)</span>
+              <span>Real face asset (generated) · tone {currentTone}</span>
             ) : (
-              <span>Generated default</span>
+              <span>Generated default · tone {currentTone}</span>
             )}
             {' · '}
             Body <span className="text-neutral-200">{currentBody}</span>
@@ -288,6 +458,28 @@ export function AppearanceEditor({
           >
             Reset to generated
           </button>
+          {canFix && fixed && onUndoFix && (
+            <button
+              onClick={() => runFix(onUndoFix, 'undone')}
+              disabled={fixState === 'busy'}
+              className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 hover:bg-surface-2 disabled:opacity-50"
+              title="Forget the recorded fix; the generator decides again"
+            >
+              {fixState === 'undone' ? 'Fix removed' : 'Undo fix'}
+            </button>
+          )}
+          {canFix && onFixEverywhere && (
+            <button
+              onClick={() => runFix(onFixEverywhere, 'saved')}
+              disabled={fixState === 'busy'}
+              className={`shrink-0 rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors disabled:opacity-50 ${
+                fixState === 'saved' ? 'bg-success/20 text-success-light' : fixState === 'error' ? 'bg-danger/20 text-red-200' : 'bg-success/15 text-success-light ring-1 ring-success/40 hover:bg-success/25'
+              }`}
+              title="Record this tone, face and body for the player himself, so every class he appears in uses it (this class, All-Time, By team, Studio)"
+            >
+              {fixState === 'busy' ? 'Saving…' : fixState === 'saved' ? 'Fixed everywhere ✓' : fixState === 'error' ? 'Could not save' : 'Fix everywhere'}
+            </button>
+          )}
           <button onClick={onClose} className="shrink-0 rounded-md bg-surface-2 px-3 py-1.5 text-[11px] font-medium text-neutral-200 hover:bg-surface-3">
             Done
           </button>

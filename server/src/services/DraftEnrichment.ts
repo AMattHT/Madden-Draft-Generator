@@ -14,6 +14,8 @@ import { RetroItaService } from './RetroItaService';
 import { CuratedSkinToneService } from './CuratedSkinToneService';
 import { PhotoLookService } from './PhotoLookService';
 import { TeamDraftService } from './TeamDraftService';
+import { LikenessOverrideService } from './LikenessOverrideService';
+import type { ToneSource } from '../types/player';
 import { BaselinePlayer } from '../types/player';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
@@ -85,22 +87,33 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // 1948 because Marion Motley signed in 1946 and the lookup carries him as a
   // 1946 draftee.
   const segregationEra = p.draftYear <= 1945 ? 2 : null;
-  const race = curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  // The user's own fix beats everything: he looked at the man and said so.
+  const fix = p.source === 'custom' || p.source === 'generated' ? null : LikenessOverrideService.get(p.firstName, p.lastName, p.draftYear);
+  const fixTone = fix?.skinTone ?? null;
+  const race = fixTone ?? curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  const toneSource: ToneSource = fixTone != null ? 'override'
+    : curatedTone != null ? 'curated'
+    : segregationEra != null ? 'era'
+    : portrait?.ita != null || portrait?.greyL != null ? 'portrait'
+    : retroIta != null ? 'headshot'
+    : wiki != null ? 'wiki'
+    : trusted != null ? 'csv'
+    : 'prior';
 
   if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
     // Cache only: a class must never wait on Wikipedia. An unseen name is
     // queued and answered in the background, so it is ready next time.
     const { url: photo, unknown } = PhotoLookService.cachedPhoto(p);
     if (unknown) PhotoLookService.warmLater({ name: [p.firstName, p.lastName] });
-    if (!photo) return p;
-    const out: BaselinePlayer = { ...p };
+    if (!photo) return { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
+    const out: BaselinePlayer = { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
     if (!out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) out.wikiImageUrl = photo;
     const gear = PhotoLookService.cachedGear(photo);
     if (gear) out.observedGear = gear;
     else PhotoLookService.warmLater({ url: photo });
     return out;
   }
-  const out: BaselinePlayer = { ...p };
+  const out: BaselinePlayer = { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
   if (label) out.position = label;
   // A 290+ lb end is an interior lineman in Madden terms (PositionMapper sends a
   // heavy DE to DT) — unless he rushed like an edge. J.J. Watt (290, 20 sacks a

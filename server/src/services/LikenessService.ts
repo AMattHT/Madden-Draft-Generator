@@ -478,6 +478,22 @@ export const LikenessService = {
   /** Assign a face for a player. `index` keeps generic picks reproducible.
    *  A real head only when the target game can render it (see realFace); an asset
    *  the game lacks would show as the empty NFL-shield silhouette. */
+  /** The generic heads of `tone` that look most like measured face features
+   *  (hair vs skin, hair coverage, facial hair), nearest first, at most `k`.
+   *  Empty when the game's heads have no measured features. */
+  rankHeads(features: FaceFeatures, tone: number, gameVersion: 'm26' | 'm27' = 'm26', k = 6): string[] {
+    load();
+    const pool = poolsFor(gameVersion).get(tone) ?? [];
+    const heads = headFeatures()[gameVersion];
+    if (!heads) return pool.slice(0, k);
+    return pool
+      .filter((c) => heads[c])
+      .map((c) => ({ c, d: faceDistance(features, heads[c]) }))
+      .sort((a, b) => a.d - b.d)
+      .slice(0, k)
+      .map((x) => x.c);
+  },
+
   assign(player: BaselinePlayer, index: number, gameVersion: 'm26' | 'm27' = 'm26'): Likeness {
     load();
     const tone = raceToSkinTone(player.race);

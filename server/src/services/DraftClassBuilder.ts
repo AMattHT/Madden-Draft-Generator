@@ -24,7 +24,7 @@ import { PortraitSlotService } from './PortraitSlotService';
 import { LaunchRatingsService, LaunchEntry } from './LaunchRatingsService';
 import { AwardsService } from './AwardsService';
 import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
-import { BaselinePlayer, CombineMeasurements } from '../types/player';
+import { BaselinePlayer, CombineMeasurements, ToneSource } from '../types/player';
 import { TeamInfo } from './TeamService';
 import { PortraitService } from './PortraitService';
 import { GEAR_SLOT_TYPES, slotOfElement, waistConflict } from './GearOptionsService';
@@ -395,7 +395,20 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // from the game's bundle tables, roster cranium heads, recent lookup ids), else a
   // generic. An asset the game lacks would render as the empty NFL-shield silhouette.
   const real = LikenessService.realFace(player, gameVersion);
-  const like = LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion);
+  let like = LikenessService.assign(player, variant ? index + variant * 1000 : index, gameVersion);
+  // The user's likeness fix: a pinned generic head (its tone comes with it) or a
+  // scan asset, applied the way a per-class face edit is. A class edit still
+  // overrides this for its own class (applyEdits runs later).
+  const fixAsset = player.likenessFix?.faceAsset;
+  if (fixAsset) {
+    const m = /^gen_(\d+)/i.exec(fixAsset);
+    like = m
+      ? { peps: fixAsset, kind: 'generic', skinTone: Number(m[1]) }
+      : { peps: fixAsset, kind: 'asset', skinTone: like.skinTone };
+  }
+  if (player.likenessFix?.bodyType && (BODY_TYPES as readonly string[]).includes(player.likenessFix.bodyType)) {
+    prospect.bodyType = player.likenessFix.bodyType as BodyType;
+  }
   prospect.PEPS = like.peps;
   // Menu portrait. M26: custom-portrait slot, else the generic head's PID, else the
   // real head's portrait id. M27: the real head's own portrait id (legends keep the
@@ -489,6 +502,10 @@ export interface PreviewRow {
   faceSource: string | null;
   skinTone: number; // 1-8, for the face picker's per-tone pool
   genericHead: string | null; // current generic head code (gen_*), null if a real asset
+  /** Where the skin tone came from; 'prior' and 'csv' are guesses worth a look. */
+  toneSource: ToneSource | null;
+  /** The user has pinned this player's likeness (LikenessOverrideService). */
+  likenessFixed: boolean;
   college: string;
   age: number;
   heightInches: number;
@@ -941,6 +958,8 @@ export const DraftClassBuilder = {
         faceSource: face === 'asset' ? (real?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
         genericHead: peps.startsWith('gen_') ? String(p.PEPS) : null,
+        toneSource: base.toneSource ?? null,
+        likenessFixed: !!base.likenessFixed,
         college: base.college,
         age: Number(p.age) || 0,
         heightInches: Number(p.heightInches) || 0,

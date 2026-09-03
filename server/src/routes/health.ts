@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { LikenessOverrideService } from '../services/LikenessOverrideService';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -33,7 +34,9 @@ function generatorFingerprint(): string {
 }
 
 r.get('/health', (_req, res) => {
-  res.json({ ok: true, ts: Date.now(), generator: generatorFingerprint() });
+  // The user's likeness fixes are part of what a class looks like: their stamp
+  // rides on the fingerprint so every cached class goes stale after a fix.
+  res.json({ ok: true, ts: Date.now(), generator: `${generatorFingerprint()}-${LikenessOverrideService.stamp()}` });
 });
 
 /**

@@ -54,7 +54,17 @@ export interface BaselinePlayer {
 
   /** Stable identity across data refreshes: draftYear|league|first|last|pick (see playerKey). */
   key?: string;
+
+  /** Where the skin tone came from (the UI flags 'prior'/'csv' as unverified). */
+  toneSource?: ToneSource;
+  /** The user's own likeness fix for this player (LikenessOverrideService): face and body. */
+  likenessFix?: { faceAsset?: string | null; bodyType?: string } | null;
+  /** True when a likeness fix exists for him (tone, face or body). */
+  likenessFixed?: boolean;
 }
+
+/** How a player's skin tone was decided, best evidence first. */
+export type ToneSource = 'override' | 'curated' | 'era' | 'portrait' | 'headshot' | 'wiki' | 'csv' | 'prior';
 
 /** How a linebacker-labeled player was placed in Madden's front seven. */
 export interface FrontSevenInfo {

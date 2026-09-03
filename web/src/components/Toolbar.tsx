@@ -12,6 +12,9 @@ export function Toolbar({
   total,
   spoilers,
   setSpoilers,
+  unverified = false,
+  setUnverified,
+  unverifiedCount = 0,
 }: {
   search: string;
   setSearch: (s: string) => void;
@@ -24,6 +27,10 @@ export function Toolbar({
   total: number;
   spoilers: boolean;
   setSpoilers: (b: boolean) => void;
+  /** Likeness review: show only generic faces whose skin tone is an unverified guess. */
+  unverified?: boolean;
+  setUnverified?: (b: boolean) => void;
+  unverifiedCount?: number;
 }) {
   const select =
     'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
@@ -86,6 +93,21 @@ export function Toolbar({
         />
         Spoilers
       </label>
+
+      {setUnverified && (
+        <label
+          className={`inline-flex cursor-pointer select-none items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm ${unverified ? 'border-gold/50 bg-gold/10 text-gold' : 'border-border bg-surface-0 text-neutral-300'}`}
+          title="Generic faces whose skin tone has no photo behind it (a position/era guess) and no fix from you yet. Each row shows his real photo so you can check it at a glance."
+        >
+          <input
+            type="checkbox"
+            checked={unverified}
+            onChange={(e) => setUnverified(e.target.checked)}
+            className="h-3.5 w-3.5 accent-gold"
+          />
+          Unverified faces <span className="tabular-nums text-xs text-muted">{unverifiedCount}</span>
+        </label>
+      )}
 
       <span className="ml-auto text-xs tabular-nums text-muted">
         <span className="font-semibold text-neutral-300">{shown}</span> of {total}

@@ -1,4 +1,4 @@
-import { displayPortrait } from '../api';
+import { displayPortrait, imageUrl } from '../api';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PlayerRow } from '../types';
 import { RatingChip, DevBadge, TeamLogo, Portrait } from './ui';
@@ -91,6 +91,7 @@ export function PlayerTable({
   sort,
   onSort,
   spoilers = true,
+  showReference = false,
 }: {
   rows: Row[];
   selectedId: number | null;
@@ -100,6 +101,8 @@ export function PlayerTable({
   onSort?: (s: string) => void;
   /** false hides overall, dev trait, wAV and attributes (blind scouting). */
   spoilers?: boolean;
+  /** Likeness review: show each player's real photo beside his generated face. */
+  showReference?: boolean;
 }) {
   const maxWav = useMemo(() => Math.max(1, ...rows.map((r) => r.wav ?? 0)), [rows]);
 
@@ -195,9 +198,16 @@ export function PlayerTable({
               </td>
               <td className="px-3 py-1.5 font-medium text-neutral-100">
                 <span className="inline-flex items-center gap-2.5">
-                  <Portrait src={displayPortrait(r)} fallback={r.portrait} size="xs" />
+                  <Portrait src={displayPortrait(r)} fallback={r.portrait} size={showReference ? 'md' : 'xs'} />
+                  {showReference && (
+                    <span className="inline-flex items-center gap-1" title={r.photoUrl ? 'His real photo (left) beside the face the class gives him' : 'No real photo on file for him'}>
+                      <span className="text-[10px] text-muted">vs</span>
+                      <Portrait src={r.photoUrl ? imageUrl(r.photoUrl) : null} size="md" />
+                    </span>
+                  )}
                   <span className="inline-flex items-center gap-1.5">
                     {r.edited && <span className="text-gold" title="edited">●</span>}
+                    {r.likenessFixed && <span className="text-success-light" title="Likeness fixed everywhere">✓</span>}
                     {r.firstName} {r.lastName}
                   </span>
                 </span>

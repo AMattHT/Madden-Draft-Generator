@@ -12,6 +12,7 @@ import portrait from './routes/portrait';
 import players from './routes/players';
 import franchise from './routes/franchise';
 import gear from './routes/gear';
+import likeness from './routes/likeness';
 
 /** Origins allowed to call the API. The franchise routes write into the Madden
  *  Saves folder, so this is deliberately just the local Vite dev server (plus
@@ -57,6 +58,7 @@ export function createApp(): Express {
   app.use('/api', media);
   app.use('/api', portrait);
   app.use('/api', players);
+  app.use('/api', likeness);
   // Franchise Tools are out of the 1.0.0 release; the routes (which read and
   // write CAREER saves) mount only when explicitly enabled.
   if (process.env.DRAFT_TOOL_FRANCHISE === '1') app.use('/api', franchise);

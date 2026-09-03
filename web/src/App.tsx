@@ -372,6 +372,21 @@ export default function App() {
     [commitEdits]
   );
 
+  // Drop a few fields of one player's edit (the appearance keys once a likeness
+  // fix carries them, so the class regenerates from the fix, not the local edit).
+  const clearEditFields = useCallback(
+    (id: number, fields: string[]) => {
+      const prev = editsRef.current;
+      if (!prev[id]) return;
+      const player = { ...prev[id] };
+      for (const f of fields) delete player[f];
+      const next = { ...prev, [id]: player };
+      if (!Object.keys(player).length) delete next[id];
+      commitEdits(next, gearRef.current);
+    },
+    [commitEdits]
+  );
+
   const setGearEdit = useCallback(
     (id: number, slot: string, asset: string) => {
       const prev = gearRef.current;
@@ -605,6 +620,7 @@ export default function App() {
               edits={edits}
               gearEdits={gearEdits}
               onEdit={setEdit}
+              onClearEdits={clearEditFields}
               onGearEdit={setGearEdit}
               onResetPlayer={resetPlayer}
               editTools={{ undo: undoEdit, redo: redoEdit, clearAll: clearAllEdits, exportEdits, importEdits }}
