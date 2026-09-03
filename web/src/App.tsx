@@ -28,8 +28,9 @@ export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
-  source: 'year' | 'alltime' | 'decade' | 'picked';
+  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
   decade: number; // used when source === 'decade' (e.g. 1990)
+  team?: string; // franchise key when source === 'team' (e.g. DAL)
   strength: number; // OVR curve multiplier (1 = normal)
   studs: number; // guaranteed first-round-caliber prospects
   generational: boolean; // force a can't-miss #1
@@ -115,6 +116,7 @@ export default function App() {
       const league = baseOpts.source === 'alltime' ? 'all-time'
         : baseOpts.source === 'decade' ? `${baseOpts.decade}s`
         : baseOpts.source === 'picked' ? `custom:${baseOpts.customId ?? 'none'}`
+        : baseOpts.source === 'team' ? `team:${baseOpts.team ?? 'none'}`
         : useLeague ?? effLeague(year);
       // The include list lives with the class (not the global options): load it for
       // this year so a forced-in player survives re-selecting the year.
@@ -122,7 +124,7 @@ export default function App() {
       const opts: DraftOpts = { ...baseOpts, include: useOpts?.include ?? storedInclude };
       if ((opts.include?.length ?? 0) !== (baseOpts.include?.length ?? 0)) setDraftOpts(opts);
       const custom = isCustomDraft(opts);
-      const ekYear = opts.source === 'alltime' || opts.source === 'picked' ? 0 : opts.source === 'decade' ? opts.decade : year;
+      const ekYear = opts.source === 'alltime' || opts.source === 'picked' || opts.source === 'team' ? 0 : opts.source === 'decade' ? opts.decade : year;
       // M27 classes are cached under a versioned key so M26/M27 views never collide.
       const cacheMode = useVersion === 'm27' ? `${useMode}-m27` : useMode;
       const req = ++reqRef.current;
@@ -148,7 +150,7 @@ export default function App() {
             picked = { board: c.board, name: c.name };
           }
           const live = await api.generatedCustom({
-            source: opts.source, year, decade: opts.decade,
+            source: opts.source, year, decade: opts.decade, team: opts.team,
             league: opts.source === 'year' ? league : undefined,
             mode: useMode, strength: opts.strength, studs: opts.studs, generational: opts.generational,
             hindsight: opts.hindsight, autoStrength: opts.autoStrength, variant: opts.variant, include: opts.include,
@@ -239,7 +241,7 @@ export default function App() {
       setDraftOpts(next);
       setFocusPlayer(null);
       const year =
-        next.source === 'alltime' || next.source === 'picked' ? 0
+        next.source === 'alltime' || next.source === 'picked' || next.source === 'team' ? 0
         : next.source === 'decade' ? next.decade
         : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
       select(year, true, mode, undefined, next);

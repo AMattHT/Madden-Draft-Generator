@@ -261,6 +261,11 @@ const NAME_TO_CODE = new Map<string, string>(Object.entries(CURRENT).map(([code,
 let teams2026Cache: Map<number, TeamInfo> | null = null;
 
 export const TeamService = {
+  /** Today's 32 franchises: nflverse key, full name, ESPN logo. */
+  franchises(): { key: string; name: string; logo: string }[] {
+    return Object.entries(CURRENT).map(([key, c]) => ({ key, name: c.name, logo: ESPN(c.espn) }));
+  },
+
   /** A current franchise's TeamInfo (abbr + ESPN logo) by full name, else null. */
   byName(fullName: string): TeamInfo | null {
     const code = NAME_TO_CODE.get(fullName.trim().toLowerCase());

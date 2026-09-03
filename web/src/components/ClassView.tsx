@@ -214,9 +214,10 @@ export function ClassView({
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
   // A hand-picked class exports by its saved player keys and name.
   const exportOpts = useMemo(() => {
+    if (draftOpts.source === 'team') return { ...draftOpts, name: `${data.name ?? draftOpts.team ?? ''} All-Time` };
     if (draftOpts.source !== 'picked') return draftOpts;
     const c = customClasses.find((x) => x.id === draftOpts.customId);
-    return { ...draftOpts, keys: c?.keys ?? [], name: data.name ?? c?.name ?? '' };
+    return { ...draftOpts, board: c?.board ?? [], name: data.name ?? c?.name ?? '' };
   }, [draftOpts, customClasses, data.name]);
 
   // Prev/next player navigation inside the profile modal, walking the board in
@@ -236,6 +237,8 @@ export function ClassView({
             <h1 className="text-xl font-bold tracking-tight">
               {data.source === 'picked' ? (
                 <span className="text-gold">Custom · {data.name || 'My class'}</span>
+              ) : data.source === 'team' ? (
+                <span className="text-gold">{data.name || 'Franchise'} · All-Time Draft</span>
               ) : allTime ? (
                 <span className="text-gold">All-Time Greats</span>
               ) : decade ? (

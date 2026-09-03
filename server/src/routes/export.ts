@@ -5,7 +5,8 @@ import { DraftClassBuilder, GenOptions, parseGenMode } from '../services/DraftCl
 import { PortraitModService } from '../services/PortraitModService';
 import { FranchiseService } from '../services/FranchiseService';
 import { M27_SAVES_DIR } from '../config/paths';
-import { enrichedClass, allTimeGreatsClass, pickedClass } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass, boardClass, teamGreatsClass, parseBoard } from '../services/DraftEnrichment';
+import { TeamDraftService } from '../services/TeamDraftService';
 import { classSlug } from '../services/ClassName';
 
 const r = Router();
@@ -21,7 +22,7 @@ r.post('/export/mdc', async (req, res) => {
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode = parseGenMode(req.body?.mode);
   const gameVersion: 'm26' | 'm27' = req.body?.gameVersion === 'm27' ? 'm27' : 'm26';
-  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : 'year';
+  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : req.body?.source === 'team' ? 'team' : 'year';
   const opts: GenOptions = {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
     studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
@@ -34,11 +35,18 @@ r.post('/export/mdc', async (req, res) => {
 
   let players; let filename: string;
   if (source === 'picked') {
+    // A Class Studio board in pick order, or the 1.2.0 shape (a list of keys).
     const raw = req.body?.keys;
-    const keys = [...new Set((Array.isArray(raw) ? raw : []).map((x: unknown) => String(x).trim()).filter(Boolean))].slice(0, 402);
-    if (!keys.length) return res.status(400).json({ error: 'no players picked' });
-    ({ players } = await pickedClass(keys, { fill: req.body?.fill !== false }));
+    const keys = [...new Set((Array.isArray(raw) ? raw : []).map((x: unknown) => String(x).trim()).filter(Boolean))].slice(0, 402) as string[];
+    const board = parseBoard(req.body?.board) ?? keys.map((key) => ({ key }));
+    if (!board.length) return res.status(400).json({ error: 'no players picked' });
+    ({ players } = await boardClass(board, { fill: req.body?.fill !== false }));
     filename = `CAREERDRAFT-${classSlug(String(req.body?.name ?? ''))}`;
+  } else if (source === 'team') {
+    const team = TeamDraftService.get(String(req.body?.team ?? ''));
+    if (!team) return res.status(400).json({ error: 'unknown team' });
+    ({ players } = await teamGreatsClass(team.key));
+    filename = `CAREERDRAFT-${classSlug(`${team.name} All-Time`)}`;
   } else if (source === 'alltime' || source === 'decade') {
     const decade = Math.floor(Number(req.body?.decade) / 10) * 10;
     const range = source === 'decade' && decade > 0 ? { from: decade, to: decade + 9 } : undefined;

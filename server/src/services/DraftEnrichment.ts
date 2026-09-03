@@ -13,6 +13,7 @@ import { NflverseCareerService } from './NflverseCareerService';
 import { RetroItaService } from './RetroItaService';
 import { CuratedSkinToneService } from './CuratedSkinToneService';
 import { PhotoLookService } from './PhotoLookService';
+import { TeamDraftService } from './TeamDraftService';
 import { BaselinePlayer } from '../types/player';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
@@ -212,6 +213,37 @@ export async function pickedClass(
   opts: { fill?: boolean } = {}
 ): Promise<{ players: BaselinePlayer[]; generatedCount: number; missing: string[]; truncatedKeys: boolean }> {
   return boardClass(keys.map((key) => ({ key })), opts);
+}
+
+/**
+ * A franchise's all-time draft: the best players it ever drafted (under every
+ * name and city it played as), ranked by the All-Time greatness score, 402 deep.
+ * A young franchise with fewer draftees is padded with era-matched prospects.
+ */
+export async function teamGreatsClass(franchise: string): Promise<{ players: BaselinePlayer[]; generatedCount: number }> {
+  const drafted = await TeamDraftService.draftedBy(franchise);
+  const picked = [...drafted].sort((a, b) => greatness(b) - greatness(a)).slice(0, FULL_CLASS_SIZE);
+  const real = await Promise.all(picked.map((p) => enrichOne(p)));
+  let fillers: BaselinePlayer[] = [];
+  if (real.length < FULL_CLASS_SIZE && real.length > 0) {
+    const years = real.map((p) => p.draftYear).sort((a, b) => a - b);
+    fillers = GenericFillerService.build(years[Math.floor(years.length / 2)], real);
+  }
+  return { players: [...real, ...fillers], generatedCount: fillers.length };
+}
+
+/** Class Studio board entries from a request body: `{ key }` or `{ custom: {...} }`;
+ *  anything else is dropped. Null when the body has no board at all. */
+export function parseBoard(raw: unknown): BoardEntry[] | null {
+  if (!Array.isArray(raw)) return null;
+  const out: BoardEntry[] = [];
+  for (const e of raw.slice(0, FULL_CLASS_SIZE)) {
+    if (!e || typeof e !== 'object') continue;
+    const o = e as { key?: unknown; custom?: unknown };
+    if (typeof o.key === 'string' && o.key) out.push({ key: o.key });
+    else if (o.custom && typeof o.custom === 'object') out.push({ custom: o.custom as CustomPlayerSpec });
+  }
+  return out;
 }
 
 /** A custom prospect as the Class Studio describes him. */

@@ -13,6 +13,14 @@ option, and classes you saved before open in it as they were.
 dev trait and archetype. The app generates his attributes to match and he drafts alongside the
 real players.
 
+**By team.** A new source in Draft options: pick a franchise and get its all-time draft, the best
+402 players it ever drafted, ranked by career. Relocations and renames stay with the franchise
+(the Oilers are Titans picks, the Baltimore Colts are Colts picks); the Browns keep Jim Brown.
+
+### Bug fixes
+
+- Exporting a class saved in the Class Studio no longer fails with "no players picked".
+
 ## 1.2.0
 
 ### Features

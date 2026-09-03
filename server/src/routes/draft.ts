@@ -5,8 +5,8 @@ import { DbPositionService } from '../services/DbPositionService';
 import { gameOverall, reconcileToTarget } from '../services/AttributeModel';
 import { TeamService, PickEnrichment } from '../services/TeamService';
 import { WikipediaTeamService } from '../services/WikipediaTeamService';
-import { enrichedClass, allTimeGreatsClass, pickedClass, boardClass, validateCustomPlayer } from '../services/DraftEnrichment';
-import type { BoardEntry, CustomPlayerSpec } from '../services/DraftEnrichment';
+import { enrichedClass, allTimeGreatsClass, pickedClass, boardClass, validateCustomPlayer, teamGreatsClass, parseBoard } from '../services/DraftEnrichment';
+import { TeamDraftService } from '../services/TeamDraftService';
 import { classSlug } from '../services/ClassName';
 import { normalizeName } from '../util/csv';
 import { DraftClassResponse } from '../types/player';
@@ -53,19 +53,6 @@ function parseInclude(raw: unknown): number[] {
 }
 
 /** `keys`: stable player keys for a hand-picked class (array or comma list), deduped, <= 402. */
-/** Class Studio board entries: `{ key }` or `{ custom: {...} }`; anything else is dropped. */
-function parseBoard(raw: unknown): BoardEntry[] | null {
-  if (!Array.isArray(raw)) return null;
-  const out: BoardEntry[] = [];
-  for (const e of raw.slice(0, 402)) {
-    if (!e || typeof e !== 'object') continue;
-    const o = e as { key?: unknown; custom?: unknown };
-    if (typeof o.key === 'string' && o.key) out.push({ key: o.key });
-    else if (o.custom && typeof o.custom === 'object') out.push({ custom: o.custom as CustomPlayerSpec });
-  }
-  return out;
-}
-
 function parseKeys(raw: unknown): string[] {
   const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(',') : [];
   return [...new Set(list.map((x) => String(x).trim()).filter(Boolean))].slice(0, 402);
@@ -131,11 +118,16 @@ r.post('/draft/recompute-batch', (req, res) => {
   res.json({ results: recomputeBatch(items, gameVersion) });
 });
 
+/** The 32 franchises a "By team" class can be built for. */
+r.get('/draft/franchises', (_req, res) => {
+  res.json({ franchises: TeamDraftService.list() });
+});
+
 r.post('/draft/custom', async (req, res) => {
   const b = (req.body ?? {}) as {
-    source?: 'year' | 'alltime' | 'decade' | 'picked'; year?: number; decade?: number; league?: string; mode?: string;
+    source?: 'year' | 'alltime' | 'decade' | 'picked' | 'team'; year?: number; decade?: number; league?: string; mode?: string;
     strength?: number; studs?: number; generational?: boolean; gameVersion?: string; hindsight?: number | string; autoStrength?: boolean; variant?: number; include?: unknown;
-    keys?: unknown; fill?: unknown; name?: unknown; board?: unknown;
+    keys?: unknown; fill?: unknown; name?: unknown; board?: unknown; team?: unknown;
   };
   const mode = parseGenMode(b.mode);
   const gameVersion: 'm26' | 'm27' = b.gameVersion === 'm27' ? 'm27' : 'm26';
@@ -164,6 +156,18 @@ r.post('/draft/custom', async (req, res) => {
     // The client re-keys `league` to its saved class id so edits follow the class,
     // not its current name.
     return res.json({ year: 0, league: `custom:${classSlug(name)}`, mode, gameVersion, source: 'picked', name, generatedCount, missing, truncatedKeys, pickedCount: players.length - generatedCount, ...preview });
+  }
+
+  if (b.source === 'team') {
+    // A franchise's all-time draft: the best players it ever drafted, every era.
+    const team = TeamDraftService.get(String(b.team ?? ''));
+    if (!team) return res.status(400).json({ error: 'unknown team' });
+    const { players, generatedCount } = await teamGreatsClass(team.key);
+    if (!players.length) return res.status(404).json({ error: 'no players' });
+    const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
+    const badge = { abbr: team.key, name: team.name, logo: team.logo };
+    for (const row of preview.rows) if (row.draftPick != null) row.team = badge;
+    return res.json({ year: 0, league: `team:${team.key}`, mode, gameVersion, source: 'team', name: team.name, team, generatedCount, ...preview });
   }
 
   if (b.source === 'alltime' || b.source === 'decade') {

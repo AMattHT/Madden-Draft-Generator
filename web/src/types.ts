@@ -106,8 +106,8 @@ export interface GeneratedClass {
   degraded?: boolean; // built before the backend's data caches were ready (not cached client-side)
   dropped?: DroppedPlayer[]; // players that did not fit (years with more than 402 rows)
   included?: number[]; // source indexes forced in (DraftOpts.include echo)
-  source?: 'year' | 'alltime' | 'decade' | 'picked';
-  name?: string; // hand-picked class name
+  source?: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
+  name?: string; // hand-picked class name, or the franchise name of a By-team class
   missing?: string[]; // picked keys the data no longer has
   truncatedKeys?: boolean; // more than 402 keys were sent
   pickedCount?: number; // real (non-filler) players in a picked class
@@ -120,6 +120,13 @@ export interface GeneratedClass {
 export type GameVersion = 'm26' | 'm27';
 
 /** A saved hand-picked class (player keys are stable across data refreshes). */
+/** One of today's 32 franchises (a "By team" all-time draft). */
+export interface TeamFranchise {
+  key: string; // nflverse abbreviation: DAL, GNB, KAN, ...
+  name: string;
+  logo: string | null;
+}
+
 /** A prospect who never existed, made in the Class Studio. The overall, dev
  *  trait and archetype are pinned; the app generates the attributes around them. */
 export interface CustomPlayer {

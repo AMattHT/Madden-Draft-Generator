@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { DraftOpts } from '../App';
 import { DEFAULT_DRAFT_OPTS } from '../App';
-import type { CustomClass } from '../types';
+import type { CustomClass, TeamFranchise } from '../types';
+import { api } from '../api';
 
 /** Draft-class generation controls: source (this year, greats, or a hand-picked
  *  class) plus modifiers (class strength, guaranteed studs, a generational #1).
@@ -23,14 +24,23 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
   const [autoStrength, setAutoStrength] = useState(!!opts.autoStrength);
   const [customId, setCustomId] = useState(opts.customId);
   const [fill, setFill] = useState(opts.fill !== false);
+  const [team, setTeam] = useState(opts.team);
+  const [franchises, setFranchises] = useState<TeamFranchise[]>([]);
+
+  // The franchise list is fetched the first time "By team" is chosen.
+  useEffect(() => {
+    if (source !== 'team' || franchises.length) return;
+    api.franchises().then(setFranchises).catch(() => {});
+  }, [source, franchises.length]);
 
   useEffect(() => {
     setSource(opts.source); setDecade(opts.decade); setStrength(opts.strength); setStuds(opts.studs); setGenerational(opts.generational);
-    setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength); setCustomId(opts.customId); setFill(opts.fill !== false);
+    setHindsight(opts.hindsight ?? 1); setAutoStrength(!!opts.autoStrength); setCustomId(opts.customId); setFill(opts.fill !== false); setTeam(opts.team);
   }, [opts]);
 
-  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength, variant: opts.variant ?? 0, customId, fill };
-  const needsClass = source === 'picked' && !customId;
+  const next: DraftOpts = { source, decade, strength, studs, generational, hindsight, autoStrength, variant: opts.variant ?? 0, customId, fill, team };
+  const needsClass = (source === 'picked' && !customId) || (source === 'team' && !team);
+  const teamInfo = franchises.find((f) => f.key === team);
   const hindsightLabel = hindsight <= 0.05 ? 'Draft day' : hindsight >= 0.95 ? 'Career outcome' : `${Math.round(hindsight * 100)}% outcome`;
   const dirty = JSON.stringify(next) !== JSON.stringify(opts);
   const strengthLabel = strength < 0.95 ? 'Weaker' : strength > 1.05 ? 'Stronger' : 'Normal';
@@ -48,7 +58,18 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
               <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
               <button className={seg(source === 'decade')} onClick={() => setSource('decade')}>By decade</button>
               <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time</button>
+              <button className={seg(source === 'team')} onClick={() => setSource('team')} title="The best players a franchise ever drafted, one class">By team</button>
             </div>
+            {source === 'team' && (
+              <div className="flex items-center gap-2">
+                {teamInfo?.logo && <img src={teamInfo.logo} alt="" className="h-6 w-6 object-contain" />}
+                <select value={team ?? ''} onChange={(e) => setTeam(e.target.value || undefined)}
+                  className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none">
+                  <option value="">Choose a franchise…</option>
+                  {franchises.map((f) => <option key={f.key} value={f.key}>{f.name}</option>)}
+                </select>
+              </div>
+            )}
             {source === 'picked' && (
               <button onClick={() => onOpenBuilder?.(customClasses.find((c) => c.id === customId) ?? null)}
                 className="rounded-md border border-gold/50 bg-gold/10 px-2.5 py-1.5 text-xs font-medium text-gold hover:bg-gold/20">
@@ -103,6 +124,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         <span className="ml-auto text-[11px] text-muted">
           {source === 'alltime' ? 'Best players in history, one class'
             : source === 'picked' ? 'Your Class Studio board, in pick order'
+            : source === 'team' ? (teamInfo ? `The best players the ${teamInfo.name} ever drafted, every era` : 'Pick a franchise: its best draft picks ever, one class')
             : source === 'decade' ? `Greatest players drafted in the ${decade}s`
             : 'Modifiers apply to the selected year'}
         </span>

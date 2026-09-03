@@ -1,9 +1,11 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
-  source: 'year' | 'alltime' | 'decade' | 'picked';
+  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
   decade?: number;
+  /** Franchise key (source === 'team'). */
+  team?: string;
   strength: number;
   studs: number;
   generational: boolean;
@@ -357,6 +359,9 @@ export const api = {
   personaDnaTraits: () => jget<{ traits: PersonaTrait[] }>('/api/lookups/persona-dna').then((r) => r.traits),
 
   /** The whole player pool for the class builder; fetched once per session. */
+  /** The 32 franchises a "By team" class can be built for. */
+  franchises: async (): Promise<TeamFranchise[]> => (await jget<{ franchises: TeamFranchise[] }>('/api/draft/franchises')).franchises,
+
   async catalog(): Promise<CatalogPlayer[]> {
     if (catalogCache) return catalogCache;
     const r = await jget<{ players: CatalogPlayer[] }>('/api/players/catalog');
@@ -414,7 +419,7 @@ export const api = {
 
   /** Custom class: All-Time Greats / by-decade source and/or generation modifiers. */
   generatedCustom: (opts: Partial<ClassRequestOpts> & {
-    source: 'year' | 'alltime' | 'decade' | 'picked';
+    source: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
     year?: number;
     league?: string;
     mode: string;
@@ -452,7 +457,7 @@ export const api = {
     // Match Madden's own save naming (extensionless CAREERDRAFT-*) so the file
     // drops straight into the Saves folder and shows up in "Load Draft Class".
     a.download =
-      draftOpts?.source === 'picked' ? classFileName(draftOpts.name)
+      draftOpts?.source === 'picked' || draftOpts?.source === 'team' ? classFileName(draftOpts.name)
       : draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
       : draftOpts?.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS`
       : `CAREERDRAFT-${year}DRAFT`;
