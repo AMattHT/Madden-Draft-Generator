@@ -1,6 +1,6 @@
 {
   "name": "draft-class-generator-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Local Node/Express backend for the Madden 26 NFL Draft Class Generator",
   "type": "commonjs",
