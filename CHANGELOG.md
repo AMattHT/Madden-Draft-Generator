@@ -20,6 +20,10 @@ real players.
 ### Bug fixes
 
 - Exporting a class saved in the Class Studio no longer fails with "no players picked".
+- All-Time, decade, By team and Studio classes now use the same depth-chart positions as a
+  year class, so Troy Polamalu is a strong safety there too, not a corner.
+- Big corners such as Mel Blount, Rod Woodson, Deion Sanders and Charles Woodson stay at
+  corner instead of being turned into safeties by their weight.
 
 ## 1.2.0
 

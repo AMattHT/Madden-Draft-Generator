@@ -194,9 +194,20 @@ export async function enrichedClass(
  *  same way as a year class but without a per-year team map. An optional draft-year
  *  `range` scopes it to a decade/era (the greatest players of that span). */
 export async function allTimeGreatsClass(range?: { from: number; to: number }): Promise<{ players: BaselinePlayer[]; generatedCount: number }> {
-  const baseline = PlayerLookupService.allTimeGreats(402, range);
-  const players = await Promise.all(baseline.map((p) => enrichOne(p)));
+  const players = await enrichAcrossYears(PlayerLookupService.allTimeGreats(402, range));
   return { players, generatedCount: 0 };
+}
+
+/**
+ * Enrich players drawn from many draft years (All-Time, decade, team, Studio
+ * boards) with the same per-pick nflverse data a year class gets: depth-chart
+ * DB positions (Polamalu is a strong safety, not a corner), the drafting team's
+ * scheme for linebackers, and measured height/weight. One lookup per year.
+ */
+async function enrichAcrossYears(players: BaselinePlayer[]): Promise<BaselinePlayer[]> {
+  const years = [...new Set(players.map((p) => p.draftYear))];
+  const byYear = new Map(await Promise.all(years.map(async (y) => [y, await TeamService.byYear(y)] as const)));
+  return Promise.all(players.map((p) => enrichOne(p, p.draftPick != null ? byYear.get(p.draftYear)?.get(p.draftPick) : undefined)));
 }
 
 /** Greatness score the All-Time class ranks by (wAV + accolades + HOF bonus). */
@@ -223,7 +234,7 @@ export async function pickedClass(
 export async function teamGreatsClass(franchise: string): Promise<{ players: BaselinePlayer[]; generatedCount: number }> {
   const drafted = await TeamDraftService.draftedBy(franchise);
   const picked = [...drafted].sort((a, b) => greatness(b) - greatness(a)).slice(0, FULL_CLASS_SIZE);
-  const real = await Promise.all(picked.map((p) => enrichOne(p)));
+  const real = await enrichAcrossYears(picked);
   let fillers: BaselinePlayer[] = [];
   if (real.length < FULL_CLASS_SIZE && real.length > 0) {
     const years = real.map((p) => p.draftYear).sort((a, b) => a - b);
@@ -323,7 +334,9 @@ export async function boardClass(
   }
   const truncatedKeys = ordered.length > FULL_CLASS_SIZE;
   const picked = ordered.slice(0, FULL_CLASS_SIZE);
-  const real = await Promise.all(picked.map((p) => (p.custom ? p : enrichOne(p))));
+  const enriched = await enrichAcrossYears(picked.filter((p) => !p.custom));
+  const enrichedByKey = new Map(enriched.map((p) => [p.key ?? '', p]));
+  const real = picked.map((p) => (p.custom ? p : enrichedByKey.get(p.key ?? '') ?? p));
   let fillers: BaselinePlayer[] = [];
   if (opts.fill !== false && real.length < FULL_CLASS_SIZE && real.length > 0) {
     fillers = GenericFillerService.build(classYear, real);

@@ -34,6 +34,21 @@ const OVERRIDES: Record<string, DbPos> = {
   'dennissmith|1981': 'SS',
   'carnelllake|1989': 'SS',
   'leroybutler|1990': 'SS',
+  // Corners. Pre-2001 DBs with no curated entry are split by weight (a corner
+  // over ~195 lb becomes a safety), which turns these big corners into safeties;
+  // some also finished their careers at safety, so the roster label says S.
+  'melblount|1970': 'CB',
+  'louiswright|1975': 'CB',
+  'lesterhayes|1977': 'CB',
+  'albertlewis|1983': 'CB',
+  'barrywilburn|1985': 'CB',
+  'rodwoodson|1987': 'CB', // moved to safety at 32; a corner for the Hall
+  'deionsanders|1989': 'CB',
+  'aeneaswilliams|1991': 'CB',
+  'troyvincent|1992': 'CB',
+  'tylaw|1995': 'CB',
+  'charleswoodson|1998': 'CB', // safety only for his last Packers years
+  'chrismcalister|1999': 'CB',
 };
 
 export const CuratedDbPositions = {
