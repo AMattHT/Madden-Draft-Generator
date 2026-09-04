@@ -123,6 +123,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         )}
         <span className="ml-auto text-[11px] text-muted">
           {source === 'alltime' ? 'Best players in history, one class'
+            : source === 'file' ? 'Opened from a file; pick a source above to generate a class instead'
             : source === 'picked' ? 'Your Class Studio board, in pick order'
             : source === 'team' ? (teamInfo ? `The best players the ${teamInfo.name} ever drafted, every era` : 'Pick a franchise: its best draft picks ever, one class')
             : source === 'decade' ? `Greatest players drafted in the ${decade}s`

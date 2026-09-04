@@ -110,8 +110,10 @@ export interface GeneratedClass {
   degraded?: boolean; // built before the backend's data caches were ready (not cached client-side)
   dropped?: DroppedPlayer[]; // players that did not fit (years with more than 402 rows)
   included?: number[]; // source indexes forced in (DraftOpts.include echo)
-  source?: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
-  name?: string; // hand-picked class name, or the franchise name of a By-team class
+  source?: 'year' | 'alltime' | 'decade' | 'picked' | 'team' | 'file';
+  name?: string; // hand-picked class name, the franchise name of a By-team class, or an opened file's name
+  fileId?: string; // an opened .mdc (source === 'file'): server-side id for export and reload
+  fileName?: string; // the opened file's name (CAREERDRAFT-1998DRAFT)
   missing?: string[]; // picked keys the data no longer has
   truncatedKeys?: boolean; // more than 402 keys were sent
   pickedCount?: number; // real (non-filler) players in a picked class
@@ -124,6 +126,13 @@ export interface GeneratedClass {
 export type GameVersion = 'm26' | 'm27';
 
 /** A saved hand-picked class (player keys are stable across data refreshes). */
+/** A draft-class file in a game's Saves folder. */
+export interface SaveFileInfo {
+  name: string;
+  sizeBytes: number;
+  modified: number;
+}
+
 /** A likeness fix recorded against a real player (server-side, every class). */
 export interface LikenessOverride {
   key: string;

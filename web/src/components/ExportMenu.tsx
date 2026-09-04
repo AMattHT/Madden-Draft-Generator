@@ -121,7 +121,7 @@ export function ExportMenu({
       const savesHint = gameVersion === 'm27' ? 'Documents\\Madden NFL 27\\saves' : 'Documents\\Madden NFL 26\\Saves';
       setMsg({
         ok: true,
-        text: `Downloaded ${draftOpts.source === 'picked' || draftOpts.source === 'team' ? classFileName(draftOpts.name) : draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS` : `CAREERDRAFT-${year}DRAFT`} — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.`,
+        text: `Downloaded ${draftOpts.source === 'file' ? (draftOpts.name || 'CAREERDRAFT') : draftOpts.source === 'picked' || draftOpts.source === 'team' ? classFileName(draftOpts.name) : draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS` : `CAREERDRAFT-${year}DRAFT`} — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Export failed: ${(e as Error).message}` });
@@ -193,10 +193,11 @@ export function ExportMenu({
 
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg border border-border-strong bg-surface-1 py-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
-          <button onClick={saveToSaves} disabled={!!busy} className={item} title="Write the .mdc into Documents\Madden NFL 26\Saves — no manual file move">
-            <span>{busy === 'saves' ? 'Saving…' : 'Save to Madden Saves folder'}</span>
+          <button onClick={saveToSaves} disabled={!!busy} className={item} title={draftOpts.source === 'file' ? 'Write the edited class back into the Saves folder under its own name; the previous file is kept as .bak' : 'Write the .mdc into Documents\\Madden NFL 26\\Saves — no manual file move'}>
+            <span>{busy === 'saves' ? 'Saving…' : draftOpts.source === 'file' ? 'Save back to Madden Saves folder' : 'Save to Madden Saves folder'}</span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-success-light">recommended</span>
           </button>
+          {draftOpts.source !== 'file' && (
           <button
             onClick={buildPortraits}
             disabled={!!busy || likeness.customPortrait === 0}
@@ -206,6 +207,7 @@ export function ExportMenu({
             <span>{busy === 'portraits' ? 'Downloading…' : 'PFR/Wiki 2D portraits'}</span>
             <span className="tabular-nums text-muted">{likeness.customPortrait} eligible</span>
           </button>
+          )}
           <button
             onClick={() => { setOpen(false); downloadCsv(); }}
             disabled={!!busy}

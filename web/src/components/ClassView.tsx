@@ -221,6 +221,7 @@ export function ClassView({
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
   // A hand-picked class exports by its saved player keys and name.
   const exportOpts = useMemo(() => {
+    if (draftOpts.source === 'file') return { ...draftOpts, fileId: data.fileId ?? draftOpts.fileId, name: data.fileName ?? data.name ?? 'CAREERDRAFT' };
     if (draftOpts.source === 'team') return { ...draftOpts, name: `${data.name ?? draftOpts.team ?? ''} All-Time` };
     if (draftOpts.source !== 'picked') return draftOpts;
     const c = customClasses.find((x) => x.id === draftOpts.customId);
@@ -242,7 +243,9 @@ export function ClassView({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-xl font-bold tracking-tight">
-              {data.source === 'picked' ? (
+              {data.source === 'file' ? (
+                <span className="text-gold">{data.fileName || data.name || 'Opened class'} <span className="text-neutral-400">· opened Madden {data.gameVersion === 'm27' ? '27' : '26'} class</span></span>
+              ) : data.source === 'picked' ? (
                 <span className="text-gold">Custom · {data.name || 'My class'}</span>
               ) : data.source === 'team' ? (
                 <span className="text-gold">{data.name || 'Franchise'} · All-Time Draft</span>
@@ -262,9 +265,13 @@ export function ClassView({
             ) : (
               <Pill tone="primary">Freshly pulled</Pill>
             )}
-            <Pill tone={mode === 'retro' ? 'legend' : mode === 'launch' ? 'gold' : 'neutral'}>
-              {mode === 'retro' ? 'Career lens' : mode === 'launch' ? 'Launch-day lens' : 'Realistic lens'}
-            </Pill>
+            {data.source === 'file' ? (
+              <span title="Ratings, faces and gear exactly as the file holds them; the rating lens does not apply"><Pill tone="neutral">As in the file</Pill></span>
+            ) : (
+              <Pill tone={mode === 'retro' ? 'legend' : mode === 'launch' ? 'gold' : 'neutral'}>
+                {mode === 'retro' ? 'Career lens' : mode === 'launch' ? 'Launch-day lens' : 'Realistic lens'}
+              </Pill>
+            )}
             {mode === 'launch' && (data.launchCount ?? 0) === 0 && (
               <span title="No launch roster covers this class (EA launch files exist for most classes since 2001, but not 2010, 2021, 2024 or 2025, and nothing before Madden 2002), so it is rated exactly as Realistic.">
                 <Pill tone="neutral">no launch data for this year</Pill>
@@ -283,6 +290,7 @@ export function ClassView({
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {data.source !== 'file' && (
           <button
             onClick={() => setShowOpts((v) => !v)}
             aria-pressed={showOpts}
@@ -295,6 +303,8 @@ export function ClassView({
             <Icon path={ICONS.chevronDown} className={`h-3.5 w-3.5 transition-transform ${showOpts ? 'rotate-180' : ''}`} />
             Draft options
           </button>
+          )}
+          {data.source !== 'file' && (
           <button
             onClick={onRefresh}
             disabled={busy}
@@ -303,7 +313,8 @@ export function ClassView({
             <Icon path={ICONS.refresh} className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} />
             {busy ? 'Refreshing…' : 'Rebuild'}
           </button>
-          {onVariant && (
+          )}
+          {onVariant && data.source !== 'file' && (
             <button
               onClick={onVariant}
               disabled={busy}
@@ -333,7 +344,7 @@ export function ClassView({
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 py-3">
-        {showOpts && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} customClasses={customClasses} onOpenBuilder={onOpenBuilder} />}
+        {showOpts && data.source !== 'file' && <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} customClasses={customClasses} onOpenBuilder={onOpenBuilder} />}
         <MetaStrip data={data} rows={effRows} pos={pos} onPickPos={setPos} onShowDropped={onShowDropped} spoilers={spoilers} />
 
         <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">

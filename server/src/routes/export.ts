@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { BaselinePlayer } from '../types/player';
 import fs from 'fs';
 import path from 'path';
 import { DraftClassBuilder, GenOptions, parseGenMode } from '../services/DraftClassBuilder';
@@ -7,6 +8,7 @@ import { FranchiseService } from '../services/FranchiseService';
 import { M27_SAVES_DIR } from '../config/paths';
 import { enrichedClass, allTimeGreatsClass, boardClass, teamGreatsClass, parseBoard } from '../services/DraftEnrichment';
 import { TeamDraftService } from '../services/TeamDraftService';
+import { OpenedClassService } from '../services/OpenedClassService';
 import { classSlug } from '../services/ClassName';
 
 const r = Router();
@@ -22,7 +24,7 @@ r.post('/export/mdc', async (req, res) => {
   const gearEdits = req.body?.gearEdits as Record<string, Record<string, string>> | undefined;
   const mode = parseGenMode(req.body?.mode);
   const gameVersion: 'm26' | 'm27' = req.body?.gameVersion === 'm27' ? 'm27' : 'm26';
-  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : req.body?.source === 'team' ? 'team' : 'year';
+  const source = req.body?.source === 'alltime' ? 'alltime' : req.body?.source === 'decade' ? 'decade' : req.body?.source === 'picked' ? 'picked' : req.body?.source === 'team' ? 'team' : req.body?.source === 'file' ? 'file' : 'year';
   const opts: GenOptions = {
     strength: Number(req.body?.strength) > 0 ? Number(req.body?.strength) : 1,
     studs: Math.max(0, Math.round(Number(req.body?.studs) || 0)),
@@ -33,8 +35,19 @@ r.post('/export/mdc', async (req, res) => {
     include: (Array.isArray(req.body?.include) ? req.body.include : []).map((x: unknown) => Number(x)).filter((n: number) => Number.isInteger(n) && n >= 0),
   };
 
-  let players; let filename: string;
-  if (source === 'picked') {
+  // An opened .mdc: apply the edits to the file's own prospects and write them
+  // back into a copy of the original bytes, in the game format it came in.
+  let fileOut: { buffer: Buffer; filename: string; gameVersion: 'm26' | 'm27'; count: number } | null = null;
+  if (source === 'file') {
+    fileOut = OpenedClassService.write(String(req.body?.fileId ?? ''), edits, gearEdits);
+    if (!fileOut) return res.status(404).json({ error: 'that opened class is gone — open the file again' });
+  }
+
+  let players: BaselinePlayer[] = []; let filename: string;
+  if (fileOut) {
+    players = [];
+    filename = fileOut.filename;
+  } else if (source === 'picked') {
     // A Class Studio board in pick order, or the 1.2.0 shape (a list of keys).
     const raw = req.body?.keys;
     const keys = [...new Set((Array.isArray(raw) ? raw : []).map((x: unknown) => String(x).trim()).filter(Boolean))].slice(0, 402) as string[];
@@ -61,20 +74,23 @@ r.post('/export/mdc', async (req, res) => {
     ({ players } = await enrichedClass(year, league, { fill }));
     filename = `CAREERDRAFT-${year}DRAFT`;
   }
-  if (players.length === 0) {
+  if (!fileOut && players.length === 0) {
     return res.status(404).json({ error: 'no players found' });
   }
 
-  const { buffer, count, truncated, dropped, likeness } = gameVersion === 'm27'
-    ? DraftClassBuilder.buildMdc27(players, edits, mode, gearEdits, opts)
-    : DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
+  const outGame: 'm26' | 'm27' = fileOut ? fileOut.gameVersion : gameVersion;
+  const { buffer, count, truncated, dropped, likeness } = fileOut
+    ? { buffer: fileOut.buffer, count: fileOut.count, truncated: false, dropped: [] as { firstName: string; lastName: string }[], likeness: { asset: 0, generic: 0, withPortrait: 0, customPortrait: 0 } }
+    : outGame === 'm27'
+      ? DraftClassBuilder.buildMdc27(players, edits, mode, gearEdits, opts)
+      : DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
 
   // saveToSaves: write the class straight into the Madden Saves folder (the name
   // is already Madden's CAREERDRAFT-* convention) so it shows up in Franchise →
   // Choose Draft Class without a manual file move. Overwrites our own previous
   // export of the same class intentionally.
   if (req.body?.saveToSaves) {
-    const dir = gameVersion === 'm27' ? M27_SAVES_DIR : FranchiseService.savesDir();
+    const dir = outGame === 'm27' ? M27_SAVES_DIR : FranchiseService.savesDir();
     if (!fs.existsSync(dir)) return res.status(400).json({ error: `Madden Saves folder not found: ${dir}` });
     const outPath = path.join(dir, filename);
     // Never leave a half-written class in the Saves folder: write a temp file
@@ -85,12 +101,13 @@ r.post('/export/mdc', async (req, res) => {
     fs.writeFileSync(tmp, buffer);
     if (overwrote) fs.copyFileSync(outPath, `${outPath}.bak`);
     fs.renameSync(tmp, outPath);
-    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness, overwrote, backup: overwrote ? `${outPath}.bak` : null });
+    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness, overwrote, backup: overwrote ? `${outPath}.bak` : null, gameVersion: outGame });
   }
 
   res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('X-Prospect-Count', String(count));
+  res.setHeader('X-Game-Version', outGame);
   res.setHeader('X-Truncated', truncated ? '1' : '0');
   res.setHeader('X-Likeness-Asset', String(likeness.asset));
   res.setHeader('X-Likeness-Generic', String(likeness.generic));

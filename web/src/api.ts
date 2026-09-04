@@ -1,9 +1,11 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto, SaveFileInfo } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
-  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
+  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team' | 'file';
   decade?: number;
+  /** An opened .mdc (source === 'file'). */
+  fileId?: string;
   /** Franchise key (source === 'team'). */
   team?: string;
   strength: number;
@@ -374,6 +376,12 @@ export const api = {
   /** The 32 franchises a "By team" class can be built for. */
   franchises: async (): Promise<TeamFranchise[]> => (await jget<{ franchises: TeamFranchise[] }>('/api/draft/franchises')).franchises,
 
+  /** Open an existing draft class (.mdc) from a Saves folder or a file the browser read. */
+  openSavesList: (gameVersion: GameVersion) => jget<{ gameVersion: GameVersion; dir: string; files: SaveFileInfo[] }>(`/api/open/saves?gameVersion=${gameVersion}`),
+  openFromSaves: (gameVersion: GameVersion, name: string) => jsend<GeneratedClass>('POST', '/api/open/saves', { gameVersion, name }),
+  openFile: (name: string, dataBase64: string) => jsend<GeneratedClass>('POST', '/api/open/file', { name, dataBase64 }),
+  openedClass: (id: string) => jget<GeneratedClass>(`/api/open/${encodeURIComponent(id)}`),
+
   /** Likeness fixes: recorded against the player, applied in every class. */
   likenessOverrides: () => jget<{ overrides: LikenessOverride[]; stamp: string }>('/api/likeness/overrides'),
   setLikenessOverride: (body: LikenessWho & { skinTone?: number; faceAsset?: string | null; bodyType?: string; note?: string }) =>
@@ -478,7 +486,8 @@ export const api = {
     // Match Madden's own save naming (extensionless CAREERDRAFT-*) so the file
     // drops straight into the Saves folder and shows up in "Load Draft Class".
     a.download =
-      draftOpts?.source === 'picked' || draftOpts?.source === 'team' ? classFileName(draftOpts.name)
+      draftOpts?.source === 'file' ? (draftOpts.name || 'CAREERDRAFT')
+      : draftOpts?.source === 'picked' || draftOpts?.source === 'team' ? classFileName(draftOpts.name)
       : draftOpts?.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS'
       : draftOpts?.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS`
       : `CAREERDRAFT-${year}DRAFT`;

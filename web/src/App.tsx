@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
 import { ClassStudio } from './components/ClassStudio';
+import { OpenClass } from './components/OpenClass';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -28,9 +29,10 @@ export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
-  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team';
+  source: 'year' | 'alltime' | 'decade' | 'picked' | 'team' | 'file';
   decade: number; // used when source === 'decade' (e.g. 1990)
   team?: string; // franchise key when source === 'team' (e.g. DAL)
+  fileId?: string; // an opened .mdc when source === 'file'
   strength: number; // OVR curve multiplier (1 = normal)
   studs: number; // guaranteed first-round-caliber prospects
   generational: boolean; // force a can't-miss #1
@@ -117,6 +119,7 @@ export default function App() {
         : baseOpts.source === 'decade' ? `${baseOpts.decade}s`
         : baseOpts.source === 'picked' ? `custom:${baseOpts.customId ?? 'none'}`
         : baseOpts.source === 'team' ? `team:${baseOpts.team ?? 'none'}`
+        : baseOpts.source === 'file' ? `file:${baseOpts.fileId ?? 'none'}`
         : useLeague ?? effLeague(year);
       // The include list lives with the class (not the global options): load it for
       // this year so a forced-in player survives re-selecting the year.
@@ -124,7 +127,7 @@ export default function App() {
       const opts: DraftOpts = { ...baseOpts, include: useOpts?.include ?? storedInclude };
       if ((opts.include?.length ?? 0) !== (baseOpts.include?.length ?? 0)) setDraftOpts(opts);
       const custom = isCustomDraft(opts);
-      const ekYear = opts.source === 'alltime' || opts.source === 'picked' || opts.source === 'team' ? 0 : opts.source === 'decade' ? opts.decade : year;
+      const ekYear = opts.source === 'alltime' || opts.source === 'picked' || opts.source === 'team' || opts.source === 'file' ? 0 : opts.source === 'decade' ? opts.decade : year;
       // M27 classes are cached under a versioned key so M26/M27 views never collide.
       const cacheMode = useVersion === 'm27' ? `${useMode}-m27` : useMode;
       const req = ++reqRef.current;
@@ -140,7 +143,16 @@ export default function App() {
         });
       }
       try {
-        if (custom) {
+        if (opts.source === 'file') {
+          // An opened .mdc: the server holds the file; nothing to generate or cache.
+          if (!opts.fileId) throw new Error('No file is open');
+          const live = await api.openedClass(opts.fileId);
+          if (req !== reqRef.current) return;
+          live.fetchedAt = Date.now();
+          setData(live);
+          setSource('live');
+          cancelPrewarm();
+        } else if (custom) {
           // Custom classes aren't year-cached — always generated fresh.
           // A Class Studio class sends its board in pick order.
           let picked: { board: import('./types').BoardEntry[]; name: string } | undefined;
@@ -241,7 +253,7 @@ export default function App() {
       setDraftOpts(next);
       setFocusPlayer(null);
       const year =
-        next.source === 'alltime' || next.source === 'picked' || next.source === 'team' ? 0
+        next.source === 'alltime' || next.source === 'picked' || next.source === 'team' || next.source === 'file' ? 0
         : next.source === 'decade' ? next.decade
         : selected && selected > 0 ? selected : years.includes(2003) ? 2003 : years[years.length - 1] ?? 2003;
       select(year, true, mode, undefined, next);
@@ -250,6 +262,21 @@ export default function App() {
   );
 
   const openBuilder = useCallback((c: CustomClass | null) => setBuilder({ open: true, initial: c }), []);
+
+  // Open an existing .mdc: the board shows the file as it is, in its own game.
+  const [openerOpen, setOpenerOpen] = useState(false);
+  const openedClass = useCallback(
+    (cls: GeneratedClass) => {
+      setOpenerOpen(false);
+      setFocusPlayer(null);
+      const v: GameVersion = cls.gameVersion === 'm27' ? 'm27' : 'm26';
+      setGameVersion(v);
+      const next: DraftOpts = { ...DEFAULT_DRAFT_OPTS, source: 'file', fileId: cls.fileId };
+      setDraftOpts(next);
+      select(0, true, mode, undefined, next, v);
+    },
+    [mode, select]
+  );
   const closeBuilder = useCallback(() => {
     setBuilder({ open: false, initial: null });
     cache.customList().then(setCustomClasses);
@@ -534,6 +561,7 @@ export default function App() {
       <UpdateBanner />
       <TopBar
         onCreateClass={() => openBuilder(null)}
+        onOpenClass={() => setOpenerOpen(true)}
         onWhatsNew={openWhatsNew}
         view={view}
         onSetView={setView}
@@ -645,6 +673,7 @@ export default function App() {
         <DroppedPanel data={data} included={draftOpts.include ?? []} onInclude={onInclude} onExclude={onExclude} onClose={() => setShowDropped(false)} busy={busy} />
       )}
       {builder.open && <ClassStudio initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
+      {openerOpen && <OpenClass onOpened={openedClass} onClose={() => setOpenerOpen(false)} />}
     </div>
   );
 }

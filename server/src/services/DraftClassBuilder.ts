@@ -526,7 +526,7 @@ export interface PreviewRow {
 }
 
 /** Flatten a prospect's PlayerOnField loadout into editor slots (helmet, gloveLeft, ...). */
-function gearSlots(prospect: MdcProspect): Record<string, string> {
+export function gearSlots(prospect: MdcProspect): Record<string, string> {
   const out: Record<string, string> = {};
   const vis = prospect.visuals as { loadouts?: Array<{ loadoutType?: string; loadoutElements?: Array<{ slotType?: string; itemAssetName: string; remove?: boolean }> }> } | undefined;
   const lo = vis?.loadouts?.find((l) => l.loadoutType === 'PlayerOnField');
@@ -736,7 +736,7 @@ export function applyGearEdits(prospects: MdcProspect[], gearEdits?: GearEdits):
 }
 
 /** Zero a block's 200-byte attribute section so the game ignores it. */
-function neutralizeBlock(buf: Buffer, blockIndex: number): void {
+export function neutralizeBlock(buf: Buffer, blockIndex: number): void {
   const attrStart = MDC_DATA_START + blockIndex * MDC_BLOCK_SIZE + 0x1000;
   if (attrStart + 200 > buf.length) return;
   buf.fill(0, attrStart, attrStart + 200);

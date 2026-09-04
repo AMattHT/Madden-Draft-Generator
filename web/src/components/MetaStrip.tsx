@@ -128,13 +128,13 @@ export function MetaStrip({
       <span className="text-[11px] text-neutral-400" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`}>
         <b className="tabular-nums text-neutral-200">{data.likeness.asset}</b> real faces
       </span>
-      <span className="h-4 w-px bg-border" />
-      <span
+      {data.source !== 'file' && <span className="h-4 w-px bg-border" />}
+      {data.source !== 'file' && <span
         className="text-[11px] text-neutral-400"
         title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, a curated record, or your own fix)${fixedCount ? ` · ${fixedCount} fixed by you` : ''}. Tick "Unverified faces" in the toolbar to review the rest.`}
       >
         <b className="tabular-nums text-neutral-200">{verified}</b>/{data.rows.length} faces verified
-      </span>
+      </span>}
       {data.dropped && data.dropped.length > 0 && (
         <>
           <span className="h-4 w-px bg-border" />
