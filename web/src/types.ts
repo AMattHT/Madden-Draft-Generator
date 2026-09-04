@@ -126,6 +126,44 @@ export interface GeneratedClass {
 export type GameVersion = 'm26' | 'm27';
 
 /** A saved hand-picked class (player keys are stable across data refreshes). */
+/** A Madden 27 ROSTER save, read by the Roster tab. */
+export interface RosterTeam { id: number; name: string; city: string; abbr: string }
+export interface RosterPlayer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  positionId: number;
+  teamId: number;
+  team: string | null; // abbr, null for a free agent
+  teamName: string | null;
+  overall: number;
+  age: number;
+  heightInches: number;
+  weight: number;
+  jersey: number;
+  yearsPro: number;
+  devTrait: number;
+  archetype: string | null;
+  college: string | null;
+  hometown: string | null;
+  draftRound: number | null;
+  draftPick: number | null;
+  assetName: string | null;
+  portrait: string | null;
+  ratings: Record<string, number>;
+}
+export interface RosterData {
+  id: string;
+  name: string;
+  gameVersion: 'm27';
+  openedAt: number;
+  count: number;
+  teamCount: number;
+  teams: RosterTeam[];
+  players: RosterPlayer[];
+}
+
 /** A draft-class file in a game's Saves folder. */
 export interface SaveFileInfo {
   name: string;

@@ -1,4 +1,4 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto, SaveFileInfo } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto, SaveFileInfo, RosterData } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
@@ -381,6 +381,12 @@ export const api = {
   openFromSaves: (gameVersion: GameVersion, name: string) => jsend<GeneratedClass>('POST', '/api/open/saves', { gameVersion, name }),
   openFile: (name: string, dataBase64: string) => jsend<GeneratedClass>('POST', '/api/open/file', { name, dataBase64 }),
   openedClass: (id: string) => jget<GeneratedClass>(`/api/open/${encodeURIComponent(id)}`),
+
+  /** Madden 27 ROSTER saves (Roster tab): list, open, reopen. */
+  rosterSaves: () => jget<{ gameVersion: 'm27'; dir: string; files: SaveFileInfo[] }>('/api/roster/saves'),
+  rosterOpenSaved: (name: string) => jsend<RosterData>('POST', '/api/roster/open', { name }),
+  rosterOpenFile: (name: string, dataBase64: string) => jsend<RosterData>('POST', '/api/roster/open', { name, dataBase64 }),
+  rosterGet: (id: string) => jget<RosterData>(`/api/roster/${encodeURIComponent(id)}`),
 
   /** Likeness fixes: recorded against the player, applied in every class. */
   likenessOverrides: () => jget<{ overrides: LikenessOverride[]; stamp: string }>('/api/likeness/overrides'),

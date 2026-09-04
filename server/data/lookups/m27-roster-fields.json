@@ -1,0 +1,661 @@
+{
+ "_about": "Madden 27 ROSTER save: player-record field ids (3-byte big-endian key) -> meaning. Values of kind small/rating are stored +64 when >= 64 (decode: v-64 when 128<=v<192). Derived 2026-09-03 by matching ROSTER-Official against a CAREER save Player table.",
+ "game": "m27",
+ "listHeaderType": 4,
+ "playersListKey": "0xc2c879",
+ "teamsListKey": "0xd2586d",
+ "team": {
+  "0xd27a64": "id",
+  "0xd21cee": "name",
+  "0xd2cba1": "city",
+  "0xd33ba1": "abbr",
+  "0xd2486e": "dbName"
+ },
+ "fields": {
+  "0x970876": {
+   "name": null,
+   "kind": "unknown",
+   "source": "?",
+   "agree": 0
+  },
+  "0xa738ee": {
+   "name": "captain",
+   "kind": "int",
+   "source": "WeeksOnTradeBlock",
+   "agree": 0.98
+  },
+  "0xc218e3": {
+   "name": "acceleration",
+   "kind": "rating",
+   "source": "AccelerationRating",
+   "agree": 0.997
+  },
+  "0xc219e5": {
+   "name": "age",
+   "kind": "small",
+   "source": "Age",
+   "agree": 1.0
+  },
+  "0xc219e9": {
+   "name": "agility",
+   "kind": "rating",
+   "source": "AgilityRating",
+   "agree": 0.997
+  },
+  "0xc21df2": {
+   "name": "awareness",
+   "kind": "rating",
+   "source": "AwarenessRating",
+   "agree": 0.885
+  },
+  "0xc228f6": {
+   "name": "ballCarrierVision",
+   "kind": "rating",
+   "source": "BCVisionRating",
+   "agree": 0.983
+  },
+  "0xc22af4": {
+   "name": "breakTackle",
+   "kind": "rating",
+   "source": "BreakTackleRating",
+   "agree": 0.989
+  },
+  "0xc22ce7": {
+   "name": "blockShedding",
+   "kind": "rating",
+   "source": "BlockSheddingRating",
+   "agree": 0.962
+  },
+  "0xc22ceb": {
+   "name": "breakSack",
+   "kind": "rating",
+   "source": "BreakSackRating",
+   "agree": 0.995
+  },
+  "0xc23872": {
+   "name": "carrying",
+   "kind": "rating",
+   "source": "CarryingRating",
+   "agree": 0.991
+  },
+  "0xc238b4": {
+   "name": "tag2",
+   "kind": "int",
+   "source": "Tag2(enum)",
+   "agree": 0.994
+  },
+  "0xc23b74": {
+   "name": "ref2",
+   "kind": "int",
+   "source": "LastName(enum)",
+   "agree": 0.899
+  },
+  "0xc23bec": {
+   "name": "collegeId",
+   "kind": "enum",
+   "source": "College(enum)",
+   "agree": 1.0
+  },
+  "0xc23c28": {
+   "name": null,
+   "kind": "unknown",
+   "source": "WeeksOnTradeBlock",
+   "agree": 0.817
+  },
+  "0xc23ce1": {
+   "name": null,
+   "kind": "unknown",
+   "source": "PLYR_CAPSALARY",
+   "agree": 0.471
+  },
+  "0xc23d28": {
+   "name": "catching",
+   "kind": "rating",
+   "source": "CatchingRating",
+   "agree": 0.981
+  },
+  "0xc23e6c": {
+   "name": null,
+   "kind": "unknown",
+   "source": "InjurySeverity(enum)",
+   "agree": 0.918
+  },
+  "0xc24c29": {
+   "name": "draftPick",
+   "kind": "small",
+   "source": "ACQ_DNA_06(enum)",
+   "agree": 0.856
+  },
+  "0xc24caf": {
+   "name": "draftRound",
+   "kind": "small",
+   "source": "PLYR_DRAFTROUND",
+   "agree": 1.0
+  },
+  "0xc24cb2": {
+   "name": "deepRouteRunning",
+   "kind": "rating",
+   "source": "DeepRouteRunningRating",
+   "agree": 0.978
+  },
+  "0xc259ef": {
+   "name": "ego",
+   "kind": "small",
+   "source": "PLYR_EGO",
+   "agree": 1.0
+  },
+  "0xc25b35": {
+   "name": "changeOfDirection",
+   "kind": "rating",
+   "source": "ChangeOfDirectionRating",
+   "agree": 0.994
+  },
+  "0xc25c33": {
+   "name": "assetName",
+   "kind": "string",
+   "source": "PLYR_ASSETNAME",
+   "agree": 1.0
+  },
+  "0xc26b73": {
+   "name": "finesseMoves",
+   "kind": "rating",
+   "source": "FinesseMovesRating",
+   "agree": 0.984
+  },
+  "0xc26ba1": {
+   "name": "firstName",
+   "kind": "string",
+   "source": "FirstName",
+   "agree": 1.0
+  },
+  "0xc27a64": {
+   "name": "id",
+   "kind": "int",
+   "source": "PLYR_ASSETNAME(enum)",
+   "agree": 1.0
+  },
+  "0xc2886e": {
+   "name": null,
+   "kind": "unknown",
+   "source": "YearlyAwardCount",
+   "agree": 0.98
+  },
+  "0xc289f4": {
+   "name": "height",
+   "kind": "small",
+   "source": "Height",
+   "agree": 1.0
+  },
+  "0xc28cee": {
+   "name": "homeStateId",
+   "kind": "enum",
+   "source": "PLYR_HOME_STATE(enum)",
+   "agree": 1.0
+  },
+  "0xc28d2e": {
+   "name": "hometown",
+   "kind": "string",
+   "source": "PLYR_HOME_TOWN",
+   "agree": 1.0
+  },
+  "0xc298ee": {
+   "name": "icon",
+   "kind": "int",
+   "source": "PLYR_ICON",
+   "agree": 1.0
+  },
+  "0xc29b70": {
+   "name": "longSnap",
+   "kind": "rating",
+   "source": "LongSnapRating",
+   "agree": 0.997
+  },
+  "0xc29baa": {
+   "name": "injury",
+   "kind": "rating",
+   "source": "InjuryRating",
+   "agree": 0.987
+  },
+  "0xc2a96e": {
+   "name": "jersey",
+   "kind": "small",
+   "source": "JerseyNum",
+   "agree": 0.909
+  },
+  "0xc2ab70": {
+   "name": "jumping",
+   "kind": "rating",
+   "source": "JumpingRating",
+   "agree": 0.996
+  },
+  "0xc2b863": {
+   "name": "kickAccuracy",
+   "kind": "rating",
+   "source": "KickAccuracyRating",
+   "agree": 0.99
+  },
+  "0xc2bc32": {
+   "name": "kickPower",
+   "kind": "rating",
+   "source": "KickPowerRating",
+   "agree": 0.997
+  },
+  "0xc2bcb4": {
+   "name": "kickReturn",
+   "kind": "rating",
+   "source": "KickReturnRating",
+   "agree": 1.0
+  },
+  "0xc2c8a4": {
+   "name": "ref3",
+   "kind": "int",
+   "source": "LastName(enum)",
+   "agree": 0.687
+  },
+  "0xc2c8ab": {
+   "name": "leadBlock",
+   "kind": "rating",
+   "source": "LeadBlockRating",
+   "agree": 0.986
+  },
+  "0xc2c8e5": {
+   "name": "celebration",
+   "kind": "small",
+   "source": "PLYR_CELEBRATION",
+   "agree": 1.0
+  },
+  "0xc2c8e9": {
+   "name": "catchInTraffic",
+   "kind": "rating",
+   "source": "CatchInTrafficRating",
+   "agree": 0.979
+  },
+  "0xc2c8f0": {
+   "name": null,
+   "kind": "unknown",
+   "source": "InjuryType(enum)",
+   "agree": 0.978
+  },
+  "0xc2c934": {
+   "name": "draftTeamId",
+   "kind": "int",
+   "source": "PLYR_DRAFTTEAM",
+   "agree": 0.999
+  },
+  "0xc2ca34": {
+   "name": "hitPower",
+   "kind": "rating",
+   "source": "HitPowerRating",
+   "agree": 0.986
+  },
+  "0xc2ca39": {
+   "name": null,
+   "kind": "unknown",
+   "source": "SeasonHealthPoolMax",
+   "agree": 0.98
+  },
+  "0xc2ca62": {
+   "name": "impactBlocking",
+   "kind": "rating",
+   "source": "ImpactBlockingRating",
+   "agree": 0.988
+  },
+  "0xc2caad": {
+   "name": "jukeMove",
+   "kind": "rating",
+   "source": "JukeMoveRating",
+   "agree": 0.983
+  },
+  "0xc2cb63": {
+   "name": "manCoverage",
+   "kind": "rating",
+   "source": "ManCoverageRating",
+   "agree": 0.972
+  },
+  "0xc2cb6f": {
+   "name": null,
+   "kind": "unknown",
+   "source": "CurrentYearSeasonEndingInjuryWeek",
+   "agree": 0.98
+  },
+  "0xc2cba1": {
+   "name": "lastName",
+   "kind": "string",
+   "source": "LastName",
+   "agree": 1.0
+  },
+  "0xc2cc25": {
+   "name": "pressCoverage",
+   "kind": "rating",
+   "source": "PressRating",
+   "agree": 0.987
+  },
+  "0xc2cc2c": {
+   "name": null,
+   "kind": "unknown",
+   "source": "PLYR_PERFORMLEVEL",
+   "agree": 1.0
+  },
+  "0xc2cc2d": {
+   "name": "powerMoves",
+   "kind": "rating",
+   "source": "PowerMovesRating",
+   "agree": 0.981
+  },
+  "0xc2cc2f": {
+   "name": null,
+   "kind": "unknown",
+   "source": "CurrentYearSeasonEndingInjuryWeek",
+   "agree": 0.98
+  },
+  "0xc2cc32": {
+   "name": "playRecognition",
+   "kind": "rating",
+   "source": "PlayRecognitionRating",
+   "agree": 0.942
+  },
+  "0xc2cc35": {
+   "name": "pursuit",
+   "kind": "rating",
+   "source": "PursuitRating",
+   "agree": 0.978
+  },
+  "0xc2ccac": {
+   "name": "release",
+   "kind": "rating",
+   "source": "ReleaseRating",
+   "agree": 0.98
+  },
+  "0xc2cce1": {
+   "name": "stiffArm",
+   "kind": "rating",
+   "source": "StiffArmRating",
+   "agree": 0.994
+  },
+  "0xc2cce3": {
+   "name": "spectacularCatch",
+   "kind": "rating",
+   "source": "SpectacularCatchRating",
+   "agree": 0.985
+  },
+  "0xc2cced": {
+   "name": "spinMove",
+   "kind": "rating",
+   "source": "SpinMoveRating",
+   "agree": 0.982
+  },
+  "0xc2cd32": {
+   "name": "trucking",
+   "kind": "rating",
+   "source": "TruckingRating",
+   "agree": 0.99
+  },
+  "0xc2cd39": {
+   "name": "archetypeId",
+   "kind": "enum",
+   "source": "PlayerType(enum)",
+   "agree": 0.945
+  },
+  "0xc2cea3": {
+   "name": "zoneCoverage",
+   "kind": "rating",
+   "source": "ZoneCoverageRating",
+   "agree": 0.967
+  },
+  "0xc2dcb2": {
+   "name": "mediumRouteRunning",
+   "kind": "rating",
+   "source": "MediumRouteRunningRating",
+   "agree": 0.973
+  },
+  "0xc2fa64": {
+   "name": "id2",
+   "kind": "int",
+   "source": "PLYR_ASSETNAME(enum)",
+   "agree": 1.0
+  },
+  "0xc2fdb2": {
+   "name": "overall",
+   "kind": "small",
+   "source": "ACQ_DNA_06(enum)",
+   "agree": 0.82
+  },
+  "0xc308a6": {
+   "name": "passBlockFinesse",
+   "kind": "rating",
+   "source": "PassBlockFinesseRating",
+   "agree": 0.988
+  },
+  "0xc308ab": {
+   "name": "passBlock",
+   "kind": "rating",
+   "source": "PassBlockRating",
+   "agree": 0.98
+  },
+  "0xc308b3": {
+   "name": "passBlockPower",
+   "kind": "rating",
+   "source": "PassBlockPowerRating",
+   "agree": 0.986
+  },
+  "0xc30b21": {
+   "name": "playAction",
+   "kind": "rating",
+   "source": "PlayActionRating",
+   "agree": 0.996
+  },
+  "0xc30bf3": {
+   "name": "positionId",
+   "kind": "enum",
+   "source": "Position(enum)",
+   "agree": 0.968
+  },
+  "0xc318b3": {
+   "name": "qbStyle",
+   "kind": "int",
+   "source": "PLYR_QBSTYLE(enum)",
+   "agree": 0.994
+  },
+  "0xc328a6": {
+   "name": "runBlockFinesse",
+   "kind": "rating",
+   "source": "RunBlockFinesseRating",
+   "agree": 0.989
+  },
+  "0xc328ab": {
+   "name": "runBlock",
+   "kind": "rating",
+   "source": "RunBlockRating",
+   "agree": 0.981
+  },
+  "0xc328b3": {
+   "name": "runBlockPower",
+   "kind": "rating",
+   "source": "RunBlockPowerRating",
+   "agree": 0.986
+  },
+  "0xc32bec": {
+   "name": "devTrait",
+   "kind": "enum",
+   "source": "TraitDevelopment(enum)",
+   "agree": 0.998
+  },
+  "0xc32ce5": {
+   "name": "runningStyle",
+   "kind": "int",
+   "source": "RunningStyleRating(enum)",
+   "agree": 1.0
+  },
+  "0xc338af": {
+   "name": null,
+   "kind": "unknown",
+   "source": "FirstName(enum)",
+   "agree": 0.392
+  },
+  "0xc33c24": {
+   "name": "speed",
+   "kind": "rating",
+   "source": "SpeedRating",
+   "agree": 0.997
+  },
+  "0xc33d21": {
+   "name": "stamina",
+   "kind": "rating",
+   "source": "StaminaRating",
+   "agree": 1.0
+  },
+  "0xc33d2d": {
+   "name": "sleeveTemperature",
+   "kind": "int",
+   "source": "PLYR_SLEEVETEMPERATURE",
+   "agree": 1.0
+  },
+  "0xc33d2e": {
+   "name": null,
+   "kind": "unknown",
+   "source": "PLYR_STANCE(enum)",
+   "agree": 1.0
+  },
+  "0xc33d32": {
+   "name": "strength",
+   "kind": "rating",
+   "source": "StrengthRating",
+   "agree": 0.997
+  },
+  "0xc33e30": {
+   "name": "ref1",
+   "kind": "int",
+   "source": "PLYR_ASSETNAME(enum)",
+   "agree": 1.0
+  },
+  "0xc34864": {
+   "name": "throwAccuracyDeep",
+   "kind": "rating",
+   "source": "ThrowAccuracyDeepRating",
+   "agree": 0.994
+  },
+  "0xc3486b": {
+   "name": "tackle",
+   "kind": "rating",
+   "source": "TackleRating",
+   "agree": 0.947
+  },
+  "0xc3486d": {
+   "name": "throwAccuracyMid",
+   "kind": "rating",
+   "source": "ThrowAccuracyMidRating",
+   "agree": 0.989
+  },
+  "0xc34873": {
+   "name": "throwAccuracyShort",
+   "kind": "rating",
+   "source": "ThrowAccuracyShortRating",
+   "agree": 0.988
+  },
+  "0xc3496e": {
+   "name": null,
+   "kind": "unknown",
+   "source": "CurrentYearSeasonEndingInjuryWeek",
+   "agree": 0.98
+  },
+  "0xc349e8": {
+   "name": "toughness",
+   "kind": "rating",
+   "source": "ToughnessRating",
+   "agree": 0.999
+  },
+  "0xc34a21": {
+   "name": "throwAccuracy",
+   "kind": "rating",
+   "source": "ThrowAccuracyRating",
+   "agree": 1.0
+  },
+  "0xc34a30": {
+   "name": "throwPower",
+   "kind": "rating",
+   "source": "ThrowPowerRating",
+   "agree": 0.998
+  },
+  "0xc34bf2": {
+   "name": "throwOnTheRun",
+   "kind": "rating",
+   "source": "ThrowOnTheRunRating",
+   "agree": 0.992
+  },
+  "0xc34ce1": {
+   "name": null,
+   "kind": "unknown",
+   "source": "Contract(enum)",
+   "agree": 0.291
+  },
+  "0xc34d70": {
+   "name": "throwUnderPressure",
+   "kind": "rating",
+   "source": "ThrowUnderPressureRating",
+   "agree": 0.99
+  },
+  "0xc368ef": {
+   "name": null,
+   "kind": "unknown",
+   "source": "InjurySeverity(enum)",
+   "agree": 0.922
+  },
+  "0xc36ce2": {
+   "name": null,
+   "kind": "unknown",
+   "source": "FirstName(enum)",
+   "agree": 0.392
+  },
+  "0xc36d33": {
+   "name": null,
+   "kind": "unknown",
+   "source": "Contract(enum)",
+   "agree": 0.291
+  },
+  "0xc379f4": {
+   "name": "weight",
+   "kind": "small",
+   "source": "Weight",
+   "agree": 0.724
+  },
+  "0xc398e6": {
+   "name": null,
+   "kind": "unknown",
+   "source": "CurrentYearSeasonEndingInjuryWeek",
+   "agree": 0.919
+  },
+  "0xc39cb0": {
+   "name": "yearsPro",
+   "kind": "small",
+   "source": "YearsPro",
+   "agree": 1.0
+  },
+  "0xc39df4": {
+   "name": "yearsWithTeam",
+   "kind": "small",
+   "source": "ACQ_DNA_07(enum)",
+   "agree": 0.855
+  },
+  "0xcf2cae": {
+   "name": "shortRouteRunning",
+   "kind": "rating",
+   "source": "ShortRouteRunningRating",
+   "agree": 0.982
+  },
+  "0xd27a64": {
+   "name": "teamId",
+   "kind": "int",
+   "source": "PLYR_STANCE(enum)",
+   "agree": 0.944
+  }
+ },
+ "enums": {
+  "devTrait": {
+   "0": 0,
+   "1": 1,
+   "2": 2,
+   "3": 3
+  },
+  "positionId": "M26/M27 position id (PositionMapper), absent = 0 = QB"
+ }
+}

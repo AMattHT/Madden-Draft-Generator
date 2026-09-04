@@ -16,6 +16,10 @@ Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens o
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).
 
+**Roster tab.** Open a Madden 27 ROSTER save (the game's own, or an all-time roster you downloaded)
+and browse every player by team and position with ratings, dev traits, archetypes, colleges and
+faces, read straight from the file. Export the lot, or one team, as a CSV. Read-only for now.
+
 **Tone from a photo.** Paste an image address or upload a picture and the builder reads the
 skin tone off it (and suggests the closest generic heads).
 

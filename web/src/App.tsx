@@ -3,6 +3,7 @@ import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
 import { ClassStudio } from './components/ClassStudio';
 import { OpenClass } from './components/OpenClass';
+import { RosterView } from './components/RosterView';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -25,7 +26,7 @@ function normalizeGearEdits(gear: GearEdits): GearEdits {
   return Object.fromEntries(Object.entries(gear).map(([id, patch]) => [Number(id), normalizeGearPatch(patch)]));
 }
 
-export type AppView = 'home' | 'draft' | 'franchise';
+export type AppView = 'home' | 'draft' | 'roster' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
@@ -597,6 +598,7 @@ export default function App() {
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
           {view === 'home' && franchiseEnabled && <HomePage onSelect={setView} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
+          {view === 'roster' && <RosterView gameVersion={gameVersion} />}
           {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}

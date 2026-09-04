@@ -39,8 +39,8 @@ function GameToggle({ gameVersion, onSetGameVersion, pinned }: { gameVersion: Ga
   );
 }
 
-function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
-  const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
+function ViewToggle({ view, onSetView, franchise }: { view: AppView; onSetView: (v: AppView) => void; franchise: boolean }) {
+  const opts: [AppView, string][] = [['draft', 'Draft'], ['roster', 'Roster'], ...(franchise ? [['franchise', 'Franchise'] as [AppView, string]] : [])];
   return (
     <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
       {opts.map(([val, label]) => (
@@ -196,12 +196,8 @@ export function TopBar({
             <div className="text-[11px] text-muted">{franchiseEnabled ? 'Draft classes · Franchise tools' : 'Historical draft classes · importable .mdc'}</div>
           </div>
         </button>
-        {franchiseEnabled && (
-          <>
-            <div className="ml-1 h-6 w-px bg-border" />
-            <ViewToggle view={view} onSetView={onSetView} />
-          </>
-        )}
+        <div className="ml-1 h-6 w-px bg-border" />
+        <ViewToggle view={view} onSetView={onSetView} franchise={franchiseEnabled} />
         {draft && (
           <>
             <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} recent={recentYears} />
