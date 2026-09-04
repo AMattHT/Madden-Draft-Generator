@@ -32,6 +32,7 @@ export function ClassView({
   source,
   onRefresh,
   onVariant,
+  onOpenClass,
   onResetVariant,
   onShowDropped,
   busy,
@@ -55,6 +56,8 @@ export function ClassView({
   source: 'cache' | 'live';
   onRefresh: () => void;
   onVariant?: () => void;
+  /** Open an existing .mdc (lives in the export menu). */
+  onOpenClass?: () => void;
   onResetVariant?: () => void;
   onShowDropped?: () => void;
   busy: boolean;
@@ -339,6 +342,7 @@ export function ClassView({
             draftOpts={exportOpts}
             gameVersion={data.gameVersion ?? 'm26'}
             editTools={editTools}
+            onOpenClass={onOpenClass}
           />
         </div>
       </header>

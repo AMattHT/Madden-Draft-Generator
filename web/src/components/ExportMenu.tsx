@@ -34,6 +34,7 @@ export function ExportMenu({
   draftOpts,
   gameVersion = 'm26',
   editTools,
+  onOpenClass,
 }: {
   year: number;
   league: string;
@@ -46,6 +47,8 @@ export function ExportMenu({
   draftOpts: ClassRequestOpts;
   gameVersion?: GameVersion;
   editTools?: EditTools;
+  /** Open an existing draft class (.mdc) from a Saves folder or a file. */
+  onOpenClass?: () => void;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -193,6 +196,19 @@ export function ExportMenu({
 
       {open && (
         <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg border border-border-strong bg-surface-1 py-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
+          {onOpenClass && (
+            <>
+              <button
+                onClick={() => { setOpen(false); onOpenClass(); }}
+                className={item}
+                title="Open an existing draft class (.mdc) from your Madden Saves folder or any file, edit it, and save it back"
+              >
+                <span className="inline-flex items-center gap-2"><Icon path={ICONS.folder} className="h-3.5 w-3.5 text-muted" /> Open a draft class…</span>
+                <span className="text-[10px] text-muted">.mdc</span>
+              </button>
+              <div className="my-1 border-t border-border" />
+            </>
+          )}
           <button onClick={saveToSaves} disabled={!!busy} className={item} title={draftOpts.source === 'file' ? 'Write the edited class back into the Saves folder under its own name; the previous file is kept as .bak' : 'Write the .mdc into Documents\\Madden NFL 26\\Saves — no manual file move'}>
             <span>{busy === 'saves' ? 'Saving…' : draftOpts.source === 'file' ? 'Save back to Madden Saves folder' : 'Save to Madden Saves folder'}</span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-success-light">recommended</span>

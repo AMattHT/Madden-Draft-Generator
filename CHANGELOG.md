@@ -11,7 +11,7 @@ time. The builder now shows his real photo beside the faces, and the board has a
 "Unverified faces" filter that lists only the players whose tone is a guess, each next to his
 photo, so a class can be checked in a minute.
 
-**Open a draft class.** An "Open class" button in the top bar lists the draft classes in your
+**Open a draft class.** "Open a draft class…" in the Download menu lists the draft classes in your
 Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens on the board as
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).

@@ -561,7 +561,6 @@ export default function App() {
       <UpdateBanner />
       <TopBar
         onCreateClass={() => openBuilder(null)}
-        onOpenClass={() => setOpenerOpen(true)}
         onWhatsNew={openWhatsNew}
         view={view}
         onSetView={setView}
@@ -661,6 +660,7 @@ export default function App() {
               customClasses={customClasses}
               onOpenBuilder={openBuilder}
               onRefresh={() => selected != null && select(selected, true)}
+              onOpenClass={() => setOpenerOpen(true)}
               onVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: (draftOpts.variant ?? 0) + 1 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
               onResetVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: 0 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
             />
