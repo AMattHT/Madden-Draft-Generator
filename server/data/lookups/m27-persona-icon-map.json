@@ -21,7 +21,6 @@
     "Outspoken": "Leader",
     "Charismatic": "Leader",
     "Ambitious": "Leader",
-
     "StudentOfTheGame": "Scholar",
     "Cerebral": "Scholar",
     "Calculated": "Scholar",
@@ -32,22 +31,19 @@
     "Savvy": "Scholar",
     "Pragmatic": "Scholar",
     "Conscientious": "Scholar",
-
     "Aggressive": "Fighter",
     "Intense": "Fighter",
     "OverlyCompetitive": "Fighter",
     "Headstrong": "Fighter",
     "Stubborn": "Fighter",
     "Uncompromising": "Fighter",
-    "Resilient": "Fighter",
+    "Resilient": "ShieldRock",
     "Passionate": "Fighter",
-
     "Diva": "Spotlight",
     "Expressive": "Spotlight",
     "Unpredictable": "Spotlight",
     "Opportunistic": "Spotlight",
     "Contractminded": "Spotlight",
-
     "TeamFirst": "TeamPilar",
     "Loyal": "TeamPilar",
     "Reliable": "TeamPilar",
@@ -61,7 +57,6 @@
     "Diplomatic": "TeamPilar",
     "Transparent": "TeamPilar",
     "Empathetic": "TeamPilar",
-
     "Stoic": "ShieldRock",
     "Composed": "ShieldRock",
     "Guarded": "ShieldRock",
@@ -72,12 +67,20 @@
     "Principled": "ShieldRock",
     "Independent": "ShieldRock",
     "Focused": "ShieldRock",
-
     "Emotional": "StateOfMind",
     "Sensitive": "StateOfMind",
     "Flexible": "StateOfMind",
     "Mindful": "StateOfMind",
     "Frugal": "StateOfMind",
     "FamilyFocused": "StateOfMind"
-  }
+  },
+  "_verified": [
+    "Ambitious",
+    "Confident",
+    "Direct",
+    "Expressive",
+    "Opportunistic",
+    "Passionate",
+    "Resilient"
+  ]
 }
