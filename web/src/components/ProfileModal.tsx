@@ -168,9 +168,6 @@ function frontSevenTitle(f: FrontSevenInfo): string {
   return parts.join(' · ');
 }
 
-/** The edit fields the Appearance builder writes; a likeness fix supersedes them. */
-const APPEARANCE_EDIT_KEYS = ['skinTone', 'genericHeadName', 'faceAsset', 'bodyType'];
-
 export function ProfileModal({
   row,
   patch,
@@ -186,8 +183,6 @@ export function ProfileModal({
   canPrev = false,
   canNext = false,
   spoilers = true,
-  onLikenessChanged,
-  onClearEdits,
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
@@ -204,10 +199,6 @@ export function ProfileModal({
   spoilers?: boolean;
   canPrev?: boolean;
   canNext?: boolean;
-  /** A likeness fix was recorded or undone: the class should regenerate. */
-  onLikenessChanged?: () => void;
-  /** Drop these fields from this player's class edit (the fix carries them now). */
-  onClearEdits?: (fields: string[]) => void;
 }) {
   // Avatar source chain (photo, then in-game portrait): imgErr counts how many
   // sources have failed so a dead photo URL falls back instead of going blank.
@@ -333,30 +324,6 @@ export function ProfileModal({
   // Face (generic head) picker: pool for the chosen skin tone; PEPS drives the write.
   const facePool = heads[String(faceTone)] ?? [];
   const curFace = effStr('genericHeadName', row.genericHead ?? '');
-  // A likeness fix is pinned to the man (name + draft year) and applied in every
-  // class; generated fillers and Studio custom players have no such identity.
-  const canFix = row.draftYear > 0 && !!row.firstName && row.wavSource !== 'preset' && !/^custom:/.test(String(row.srcIdx ?? ''));
-  const likenessWho = { firstName: row.firstName, lastName: row.lastName, draftYear: row.draftYear };
-  const fixEverywhere = async () => {
-    const asset = typeof patch.faceAsset === 'string' && patch.faceAsset ? patch.faceAsset
-      : typeof patch.genericHeadName === 'string' && patch.genericHeadName ? patch.genericHeadName
-      : undefined;
-    const tone = Math.max(1, Math.min(7, effNum('skinTone', row.skinTone ?? 4)));
-    await api.setLikenessOverride({
-      ...likenessWho,
-      skinTone: tone,
-      faceAsset: asset,
-      bodyType: typeof patch.bodyType === 'string' && patch.bodyType ? patch.bodyType : undefined,
-    });
-    // The fix now carries the look; the local class edit would only mask an undo.
-    onClearEdits?.(APPEARANCE_EDIT_KEYS);
-    onLikenessChanged?.();
-  };
-  const undoFix = async () => {
-    await api.removeLikenessOverride(likenessWho);
-    onClearEdits?.(APPEARANCE_EDIT_KEYS);
-    onLikenessChanged?.();
-  };
   const toneFromPhoto = (input: { imageUrl?: string; imageBase64?: string }) =>
     api.toneFromPhoto({ ...input, position: row.position, draftYear: row.draftYear, gameVersion });
   const faceIdx = facePool.indexOf(curFace);
@@ -703,9 +670,7 @@ export function ProfileModal({
               Appearance <span className="font-medium normal-case tracking-normal text-muted">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
             <span className="inline-flex items-center gap-2">
-            {row.likenessFixed ? (
-              <span title="A likeness fix is recorded for this player; it applies in every class he appears in"><Pill tone="success">Fixed everywhere</Pill></span>
-            ) : row.face !== 'asset' && (row.toneSource === 'prior' || row.toneSource === 'csv') ? (
+            {row.face !== 'asset' && (row.toneSource === 'prior' || row.toneSource === 'csv') ? (
               <span title="No photo evidence for his skin tone: it comes from the position/era prior. Open the editor to check it against a photo."><Pill tone="neutral">Unverified tone</Pill></span>
             ) : null}
             <button
@@ -825,10 +790,6 @@ export function ProfileModal({
         generatedBody={row.bodyType || 'Standard'}
         isRealFace={row.face === 'asset'}
         referencePhotos={imgChain.filter((u) => u !== row.portrait)}
-        canFix={canFix}
-        fixed={!!row.likenessFixed}
-        onFixEverywhere={fixEverywhere}
-        onUndoFix={undoFix}
         onToneFromPhoto={toneFromPhoto}
         onEdit={onEdit}
         onClose={() => setAppearOpen(false)}

@@ -207,7 +207,6 @@ export function PlayerTable({
                   )}
                   <span className="inline-flex items-center gap-1.5">
                     {r.edited && <span className="text-gold" title="edited">●</span>}
-                    {r.likenessFixed && <span className="text-success-light" title="Likeness fixed everywhere">✓</span>}
                     {r.firstName} {r.lastName}
                   </span>
                 </span>

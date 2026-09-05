@@ -39,8 +39,8 @@ function GameToggle({ gameVersion, onSetGameVersion, pinned }: { gameVersion: Ga
   );
 }
 
-function ViewToggle({ view, onSetView, franchise }: { view: AppView; onSetView: (v: AppView) => void; franchise: boolean }) {
-  const opts: [AppView, string][] = [['draft', 'Draft'], ['roster', 'Roster'], ...(franchise ? [['franchise', 'Franchise'] as [AppView, string]] : [])];
+function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
+  const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
   return (
     <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
       {opts.map(([val, label]) => (
@@ -153,6 +153,7 @@ export function TopBar({
   selected,
   onSelectYear,
   onCreateClass,
+  onOpenClass,
   onSelectPlayer,
   cachedYears,
   recentYears = [],
@@ -178,6 +179,8 @@ export function TopBar({
   onSelectYear: (y: number) => void;
   /** Open the Class Studio (build a class by hand, custom players included). */
   onCreateClass?: () => void;
+  /** Open an existing .mdc from a Saves folder or a file. */
+  onOpenClass?: () => void;
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
   recentYears?: number[];
@@ -196,8 +199,12 @@ export function TopBar({
             <div className="text-[11px] text-muted">{franchiseEnabled ? 'Draft classes · Franchise tools' : 'Historical draft classes · importable .mdc'}</div>
           </div>
         </button>
-        <div className="ml-1 h-6 w-px bg-border" />
-        <ViewToggle view={view} onSetView={onSetView} franchise={franchiseEnabled} />
+        {franchiseEnabled && (
+          <>
+            <div className="ml-1 h-6 w-px bg-border" />
+            <ViewToggle view={view} onSetView={onSetView} />
+          </>
+        )}
         {draft && (
           <>
             <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} recent={recentYears} />
@@ -217,6 +224,15 @@ export function TopBar({
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold transition-colors hover:bg-gold/20"
               >
                 <Icon path={ICONS.plus} className="h-3.5 w-3.5" /> Create class
+              </button>
+            )}
+            {onOpenClass && (
+              <button
+                onClick={onOpenClass}
+                title="Open an existing draft class (.mdc) from your Madden Saves folder or any file, edit it, and save it back"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-semibold text-neutral-200 transition-colors hover:bg-surface-3"
+              >
+                <Icon path={ICONS.folder} className="h-3.5 w-3.5" /> Open draft class
               </button>
             )}
           </>

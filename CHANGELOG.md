@@ -4,21 +4,14 @@
 
 ### Features
 
-**Likeness fixes that stick.** Open a player's Appearance builder, pick the right skin tone or
-face, and hit "Fix everywhere": the fix is recorded against the player himself, so his year
-class, All-Time, By team and Studio classes all use it, and it survives updates. Undo it any
-time. The builder now shows his real photo beside the faces, and the board has an
-"Unverified faces" filter that lists only the players whose tone is a guess, each next to his
-photo, so a class can be checked in a minute.
+**Likeness review.** The Appearance builder shows the player's real photo beside the faces, and
+the board has an "Unverified faces" filter that lists only the players whose skin tone is a
+guess, each next to his photo, so a class can be checked in a minute.
 
 **Open a draft class.** "Open a draft class…" in the Download menu lists the draft classes in your
 Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens on the board as
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).
-
-**Roster tab.** Open a Madden 27 ROSTER save (the game's own, or an all-time roster you downloaded)
-and browse every player by team and position with ratings, dev traits, archetypes, colleges and
-faces, read straight from the file. Export the lot, or one team, as a CSV. Read-only for now.
 
 **Tone from a photo.** Paste an image address or upload a picture and the builder reads the
 skin tone off it (and suggests the closest generic heads).

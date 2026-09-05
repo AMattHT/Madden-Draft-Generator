@@ -39,7 +39,6 @@ export function ClassView({
   edits,
   gearEdits,
   onEdit,
-  onClearEdits,
   onGearEdit,
   onResetPlayer,
   editTools,
@@ -64,7 +63,6 @@ export function ClassView({
   edits: ClassEdits;
   gearEdits: GearEdits;
   onEdit: (id: number, field: string, value: number | string) => void;
-  onClearEdits?: (id: number, fields: string[]) => void;
   onGearEdit: (id: number, slot: string, asset: string) => void;
   onResetPlayer: (id: number) => void;
   editTools?: EditTools;
@@ -384,12 +382,10 @@ export function ClassView({
           gameVersion={data.gameVersion ?? "m26"}
           spoilers={spoilers}
           onEdit={(f, v) => onEdit(selectedRow.id, f, v)}
-          onClearEdits={onClearEdits ? (fields) => onClearEdits(selectedRow.id, fields) : undefined}
           onGearEdit={(slot, asset) => onGearEdit(selectedRow.id, slot, asset)}
           onReset={() => onResetPlayer(selectedRow.id)}
           onClose={() => setSelectedId(null)}
           onNavigate={navigatePlayer}
-          onLikenessChanged={onRefresh}
           canPrev={selectedIndex > 0}
           canNext={selectedIndex >= 0 && selectedIndex < rows.length - 1}
         />

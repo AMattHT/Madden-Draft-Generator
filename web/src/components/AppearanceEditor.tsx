@@ -49,8 +49,7 @@ function ReferencePhoto({ chain }: { chain: string[] }) {
  * Appearance builder — same chrome as Equipment Builder.
  * Left: the player's reference photo, then Generic faces (by skin tone) / Face
  * scans (M26 or M27 catalog) / Body. Right: searchable thumbnail grid. Picks
- * write into the same edit patch as export; "Fix everywhere" also records them
- * against the player so every class he appears in gets the same look.
+ * write into the same edit patch as export.
  */
 export function AppearanceEditor({
   playerName,
@@ -66,10 +65,6 @@ export function AppearanceEditor({
   generatedBody,
   isRealFace,
   referencePhotos = [],
-  canFix = false,
-  fixed = false,
-  onFixEverywhere,
-  onUndoFix,
   onToneFromPhoto,
   onEdit,
   onClose,
@@ -88,12 +83,6 @@ export function AppearanceEditor({
   isRealFace: boolean;
   /** Real photos of the player, best first (displayPortraitChain). */
   referencePhotos?: string[];
-  /** Real players only: the fix can be pinned to the man, not just this class. */
-  canFix?: boolean;
-  /** A fix is already recorded for him. */
-  fixed?: boolean;
-  onFixEverywhere?: () => Promise<void>;
-  onUndoFix?: () => Promise<void>;
   onToneFromPhoto?: (input: { imageUrl?: string; imageBase64?: string }) => Promise<ToneFromPhoto>;
   onEdit: (field: string, value: string | number) => void;
   onClose: () => void;
@@ -108,7 +97,6 @@ export function AppearanceEditor({
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoErr, setPhotoErr] = useState<string | null>(null);
   const [suggest, setSuggest] = useState<ToneFromPhoto | null>(null);
-  const [fixState, setFixState] = useState<'idle' | 'busy' | 'saved' | 'undone' | 'error'>('idle');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -178,18 +166,6 @@ export function AppearanceEditor({
     reader.readAsDataURL(f);
   };
 
-  const runFix = async (fn: (() => Promise<void>) | undefined, done: 'saved' | 'undone') => {
-    if (!fn) return;
-    setFixState('busy');
-    try {
-      await fn();
-      setFixState(done);
-      setTimeout(() => setFixState('idle'), 2000);
-    } catch {
-      setFixState('error');
-    }
-  };
-
   const usingScan = !!(currentAsset && !/^gen_/i.test(currentAsset));
   const scanLabel = gameVersion === 'm27' ? 'M27 face scans' : 'M26 face scans';
 
@@ -212,11 +188,6 @@ export function AppearanceEditor({
               <span className="ml-1 rounded bg-gold/20 px-1 text-[9px] font-semibold text-gold">
                 {gameVersion === 'm27' ? 'M27' : 'M26'}
               </span>
-              {fixed && (
-                <span className="ml-1.5 rounded bg-success/20 px-1 text-[9px] font-semibold text-success-light" title="A likeness fix is recorded for this player and applies in every class">
-                  FIXED EVERYWHERE
-                </span>
-              )}
             </div>
           </div>
           <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
@@ -458,28 +429,6 @@ export function AppearanceEditor({
           >
             Reset to generated
           </button>
-          {canFix && fixed && onUndoFix && (
-            <button
-              onClick={() => runFix(onUndoFix, 'undone')}
-              disabled={fixState === 'busy'}
-              className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 hover:bg-surface-2 disabled:opacity-50"
-              title="Forget the recorded fix; the generator decides again"
-            >
-              {fixState === 'undone' ? 'Fix removed' : 'Undo fix'}
-            </button>
-          )}
-          {canFix && onFixEverywhere && (
-            <button
-              onClick={() => runFix(onFixEverywhere, 'saved')}
-              disabled={fixState === 'busy'}
-              className={`shrink-0 rounded-md px-3 py-1.5 text-[11px] font-semibold transition-colors disabled:opacity-50 ${
-                fixState === 'saved' ? 'bg-success/20 text-success-light' : fixState === 'error' ? 'bg-danger/20 text-red-200' : 'bg-success/15 text-success-light ring-1 ring-success/40 hover:bg-success/25'
-              }`}
-              title="Record this tone, face and body for the player himself, so every class he appears in uses it (this class, All-Time, By team, Studio)"
-            >
-              {fixState === 'busy' ? 'Saving…' : fixState === 'saved' ? 'Fixed everywhere ✓' : fixState === 'error' ? 'Could not save' : 'Fix everywhere'}
-            </button>
-          )}
           <button onClick={onClose} className="shrink-0 rounded-md bg-surface-2 px-3 py-1.5 text-[11px] font-medium text-neutral-200 hover:bg-surface-3">
             Done
           </button>

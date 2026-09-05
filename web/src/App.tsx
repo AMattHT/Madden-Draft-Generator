@@ -3,7 +3,6 @@ import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
 import { ClassStudio } from './components/ClassStudio';
 import { OpenClass } from './components/OpenClass';
-import { RosterView } from './components/RosterView';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -26,7 +25,7 @@ function normalizeGearEdits(gear: GearEdits): GearEdits {
   return Object.fromEntries(Object.entries(gear).map(([id, patch]) => [Number(id), normalizeGearPatch(patch)]));
 }
 
-export type AppView = 'home' | 'draft' | 'roster' | 'franchise';
+export type AppView = 'home' | 'draft' | 'franchise';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {
@@ -400,20 +399,6 @@ export default function App() {
     [commitEdits]
   );
 
-  // Drop a few fields of one player's edit (the appearance keys once a likeness
-  // fix carries them, so the class regenerates from the fix, not the local edit).
-  const clearEditFields = useCallback(
-    (id: number, fields: string[]) => {
-      const prev = editsRef.current;
-      if (!prev[id]) return;
-      const player = { ...prev[id] };
-      for (const f of fields) delete player[f];
-      const next = { ...prev, [id]: player };
-      if (!Object.keys(player).length) delete next[id];
-      commitEdits(next, gearRef.current);
-    },
-    [commitEdits]
-  );
 
   const setGearEdit = useCallback(
     (id: number, slot: string, asset: string) => {
@@ -562,6 +547,7 @@ export default function App() {
       <UpdateBanner />
       <TopBar
         onCreateClass={() => openBuilder(null)}
+        onOpenClass={() => setOpenerOpen(true)}
         onWhatsNew={openWhatsNew}
         view={view}
         onSetView={setView}
@@ -598,7 +584,6 @@ export default function App() {
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1">
           {view === 'home' && franchiseEnabled && <HomePage onSelect={setView} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
-          {view === 'roster' && <RosterView gameVersion={gameVersion} />}
           {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}
@@ -649,7 +634,6 @@ export default function App() {
               edits={edits}
               gearEdits={gearEdits}
               onEdit={setEdit}
-              onClearEdits={clearEditFields}
               onGearEdit={setGearEdit}
               onResetPlayer={resetPlayer}
               editTools={{ undo: undoEdit, redo: redoEdit, clearAll: clearAllEdits, exportEdits, importEdits }}
