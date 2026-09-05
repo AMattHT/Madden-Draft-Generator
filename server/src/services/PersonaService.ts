@@ -31,6 +31,20 @@ export const DNA = {
   Stubborn: 59, Transparent: 60, Uncompromising: 61, Unpredictable: 62, Wary: 63,
 } as const;
 
+/** Trait -> icon family (data/lookups/m27-persona-icon-map.json): the game draws
+ *  persona DNA with eight pictures (Leader, Scholar, Fighter, ...), not one per trait. */
+let familyCache: Record<string, string> | null = null;
+function iconFamilies(): Record<string, string> {
+  if (familyCache) return familyCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-persona-icon-map.json'), 'utf8')) as { traits?: Record<string, string> };
+    familyCache = raw.traits ?? {};
+  } catch {
+    familyCache = {};
+  }
+  return familyCache;
+}
+
 /** Short plain-language blurbs for the profile's persona cards (data/lookups/m27-persona-descriptions.json). */
 let descCache: Record<string, string> | null = null;
 function descriptions(): Record<string, string> {
@@ -160,6 +174,18 @@ export const PersonaService = {
     return pickTraits(h, 5, TILT[group] ?? [], group, devTrait);
   },
 
+  /** The picture on disk for a trait: its own file, else its family's, else null. */
+  iconFile(traitName: string): string | null {
+    const own = path.join(DATA_ROOT, 'dna-icons', `${traitName}.png`);
+    if (fs.existsSync(own)) return own;
+    const fam = iconFamilies()[traitName];
+    if (fam) {
+      const f = path.join(DATA_ROOT, 'dna-icons', 'categories', `${fam}.png`);
+      if (fs.existsSync(f)) return f;
+    }
+    return null;
+  },
+
   /** Display name for a trait id (UI). */
   name(id: number): string {
     return NAME_BY_ID[id] ?? `#${id}`;
@@ -167,15 +193,17 @@ export const PersonaService = {
 
   /** The selectable trait list for the persona editor (id + name, sorted). Excludes
    *  Invalid and WinAtAllCosts (the game strips that one from imported rookies). */
-  list(): { id: number; name: string; description: string | null; icon: string; hasIcon: boolean }[] {
+  list(): { id: number; name: string; description: string | null; icon: string; hasIcon: boolean; family: string | null }[] {
     const desc = descriptions();
+    const fam = iconFamilies();
     return Object.entries(DNA)
       .map(([name, id]) => ({
         name,
         id,
         description: desc[name] ?? null,
         icon: `/api/portrait/dna-icon/${name}`,
-        hasIcon: fs.existsSync(path.join(DATA_ROOT, 'dna-icons', `${name}.png`)),
+        hasIcon: !!PersonaService.iconFile(name),
+        family: fam[name] ?? null,
       }))
       .filter((t) => t.id !== DNA.Invalid && t.id !== DNA.WinAtAllCosts)
       .sort((a, b) => a.name.localeCompare(b.name));

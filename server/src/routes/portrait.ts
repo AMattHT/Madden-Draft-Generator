@@ -6,6 +6,7 @@ import { DATA_ROOT } from '../config/paths';
 import { PortraitService } from '../services/PortraitService';
 import { GearImageService } from '../services/GearImageService';
 import { LikenessService } from '../services/LikenessService';
+import { PersonaService } from '../services/PersonaService';
 import { RetroHeadshotService } from '../services/RetroHeadshotService';
 
 const r = Router();
@@ -85,8 +86,8 @@ r.get('/portrait/dna-icon/:name', async (req, res) => {
   const name = String(req.params.name || '');
   if (!/^[A-Za-z]{2,40}$/.test(name)) return res.status(400).end();
   res.setHeader('Content-Type', 'image/png');
-  const file = path.join(DATA_ROOT, 'dna-icons', `${name}.png`);
-  if (fs.existsSync(file)) {
+  const file = PersonaService.iconFile(name);
+  if (file) {
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
     return res.sendFile(file);
   }

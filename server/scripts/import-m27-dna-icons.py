@@ -5,9 +5,13 @@ Image Library Manager > Export Image Library) holding the persona / DNA trait
 icons as DDS or PNG, one file per icon. Optionally the library's XML
 (AssetMetaList: AssetName -> AssetId) when the files are named by numeric id.
 
-Output: data/dna-icons/<TraitName>.png at 128px, one per trait in the game's
-persona enum (TeamFirst, Calculated, Contractminded, ...). The API serves them at
-/api/portrait/dna-icon/<TraitName>; a trait without a file gets a drawn tile.
+Output: data/dna-icons/<TraitName>.png at 128px for any per-trait picture, and
+data/dna-icons/categories/<Family>.png for the game's eight persona DNA icon
+families (the "personadnaicons" library exports as ucpdi_<Family>.xml sidecars
+plus 0.dds..7.dds in the same alphabetical order: BurnedOut, Fighter, Leader,
+Scholar, ShieldRock, Spotlight, StateOfMind, TeamPilar). The API serves a trait's
+own picture, else its family's (data/lookups/m27-persona-icon-map.json), else a
+drawn tile.
 
 Matching: the file (or AssetName) is normalised to letters only and compared
 with the trait names the same way, so "dna_team_first", "TeamFirst_icon" and
@@ -89,6 +93,34 @@ def names_from_xml(path: str):
     return out
 
 
+def save_png(im, dest):
+    im = im.convert('RGBA')
+    im.thumbnail((SIZE, SIZE), Image.LANCZOS)
+    canvas = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
+    canvas.paste(im, ((SIZE - im.width) // 2, (SIZE - im.height) // 2), im)
+    canvas.save(dest, optimize=True)
+
+
+def import_families(src):
+    """ucpdi_<Family>.xml sidecars name the families; 0.dds.. are the pictures in
+    the same (alphabetical) order. Returns the set of files consumed."""
+    fams = sorted({re.match(r'ucpdi_([A-Za-z]+)\.xml$', f).group(1) for f in os.listdir(src) if re.match(r'ucpdi_([A-Za-z]+)\.xml$', f)})
+    nums = sorted([f for f in os.listdir(src) if re.match(r'^\d+\.(dds|png)$', f, re.I)], key=lambda f: int(os.path.splitext(f)[0]))
+    used = set()
+    if not fams or not nums:
+        return used
+    if len(nums) != len(fams):
+        print(f'families ({len(fams)}: {", ".join(fams)}) and numbered pictures ({len(nums)}) differ; matching the first {min(len(nums), len(fams))} in order')
+    out = os.path.join(OUT, 'categories')
+    os.makedirs(out, exist_ok=True)
+    for fam, f in zip(fams, nums):
+        save_png(Image.open(os.path.join(src, f)), os.path.join(out, f'{fam}.png'))
+        used.add(f)
+        print(f'  family {fam:<12} <- {f}')
+    print(f'wrote {len(used)} family icons to {out}')
+    return used
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__)
@@ -96,31 +128,27 @@ def main():
     src = sys.argv[1]
     id_names = names_from_xml(sys.argv[2]) if len(sys.argv) > 2 else {}
     os.makedirs(OUT, exist_ok=True)
+    consumed = import_families(src)
     written, unmatched = {}, []
     for f in sorted(os.listdir(src)):
         stem, ext = os.path.splitext(f)
-        if ext.lower() not in ('.dds', '.png', '.jpg', '.jpeg', '.tga', '.webp'):
+        if ext.lower() not in ('.dds', '.png', '.jpg', '.jpeg', '.tga', '.webp') or f in consumed:
             continue
+        if re.match(r'^\d+$', stem) or stem.lower().startswith('icon_cfm_personalities'):
+            continue  # numbered leftovers / the older CFM personality icons are not traits
         label = id_names.get(stem, stem)
         trait = trait_for(label)
         if not trait:
             unmatched.append(f'{f} ({label})' if label != stem else f)
             continue
         try:
-            im = Image.open(os.path.join(src, f)).convert('RGBA')
+            save_png(Image.open(os.path.join(src, f)), os.path.join(OUT, f'{trait}.png'))
         except Exception as e:  # noqa: BLE001
             unmatched.append(f'{f}: {e}')
             continue
-        im.thumbnail((SIZE, SIZE), Image.LANCZOS)
-        canvas = Image.new('RGBA', (SIZE, SIZE), (0, 0, 0, 0))
-        canvas.paste(im, ((SIZE - im.width) // 2, (SIZE - im.height) // 2), im)
-        dest = os.path.join(OUT, f'{trait}.png')
-        canvas.save(dest, optimize=True)
         written[trait] = f
-    print(f'wrote {len(written)} icons to {OUT}')
-    missing = [t for t in TRAITS if t not in written and t != 'WinAtAllCosts']
-    if missing:
-        print(f'traits still without an icon ({len(missing)}): {", ".join(missing)}')
+    if written:
+        print(f'wrote {len(written)} per-trait icons to {OUT}')
     if unmatched:
         print(f'files not matched to a trait ({len(unmatched)}):')
         for u in unmatched:
