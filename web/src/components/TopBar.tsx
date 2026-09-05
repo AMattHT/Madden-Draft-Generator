@@ -71,38 +71,30 @@ function LogoMark() {
 }
 
 function ModeToggle({ mode, onSetMode }: { mode: GenMode; onSetMode: (m: GenMode) => void }) {
+  // One quiet segmented control: a short caption inside the pill, short labels
+  // that never wrap, and a single accent for the active lens (the class header's
+  // pill already colours the lens). Tooltips carry the long explanations.
+  const opts: [GenMode, string, string][] = [
+    ['launch', 'Launch', "EA's launch-day rookie ratings wherever that Madden edition's launch roster exists (most classes since 2001); everyone else as Realistic"],
+    ['madden', 'Realistic', 'Match a real Madden class: realistic rookies, capped at 84'],
+    ['retro', 'Career', 'Career lens: rated by how good they actually turned out (uncapped)'],
+  ];
   return (
-    <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
-      <button
-        onClick={() => onSetMode('launch')}
-        aria-pressed={mode === 'launch'}
-        title="EA's launch-day rookie ratings wherever that Madden edition's launch roster exists (most classes since 2001); everyone else as Realistic"
-        className={`rounded-md px-3 py-1.5 transition-colors ${
-          mode === 'launch' ? 'bg-gold text-black shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
-        }`}
-      >
-        Launch day ratings
-      </button>
-      <button
-        onClick={() => onSetMode('madden')}
-        aria-pressed={mode === 'madden'}
-        title="Match a real Madden class — realistic rookies, capped at 84"
-        className={`rounded-md px-3 py-1.5 transition-colors ${
-          mode === 'madden' ? 'bg-primary text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
-        }`}
-      >
-        Realistic
-      </button>
-      <button
-        onClick={() => onSetMode('retro')}
-        aria-pressed={mode === 'retro'}
-        title="Career-retrospective — rated by how good they actually turned out (uncapped)"
-        className={`rounded-md px-3 py-1.5 transition-colors ${
-          mode === 'retro' ? 'bg-legend text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
-        }`}
-      >
-        Career
-      </button>
+    <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium" role="group" aria-label="Rating lens">
+      <span className="hidden select-none px-2 text-[10px] font-semibold uppercase tracking-wider text-muted md:inline">Lens</span>
+      {opts.map(([val, label, title]) => (
+        <button
+          key={val}
+          onClick={() => onSetMode(val)}
+          aria-pressed={mode === val}
+          title={title}
+          className={`whitespace-nowrap rounded-md px-3 py-1.5 transition-colors ${
+            mode === val ? 'bg-primary text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -227,12 +219,7 @@ export function TopBar({
             <LeagueToggle league={league} onSetLeague={onSetLeague} />
           </div>
         )}
-        {draft && (
-          <div className="flex items-center gap-2">
-            <span className="hidden text-[11px] uppercase tracking-wider text-muted md:inline">Rating lens</span>
-            <ModeToggle mode={mode} onSetMode={onSetMode} />
-          </div>
-        )}
+        {draft && <ModeToggle mode={mode} onSetMode={onSetMode} />}
       </div>
     </header>
   );
