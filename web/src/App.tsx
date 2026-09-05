@@ -3,6 +3,8 @@ import { api, type ArchetypeOption } from './api';
 import { cache, setGeneratorFingerprint } from './cache';
 import { ClassStudio } from './components/ClassStudio';
 import { OpenClass } from './components/OpenClass';
+import { MenuBar } from './components/MenuBar';
+import type { ExportActions } from './components/ExportMenu';
 import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
@@ -76,6 +78,13 @@ export default function App() {
   const [view, setView] = useState<AppView>('draft');
   // Opens itself once after an update, and is reachable any time from the bar.
   const [whatsNewOpen, openWhatsNew, closeWhatsNew] = useWhatsNew();
+  // The open class's export actions, filled by ExportMenu for the File / Edit menus.
+  const exportActionsRef = useRef<ExportActions | null>(null);
+  // App version for the Help menu (from the API's about endpoint).
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+  useEffect(() => {
+    fetch('/api/about').then((r) => r.json()).then((d: { version?: string }) => setAppVersion(d.version ? `v${d.version}` : null)).catch(() => {});
+  }, []);
   const [usedYears, setUsedYears] = useState<Set<number>>(new Set());
   const [range, setRange] = useState<{ from: number; to: number } | null>(null);
   const [lastDrawn, setLastDrawn] = useState<number | null>(null);
@@ -545,10 +554,24 @@ export default function App() {
     <div className="flex h-screen flex-col">
       <WhatsNew open={whatsNewOpen} onClose={closeWhatsNew} />
       <UpdateBanner />
-      <TopBar
+      <MenuBar
         onCreateClass={() => openBuilder(null)}
         onOpenClass={() => setOpenerOpen(true)}
         onWhatsNew={openWhatsNew}
+        view={view}
+        onSetView={setView}
+        franchiseEnabled={franchiseEnabled}
+        gameVersion={gameVersion}
+        onSetGameVersion={changeGameVersion}
+        pinnedGame={pinnedGame}
+        mode={mode}
+        onSetMode={changeMode}
+        version={appVersion}
+        hasClass={!!data && view === 'draft'}
+        exportActions={exportActionsRef}
+        editTools={{ undo: undoEdit, redo: redoEdit, clearAll: clearAllEdits, exportEdits, importEdits }}
+      />
+      <TopBar
         view={view}
         onSetView={setView}
         onGoHome={() => setView(franchiseEnabled ? 'home' : 'draft')}
@@ -646,7 +669,7 @@ export default function App() {
               customClasses={customClasses}
               onOpenBuilder={openBuilder}
               onRefresh={() => selected != null && select(selected, true)}
-              onOpenClass={() => setOpenerOpen(true)}
+              exportActionsRef={exportActionsRef}
               onVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: (draftOpts.variant ?? 0) + 1 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
               onResetVariant={() => { if (selected == null) return; const next = { ...draftOpts, variant: 0 }; setDraftOpts(next); select(selected, true, mode, undefined, next); }}
             />

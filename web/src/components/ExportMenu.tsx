@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import { api, classFileName, type ClassRequestOpts } from '../api';
 import type { ClassEdits, GearEdits, LikenessStats, PlayerRow, GameVersion } from '../types';
 import { ATTR_COLUMNS } from '../constants';
@@ -8,11 +8,24 @@ import { Icon, ICONS } from './ui';
 type Msg = { ok: boolean; text: string } | null;
 
 /**
- * Header export control: primary "Download .mdc" button plus a caret menu for
- * the less-used actions — Save directly to the Madden Saves folder (skips the
- * manual file move), Frosty portrait build, CSV. Results show as a bottom-right
- * toast instead of eating layout space.
+ * Header export control: one "Save to Madden" button that writes the class into
+ * the Madden Saves folder. The other actions (download the .mdc, CSV, portrait
+ * pack, edit history) are registered on `actionsRef` for the File and Edit menus.
+ * Results show as a bottom-right toast instead of eating layout space.
  */
+/** What the menu bar can trigger on the open class. */
+export interface ExportActions {
+  downloadMdc: () => void;
+  saveToSaves: () => void;
+  downloadCsv: () => void;
+  buildPortraits: () => void;
+  canBuildPortraits: boolean;
+  exportEditsJson: () => void;
+  importEditsPick: () => void;
+  clearAllEdits: () => void;
+  editedCount: number;
+  isFile: boolean;
+}
 /** Edit-history and transfer tools supplied by App (undo/redo/clear/export/import). */
 export interface EditTools {
   undo: () => void;
@@ -34,7 +47,7 @@ export function ExportMenu({
   draftOpts,
   gameVersion = 'm26',
   editTools,
-  onOpenClass,
+  actionsRef,
 }: {
   year: number;
   league: string;
@@ -47,8 +60,8 @@ export function ExportMenu({
   draftOpts: ClassRequestOpts;
   gameVersion?: GameVersion;
   editTools?: EditTools;
-  /** Open an existing draft class (.mdc) from a Saves folder or a file. */
-  onOpenClass?: () => void;
+  /** Filled with this class's actions so the File / Edit menus can call them. */
+  actionsRef?: MutableRefObject<ExportActions | null>;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -76,24 +89,8 @@ export function ExportMenu({
       setMsg({ ok: false, text: `Import failed: ${(e as Error).message}` });
     }
   }
-  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<'mdc' | 'saves' | 'portraits' | null>(null);
   const [msg, setMsg] = useState<Msg>(null);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
 
   // Auto-dismiss successful toasts; errors stay until dismissed.
   useEffect(() => {
@@ -134,7 +131,6 @@ export function ExportMenu({
   }
 
   async function saveToSaves() {
-    setOpen(false);
     setBusy('saves');
     setMsg(null);
     try {
@@ -152,7 +148,6 @@ export function ExportMenu({
   }
 
   async function buildPortraits() {
-    setOpen(false);
     setBusy('portraits');
     setMsg({ ok: true, text: 'Downloading PFR/Wikipedia headshots…' });
     try {
@@ -168,90 +163,34 @@ export function ExportMenu({
     }
   }
 
-  const item =
-    'flex w-full items-center justify-between gap-3 px-3.5 py-2 text-left text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-2 disabled:opacity-40';
+  const isFile = draftOpts.source === 'file';
+  const canBuildPortraits = !isFile && likeness.customPortrait > 0;
+  const clearAllEdits = () => {
+    if (!editTools || !editedCount) return;
+    if (window.confirm(`Clear all ${editedCount} edited players for ${year} ${league}? Undo (Ctrl+Z) can bring them back until you reload.`)) editTools.clearAll();
+  };
+  // The File / Edit menus drive these; refreshed every render so counts stay current.
+  if (actionsRef) {
+    actionsRef.current = {
+      downloadMdc, saveToSaves, downloadCsv, buildPortraits, canBuildPortraits,
+      exportEditsJson: downloadEditsJson, importEditsPick: () => fileRef.current?.click(), clearAllEdits,
+      editedCount, isFile,
+    };
+  }
+  useEffect(() => () => { if (actionsRef) actionsRef.current = null; }, [actionsRef]);
 
   return (
-    <div ref={rootRef} className="relative">
-      <div className="flex items-stretch">
-        <button
-          onClick={downloadMdc}
-          disabled={!!busy}
-          className="inline-flex items-center gap-2 rounded-l-md bg-primary px-4 py-1.5 text-xs font-semibold text-white shadow-[0_2px_10px_rgba(47,107,255,0.3)] transition-colors hover:bg-primary-light disabled:opacity-50"
-        >
-          <Icon path={ICONS.download} className="h-3.5 w-3.5" />
-          {busy === 'mdc' ? 'Exporting…' : 'Download .mdc'}
-        </button>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          disabled={!!busy}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          aria-label="More export options"
-          className="grid w-7 place-items-center rounded-r-md border-l border-white/20 bg-primary text-white transition-colors hover:bg-primary-light disabled:opacity-50"
-        >
-          <Icon path={ICONS.chevronDown} className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
-        </button>
-      </div>
-
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg border border-border-strong bg-surface-1 py-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
-          {onOpenClass && (
-            <>
-              <button
-                onClick={() => { setOpen(false); onOpenClass(); }}
-                className={item}
-                title="Open an existing draft class (.mdc) from your Madden Saves folder or any file, edit it, and save it back"
-              >
-                <span className="inline-flex items-center gap-2"><Icon path={ICONS.folder} className="h-3.5 w-3.5 text-muted" /> Open a draft class…</span>
-                <span className="text-[10px] text-muted">.mdc</span>
-              </button>
-              <div className="my-1 border-t border-border" />
-            </>
-          )}
-          <button onClick={saveToSaves} disabled={!!busy} className={item} title={draftOpts.source === 'file' ? 'Write the edited class back into the Saves folder under its own name; the previous file is kept as .bak' : 'Write the .mdc into Documents\\Madden NFL 26\\Saves — no manual file move'}>
-            <span>{busy === 'saves' ? 'Saving…' : draftOpts.source === 'file' ? 'Save back to Madden Saves folder' : 'Save to Madden Saves folder'}</span>
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-success-light">recommended</span>
-          </button>
-          {draftOpts.source !== 'file' && (
-          <button
-            onClick={buildPortraits}
-            disabled={!!busy || likeness.customPortrait === 0}
-            className={item}
-            title={likeness.customPortrait === 0 ? 'No players in this class need a custom photo' : 'Download PFR/Wikipedia headshots for players without a Madden portrait'}
-          >
-            <span>{busy === 'portraits' ? 'Downloading…' : 'PFR/Wiki 2D portraits'}</span>
-            <span className="tabular-nums text-muted">{likeness.customPortrait} eligible</span>
-          </button>
-          )}
-          <button
-            onClick={() => { setOpen(false); downloadCsv(); }}
-            disabled={!!busy}
-            className={item}
-            title="Every player with overall, dev trait, bio, combine and all 54 attributes — edits applied. Reveals hidden ratings even with Spoilers off."
-          >
-            <span>Export CSV (all attributes)</span>
-          </button>
-          {editTools && (
-            <>
-              <div className="my-1 border-t border-border" />
-              <div className="px-3 pb-1 pt-1 text-[10px] font-medium uppercase tracking-wider text-muted">Edits</div>
-              <button onClick={() => { setOpen(false); editTools.undo(); }} className={item} title="Ctrl+Z"><span>Undo last edit</span><span className="text-muted">Ctrl+Z</span></button>
-              <button onClick={() => { setOpen(false); editTools.redo(); }} className={item} title="Ctrl+Shift+Z"><span>Redo</span><span className="text-muted">Ctrl+Shift+Z</span></button>
-              <button onClick={() => { setOpen(false); downloadEditsJson(); }} disabled={!editedCount} className={item}><span>Export edits (.json)</span><span className="tabular-nums text-muted">{editedCount}</span></button>
-              <button onClick={() => { setOpen(false); fileRef.current?.click(); }} className={item}><span>Import edits (.json)</span></button>
-              <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importEditsFile(f); e.target.value = ''; }} />
-              <button
-                onClick={() => { setOpen(false); if (editedCount && window.confirm(`Clear all ${editedCount} edited players for ${year} ${league}? Undo (Ctrl+Z) can bring them back until you reload.`)) editTools.clearAll(); }}
-                disabled={!editedCount}
-                className={`${item} text-red-300`}
-              >
-                <span>Clear all edits for this class</span>
-              </button>
-            </>
-          )}
-        </div>
-      )}
+    <div className="relative">
+      <button
+        onClick={saveToSaves}
+        disabled={!!busy}
+        title={isFile ? 'Write the edited class back into the Madden Saves folder under its own name; the previous file is kept as .bak' : `Write the class into your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder, ready for Franchise → Choose Draft Class`}
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-white shadow-[0_2px_10px_rgba(47,107,255,0.3)] transition-colors hover:bg-primary-light disabled:opacity-50"
+      >
+        <Icon path={ICONS.download} className="h-3.5 w-3.5" />
+        {busy === 'saves' ? 'Saving…' : busy === 'mdc' ? 'Exporting…' : busy === 'portraits' ? 'Downloading…' : 'Save to Madden'}
+      </button>
+      <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importEditsFile(f); e.target.value = ''; }} />
 
       {msg && (
         <div

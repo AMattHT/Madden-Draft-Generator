@@ -8,7 +8,12 @@
 the board has an "Unverified faces" filter that lists only the players whose skin tone is a
 guess, each next to his photo, so a class can be checked in a minute.
 
-**Open a draft class.** "Open a draft class…" in the Download menu lists the draft classes in your
+**Menu bar and one save button.** File, Edit, View and Help menus sit above the toolbar: create
+or open a class, save it as a draft class file, save it into the Madden Saves folder, export a
+CSV or a portrait pack, undo and redo, switch game and rating lens. The blue button in the
+class header is now simply "Save to Madden" and writes the class into your Saves folder.
+
+**Open a draft class.** File → Open a draft class… lists the draft classes in your
 Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens on the board as
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).

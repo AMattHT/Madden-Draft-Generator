@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
 import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, PlayerRow } from '../types';
 import type { ArchetypeOption } from '../api';
 import { api } from '../api';
@@ -8,7 +8,7 @@ import { POS_NAMES, groupForId } from '../constants';
 import { MetaStrip } from './MetaStrip';
 import { DraftOptions } from './DraftOptions';
 import { ExportMenu } from './ExportMenu';
-import type { EditTools } from './ExportMenu';
+import type { EditTools, ExportActions } from './ExportMenu';
 import { Toolbar } from './Toolbar';
 import { PlayerTable, ATTR_COLUMNS, SPOILER_SORTS } from './PlayerTable';
 import { ProfileModal } from './ProfileModal';
@@ -32,7 +32,7 @@ export function ClassView({
   source,
   onRefresh,
   onVariant,
-  onOpenClass,
+  exportActionsRef,
   onResetVariant,
   onShowDropped,
   busy,
@@ -55,8 +55,8 @@ export function ClassView({
   source: 'cache' | 'live';
   onRefresh: () => void;
   onVariant?: () => void;
-  /** Open an existing .mdc (lives in the export menu). */
-  onOpenClass?: () => void;
+  /** Filled by the export control so the File / Edit menus can act on this class. */
+  exportActionsRef?: MutableRefObject<ExportActions | null>;
   onResetVariant?: () => void;
   onShowDropped?: () => void;
   busy: boolean;
@@ -340,7 +340,7 @@ export function ClassView({
             draftOpts={exportOpts}
             gameVersion={data.gameVersion ?? 'm26'}
             editTools={editTools}
-            onOpenClass={onOpenClass}
+            actionsRef={exportActionsRef}
           />
         </div>
       </header>

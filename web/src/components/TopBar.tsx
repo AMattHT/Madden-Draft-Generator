@@ -152,12 +152,9 @@ export function TopBar({
   years,
   selected,
   onSelectYear,
-  onCreateClass,
-  onOpenClass,
   onSelectPlayer,
   cachedYears,
   recentYears = [],
-  onWhatsNew,
 }: {
   view: AppView;
   onSetView: (v: AppView) => void;
@@ -178,13 +175,10 @@ export function TopBar({
   selected: number | null;
   onSelectYear: (y: number) => void;
   /** Open the Class Studio (build a class by hand, custom players included). */
-  onCreateClass?: () => void;
-  /** Open an existing .mdc from a Saves folder or a file. */
-  onOpenClass?: () => void;
+
   onSelectPlayer: (year: number, focusName: string) => void;
   cachedYears: Set<number>;
   recentYears?: number[];
-  onWhatsNew?: () => void;
 }) {
   const draft = view === 'draft';
   return (
@@ -217,37 +211,10 @@ export function TopBar({
               <Icon path={ICONS.shuffle} className="h-4 w-4" />
             </button>
             <PlayerSearch onSelect={onSelectPlayer} />
-            {onCreateClass && (
-              <button
-                onClick={onCreateClass}
-                title="Create your own draft class: real players in the order you want, plus custom prospects"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold transition-colors hover:bg-gold/20"
-              >
-                <Icon path={ICONS.plus} className="h-3.5 w-3.5" /> Create class
-              </button>
-            )}
-            {onOpenClass && (
-              <button
-                onClick={onOpenClass}
-                title="Open an existing draft class (.mdc) from your Madden Saves folder or any file, edit it, and save it back"
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-semibold text-neutral-200 transition-colors hover:bg-surface-3"
-              >
-                <Icon path={ICONS.folder} className="h-3.5 w-3.5" /> Open draft class
-              </button>
-            )}
           </>
         )}
       </div>
       <div className="flex items-center gap-4">
-        {onWhatsNew && (
-          <button
-            onClick={onWhatsNew}
-            title="What's new in this version"
-            className="hidden rounded-md border border-border px-2 py-1 text-[11px] text-neutral-400 transition-colors hover:border-primary/40 hover:text-neutral-100 sm:block"
-          >
-            What's new
-          </button>
-        )}
         <div className="hidden items-center gap-2 text-[11px] text-muted sm:flex">
           <span className={`h-2 w-2 rounded-full ${connected ? 'bg-success shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-danger'}`} />
           {connected ? 'Backend connected' : 'Backend offline'}
