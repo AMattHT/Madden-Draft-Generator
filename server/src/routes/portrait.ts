@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 import { DATA_ROOT } from '../config/paths';
@@ -74,6 +75,35 @@ r.get('/portrait/dev-icon/:name', (req, res) => {
   res.setHeader('Content-Type', 'image/png');
   res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
   return res.sendFile(file);
+});
+
+/** Persona DNA trait icon: the game's artwork from data/dna-icons/<Trait>.png
+ *  (imported with scripts/import-m27-dna-icons.py), else a drawn tile with the
+ *  trait's initials so the profile's cards never break. */
+const dnaPlaceholders = new Map<string, Buffer>();
+r.get('/portrait/dna-icon/:name', async (req, res) => {
+  const name = String(req.params.name || '');
+  if (!/^[A-Za-z]{2,40}$/.test(name)) return res.status(400).end();
+  res.setHeader('Content-Type', 'image/png');
+  const file = path.join(DATA_ROOT, 'dna-icons', `${name}.png`);
+  if (fs.existsSync(file)) {
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    return res.sendFile(file);
+  }
+  let buf = dnaPlaceholders.get(name);
+  if (!buf) {
+    const words = name.replace(/([a-z])([A-Z])/g, '$1 $2').split(' ');
+    const initials = (words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2)).toUpperCase();
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+      <rect x="4" y="4" width="120" height="120" rx="24" fill="#1c1630" stroke="#6d4fc2" stroke-width="3"/>
+      <circle cx="64" cy="64" r="40" fill="#2a2148"/>
+      <text x="64" y="80" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="44" fill="#c9b6ff">${initials}</text>
+    </svg>`;
+    buf = await sharp(Buffer.from(svg)).png().toBuffer();
+    dnaPlaceholders.set(name, buf);
+  }
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  return res.send(buf);
 });
 
 /** Serve a Madden menu portrait PNG by portrait PID. */

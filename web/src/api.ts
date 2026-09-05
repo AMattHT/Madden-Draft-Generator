@@ -139,6 +139,9 @@ export interface RealGearPlayer extends RealGearPlayerSummary {
 export interface PersonaTrait {
   id: number;
   name: string;
+  description?: string | null;
+  icon?: string; // /api/portrait/dna-icon/<Name> (the game's art, else a drawn tile)
+  hasIcon?: boolean;
 }
 
 export interface FranchiseInfo {

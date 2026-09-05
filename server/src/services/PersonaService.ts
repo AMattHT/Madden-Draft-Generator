@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { LOOKUPS_DIR } from '../config/paths';
+import { LOOKUPS_DIR, DATA_ROOT } from '../config/paths';
 
 /**
  * Persona DNA assignment for generated M27 prospects.
@@ -30,6 +30,19 @@ export const DNA = {
   Savvy: 53, Selfless: 54, Sensitive: 55, Serious: 56, Stoic: 57, Strategic: 58,
   Stubborn: 59, Transparent: 60, Uncompromising: 61, Unpredictable: 62, Wary: 63,
 } as const;
+
+/** Short plain-language blurbs for the profile's persona cards (data/lookups/m27-persona-descriptions.json). */
+let descCache: Record<string, string> | null = null;
+function descriptions(): Record<string, string> {
+  if (descCache) return descCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-persona-descriptions.json'), 'utf8')) as { descriptions?: Record<string, string> };
+    descCache = raw.descriptions ?? {};
+  } catch {
+    descCache = {};
+  }
+  return descCache;
+}
 
 const NAME_BY_ID: Record<number, string> = Object.fromEntries(
   Object.entries(DNA).map(([k, v]) => [v, k])
@@ -154,9 +167,16 @@ export const PersonaService = {
 
   /** The selectable trait list for the persona editor (id + name, sorted). Excludes
    *  Invalid and WinAtAllCosts (the game strips that one from imported rookies). */
-  list(): { id: number; name: string }[] {
+  list(): { id: number; name: string; description: string | null; icon: string; hasIcon: boolean }[] {
+    const desc = descriptions();
     return Object.entries(DNA)
-      .map(([name, id]) => ({ name, id }))
+      .map(([name, id]) => ({
+        name,
+        id,
+        description: desc[name] ?? null,
+        icon: `/api/portrait/dna-icon/${name}`,
+        hasIcon: fs.existsSync(path.join(DATA_ROOT, 'dna-icons', `${name}.png`)),
+      }))
       .filter((t) => t.id !== DNA.Invalid && t.id !== DNA.WinAtAllCosts)
       .sort((a, b) => a.name.localeCompare(b.name));
   },

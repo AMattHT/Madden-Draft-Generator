@@ -18,6 +18,10 @@ Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens o
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).
 
+**Persona DNA, in full view.** The Madden 27 persona traits get their own section below
+Equipment: the five slots as cards with the trait's picture and a one-line blurb, and an
+Add trait picker that shows every trait with its picture before you choose.
+
 **Tone from a photo.** Paste an image address or upload a picture and the builder reads the
 skin tone off it (and suggests the closest generic heads).
 

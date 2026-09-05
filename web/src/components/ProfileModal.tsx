@@ -23,7 +23,29 @@ function faceSourceLabel(src?: string | null): string {
   return ' · carried over (unverified)';
 }
 
-function PersonaEditor({
+const dnaIcon = (t: { name: string; icon?: string }) => t.icon ?? `/api/portrait/dna-icon/${encodeURIComponent(t.name)}`;
+const humanTrait = (name: string) => name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^Contractminded$/, 'Contract-minded');
+
+function TraitCard({ t, onRemove }: { t: PersonaTrait; onRemove?: () => void }) {
+  return (
+    <div className="relative flex flex-col items-center gap-1.5 rounded-lg border border-legend/30 bg-legend/10 px-2 pb-2 pt-3 text-center" title={t.description ?? humanTrait(t.name)}>
+      {onRemove && (
+        <button onClick={onRemove} aria-label={`Remove ${humanTrait(t.name)}`} title="Remove trait" className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full text-legend-light/70 transition-colors hover:bg-legend/30 hover:text-white">×</button>
+      )}
+      <img src={dnaIcon(t)} alt="" className="h-14 w-14 rounded-xl object-contain" loading="lazy" />
+      <div className="text-[11px] font-semibold leading-tight text-legend-light">{humanTrait(t.name)}</div>
+      {t.description && <div className="line-clamp-2 text-[10px] leading-snug text-neutral-400">{t.description}</div>}
+    </div>
+  );
+}
+
+/**
+ * M27 Persona DNA section: the five slots as cards (icon, name, blurb) and a
+ * browsable picker with every selectable trait and its picture. Writes a
+ * comma-separated id list into the player's edit patch ('personaDNA'), which the
+ * export maps into the draft binary's 5 slots.
+ */
+function PersonaSection({
   generated,
   patch,
   onEdit,
@@ -35,116 +57,96 @@ function PersonaEditor({
   const [traits, setTraits] = useState<PersonaTrait[]>([]);
   const [adding, setAdding] = useState(false);
   const [query, setQuery] = useState('');
-  const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     api.personaDnaTraits().then(setTraits).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!adding) return;
-    const onDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setAdding(false);
-    };
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setAdding(false); } };
-    document.addEventListener('mousedown', onDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [adding]);
-
   const idOf = new Map(traits.map((t) => [t.name, t.id]));
-  const nameOf = new Map(traits.map((t) => [t.id, t.name]));
+  const byId = new Map(traits.map((t) => [t.id, t]));
   const edited = typeof patch.personaDNA === 'string';
   const generatedIds = (generated ?? []).map((n) => idOf.get(n)).filter((n): n is number => n != null);
   const ids: number[] = edited
     ? String(patch.personaDNA).split(',').map((s) => parseInt(s.trim(), 10)).filter((n) => Number.isFinite(n) && n > 0)
     : generatedIds;
-
   const apply = (next: number[]) => onEdit('personaDNA', next.join(','));
   const q = query.trim().toLowerCase();
-  const available = traits.filter((t) => !ids.includes(t.id) && (!q || t.name.toLowerCase().includes(q)));
+  const pool = traits.filter((t) => !q || humanTrait(t.name).toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q));
+  // Before the trait list loads, an unedited player still shows his generated names.
+  const cards: (PersonaTrait | null)[] = traits.length || edited
+    ? ids.map((id) => byId.get(id) ?? { id, name: `#${id}` })
+    : (generated ?? []).map((n, i) => ({ id: -1 - i, name: n }));
+  while (cards.length < 5) cards.push(null);
 
   return (
-    <div ref={wrapRef} className="relative mt-1.5 flex flex-wrap items-center gap-1" title="M27 Persona DNA — written into the export (5 slots max)">
-      <span className="text-[9px] font-semibold uppercase tracking-wider text-muted">
-        DNA <span className="text-neutral-500">{ids.length}/5</span>
-      </span>
-      {ids.map((id) => (
-        <span
-          key={id}
-          className="inline-flex items-center gap-1 rounded-full bg-legend/15 py-0.5 pl-2 pr-1 text-[10px] font-medium text-legend-light ring-1 ring-legend/30"
-        >
-          {nameOf.get(id) ?? `#${id}`}
+    <>
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+          Persona DNA <span className="font-medium normal-case tracking-normal text-muted">· {ids.length}/5 slots · written into the M27 export</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {edited && generatedIds.length > 0 && (
+            <button onClick={() => apply(generatedIds)} title="Restore the generated traits" className="rounded-md px-2 py-1 text-[11px] text-muted underline-offset-2 transition-colors hover:text-neutral-200 hover:underline">
+              Reset
+            </button>
+          )}
           <button
-            onClick={() => apply(ids.filter((x) => x !== id))}
-            className="grid h-3.5 w-3.5 place-items-center rounded-full text-legend-light/80 transition-colors hover:bg-legend/30 hover:text-white"
-            aria-label={`Remove ${nameOf.get(id) ?? id}`}
-            title="Remove trait"
+            onClick={() => setAdding((v) => !v)}
+            disabled={ids.length >= 5 && !adding}
+            title={ids.length >= 5 ? 'All five slots are used — remove a trait to add another' : 'Browse every trait with its picture'}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ×
+            {adding ? 'Close' : '+ Add trait'}
           </button>
-        </span>
-      ))}
-      {/* Before the trait list loads (unedited players), show names without remove. */}
-      {!edited && traits.length === 0 &&
-        (generated ?? []).map((n) => (
-          <span key={n} className="rounded-full bg-legend/15 px-2 py-0.5 text-[10px] font-medium text-legend-light ring-1 ring-legend/30">
-            {n}
-          </span>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+        {cards.map((t, i) => t ? (
+          <TraitCard key={`${t.id}-${i}`} t={t} onRemove={traits.length ? () => apply(ids.filter((x) => x !== t.id)) : undefined} />
+        ) : (
+          <button
+            key={`empty-${i}`}
+            onClick={() => setAdding(true)}
+            className="grid min-h-[104px] place-items-center rounded-lg border border-dashed border-border text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-legend/40 hover:text-neutral-300"
+          >
+            empty slot
+          </button>
         ))}
-      {/* Generated prospects fill all five slots, so hiding this at the cap hid
-       *  it from every player in a fresh class -- leaving chips that read as
-       *  static labels. It stays visible and explains itself instead. */}
-      <button
-        onClick={() => setAdding((v) => !v)}
-        disabled={ids.length >= 5}
-        title={ids.length >= 5 ? 'All five slots are used — remove a trait to add another' : 'Add a persona trait'}
-        className="rounded-full border border-dashed border-legend/40 px-2 py-0.5 text-[10px] font-medium text-legend-light transition-colors hover:bg-legend/10 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
-      >
-        + Add
-      </button>
-      {edited && generatedIds.length > 0 && (
-        <button
-          onClick={() => apply(generatedIds)}
-          title="Restore the generated traits"
-          className="rounded-full px-1.5 py-0.5 text-[10px] text-muted underline-offset-2 transition-colors hover:text-neutral-200 hover:underline"
-        >
-          Reset
-        </button>
-      )}
+      </div>
       {adding && (
-        <div className="absolute left-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-lg border border-border-strong bg-surface-1 shadow-xl">
-          <div className="border-b border-border p-2">
+        <div className="rounded-lg border border-border-strong bg-surface-0 p-2.5" data-nested-editor>
+          <div className="mb-2 flex items-center gap-2">
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter traits…"
-              className="w-full rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+              className="w-56 rounded-md border border-border bg-surface-1 px-2 py-1 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
             />
+            <span className="text-[11px] text-muted">{ids.length >= 5 ? 'All five slots are used; remove one above to swap it.' : `Pick up to ${5 - ids.length} more. Dimmed traits are already on him.`}</span>
           </div>
-          <div className="max-h-52 overflow-auto py-1">
-            {available.slice(0, 40).map((t) => (
-              <button
-                key={t.id}
-                onClick={() => {
-                  apply([...ids, t.id]);
-                  setAdding(false);
-                  setQuery('');
-                }}
-                className="block w-full px-3 py-1.5 text-left text-xs text-neutral-200 hover:bg-surface-2"
-              >
-                {t.name}
-              </button>
-            ))}
-            {available.length === 0 && <div className="px-3 py-3 text-center text-[11px] text-muted">No matching traits.</div>}
+          <div className="grid max-h-80 grid-cols-3 gap-1.5 overflow-auto pr-1 sm:grid-cols-4 md:grid-cols-6">
+            {pool.map((t) => {
+              const on = ids.includes(t.id);
+              return (
+                <button
+                  key={t.id}
+                  disabled={on || ids.length >= 5}
+                  onClick={() => { const next = [...ids, t.id]; apply(next); if (next.length >= 5) setAdding(false); }}
+                  title={t.description ?? humanTrait(t.name)}
+                  className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-center transition-colors ${on ? 'border-legend/40 bg-legend/10 opacity-50' : 'border-border hover:border-legend/40 hover:bg-surface-2'} disabled:cursor-default`}
+                >
+                  <img src={dnaIcon(t)} alt="" className="h-12 w-12 rounded-xl object-contain" loading="lazy" />
+                  <span className="text-[10px] font-medium leading-tight text-neutral-200">{humanTrait(t.name)}</span>
+                  {t.description && <span className="line-clamp-2 text-[9px] leading-snug text-muted">{t.description}</span>}
+                </button>
+              );
+            })}
+            {pool.length === 0 && <div className="col-span-full py-4 text-center text-[11px] text-muted">No matching traits.</div>}
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -218,6 +220,7 @@ export function ProfileModal({
   const bioRef = useRef<HTMLDivElement>(null);
   const appearRef = useRef<HTMLDivElement>(null);
   const equipRef = useRef<HTMLDivElement>(null);
+  const personaRef = useRef<HTMLDivElement>(null);
   const attrsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -425,9 +428,6 @@ export function ProfileModal({
               {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
               {row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
-            {row.persona && (
-              <PersonaEditor generated={row.persona} patch={patch} onEdit={onEdit} />
-            )}
           </div>
           {onNavigate && (
             <div className="flex shrink-0 items-center gap-0.5 self-center">
@@ -468,6 +468,7 @@ export function ProfileModal({
                 ['Bio', bioRef],
                 ['Appearance', appearRef],
                 ['Equipment', equipRef],
+                ...(row.persona ? ([['Persona', personaRef]] as const) : []),
                 ['Attributes', attrsRef],
               ] as const
             ).map(([label, ref]) => (
@@ -735,6 +736,12 @@ export function ProfileModal({
             <p className="text-[11px] text-muted">Auto — era-appropriate gear ({year}). Click “Edit equipment” to customize.</p>
           )}
         </div>
+
+        {row.persona && (
+          <div ref={personaRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
+            <PersonaSection generated={row.persona} patch={patch} onEdit={onEdit} />
+          </div>
+        )}
 
         <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
