@@ -1,4 +1,7 @@
+import fs from 'fs';
+import path from 'path';
 import { normalizeName } from '../util/csv';
+import { LOOKUPS_DIR } from '../config/paths';
 
 /**
  * Hand-curated Strong/Free-safety (and corner) designations for notable defensive
@@ -51,9 +54,33 @@ const OVERRIDES: Record<string, DbPos> = {
   'chrismcalister|1999': 'CB',
 };
 
+/**
+ * Data-file overrides (data/lookups/curated-db-positions.json, shape
+ * { "positions": { "melblount|1970": "CB" } }), kept by the player editor tool.
+ * They win over the table above so a data fix needs no code change.
+ */
+const FILE = path.join(LOOKUPS_DIR, 'curated-db-positions.json');
+let fromFile: Record<string, DbPos> | null = null;
+function fileOverrides(): Record<string, DbPos> {
+  if (fromFile) return fromFile;
+  try {
+    const raw = JSON.parse(fs.readFileSync(FILE, 'utf8')) as { positions?: Record<string, string> };
+    fromFile = {};
+    for (const [k, v] of Object.entries(raw.positions ?? {})) if (v === 'CB' || v === 'FS' || v === 'SS') fromFile[k] = v;
+  } catch {
+    fromFile = {};
+  }
+  return fromFile;
+}
+
 export const CuratedDbPositions = {
   /** Curated SS/FS/CB for a player, or undefined. Matched by name + draft year. */
   get(first: string, last: string, draftYear: number): DbPos | undefined {
-    return OVERRIDES[`${normalizeName(`${first} ${last}`)}|${draftYear}`];
+    const key = `${normalizeName(`${first} ${last}`)}|${draftYear}`;
+    return fileOverrides()[key] ?? OVERRIDES[key];
+  },
+  /** Forget the data-file overrides (tests, the editor tool after a save). */
+  reload(): void {
+    fromFile = null;
   },
 };

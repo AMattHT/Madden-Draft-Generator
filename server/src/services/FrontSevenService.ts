@@ -1,4 +1,8 @@
 import { BaselinePlayer, FrontSevenInfo } from '../types/player';
+import fs from 'fs';
+import path from 'path';
+import { normalizeName } from '../util/csv';
+import { LOOKUPS_DIR } from '../config/paths';
 import { NflverseCareerService } from './NflverseCareerService';
 import { RosterPositionService } from './RosterPositionService';
 import { SchemeService } from './SchemeService';
@@ -28,10 +32,35 @@ export interface FrontSevenResolution {
   frontSeven: FrontSevenInfo | null;
 }
 
+const CURATED_FILE = path.join(LOOKUPS_DIR, 'curated-front-seven.json');
+let curatedCache: Record<string, 'EDGE' | 'SAM' | 'MIKE' | 'WILL'> | null = null;
+function curatedRoles(): Record<string, 'EDGE' | 'SAM' | 'MIKE' | 'WILL'> {
+  if (curatedCache) return curatedCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(CURATED_FILE, 'utf8')) as { roles?: Record<string, string> };
+    curatedCache = {};
+    for (const [k, v] of Object.entries(raw.roles ?? {})) if (v === 'EDGE' || v === 'SAM' || v === 'MIKE' || v === 'WILL') curatedCache[k] = v;
+  } catch {
+    curatedCache = {};
+  }
+  return curatedCache;
+}
+
 export const FrontSevenService = {
+  /** Forget the data-file roles (tests, the editor tool after a save). */
+  reloadCurated(): void {
+    curatedCache = null;
+  },
   /** `pickTeam` is the nflverse team code from the draft-pick join (year classes);
    *  when absent the drafting team comes from nflverse by name. */
   resolve(p: BaselinePlayer, pickTeam?: string | null): FrontSevenResolution {
+    // A recorded role (data/lookups/curated-front-seven.json, kept by the player
+    // editor tool) wins outright: { "roles": { "lawrencetaylor|1981": "EDGE" } }.
+    const pinned = curatedRoles()[`${normalizeName(`${p.firstName} ${p.lastName}`)}|${p.draftYear}`];
+    if (pinned) {
+      const info: FrontSevenInfo = { role: pinned, reason: 'curated', lock: true, scheme: null, team: null, sackRate: null };
+      return { label: pinned === 'EDGE' ? 'DE' : pinned, frontSeven: info };
+    }
     const raw = RosterPositionService.raw(p.firstName, p.lastName);
     // A same-name collision with a non-front-seven player must not steer the verdict.
     const nv = raw && FRONT_SEVEN_TEXT.has(raw.position) ? raw : null;
