@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { CACHE_DIR } from '../config/paths';
+import { CACHE_DIR, LOOKUPS_DIR } from '../config/paths';
 import { normalizeName } from '../util/csv';
 
 /**
@@ -45,6 +45,22 @@ const BODY_TYPES = new Set(['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy']);
 let file = path.join(CACHE_DIR, 'likeness-overrides.json');
 let store: StoreFile | null = null;
 
+/** Shipped, data-level face picks (data/lookups/curated-faces.json, kept by the
+ *  player editor): { "faces": { "melblount|1970": "gen_7_B_S_001" } }. A user's own
+ *  fix in the cache store wins over these. */
+const CURATED_FACES = path.join(LOOKUPS_DIR, 'curated-faces.json');
+let curatedFaces: Record<string, string> | null = null;
+function shippedFaces(): Record<string, string> {
+  if (curatedFaces) return curatedFaces;
+  try {
+    const raw = JSON.parse(fs.readFileSync(CURATED_FACES, 'utf8')) as { faces?: Record<string, string> };
+    curatedFaces = raw.faces && typeof raw.faces === 'object' ? raw.faces : {};
+  } catch {
+    curatedFaces = {};
+  }
+  return curatedFaces;
+}
+
 export const likenessKey = (first: string, last: string, year: number): string =>
   `${normalizeName(first)}|${normalizeName(last)}|${year}`;
 
@@ -84,7 +100,18 @@ export const LikenessOverrideService = {
   /** The user's fix for this player, or null. */
   get(first: string, last: string, draftYear: number | null | undefined): LikenessOverrideEntry | null {
     if (draftYear == null) return null;
-    return load().overrides[likenessKey(first, last, draftYear)] ?? null;
+    const key = likenessKey(first, last, draftYear);
+    const own = load().overrides[key] ?? null;
+    const shipped = shippedFaces()[key];
+    if (!shipped) return own;
+    if (own) return own.faceAsset !== undefined ? own : { ...own, faceAsset: shipped };
+    const m = /^gen_(\d+)/i.exec(shipped);
+    return { key, firstName: first, lastName: last, draftYear, faceAsset: shipped, skinTone: m ? Math.max(1, Math.min(7, Number(m[1]))) : undefined, updatedAt: 0 };
+  },
+
+  /** Forget the shipped face picks (tests, the editor tool after a save). */
+  reloadShipped(): void {
+    curatedFaces = null;
   },
 
   /** Every fix, newest first. */

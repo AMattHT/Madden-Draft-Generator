@@ -1,4 +1,5 @@
 import { MdcService, MdcProspect } from './MdcService';
+import { CuratedGearService } from './CuratedGearService';
 import { Mdc27Service } from './Mdc27Service';
 import { assignM27Fields, commentaryIdFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
@@ -452,6 +453,12 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
     vis.skinTone = like.skinTone;
   }
   prospect.visuals = vis;
+  // Recorded equipment for this real player (player editor): sits on the era
+  // loadout; a per-class gear edit applied later still wins.
+  if (player.source !== 'custom' && player.source !== 'generated') {
+    const curatedGear = CuratedGearService.get(player.firstName, player.lastName, player.draftYear);
+    if (curatedGear) applyGearSlots(prospect, curatedGear);
+  }
 
   return { prospect, kind: like.kind };
 }
@@ -712,25 +719,30 @@ export function applyGearEdits(prospects: MdcProspect[], gearEdits?: GearEdits):
   for (const [pickStr, slots] of Object.entries(gearEdits)) {
     const p = prospects[Number(pickStr) - 1];
     if (!p || !slots) continue;
-    const visuals = (p.visuals ?? {}) as { loadouts?: Array<{ loadoutType?: string; loadoutElements?: Array<{ slotType?: string; itemAssetName: string }> }> };
-    const loadout = visuals.loadouts?.[0];
-    if (!loadout) continue;
-    const els = (loadout.loadoutElements ??= []);
-    for (const [slot, asset] of Object.entries(slots)) {
-      if (!asset || waistConflict(slots, slot)) continue;
-      // Facemask is a SLOTLESS element (itemAssetName GearFaceMask_*, no slotType):
-      // replace the existing prefix-matched element or push a new one.
-      if (slot === 'facemask') {
-        const existing = els.find((e) => !e.slotType && e.itemAssetName?.startsWith('GearFaceMask_'));
-        if (existing) existing.itemAssetName = asset;
-        else els.push({ itemAssetName: asset });
-        continue;
-      }
-      for (const slotType of GEAR_SLOT_TYPES[slot] ?? []) {
-        const existing = els.find((e) => e.slotType === slotType);
-        if (existing) existing.itemAssetName = asset;
-        else els.push({ slotType, itemAssetName: asset });
-      }
+    applyGearSlots(p, slots);
+  }
+}
+
+/** Write editor slots (helmet, gloveLeft, facemask, ...) into one prospect's PlayerOnField loadout. */
+export function applyGearSlots(p: MdcProspect, slots: Record<string, string | undefined>): void {
+  const visuals = (p.visuals ?? {}) as { loadouts?: Array<{ loadoutType?: string; loadoutElements?: Array<{ slotType?: string; itemAssetName: string }> }> };
+  const loadout = visuals.loadouts?.[0];
+  if (!loadout) return;
+  const els = (loadout.loadoutElements ??= []);
+  for (const [slot, asset] of Object.entries(slots)) {
+    if (!asset || waistConflict(slots, slot)) continue;
+    // Facemask is a SLOTLESS element (itemAssetName GearFaceMask_*, no slotType):
+    // replace the existing prefix-matched element or push a new one.
+    if (slot === 'facemask') {
+      const existing = els.find((e) => !e.slotType && e.itemAssetName?.startsWith('GearFaceMask_'));
+      if (existing) existing.itemAssetName = asset;
+      else els.push({ itemAssetName: asset });
+      continue;
+    }
+    for (const slotType of GEAR_SLOT_TYPES[slot] ?? []) {
+      const existing = els.find((e) => e.slotType === slotType);
+      if (existing) existing.itemAssetName = asset;
+      else els.push({ slotType, itemAssetName: asset });
     }
   }
 }
