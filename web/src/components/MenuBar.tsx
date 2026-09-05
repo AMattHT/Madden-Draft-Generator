@@ -105,10 +105,13 @@ export function MenuBar({
       items: [
         { kind: 'item', label: 'Draft classes', checked: view === 'draft', onSelect: () => onSetView('draft') },
         ...(franchiseEnabled ? [{ kind: 'item', label: 'Franchise tools', checked: view === 'franchise', onSelect: () => onSetView('franchise') } as Item] : []),
-        { kind: 'sep' },
-        { kind: 'label', label: 'Game' },
-        { kind: 'item', label: 'Madden 26', checked: gameVersion === 'm26', disabled: pinnedGame === 'm27', onSelect: () => onSetGameVersion('m26') },
-        { kind: 'item', label: 'Madden 27', checked: gameVersion === 'm27', disabled: pinnedGame === 'm26', onSelect: () => onSetGameVersion('m27') },
+        // A per-game build (the Madden 26 or Madden 27 app) is locked to its game; only the dev build switches.
+        ...(pinnedGame ? [] : [
+          { kind: 'sep' } as Item,
+          { kind: 'label', label: 'Game' } as Item,
+          { kind: 'item', label: 'Madden 26', checked: gameVersion === 'm26', onSelect: () => onSetGameVersion('m26') } as Item,
+          { kind: 'item', label: 'Madden 27', checked: gameVersion === 'm27', onSelect: () => onSetGameVersion('m27') } as Item,
+        ]),
         { kind: 'sep' },
         { kind: 'label', label: 'Rating lens' },
         { kind: 'item', label: 'Launch day ratings', checked: mode === 'launch', onSelect: () => onSetMode('launch') },

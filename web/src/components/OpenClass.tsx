@@ -59,7 +59,7 @@ function SavesList({ gameVersion, busy, onOpen }: { gameVersion: GameVersion; bu
  * browse for a file. The class then loads on the board like any other, edits
  * included, and exports back in the game format it came in.
  */
-export function OpenClass({ onOpened, onClose }: { onOpened: (cls: GeneratedClass) => void; onClose: () => void }) {
+export function OpenClass({ onOpened, onClose, pinnedGame = null }: { onOpened: (cls: GeneratedClass) => void; onClose: () => void; /** A per-game build shows and accepts only its own game's classes. */ pinnedGame?: GameVersion | null }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -74,7 +74,11 @@ export function OpenClass({ onOpened, onClose }: { onOpened: (cls: GeneratedClas
     setBusy(key);
     setErr(null);
     try {
-      onOpened(await fn());
+      const cls = await fn();
+      if (pinnedGame && cls.gameVersion && cls.gameVersion !== pinnedGame) {
+        throw new Error(`That is a Madden ${cls.gameVersion === 'm27' ? '27' : '26'} class; this app opens Madden ${pinnedGame === 'm27' ? '27' : '26'} classes only.`);
+      }
+      onOpened(cls);
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -102,7 +106,7 @@ export function OpenClass({ onOpened, onClose }: { onOpened: (cls: GeneratedClas
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <div>
             <div className="text-sm font-bold tracking-tight text-neutral-100">Open a draft class</div>
-            <div className="text-[11px] text-muted">A CAREERDRAFT file from either game. It opens on the board as it is, every editor works, and it exports back in the same game's format.</div>
+            <div className="text-[11px] text-muted">{pinnedGame ? `A Madden ${pinnedGame === 'm27' ? '27' : '26'} CAREERDRAFT file. It opens on the board as it is, every editor works, and it saves back in the same format.` : "A CAREERDRAFT file from either game. It opens on the board as it is, every editor works, and it exports back in the same game's format."}</div>
           </div>
           <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
@@ -110,8 +114,9 @@ export function OpenClass({ onOpened, onClose }: { onOpened: (cls: GeneratedClas
         </div>
 
         <div className="flex flex-col gap-3 p-4 md:flex-row">
-          <SavesList gameVersion="m27" busy={busy} onOpen={(name) => run(`m27:${name}`, () => api.openFromSaves('m27', name))} />
-          <SavesList gameVersion="m26" busy={busy} onOpen={(name) => run(`m26:${name}`, () => api.openFromSaves('m26', name))} />
+          {(pinnedGame ? [pinnedGame] : (['m27', 'm26'] as GameVersion[])).map((gv) => (
+            <SavesList key={gv} gameVersion={gv} busy={busy} onOpen={(name) => run(`${gv}:${name}`, () => api.openFromSaves(gv, name))} />
+          ))}
         </div>
 
         <div className="flex items-center gap-3 border-t border-border px-4 py-3">
@@ -123,7 +128,7 @@ export function OpenClass({ onOpened, onClose }: { onOpened: (cls: GeneratedClas
             {busy === 'file' ? 'Opening…' : 'Browse for a file…'}
           </button>
           <input ref={fileRef} type="file" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
-          <span className="text-[11px] text-muted">Any Madden 26 or 27 draft class, with or without the .mdc extension.</span>
+          <span className="text-[11px] text-muted">{pinnedGame ? `Any Madden ${pinnedGame === 'm27' ? '27' : '26'} draft class, with or without the .mdc extension.` : 'Any Madden 26 or 27 draft class, with or without the .mdc extension.'}</span>
           {err && <span className="ml-auto text-xs text-red-300">{err}</span>}
         </div>
       </div>

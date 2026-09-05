@@ -682,7 +682,7 @@ export default function App() {
         <DroppedPanel data={data} included={draftOpts.include ?? []} onInclude={onInclude} onExclude={onExclude} onClose={() => setShowDropped(false)} busy={busy} />
       )}
       {builder.open && <ClassStudio initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
-      {openerOpen && <OpenClass onOpened={openedClass} onClose={() => setOpenerOpen(false)} />}
+      {openerOpen && <OpenClass onOpened={openedClass} onClose={() => setOpenerOpen(false)} pinnedGame={pinnedGame} />}
     </div>
   );
 }
