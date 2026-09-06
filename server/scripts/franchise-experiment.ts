@@ -396,6 +396,7 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
  *   --part forceall ForceWin on the six empty wild-card rows of a week-18 save (Home x4, Away x2)
  *   --part weekcount  SeasonInfo.NflseasonWeekCount 23 -> 19 only
  *   --part blankweeks empty the regular-season rows from week 14 on only
+ *   --part season14shift  week count + blank weeks + post-season rows moved up four weeks
  *   --part divrows  rewrite the four divisional rows as the ghost bracket does
  */
 async function bisectPreset(ctx: Ctx): Promise<void> {
@@ -469,6 +470,27 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
       n++;
     }
     ctx.changes.push(`emptied ${n} regular-season rows from week 14 on`);
+  } else if (part === 'season14shift') {
+    // Week count 23 -> 19, weeks 14-17 emptied, AND the post-season rows moved up four weeks
+    // (wild card 18 -> 14 ... Super Bowl 22 -> 18) so the calendar and the rows agree.
+    const si = file.getTableByUniqueId(SEASONINFO_TABLE_UID); await si.readRecords();
+    const post = Number(val(si.records[0], 'PostSeasonNumWeeks')) || 5;
+    put(ctx, si.records[0], 'NflseasonWeekCount', 14 + post, 'SeasonInfo');
+    let emptied = 0, shifted = 0;
+    for (const g of sg.records) {
+      if (g.isEmpty) continue;
+      const type = String(val(g, 'SeasonWeekType')); const wk = Number(val(g, 'SeasonWeek'));
+      if (type === 'RegularSeason' && wk >= 14 && !/^0*$/.test(String(val(g, 'HomeTeam')))) {
+        if (!dryRun) { try { g.HomeTeam = NULL_REF; g.AwayTeam = NULL_REF; } catch { continue; } put(ctx, g, 'GameStatus', 'Unscheduled', `game ${val(g, 'SeasonGameID')}`); }
+        emptied++;
+      } else if (/Playoff|SuperBowl|ProBowl/.test(type) && wk >= 18) {
+        put(ctx, g, 'SeasonWeek', wk - 4, `${type} row`);
+        shifted++;
+      }
+    }
+    const flow = file.getTableByName('FranchiseServer_GameScheduleFlow');
+    if (flow) { await flow.readRecords(); const r = flow.records[0]; const cur = Number(val(r, 'ShowPlayoffBracketWeekNumber')); if (cur >= 4) put(ctx, r, 'ShowPlayoffBracketWeekNumber', cur - 4, 'GameScheduleFlow'); else ctx.changes.push(`ShowPlayoffBracketWeekNumber=${cur} left alone`); }
+    ctx.changes.push(`emptied ${emptied} regular-season rows, shifted ${shifted} post-season rows by -4`);
   } else if (part === 'flags') {
     const { recs, cmp } = await readField(ctx);
     for (const conf of ['AFC', 'NFC']) {
