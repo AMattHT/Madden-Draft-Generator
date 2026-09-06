@@ -324,6 +324,15 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
       ? recs.filter((r) => r.conf === conf && PARKED.includes(r.name))
       : rest.filter((r) => !seeds[conf].includes(r)).reverse();
     ghosts[conf] = pool.slice(0, ghostsPerConf);
+    if (flag('keep-user')) {
+      // The user-controlled club has a pending game request; keep it in the bracket (as the
+      // lowest ghost of its conference) so that request still points at a game it plays.
+      const user = mine.find((r) => !/^0*$/.test(String(val(teams.records[r.row], 'UserCharacter'))));
+      if (user && !seeds[conf].includes(user) && ghostsPerConf > 0) {
+        ghosts[conf] = [...ghosts[conf].filter((g) => g !== user).slice(0, ghostsPerConf - 1), user];
+        ctx.changes.push(`${conf}: user club ${user.name} kept as the last ghost seed`);
+      }
+    }
     if (ghosts[conf].length < ghostsPerConf) ctx.changes.push(`WARNING: ${conf} has only ${ghosts[conf].length} ghost candidates, need ${ghostsPerConf}`);
     ctx.changes.push(`${conf} seeds: ${seeds[conf].map((r, i) => `${i + 1} ${r.name} ${r.wins}-${r.losses}${winners.includes(r) ? '' : ' (WC)'}`).join(', ')} | ghosts: ${ghosts[conf].map((g) => g.name).join(', ')}`);
   }
@@ -382,6 +391,8 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
  *   --part teams    re-pair the not-yet-played wild-card rows only (teams swapped, statuses kept)
  *   --part reset    put the already-played wild-card rows back to HomeScheduled with zero scores
  *   --part flags    Team.PlayoffStatus / CurSeasonConfStanding for the 8-team seeding only
+ *   --part playedteams  reset the played wild-card rows AND swap one team on each
+ *   --part divrows  rewrite the four divisional rows as the ghost bracket does
  */
 async function bisectPreset(ctx: Ctx): Promise<void> {
   const { file, teams } = ctx;
@@ -407,6 +418,34 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
       put(ctx, g, 'GameStatus', 'HomeScheduled', label);
       for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
     }
+  } else if (part === 'playedteams') {
+    // Reset the played wild-card rows AND change one team on each (what the ghost bracket does to them).
+    const spare = ctx.teamRows.get('Bills')!, spare2 = ctx.teamRows.get('Jets')!, spare3 = ctx.teamRows.get('Saints')!, spare4 = ctx.teamRows.get('Bears')!, spare5 = ctx.teamRows.get('Dolphins')!;
+    const spares = [spare, spare2, spare3, spare4, spare5];
+    wc.filter((x: any) => played(x)).forEach((g: any, i: number) => {
+      const label = `${teamName(g, 'AwayTeam')} @ ${teamName(g, 'HomeTeam')} -> away ${ctx.teamByRow[spares[i]]}`;
+      if (dryRun) { ctx.changes.push(label + ' (dry run)'); return; }
+      try { g.AwayTeam = teams.getBinaryReferenceToRecord(spares[i]); } catch (e) { ctx.changes.push(`${label} FAILED ${(e as Error).message}`); return; }
+      put(ctx, g, 'GameStatus', 'HomeScheduled', label);
+      put(ctx, g, 'ForceWin', 'Home', label);
+      for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
+      ctx.changes.push(label);
+    });
+  } else if (part === 'divrows') {
+    // Rewrite the four divisional rows exactly as the ghost bracket does (same bye hosts).
+    const dvr = sg.records.filter((g: any) => !g.isEmpty && val(g, 'SeasonWeekType') === 'DivisionalPlayoff' && Number(val(g, 'SeasonWeek')) >= 18);
+    for (const g of dvr) {
+      const h = teamName(g, 'HomeTeam');
+      const label = `divisional row (${h})`;
+      if (dryRun) { ctx.changes.push(label + ' (dry run)'); continue; }
+      try {
+        if (h !== '-') { const row = g.getReferenceDataByKey('HomeTeam').rowNumber; g.HomeTeam = teams.getBinaryReferenceToRecord(row); g.AwayTeam = NULL_REF; put(ctx, g, 'GameStatus', 'HomeScheduled', label); }
+        else { g.HomeTeam = NULL_REF; g.AwayTeam = NULL_REF; put(ctx, g, 'GameStatus', 'Unscheduled', label); }
+        put(ctx, g, 'ForceWin', 'None', label);
+        for (const k of ['HomeTeamStatus', 'AwayTeamStatus']) { try { if (String(val(g, k)) !== 'Pending') writeField(g, k, 'Pending'); } catch { /* */ } }
+        ctx.changes.push(label + ' rewritten');
+      } catch (e) { ctx.changes.push(`${label} FAILED ${(e as Error).message}`); }
+    }
   } else if (part === 'flags') {
     const { recs, cmp } = await readField(ctx);
     for (const conf of ['AFC', 'NFC']) {
@@ -424,7 +463,7 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName);
-  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G${flag('keep-user') ? 'U' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'noop': ctx.changes.push('no edits: open + save only (control)'); break;
