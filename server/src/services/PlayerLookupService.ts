@@ -217,7 +217,7 @@ function load(): void {
   // pre-1960 accolades (so the merged row's career signals are complete), then
   // resolve name-matched shared assets (which use those signals to pick owners).
   splitSharedCareers(all);
-  const merged = mergeDuplicatePeople(all);
+  const merged = dropRedraftedRows(mergeDuplicatePeople(all));
   applyHistoricalAccolades(merged);
   dedupSharedAssets(merged);
   sanitizeWikiPhotos(merged);
@@ -464,6 +464,54 @@ function splitSharedCareers(players: BaselinePlayer[]): void {
       p.isHOF = false;
     }
   }
+}
+
+/** First season of the common draft; earlier years had AFL/NFL dual drafts that
+ *  are a separate, deliberate feature of the combined classes. */
+const COMMON_DRAFT_FROM = 1967;
+
+/**
+ * A player who did not sign went back into the next draft, so the lookup lists him
+ * twice and a franchise played year to year would draft him twice: Bo Jackson is
+ * Tampa Bay's 1st overall pick in 1986 and the Raiders' 183rd in 1987; Craig
+ * Erickson is a 1991 Eagle and a 1992 Buccaneer. The pick he actually signed is the
+ * later one, so the earlier row is folded into it and dropped.
+ *
+ * Only same name + same college, common-draft era, drafts one to three years
+ * apart, and only when the rows are plainly one man: the same career footprint on
+ * both rows (the lookup copies the career onto each), or an earlier row with no
+ * career at all. An earlier row that carries a career of its own
+ * which the later row lacks is a different man (the 1977 Colorado CB Mike Davis
+ * played eleven seasons; the 1980 Colorado CB Mike Davis did not) and both stay.
+ */
+function dropRedraftedRows(players: BaselinePlayer[]): BaselinePlayer[] {
+  const groups = new Map<string, BaselinePlayer[]>();
+  for (const p of players) {
+    if (p.draftYear < COMMON_DRAFT_FROM || p.draftRound == null) continue;
+    const k = `${normalizeName(`${p.firstName} ${p.lastName}`)}|${normalizeName(p.college)}`;
+    (groups.get(k) ?? groups.set(k, []).get(k)!).push(p);
+  }
+  const hasCareer = (p: BaselinePlayer) => p.careerTo != null || (p.wav ?? 0) > 0 || !!p.allPro1 || !!p.proBowls || !!p.seasonsStarted;
+  const sameCareer = (a: BaselinePlayer, b: BaselinePlayer) =>
+    a.careerTo != null && a.careerTo === b.careerTo && (a.wav ?? null) === (b.wav ?? null);
+  const drop = new Set<BaselinePlayer>();
+  for (const grp of groups.values()) {
+    if (grp.length < 2) continue;
+    const byYear = [...grp].sort((a, b) => a.draftYear - b.draftYear);
+    for (let i = 0; i < byYear.length - 1; i++) {
+      const earlier = byYear[i];
+      const later = byYear[i + 1];
+      const gap = later.draftYear - earlier.draftYear;
+      if (gap < 1 || gap > 3) continue;
+      // Not a shared asset id: the lookup joins Madden assets by name, so two men of
+      // one name and school carry the same id (both Colorado Mike Davises do).
+      const onePerson = sameCareer(earlier, later) || !hasCareer(earlier);
+      if (!onePerson) continue;
+      mergeInto(later, earlier);
+      drop.add(earlier);
+    }
+  }
+  return drop.size ? players.filter((p) => !drop.has(p)) : players;
 }
 
 function mergeDuplicatePeople(players: BaselinePlayer[]): BaselinePlayer[] {

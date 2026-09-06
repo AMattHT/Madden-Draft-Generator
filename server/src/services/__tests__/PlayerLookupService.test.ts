@@ -35,3 +35,23 @@ test('wiki photo URLs: icons/SVGs are dropped and a photo shared across decades 
   const shared = [...byUrl.values()].filter((ys) => ys.size > 1).length;
   assert.equal(shared, 0, `${shared} photo URLs still shared across draft years`);
 });
+
+test('a player re-drafted after not signing appears only in the draft he signed from', () => {
+  const bo = (year: number) => PlayerLookupService.byYear(year).filter((p) => p.firstName === 'Bo' && p.lastName === 'Jackson');
+  assert.equal(bo(1986).length, 0, 'Bo Jackson is not in the 1986 class');
+  assert.equal(bo(1987).length, 1, 'Bo Jackson is in the 1987 class once');
+  assert.equal(bo(1987)[0].draftPick, 183);
+  assert.equal(bo(1987)[0].careerTo, 1990, 'his career rides along');
+  const erickson = (year: number) => PlayerLookupService.byYear(year).filter((p) => p.firstName === 'Craig' && p.lastName === 'Erickson');
+  assert.equal(erickson(1991).length, 0);
+  assert.equal(erickson(1992).length, 1);
+});
+
+test('same-name men of the same school are kept apart when the earlier one had his own career', () => {
+  const davis = (year: number) => PlayerLookupService.byYear(year).filter((p) => p.firstName === 'Mike' && p.lastName === 'Davis' && /colorado/i.test(p.college));
+  assert.equal(davis(1977).length, 1, 'the Raiders safety stays in 1977');
+  assert.equal(davis(1980).length, 1);
+  const clay = (year: number) => PlayerLookupService.byYear(year).filter((p) => p.firstName === 'Clay' && p.lastName === 'Matthews');
+  assert.equal(clay(1978).length, 1);
+  assert.equal(clay(2009).length, 1);
+});

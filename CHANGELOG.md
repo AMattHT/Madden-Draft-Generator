@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+- Players who were drafted twice because they didn't sign the first time (Bo Jackson, 1986
+  and 1987) now appear only in the draft they signed from.
+
 ## 1.3.0
 
 ### Features
