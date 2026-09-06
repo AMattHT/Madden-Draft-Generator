@@ -329,8 +329,9 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
       // lowest ghost of its conference) so that request still points at a game it plays.
       const user = mine.find((r) => !/^0*$/.test(String(val(teams.records[r.row], 'UserCharacter'))));
       if (user && !seeds[conf].includes(user) && ghostsPerConf > 0) {
-        ghosts[conf] = [...ghosts[conf].filter((g) => g !== user).slice(0, ghostsPerConf - 1), user];
-        ctx.changes.push(`${conf}: user club ${user.name} kept as the last ghost seed`);
+        // First ghost slot = seed 5 = the 4-v-5 game, the row the user's pending request points at.
+        ghosts[conf] = [user, ...ghosts[conf].filter((g) => g !== user).slice(0, ghostsPerConf - 1)];
+        ctx.changes.push(`${conf}: user club ${user.name} kept as ghost seed ${realPerConf + 1}`);
       }
     }
     if (ghosts[conf].length < ghostsPerConf) ctx.changes.push(`WARNING: ${conf} has only ${ghosts[conf].length} ghost candidates, need ${ghostsPerConf}`);
@@ -400,7 +401,7 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
   const sg = file.getTableByUniqueId(SEASONGAME_TABLE_UID); await sg.readRecords();
   const wc = sg.records.filter((g: any) => !g.isEmpty && val(g, 'SeasonWeekType') === 'WildcardPlayoff' && Number(val(g, 'SeasonWeek')) >= 18);
   const played = (g: any) => /Won$|Tied/.test(String(val(g, 'GameStatus')));
-  const teamName = (g: any, k: string) => { try { return ctx.teamByRow[g.getReferenceDataByKey(k).rowNumber]; } catch { return '-'; } };
+  const teamName = (g: any, k: string) => { try { if (/^0*$/.test(String(val(g, k)))) return '-'; return ctx.teamByRow[g.getReferenceDataByKey(k).rowNumber]; } catch { return '-'; } };
   if (part === 'force') {
     for (const g of wc.filter((x: any) => !played(x))) put(ctx, g, 'ForceWin', 'Home', `${teamName(g, 'AwayTeam')} @ ${teamName(g, 'HomeTeam')}`);
   } else if (part === 'teams') {
