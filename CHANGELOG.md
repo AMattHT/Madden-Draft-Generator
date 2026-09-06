@@ -4,16 +4,6 @@
 
 ### Features
 
-**Persona descriptions from the game.** Every persona DNA card and picker entry now shows the
-game's own one-line description and display name for the trait, read from Madden 27's franchise
-data (Diva appears as "Particular", as it does in the game). The section also shows the
-player's mindset focus (Love of the Game, Winning, Personal Accolades or Financial) as its own
-picker above the traits, with the game's wording, and the choice is written into the export.
-
-**Likeness review.** The Appearance builder shows the player's real photo beside the faces, and
-the board has an "Unverified faces" filter that lists only the players whose skin tone is a
-guess, each next to his photo, so a class can be checked in a minute.
-
 **Menu bar and one save button.** File, Edit, View and Help menus sit above the toolbar: create
 or open a class, save it as a draft class file, save it into the Madden Saves folder, export a
 CSV or a portrait pack, undo and redo, switch game and rating lens. The blue button in the
@@ -24,9 +14,17 @@ Madden 26 and Madden 27 Saves folders, or browse for any .mdc. The class opens o
 it is, every editor works, and it saves back in the same game's format (the previous file is
 kept as .bak).
 
-**Persona DNA, in full view.** The Madden 27 persona traits get their own section below
-Equipment: the five slots as cards with the trait's picture and a one-line blurb, and an
-Add trait picker that shows every trait with its picture before you choose.
+**Persona, the way the game shows it.** Madden 27 players get a Persona section below
+Equipment. It opens with the mindset focus (Love of the Game, Winning, Personal Accolades or
+Financial) as four cards you can switch between, then the five persona DNA slots as cards with
+the game's icon, display name and one-line description, and an Add trait picker that shows
+every trait the same way. All of the wording and art is the game's own (Diva appears as
+"Particular", as it does in Madden), and both the focus and the traits are written into the
+export.
+
+**Likeness review.** The Appearance builder shows the player's real photo beside the faces, and
+the board has an "Unverified faces" filter that lists only the players whose skin tone is a
+guess, each next to his photo, so a class can be checked in a minute.
 
 **Tone from a photo.** Paste an image address or upload a picture and the builder reads the
 skin tone off it (and suggests the closest generic heads).
