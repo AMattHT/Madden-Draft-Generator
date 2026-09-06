@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api, type HistoricPreview, type HistoricSeasonOption } from '../../api';
-import { ToolHeader, ErrorCard, Field, cardCls, btnGhost, inputCls } from './shared';
+import { api, type ArmPlayoffsResult, type HistoricPreview, type HistoricSeasonOption } from '../../api';
+import { ToolHeader, ErrorCard, Field, cardCls, btnGhost, btnPrimary, inputCls } from './shared';
 
 const statusCls: Record<string, string> = {
   matches: 'bg-success/15 text-green-200',
@@ -13,14 +13,25 @@ const statusLabel: Record<string, string> = { matches: 'matches', differs: 'diff
 /**
  * Historic season (Madden 27): pick a baked season, preview what its pack would do to the
  * selected save, and see the era's playoff bracket seeded from the save's standings.
- * Read-only for now; the writers arrive once the save experiments settle what Madden honours.
+ * Arming the playoff format writes a new save; the layout, roster and schedule writers follow.
  */
-export function HistoricSeasonTool({ save, gameVersion }: { save: string; gameVersion: 'm26' | 'm27' }) {
+export function HistoricSeasonTool({ save, gameVersion, onWrote }: { save: string; gameVersion: 'm26' | 'm27'; onWrote?: () => void }) {
   const [seasons, setSeasons] = useState<HistoricSeasonOption[]>([]);
   const [year, setYear] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<HistoricPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [armBusy, setArmBusy] = useState(false);
+  const [armed, setArmed] = useState<ArmPlayoffsResult | null>(null);
+  const [armError, setArmError] = useState<string | null>(null);
+
+  async function arm(dryRun: boolean) {
+    if (!save || !year) return;
+    setArmBusy(true); setArmError(null);
+    try { setArmed(await api.franchiseArmPlayoffs(save, year, { dryRun })); if (!dryRun) onWrote?.(); }
+    catch (e) { setArmError((e as Error).message); }
+    finally { setArmBusy(false); }
+  }
 
   useEffect(() => {
     api.franchiseHistoricSeasons().then((s) => { setSeasons(s); if (s.length && year == null) setYear(s[0].year); }).catch((e) => setError((e as Error).message));
@@ -41,8 +52,8 @@ export function HistoricSeasonTool({ save, gameVersion }: { save: string; gameVe
     <>
       <ToolHeader title="Historic season">
         Set a franchise up as a past NFL season: that year's clubs and divisions, its real schedule and rosters, and
-        its playoff format. This preview reads the save and the season pack and shows what would change, plus the
-        era's bracket seeded from the save's current standings. Nothing is written yet.
+        its playoff format. Preview reads the save and the season pack and shows what would change, plus the era's
+        bracket seeded from the save's current standings. The playoff format can be armed into a new save below.
       </ToolHeader>
 
       {gameVersion !== 'm27' && (
@@ -153,6 +164,40 @@ export function HistoricSeasonTool({ save, gameVersion }: { save: string; gameVe
               {preview.bracket.notes.map((n, i) => <p key={i} className="mt-2 text-[11px] text-muted">{n}</p>)}
             </section>
           </div>
+
+          <section className={cardCls}>
+            <h3 className="text-sm font-semibold text-neutral-100">Playoff format</h3>
+            <p className="mt-1 text-xs text-muted">
+              Madden always seeds seven clubs per conference, but it keeps a force-win flag on each wild-card game. Arming the
+              format sets those flags so only the {preview.era.playoff.teams}-team field of {preview.year} survives the wild-card
+              round. Run it any time in the regular season (week 18 is fine), or at the wild-card week before a game is played.
+            </p>
+            <div className="mt-3 flex gap-3">
+              <button onClick={() => arm(true)} disabled={armBusy || !save} className={btnGhost}>{armBusy ? 'Working…' : 'Preview'}</button>
+              <button onClick={() => arm(false)} disabled={armBusy || !save || !armed || !armed.dryRun} className={btnPrimary}>{armBusy ? 'Writing…' : 'Arm → new save'}</button>
+            </div>
+            {armError && <div className="mt-3"><ErrorCard message={armError} /></div>}
+            {armed && (
+              <div className="mt-3 rounded-lg border border-success/40 bg-success/10 p-3 text-sm">
+                <div className="font-semibold text-green-100">
+                  {armed.dryRun ? `Preview (${armed.mode === 'wildcard' ? 'rows already seeded' : 'placeholders + flags'})` : <>Wrote <code className="rounded bg-black/30 px-1">{armed.output}</code></>}
+                </div>
+                <div className="mt-2 text-xs text-neutral-300">Field: {Object.entries(armed.field).map(([c, t]) => `${c}: ${t.join(', ')}`).join(' · ')}</div>
+                <table className="mt-2 w-full text-xs">
+                  <tbody>
+                    {armed.rows.map((r) => (
+                      <tr key={r.index} className="border-t border-border/50">
+                        <td className="py-1 pr-2 text-neutral-200">{r.away} at {r.home}{r.placeholder ? <span className="text-muted"> (placeholder)</span> : null}</td>
+                        <td className="py-1 pr-2 font-semibold tabular-nums text-neutral-100">{r.force === 'None' ? 'played' : `force ${r.force.toLowerCase()}`}</td>
+                        <td className="py-1 text-muted">{r.reason}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {armed.notes.map((n, i) => <p key={i} className="mt-2 text-[11px] text-green-200/80">{n}</p>)}
+              </div>
+            )}
+          </section>
 
           {preview.warnings.length > 0 && (
             <div className="rounded-lg border border-gold/40 bg-gold/10 px-4 py-3 text-xs text-gold">

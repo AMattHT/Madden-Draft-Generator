@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { companionBracket, type TeamRecord, type PlayedGame } from '../HistoricFranchiseService';
+import { companionBracket, playoffForces, type TeamRecord, type PlayedGame } from '../HistoricFranchiseService';
 import { SeasonPackService } from '../SeasonPackService';
 import { EraRulesService } from '../EraRulesService';
 
@@ -41,4 +41,15 @@ test('companion bracket applies wild cards and byes for a 12-team era', () => {
   assert.equal(b.conferences.AFC.filter((s) => s.via === 'wildcard').length, 3);
   assert.deepEqual(b.conferences.AFC.slice(0, 2).map((s) => s.bye), [true, true]);
   assert.equal(b.games.filter((g) => g.round.startsWith('AFC')).length, 2, 'two wild-card games per conference');
+});
+
+test('playoff forces: only the era field survives the wild-card round', () => {
+  const field = new Set(['Ravens', 'Chargers', 'Jets', 'Bengals']);
+  const rows = [
+    { home: 'Chargers', away: 'Colts' },   // member hosts a non-member -> Home
+    { home: 'Patriots', away: 'Jets' },    // non-member hosts a member -> Away
+    { home: 'Chargers', away: 'Jets' },    // both members -> played
+    { home: 'Texans', away: 'Colts' },     // neither -> Home (irrelevant)
+  ];
+  assert.deepEqual(playoffForces(field, rows).map((f) => f.force), ['Home', 'Away', 'None', 'Home']);
 });

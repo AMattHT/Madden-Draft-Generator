@@ -360,6 +360,12 @@ export interface HistoricPreview {
   warnings: string[];
 }
 
+export interface ArmedRow { index: number; away: string; home: string; force: 'Home' | 'Away' | 'None'; reason: string; placeholder: boolean }
+export interface ArmPlayoffsResult {
+  input: string; output: string; outputPath: string; dryRun: boolean; year: number; mode: 'regular' | 'wildcard';
+  field: Record<string, string[]>; rows: ArmedRow[]; notes: string[];
+}
+
 export interface ScheduleGame {
   away: string; home: string; played: boolean;
   awayScore: number; homeScore: number; status: string;
@@ -639,6 +645,20 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, year, gameVersion: franchiseGameVersion }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Arm the era's playoff format in a save (dryRun previews; else writes CAREER-*-PLAYOFFS). */
+  async franchiseArmPlayoffs(fileName: string, year: number, options: { dryRun?: boolean }): Promise<ArmPlayoffsResult> {
+    const res = await fetch('/api/franchise/historic/arm-playoffs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, year, options, gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

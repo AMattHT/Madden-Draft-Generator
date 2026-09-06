@@ -1,14 +1,15 @@
 import fs from 'fs';
 import path from 'path';
-import { openSave, savesDir, TEAM_TABLE_UID, SEASONGAME_TABLE_UID, SEASONINFO_TABLE_UID, type GameVersion } from './FranchiseService';
+import { openSave, savesDir, writeField, outputNameFor, TEAM_TABLE_UID, SEASONGAME_TABLE_UID, SEASONINFO_TABLE_UID, type GameVersion } from './FranchiseService';
 import { SeasonPackService, type SeasonPack, type SeasonTeam } from './SeasonPackService';
 import { EraRulesService, type EraRules, type PlayoffFormat } from './EraRulesService';
 
 /**
  * Historic seasons in a Madden 27 franchise: read-only preview of what a season pack
  * (data/seasons/<year>.json) would do to a save, plus the companion playoff bracket
- * computed from the save's standings under that era's rules. The writers (layout,
- * rosters, schedule, era rules) land once the save experiments say what the game honours.
+ * computed from the save's standings under that era's rules, and the first writer:
+ * armPlayoffFormat (the era's field via ForceWin on the wild-card rows). Layout, roster and
+ * schedule writers follow.
  */
 
 export interface TeamRecord {
@@ -32,6 +33,21 @@ export interface CompanionBracket {
 }
 
 export interface HistoricRule { key: string; label: string; wanted: string; current: string; status: 'matches' | 'differs' | 'unknown' | 'guidance' }
+
+export type ForceWin = 'Home' | 'Away' | 'None';
+export interface ArmedRow { index: number; away: string; home: string; force: ForceWin; reason: string; placeholder: boolean }
+export interface ArmPlayoffsResult {
+  input: string;
+  output: string;
+  outputPath: string;
+  dryRun: boolean;
+  year: number;
+  /** 'regular' = rows were empty and got placeholders + flags; 'wildcard' = rows already seeded, flags only. */
+  mode: 'regular' | 'wildcard';
+  field: Record<string, string[]>;
+  rows: ArmedRow[];
+  notes: string[];
+}
 
 export interface HistoricPreview {
   input: string;
@@ -121,6 +137,27 @@ export function companionBracket(pack: SeasonPack, era: EraRules, records: Map<s
   return { format, conferences, games: games_, notes };
 }
 
+/**
+ * Which way each wild-card game must be forced so that exactly the era's field survives
+ * the round. `field` holds the modern names of the clubs that belong in the era's playoff.
+ * A game between two members is left alone (they play), a game with one member is forced
+ * to that member, a game with none is forced Home (irrelevant to the field).
+ */
+export function playoffForces(field: Set<string>, rows: { home: string; away: string }[]): { force: ForceWin; reason: string }[] {
+  return rows.map(({ home, away }) => {
+    const h = field.has(home), a = field.has(away);
+    if (h && a) return { force: 'None', reason: 'both clubs belong to the field; the game is played' };
+    if (h) return { force: 'Home', reason: `${home} belongs to the field, ${away} does not` };
+    if (a) return { force: 'Away', reason: `${away} belongs to the field, ${home} does not` };
+    return { force: 'Home', reason: 'neither club belongs to the field' };
+  });
+}
+
+/** The era's playoff field (modern names) from the companion bracket: every seed. */
+export function eraField(bracket: CompanionBracket): Record<string, string[]> {
+  return Object.fromEntries(Object.entries(bracket.conferences).map(([conf, seeds]) => [conf, seeds.map((s) => s.team)]));
+}
+
 // ------------------------------------------------------------------ save reading
 async function readSave(inputPath: string, gameVersion: GameVersion) {
   const file = await openSave(inputPath, gameVersion);
@@ -191,6 +228,14 @@ async function readSave(inputPath: string, gameVersion: GameVersion) {
 }
 
 // ------------------------------------------------------------------ service
+const NULL_REF = '0'.repeat(32);
+/** Madden fills the six wild-card rows in this order (observed): AFC 2v7, NFC 2v7, AFC 3v6, NFC 3v6, AFC 4v5, NFC 4v5. */
+const WILDCARD_ROW_ORDER: { conf: 'AFC' | 'NFC'; home: number; away: number }[] = [
+  { conf: 'AFC', home: 1, away: 6 }, { conf: 'NFC', home: 1, away: 6 },
+  { conf: 'AFC', home: 2, away: 5 }, { conf: 'NFC', home: 2, away: 5 },
+  { conf: 'AFC', home: 3, away: 4 }, { conf: 'NFC', home: 3, away: 4 },
+];
+
 export const HistoricFranchiseService = {
   /** Baked seasons with their era rules, for the season picker. */
   seasons(): { year: number; era: EraRules | null; teams: number }[] {
@@ -198,6 +243,99 @@ export const HistoricFranchiseService = {
   },
 
   companionBracket,
+  playoffForces,
+
+  /**
+   * Arm the era's playoff format. Madden always seeds seven clubs per conference and sims
+   * the wild-card round from the six pre-built rows; it re-seeds the teams on those rows at
+   * the week-18 advance but KEEPS each row's ForceWin flag (verified 2026-09-06). So:
+   *  - during the regular season the rows are empty: write placeholder pairings (the flag
+   *    only loads when the row has teams) and the flags for the projected field;
+   *  - at the wild-card week, before any game is played: the rows hold the real seeds, so
+   *    only the flags are (re)written, exactly for the era's field.
+   * Rows that have been played are never touched (re-teaming a played row breaks the save).
+   */
+  async armPlayoffFormat(fileName: string, year: number, opts: { dryRun?: boolean; outputName?: string } = {}, gameVersion: GameVersion = 'm27'): Promise<ArmPlayoffsResult> {
+    const pack = SeasonPackService.get(year);
+    if (!pack) throw new Error(`no season pack for ${year}`);
+    const era = EraRulesService.rulesFor(year);
+    if (!era) throw new Error(`no era rules for ${year}`);
+    const dir = savesDir(gameVersion);
+    const inputPath = path.join(dir, fileName);
+    if (!fs.existsSync(inputPath)) throw new Error(`franchise not found: ${fileName}`);
+    const dryRun = !!opts.dryRun;
+    const outputName = dryRun ? '' : outputNameFor(fileName, 'PLAYOFFS', opts.outputName);
+    const outputPath = dryRun ? '' : path.join(dir, outputName);
+    if (!dryRun && path.resolve(outputPath) === path.resolve(inputPath)) throw new Error('refusing to overwrite the input file');
+
+    const save = await readSave(inputPath, gameVersion);
+    const notes: string[] = [];
+    const bracket = companionBracket(pack, era, save.records, save.played);
+    const fieldByConf = eraField(bracket);
+    const field = new Set(Object.values(fieldByConf).flat());
+
+    const file = await openSave(inputPath, gameVersion);
+    const tt = file.getTableByUniqueId(TEAM_TABLE_UID); await tt.readRecords();
+    const rowOfName = new Map<string, number>();
+    const nameOfRow: string[] = [];
+    tt.records.forEach((r: any, i: number) => { if (r.isEmpty) return; const n = String(val(r, 'DisplayName') ?? ''); nameOfRow[i] = n; if (n && !rowOfName.has(n)) rowOfName.set(n, i); });
+    const sg = file.getTableByUniqueId(SEASONGAME_TABLE_UID); await sg.readRecords();
+    const wc = sg.records.filter((g: any) => !g.isEmpty && String(val(g, 'SeasonWeekType')) === 'WildcardPlayoff' && num(val(g, 'SeasonWeek')) >= 18);
+    const dv = sg.records.filter((g: any) => !g.isEmpty && String(val(g, 'SeasonWeekType')) === 'DivisionalPlayoff' && num(val(g, 'SeasonWeek')) >= 18);
+    if (wc.length !== 6) throw new Error(`expected six wild-card rows, found ${wc.length}`);
+    if (wc.some((g: any) => /Won$|Tied|StatsReported/.test(String(val(g, 'GameStatus'))))) throw new Error('the wild-card round has already been played in this save; arm the format before the wild-card week is advanced');
+    const teamOf = (g: any, k: string) => { const bits = String(val(g, k) ?? ''); if (isNullRef(bits)) return ''; try { return nameOfRow[g.getReferenceDataByKey(k).rowNumber] ?? ''; } catch { return ''; } };
+    const seeded = wc.every((g: any) => teamOf(g, 'HomeTeam') && teamOf(g, 'AwayTeam'));
+    const mode: 'regular' | 'wildcard' = seeded ? 'wildcard' : 'regular';
+
+    // Placeholder pairings for empty rows: Madden's own shape from the current standings
+    // (division winners of the save's divisions by record, then the best of the rest).
+    let placeholders: { home: string; away: string }[] = [];
+    if (!seeded) {
+      const seedsByConf: Record<string, string[]> = {};
+      for (const conf of ['AFC', 'NFC']) {
+        const divs = save.saveLayout.filter((d) => d.division.startsWith(conf));
+        const recs = (names: string[]) => names.map((n) => save.records.get(n)).filter((r): r is TeamRecord => !!r).sort((a, b) => compareRecords(a, b, save.played));
+        const winners = divs.map((d) => recs(d.teams)[0]).filter((r): r is TeamRecord => !!r).sort((a, b) => compareRecords(a, b, save.played));
+        const rest = recs(divs.flatMap((d) => d.teams)).filter((r) => !winners.includes(r));
+        seedsByConf[conf] = [...winners, ...rest].slice(0, 7).map((r) => r.name);
+      }
+      placeholders = WILDCARD_ROW_ORDER.map((o) => ({ home: seedsByConf[o.conf][o.home] ?? '', away: seedsByConf[o.conf][o.away] ?? '' }));
+      if (placeholders.some((p: { home: string; away: string }) => !p.home || !p.away)) throw new Error('could not build placeholder pairings from the standings');
+      notes.push('Rows were empty (regular season): placeholder pairings written so the flags load; Madden replaces the teams with the real seeds when the week-18 advance seeds the bracket and keeps the flags.');
+    } else {
+      notes.push('Rows already seeded by the game: only the ForceWin flags were written, for the era\'s field as the standings stand now.');
+    }
+    const pairings = seeded ? wc.map((g: any) => ({ home: teamOf(g, 'HomeTeam'), away: teamOf(g, 'AwayTeam') })) : placeholders;
+    const forces = playoffForces(field, pairings);
+    if (!seeded && era.playoff.teams <= 8) notes.push('Projected from the current standings; with the 8-team format every wild-card game is forced to the higher seed once the real seeds are known, so run this again at the wild-card week only if a 5 seed should replace a 4 seed under the era\'s wild-card rule.');
+    if (era.playoff.teams >= 14) notes.push('This era uses the full 14-team field: nothing is forced.');
+
+    if (seeded) {
+      const seededNames = new Set<string>([...pairings.flatMap((p: { home: string; away: string }) => [p.home, p.away]), ...dv.map((g: any) => teamOf(g, 'HomeTeam')).filter(Boolean)]);
+      for (const name of field) if (!seededNames.has(name)) notes.push(`${name} belongs to the ${year} field but Madden did not seed it; check the division layout (its division winner must be a Madden division winner).`);
+    }
+    const rows: ArmedRow[] = pairings.map((p: { home: string; away: string }, i: number) => ({ index: i, away: p.away, home: p.home, force: forces[i].force, reason: forces[i].reason, placeholder: !seeded }));
+    if (!dryRun) {
+      wc.forEach((g: any, i: number) => {
+        if (!seeded) {
+          g.HomeTeam = tt.getBinaryReferenceToRecord(rowOfName.get(pairings[i].home)!);
+          g.AwayTeam = tt.getBinaryReferenceToRecord(rowOfName.get(pairings[i].away)!);
+          writeField(g, 'GameStatus', 'HomeScheduled', true);
+        }
+        writeField(g, 'ForceWin', forces[i].force, true);
+      });
+      if (!seeded) {
+        // The two bye hosts the game will also overwrite; keep the shape it expects.
+        const byes = ['AFC', 'NFC'].map((conf) => bracket.conferences[conf]?.[0]?.team);
+        dv.forEach((g: any, i: number) => {
+          if (i < 2 && byes[i] && rowOfName.has(byes[i]!)) { g.HomeTeam = tt.getBinaryReferenceToRecord(rowOfName.get(byes[i]!)!); g.AwayTeam = NULL_REF; writeField(g, 'GameStatus', 'HomeScheduled', true); }
+        });
+      }
+      await file.save(outputPath, {});
+    }
+    return { input: fileName, output: outputName, outputPath, dryRun, year, mode, field: fieldByConf, rows, notes: [...notes, ...bracket.notes] };
+  },
 
   /** Read-only: what the pack would change in this save, and the era's bracket for its standings. */
   async preview(fileName: string, year: number, gameVersion: GameVersion = 'm27'): Promise<HistoricPreview> {

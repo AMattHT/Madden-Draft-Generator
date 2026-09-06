@@ -11,6 +11,15 @@ router.get('/franchise/historic/seasons', (_req: Request, res: Response) => {
   catch (e) { res.status(500).json({ error: (e as Error).message }); }
 });
 
+/** Arm the era's playoff format: ForceWin on the wild-card rows (placeholders when the rows are empty). Writes CAREER-*-PLAYOFFS unless dryRun. */
+router.post('/franchise/historic/arm-playoffs', async (req: Request, res: Response) => {
+  const { fileName, year, options } = (req.body ?? {}) as { fileName?: string; year?: number; options?: { dryRun?: boolean } };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  if (!year) return res.status(400).json({ error: 'year required' });
+  try { res.json(await HistoricFranchiseService.armPlayoffFormat(fileName, Number(year), options ?? {}, versionOf(req.body))); }
+  catch (e) { res.status(500).json({ error: (e as Error).message }); }
+});
+
 /** Read-only preview of a season pack against a save: team map, layout, rules, companion bracket. */
 router.post('/franchise/historic/preview', async (req: Request, res: Response) => {
   const { fileName, year } = (req.body ?? {}) as { fileName?: string; year?: number };

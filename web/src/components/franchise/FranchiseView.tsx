@@ -25,7 +25,7 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 // Our own generated outputs — a fresh session should default to the user's real save, not one of these.
-const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAND|RELOCATE|AGED\d+|EXP-[A-Z0-9]+|HISTORIC\d*)$/i;
+const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAND|RELOCATE|AGED\d+|EXP-[A-Z0-9]+|HISTORIC\d*|PLAYOFFS)$/i;
 const fmtDate = (ms: number) => new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export function FranchiseView(props: {
@@ -159,7 +159,7 @@ export function FranchiseView(props: {
               </>
             )}
             {tab === 'schedule' && <ScheduleViewer save={selected} />}
-            {tab === 'historic' && <HistoricSeasonTool save={selected} gameVersion={props.gameVersion} />}
+            {tab === 'historic' && <HistoricSeasonTool save={selected} gameVersion={props.gameVersion} onWrote={refresh} />}
           </ToolStack>
         )}
       </div>
