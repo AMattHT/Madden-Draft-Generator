@@ -26,3 +26,15 @@ test('trait mix follows the game\'s rookies per position (QB: Reliable/Stoic/Res
 test('deterministic per seed', () => {
   assert.deepEqual(PersonaService.dnaFor('same|seed', 'CB', 72, 1), PersonaService.dnaFor('same|seed', 'CB', 72, 1));
 });
+
+test('every selectable trait carries the game description and display name', () => {
+  const traits = PersonaService.list();
+  assert.equal(traits.length, 62);
+  for (const t of traits) {
+    assert.ok(t.description, t.name);
+    assert.ok(t.label, t.name);
+  }
+  assert.equal(traits.find((t) => t.name === 'Diva')?.label, 'Particular');
+  assert.equal(traits.find((t) => t.name === 'Opportunistic')?.description, 'Acts fast when a good chance appears.');
+  assert.equal(traits.find((t) => t.name === 'Confident')?.description, "Believes in his value and won't settle.");
+});

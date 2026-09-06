@@ -25,15 +25,17 @@ function faceSourceLabel(src?: string | null): string {
 
 const dnaIcon = (t: { name: string; icon?: string }) => t.icon ?? `/api/portrait/dna-icon/${encodeURIComponent(t.name)}`;
 const humanTrait = (name: string) => name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^Contractminded$/, 'Contract-minded');
+/** The game's display name when the API sent one, else the enum name spaced out. */
+const traitLabel = (t: { name: string; label?: string }): string => t.label ?? humanTrait(t.name);
 
 function TraitCard({ t, onRemove }: { t: PersonaTrait; onRemove?: () => void }) {
   return (
-    <div className="relative flex flex-col items-center gap-1.5 rounded-lg border border-legend/30 bg-legend/10 px-2 pb-2 pt-3 text-center" title={t.description ?? humanTrait(t.name)}>
+    <div className="relative flex flex-col items-center gap-1.5 rounded-lg border border-legend/30 bg-legend/10 px-2 pb-2 pt-3 text-center" title={t.description ?? traitLabel(t)}>
       {onRemove && (
-        <button onClick={onRemove} aria-label={`Remove ${humanTrait(t.name)}`} title="Remove trait" className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full text-legend-light/70 transition-colors hover:bg-legend/30 hover:text-white">×</button>
+        <button onClick={onRemove} aria-label={`Remove ${traitLabel(t)}`} title="Remove trait" className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full text-legend-light/70 transition-colors hover:bg-legend/30 hover:text-white">×</button>
       )}
       <img src={dnaIcon(t)} alt="" className="h-14 w-14 rounded-xl object-contain" loading="lazy" />
-      <div className="text-[11px] font-semibold leading-tight text-legend-light">{humanTrait(t.name)}</div>
+      <div className="text-[11px] font-semibold leading-tight text-legend-light">{traitLabel(t)}</div>
       {t.description && <div className="line-clamp-2 text-[10px] leading-snug text-neutral-400">{t.description}</div>}
     </div>
   );
@@ -71,7 +73,7 @@ function PersonaSection({
     : generatedIds;
   const apply = (next: number[]) => onEdit('personaDNA', next.join(','));
   const q = query.trim().toLowerCase();
-  const pool = traits.filter((t) => !q || humanTrait(t.name).toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q));
+  const pool = traits.filter((t) => !q || traitLabel(t).toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q));
   // Before the trait list loads, an unedited player still shows his generated names.
   const cards: (PersonaTrait | null)[] = traits.length || edited
     ? ids.map((id) => byId.get(id) ?? { id, name: `#${id}` })
@@ -133,11 +135,11 @@ function PersonaSection({
                   key={t.id}
                   disabled={on || ids.length >= 5}
                   onClick={() => { const next = [...ids, t.id]; apply(next); if (next.length >= 5) setAdding(false); }}
-                  title={t.description ?? humanTrait(t.name)}
+                  title={t.description ?? traitLabel(t)}
                   className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-center transition-colors ${on ? 'border-legend/40 bg-legend/10 opacity-50' : 'border-border hover:border-legend/40 hover:bg-surface-2'} disabled:cursor-default`}
                 >
                   <img src={dnaIcon(t)} alt="" className="h-12 w-12 rounded-xl object-contain" loading="lazy" />
-                  <span className="text-[10px] font-medium leading-tight text-neutral-200">{humanTrait(t.name)}</span>
+                  <span className="text-[10px] font-medium leading-tight text-neutral-200">{traitLabel(t)}</span>
                   {t.description && <span className="line-clamp-2 text-[9px] leading-snug text-muted">{t.description}</span>}
                 </button>
               );

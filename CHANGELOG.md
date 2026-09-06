@@ -4,6 +4,10 @@
 
 ### Features
 
+**Persona descriptions from the game.** Every persona DNA card and picker entry now shows the
+game's own one-line description and display name for the trait, read from Madden 27's franchise
+data (Diva appears as "Particular", as it does in the game).
+
 **Likeness review.** The Appearance builder shows the player's real photo beside the faces, and
 the board has an "Unverified faces" filter that lists only the players whose skin tone is a
 guess, each next to his photo, so a class can be checked in a minute.

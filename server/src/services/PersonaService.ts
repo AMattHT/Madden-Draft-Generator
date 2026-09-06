@@ -45,18 +45,21 @@ function iconFamilies(): Record<string, string> {
   return familyCache;
 }
 
-/** Short plain-language blurbs for the profile's persona cards (data/lookups/m27-persona-descriptions.json). */
-let descCache: Record<string, string> | null = null;
-function descriptions(): Record<string, string> {
-  if (descCache) return descCache;
+/** The game's one-line description and display name per trait
+ *  (data/lookups/m27-persona-descriptions.json, read from the M27 franchise data). */
+interface PersonaText { descriptions: Record<string, string>; labels: Record<string, string> }
+let textCache: PersonaText | null = null;
+function personaText(): PersonaText {
+  if (textCache) return textCache;
   try {
-    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-persona-descriptions.json'), 'utf8')) as { descriptions?: Record<string, string> };
-    descCache = raw.descriptions ?? {};
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-persona-descriptions.json'), 'utf8')) as Partial<PersonaText>;
+    textCache = { descriptions: raw.descriptions ?? {}, labels: raw.labels ?? {} };
   } catch {
-    descCache = {};
+    textCache = { descriptions: {}, labels: {} };
   }
-  return descCache;
+  return textCache;
 }
+function descriptions(): Record<string, string> { return personaText().descriptions; }
 
 const NAME_BY_ID: Record<number, string> = Object.fromEntries(
   Object.entries(DNA).map(([k, v]) => [v, k])
@@ -186,20 +189,26 @@ export const PersonaService = {
     return null;
   },
 
-  /** Display name for a trait id (UI). */
+  /** Enum name for a trait id. */
   name(id: number): string {
     return NAME_BY_ID[id] ?? `#${id}`;
   },
 
+  /** The game's display name for a trait (e.g. Diva is shown as "Particular"); enum name if unknown. */
+  label(name: string): string {
+    return personaText().labels[name] ?? name;
+  },
+
   /** The selectable trait list for the persona editor (id + name, sorted). Excludes
    *  Invalid and WinAtAllCosts (the game strips that one from imported rookies). */
-  list(): { id: number; name: string; description: string | null; icon: string; hasIcon: boolean; family: string | null }[] {
+  list(): { id: number; name: string; label: string; description: string | null; icon: string; hasIcon: boolean; family: string | null }[] {
     const desc = descriptions();
     const fam = iconFamilies();
     return Object.entries(DNA)
       .map(([name, id]) => ({
         name,
         id,
+        label: PersonaService.label(name),
         description: desc[name] ?? null,
         icon: `/api/portrait/dna-icon/${name}`,
         hasIcon: !!PersonaService.iconFile(name),
