@@ -1,0 +1,59 @@
+{
+  "_about": "League structure and rules by season range, for the historic-season franchise tools. 'from'..'to' inclusive; the first matching era wins. playoff: divisionWinners and wildCards are PER CONFERENCE, byes per conference; teams is the whole field. Sources: NFL playoff history (8 teams 1970-77, 10 from 1978, 12 from 1990, 14 from 2020) and the season alignments.",
+  "eras": [
+    {
+      "from": 1970, "to": 1975, "label": "Post-merger, 26 teams",
+      "teams": 26, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 14, "regularSeasonWeeks": 14,
+      "playoff": { "teams": 8, "divisionWinners": 3, "wildCards": 1, "byes": 0, "rounds": ["Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 43, "salaryCap": false, "tradeDeadline": true,
+      "notes": ["Wild card played the division winner from the other division on rotation; two teams from the same division could not meet in the divisional round.", "No overtime in the regular season until 1974 (sudden death from 1974)."]
+    },
+    {
+      "from": 1976, "to": 1977, "label": "Expansion to 28 teams",
+      "teams": 28, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 14, "regularSeasonWeeks": 14,
+      "playoff": { "teams": 8, "divisionWinners": 3, "wildCards": 1, "byes": 0, "rounds": ["Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 43, "salaryCap": false, "tradeDeadline": true,
+      "notes": ["Seahawks (NFC West in 1976, AFC West from 1977) and Buccaneers (AFC West in 1976, NFC Central from 1977) join."]
+    },
+    {
+      "from": 1978, "to": 1989, "label": "16 games, 10-team playoff",
+      "teams": 28, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 16, "regularSeasonWeeks": 16,
+      "playoff": { "teams": 10, "divisionWinners": 3, "wildCards": 2, "byes": 1, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 45, "salaryCap": false, "tradeDeadline": true,
+      "notes": ["1982 strike season: 9 games and a 16-team tournament (not modelled).", "1987 strike: 15 games with replacement players."]
+    },
+    {
+      "from": 1990, "to": 1994, "label": "12-team playoff, bye week added",
+      "teams": 28, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 16, "regularSeasonWeeks": 17,
+      "playoff": { "teams": 12, "divisionWinners": 3, "wildCards": 3, "byes": 2, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 47, "salaryCap": false, "tradeDeadline": true,
+      "notes": ["1993 had two bye weeks (18-week season)."]
+    },
+    {
+      "from": 1995, "to": 2001, "label": "Salary cap era, 30-31 teams",
+      "teams": 30, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 16, "regularSeasonWeeks": 17,
+      "playoff": { "teams": 12, "divisionWinners": 3, "wildCards": 3, "byes": 2, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 53, "salaryCap": true, "tradeDeadline": true,
+      "notes": ["Panthers and Jaguars join 1995; Ravens 1996; Browns return 1999 (31 teams)."]
+    },
+    {
+      "from": 2002, "to": 2019, "label": "Eight divisions, 32 teams",
+      "teams": 32, "conferences": 2, "divisionsPerConference": 4, "gamesPerTeam": 16, "regularSeasonWeeks": 17,
+      "playoff": { "teams": 12, "divisionWinners": 4, "wildCards": 2, "byes": 2, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 53, "salaryCap": true, "tradeDeadline": true,
+      "notes": ["Texans join 2002 and the league realigns into eight four-team divisions."]
+    },
+    {
+      "from": 2020, "to": 2020, "label": "14-team playoff",
+      "teams": 32, "conferences": 2, "divisionsPerConference": 4, "gamesPerTeam": 16, "regularSeasonWeeks": 17,
+      "playoff": { "teams": 14, "divisionWinners": 4, "wildCards": 3, "byes": 1, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 53, "salaryCap": true, "tradeDeadline": true, "notes": []
+    },
+    {
+      "from": 2021, "to": 2100, "label": "17 games, 14-team playoff",
+      "teams": 32, "conferences": 2, "divisionsPerConference": 4, "gamesPerTeam": 17, "regularSeasonWeeks": 18,
+      "playoff": { "teams": 14, "divisionWinners": 4, "wildCards": 3, "byes": 1, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "rosterLimit": 53, "salaryCap": true, "tradeDeadline": true, "notes": []
+    }
+  ]
+}

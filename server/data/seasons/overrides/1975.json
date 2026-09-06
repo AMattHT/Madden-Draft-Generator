@@ -1,0 +1,13 @@
+{
+  "_about": "Hand-checked facts the baker cannot parse from the Wikipedia bracket template. Team refs are that season's keys (nflverse codes). Scores are away then home.",
+  "playoffs": [
+    { "round": "Divisional", "date": "1975-12-27", "away": "BAL", "home": "PIT", "awayScore": 10, "homeScore": 28 },
+    { "round": "Divisional", "date": "1975-12-27", "away": "STL", "home": "LA", "awayScore": 23, "homeScore": 35 },
+    { "round": "Divisional", "date": "1975-12-28", "away": "CIN", "home": "OAK", "awayScore": 28, "homeScore": 31 },
+    { "round": "Divisional", "date": "1975-12-28", "away": "DAL", "home": "MIN", "awayScore": 17, "homeScore": 14 },
+    { "round": "AFC Championship", "date": "1976-01-04", "away": "OAK", "home": "PIT", "awayScore": 10, "homeScore": 16 },
+    { "round": "NFC Championship", "date": "1976-01-04", "away": "DAL", "home": "LA", "awayScore": 37, "homeScore": 7 },
+    { "round": "Super Bowl X", "date": "1976-01-18", "away": "DAL", "home": "PIT", "awayScore": 17, "homeScore": 21 }
+  ],
+  "wildCards": { "AFC": "CIN", "NFC": "DAL" }
+}

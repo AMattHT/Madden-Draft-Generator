@@ -150,6 +150,7 @@ let byKey: Map<string, BaselinePlayer> | null = null;
 let catalogCache: CatalogPlayer[] | null = null;
 let byYear: Map<number, BaselinePlayer[]> | null = null;
 let byNormName: Map<string, BaselinePlayer[]> | null = null;
+let byLastName: Map<string, BaselinePlayer[]> | null = null;
 const normName = (first: string, last: string) => `${first} ${last}`.toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
 
 function load(): void {
@@ -224,7 +225,11 @@ function load(): void {
   sanitizeLegendPortraits(merged);
   byYear = new Map();
   byNormName = new Map();
-  for (const p of merged) { const k = normName(p.firstName, p.lastName); (byNormName.get(k) ?? byNormName.set(k, []).get(k)!).push(p); }
+  byLastName = new Map();
+  for (const p of merged) {
+    const k = normName(p.firstName, p.lastName); (byNormName.get(k) ?? byNormName.set(k, []).get(k)!).push(p);
+    const l = normalizeName(p.lastName); (byLastName.get(l) ?? byLastName.set(l, []).get(l)!).push(p);
+  }
   for (const p of merged) {
     if (!byYear.has(p.draftYear)) byYear.set(p.draftYear, []);
     byYear.get(p.draftYear)!.push(p);
@@ -718,10 +723,8 @@ function dedupSharedAssets(players: BaselinePlayer[]): void {
  * here, NOT in the source, so per-league (NFL-only / AFL-only) views keep their
  * own row. Only collapses when every row in a name+college group is in a DISTINCT
  * league (an unambiguous dual-draft) — same-league same-name teammates (the two
- * 1979 Colorado St. "Mark Bell"s) are never touched. Cross-YEAR re-drafts (a
- * player in two different years' classes, e.g. Bo Jackson 1986+1987) are a
- * different, ambiguous case — which year is canonical needs play history — and
- * are intentionally left as-is. Keeps the most-accomplished row, preferring the
+ * 1979 Colorado St. "Mark Bell"s) are never touched. Cross-YEAR re-drafts (Bo
+ * Jackson 1986+1987) are handled earlier by dropRedraftedRows. Keeps the most-accomplished row, preferring the
  * surviving NFL row then the earlier pick.
  */
 function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
@@ -746,6 +749,25 @@ function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
   return drop.size ? list.filter((p) => !drop.has(p)) : list;
 }
 
+/** Legal first name -> the forms a player was listed under (both directions are tried). */
+const NICKNAMES: Record<string, string[]> = {
+  william: ['bill', 'billy', 'will', 'willie'], robert: ['bob', 'bobby', 'rob', 'robbie'], richard: ['dick', 'rick', 'rich', 'richie'],
+  james: ['jim', 'jimmy'], john: ['jack', 'johnny'], charles: ['chuck', 'charlie'], michael: ['mike'], thomas: ['tom', 'tommy'],
+  joseph: ['joe', 'joey'], daniel: ['dan', 'danny'], david: ['dave'], edward: ['ed', 'eddie', 'ted'], anthony: ['tony'],
+  gerald: ['jerry'], jerome: ['jerry'], douglas: ['doug'], terrence: ['terry'], terence: ['terry'], timothy: ['tim'],
+  steven: ['steve'], stephen: ['steve'], lawrence: ['larry'], frederick: ['fred', 'freddie'], raymond: ['ray'], harold: ['hal', 'harry'],
+  walter: ['walt', 'wally'], ronald: ['ron', 'ronnie'], donald: ['don', 'donnie'], kenneth: ['ken', 'kenny'], ernest: ['ernie'], earnest: ['ernie'],
+  franklin: ['frank'], francis: ['frank'], melvin: ['mel'], leonard: ['len', 'lenny'], samuel: ['sam', 'sammy'], benjamin: ['ben', 'benny'],
+  alexander: ['alex'], nicholas: ['nick'], patrick: ['pat'], matthew: ['matt'], christopher: ['chris'], gregory: ['greg'], jeffrey: ['jeff'],
+  andrew: ['andy', 'drew'], peter: ['pete'], eugene: ['gene'], clarence: ['clancy'], lester: ['les'], russell: ['russ', 'rusty'],
+  herbert: ['herb'], albert: ['al'], alfred: ['al'], arthur: ['art', 'artie'], bernard: ['bernie'], calvin: ['cal'], clifford: ['cliff'],
+  curtis: ['curt'], dennis: ['denny'], elbert: ['el'], elvin: ['el'], howard: ['howie'], isiah: ['ike'], isaac: ['ike'], jonathan: ['jon'],
+  lawerence: ['larry'], leroy: ['lee'], louis: ['lou'], marvin: ['marv'], maurice: ['mo'], milton: ['milt'], nathaniel: ['nate'],
+  norman: ['norm'], oliver: ['ollie'], oscar: ['ozzie'], philip: ['phil'], phillip: ['phil'], randall: ['randy'], reginald: ['reggie'],
+  rodney: ['rod'], roderick: ['rod'], rudolph: ['rudy'], sylvester: ['sly'], theodore: ['ted', 'teddy'], vincent: ['vince', 'vinny'],
+  wesley: ['wes'], willis: ['will'], wilbert: ['wil'], zachary: ['zach'],
+};
+
 export const PlayerLookupService = {
   /** Is this the most accomplished player of this name in the lookup? Shared
    *  assets keyed by name (legends portraits: plpo_legends_johnsonchris) belong to
@@ -764,6 +786,53 @@ export const PlayerLookupService = {
     if (best.draftYear !== p.draftYear) return false;
     if (!p.college || !best.college) return true;
     return normalizeName(best.college) === normalizeName(p.college);
+  },
+
+  /**
+   * The pool player most likely to be a given man active in `season`: same normalized
+   * name, career (or draft year) covering the season, then the closest college / birth
+   * year / draft year. Used to attach ratings and likeness to historic roster rows.
+   */
+  matchActive(first: string, last: string, opts: { season: number; college?: string | null; birthYear?: number | null }): BaselinePlayer | null {
+    load();
+    const { season } = opts;
+    // Rosters carry legal first names ("Melvin Blount", "John Lambert"); the pool has the
+    // names men played under. Try the name as given, its everyday forms, then any lone
+    // man of that surname whose career covers the season and whose initial agrees.
+    let group = byNormName?.get(normName(first, last)) ?? [];
+    if (!group.length) {
+      for (const alt of NICKNAMES[normalizeName(first)] ?? []) {
+        group = byNormName?.get(normName(alt, last)) ?? [];
+        if (group.length) break;
+      }
+    }
+    if (!group.length) {
+      const initial = normalizeName(first).charAt(0);
+      const sameLast = (byLastName?.get(normalizeName(last)) ?? []).filter((p) => {
+        const from = p.careerFrom ?? p.draftYear;
+        const to = p.careerTo ?? from + 3;
+        return from <= season && to >= season && normalizeName(p.firstName).charAt(0) === initial;
+      });
+      if (sameLast.length === 1) group = sameLast;
+    }
+    if (!group.length) return null;
+    const college = opts.college ? normalizeName(opts.college) : '';
+    const covers = (p: BaselinePlayer) => {
+      const from = p.careerFrom ?? p.draftYear;
+      const to = p.careerTo ?? (p.careerFrom ?? p.draftYear) + 3;
+      return from <= season && to >= season;
+    };
+    const score = (p: BaselinePlayer) => {
+      let s = 0;
+      if (covers(p)) s += 100;
+      else if (p.draftYear <= season && p.draftYear >= season - 20) s += 20;
+      if (college && p.college && normalizeName(p.college) === college) s += 30;
+      if (opts.birthYear && p.age != null && Math.abs((p.draftYear - p.age) - opts.birthYear) <= 1) s += 30;
+      s -= Math.abs(season - p.draftYear) / 100; // prefer the man drafted nearest before the season
+      return s;
+    };
+    const best = [...group].sort((x, y) => score(y) - score(x))[0];
+    return score(best) >= 20 ? best : null;
   },
 
   /** All draft years present in the local lookup, ascending. */
