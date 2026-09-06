@@ -9,7 +9,7 @@
  *   npx tsx scripts/franchise-experiment.ts schedule-week1
  *   npx tsx scripts/franchise-experiment.ts swap-players
  *   npx tsx scripts/franchise-experiment.ts all-1975       (field 0/0 + divisions --park + season14)
- *   npx tsx scripts/franchise-experiment.ts bracket        --teams 8|10|12|14 [--first-round wildcard|divisional]
+ *   npx tsx scripts/franchise-experiment.ts bracket        --teams 8|10|12 [--parked] [--ghost-from worst|parked]
  *
  * Every writing preset saves `CAREER-<base>-EXP-<PRESET>` into the Madden 27 Saves folder
  * (or prints what it would change with --dry-run). Default input: the newest CAREER-* save.
@@ -29,16 +29,11 @@
  *                  checked against a known list.
  *   swap-players   Swaps two same-position starters between the Chiefs and the Raiders
  *                  (TeamIndex + Team.Roster slot), the cheapest test of moving players.
- *   bracket        The Dynasty Tool move. On a save sitting at the START of the wild-card
- *                  week (regular season over, no playoff game played yet) it re-seeds the
- *                  field under an older format from the save's own standings and rewrites the
- *                  pre-built playoff rows the way the game fills them: first-round games as
- *                  HomeScheduled with both teams, bye teams as the HomeTeam of a divisional row,
- *                  every surplus row Unscheduled with null teams. --teams 8 is 1970-77 (no wild
- *                  cards: four division winners per conference; --first-round divisional puts
- *                  those games in the divisional rows and empties the wild-card week, the
- *                  default wildcard keeps them in the wild-card rows), 10 is 1978-89 (one WC game
- *                  per conference, three byes), 12 is 1990-2019, 14 is today's.
+ *   bracket        The Dynasty Tool move, Madden style: the era's field takes the top seeds
+ *                  of Madden's fixed 14-slot bracket and ghost teams fill the rest, each
+ *                  ghost game ForceWin'd to the real club, so the wild-card week resolves
+ *                  itself and the divisional round is the era's real first round. Emptying
+ *                  rows instead (first attempt) left the save unable to load.
  */
 import fs from 'fs';
 import path from 'path';
@@ -268,14 +263,9 @@ async function swapPlayersPreset(ctx: Ctx): Promise<void> {
 
 interface Rec { name: string; row: number; conf: string; division: string; wins: number; losses: number; ties: number; pf: number; pa: number }
 
-async function bracketPreset(ctx: Ctx): Promise<void> {
+/** Every visible club with its conference/division (from the save's Division tables) and record. */
+async function readField(ctx: Ctx): Promise<{ recs: Rec[]; cmp: (a: Rec, b: Rec) => number }> {
   const { file, teams, teamByRow } = ctx;
-  const teamsIn = parseInt(opt('teams', '8'), 10);
-  const firstRound = opt('first-round', 'wildcard');
-  const perConf = teamsIn / 2;
-  const byes = teamsIn === 8 ? 0 : teamsIn === 10 ? 3 : teamsIn === 12 ? 2 : 1;
-
-  // Conference + division of every club from the Division tables (the save's current layout).
   const divOf = new Map<string, { conf: string; division: string }>();
   const dv = file.getTableByName('Division'); await dv.readRecords();
   for (const d of dv.records) {
@@ -290,70 +280,97 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
   teams.records.forEach((r: any, row: number) => {
     if (r.isEmpty) return;
     const name = String(val(r, 'DisplayName')); const d = divOf.get(name);
-    if (!d || Number(val(r, 'TeamIndex')) >= 32 || val(r, 'TEAM_VISIBLE') === false) return;
+    if (!d || Number(val(r, 'TeamIndex')) >= 32) return;
     recs.push({ name, row, conf: d.conf, division: d.division,
       wins: Number(val(r, 'HomeWin')) + Number(val(r, 'RoadWin')), losses: Number(val(r, 'HomeLoss')) + Number(val(r, 'RoadLoss')), ties: Number(val(r, 'HomeTie')) + Number(val(r, 'RoadTie')),
       pf: Number(val(r, 'SeasonLeagPointsFor')), pa: Number(val(r, 'SeasonLeagPointsAgainst')) });
   });
   const pct = (r: Rec) => (r.wins + 0.5 * r.ties) / Math.max(1, r.wins + r.losses + r.ties);
   const cmp = (a: Rec, b: Rec) => pct(b) - pct(a) || (b.pf - b.pa) - (a.pf - a.pa) || b.pf - a.pf || a.name.localeCompare(b.name);
+  return { recs, cmp };
+}
+
+/**
+ * The Dynasty Tool move, Madden style. The game keeps a fixed 14-slot bracket (seven per
+ * conference, one bye, six wild-card games), and emptying rows breaks the load. So the era's
+ * field takes the top seeds and GHOST teams fill the remaining slots, with ForceWin handing
+ * every ghost game to the real club: the wild-card week resolves itself and the divisional
+ * round is the era's real first round (8 teams: 4 real + 3 ghosts per conference; 10: 5 + 2;
+ * 12: 6 + 1). Ghosts are the parked clubs when the save has them, else the conference's
+ * worst non-qualifiers (--ghost-from worst).
+ */
+async function bracketPreset(ctx: Ctx): Promise<void> {
+  const { file, teams } = ctx;
+  const teamsIn = parseInt(opt('teams', '8'), 10);
+  const realPerConf = teamsIn / 2;
+  const ghostsPerConf = 7 - realPerConf;
+  const ghostFrom = opt('ghost-from', PARKED.some((n) => ctx.teamRows.has(n)) && flag('parked') ? 'parked' : 'worst');
+  const { recs, cmp } = await readField(ctx);
+  const visible = recs.filter((r) => val(teams.records[r.row], 'TEAM_VISIBLE') !== false && !(ghostFrom === 'parked' && PARKED.includes(r.name)));
+
   const seeds: Record<string, Rec[]> = {};
+  const ghosts: Record<string, Rec[]> = {};
   const divWinners = new Set<Rec>();
   for (const conf of ['AFC', 'NFC']) {
-    const mine = recs.filter((r) => r.conf === conf);
+    const mine = visible.filter((r) => r.conf === conf);
     const divisions = [...new Set(mine.map((r) => r.division))];
     const winners = divisions.map((d) => mine.filter((r) => r.division === d).sort(cmp)[0]).filter(Boolean).sort(cmp);
     winners.forEach((w) => divWinners.add(w));
     const rest = mine.filter((r) => !winners.includes(r)).sort(cmp);
-    seeds[conf] = [...winners, ...rest].slice(0, perConf);
-    ctx.changes.push(`${conf} seeds: ${seeds[conf].map((r, i) => `${i + 1} ${r.name} ${r.wins}-${r.losses}${winners.includes(r) ? '' : ' (WC)'}`).join(', ')}`);
+    seeds[conf] = [...winners, ...rest].slice(0, realPerConf);
+    const pool = ghostFrom === 'parked'
+      ? recs.filter((r) => r.conf === conf && PARKED.includes(r.name))
+      : rest.filter((r) => !seeds[conf].includes(r)).reverse();
+    ghosts[conf] = pool.slice(0, ghostsPerConf);
+    if (ghosts[conf].length < ghostsPerConf) ctx.changes.push(`WARNING: ${conf} has only ${ghosts[conf].length} ghost candidates, need ${ghostsPerConf}`);
+    ctx.changes.push(`${conf} seeds: ${seeds[conf].map((r, i) => `${i + 1} ${r.name} ${r.wins}-${r.losses}${winners.includes(r) ? '' : ' (WC)'}`).join(', ')} | ghosts: ${ghosts[conf].map((g) => g.name).join(', ')}`);
   }
 
   const sg = file.getTableByUniqueId(SEASONGAME_TABLE_UID); await sg.readRecords();
   const rowsOf = (type: string) => sg.records.filter((g: any) => !g.isEmpty && val(g, 'SeasonWeekType') === type && Number(val(g, 'SeasonWeek')) >= 18);
   const wc = rowsOf('WildcardPlayoff'), dvr = rowsOf('DivisionalPlayoff');
   ctx.changes.push(`rows: ${wc.length} wild-card, ${dvr.length} divisional`);
-  if (wc.some((g: any) => /Won$/.test(String(val(g, 'GameStatus'))))) ctx.changes.push('WARNING: wild-card games already played in this save; use a save from the start of the wild-card week');
+  if (wc.some((g: any) => /Won$/.test(String(val(g, 'GameStatus'))))) ctx.changes.push('WARNING: wild-card games already played in this save; a save from the start of the wild-card week is cleaner');
 
   const ref = (row: number) => teams.getBinaryReferenceToRecord(row);
-  const setGame = (g: any, away: Rec | null, home: Rec | null, status: string, label: string) => {
-    const text = `${label}: ${away?.name ?? '-'} @ ${home?.name ?? '-'} ${status}`;
+  const setGame = (g: any, away: Rec | null, home: Rec | null, status: string, force: 'Home' | 'Away' | 'None', label: string) => {
+    const text = `${label}: ${away?.name ?? '-'} @ ${home?.name ?? '-'} ${status}${force !== 'None' ? ` force ${force}` : ''}`;
     if (dryRun) { ctx.changes.push(text + ' (dry run)'); return; }
     try { g.AwayTeam = away ? ref(away.row) : NULL_REF; g.HomeTeam = home ? ref(home.row) : NULL_REF; } catch (e) { ctx.changes.push(`${label}: ref FAILED ${(e as Error).message}`); return; }
     put(ctx, g, 'GameStatus', status, label);
-    // A rewritten row starts fresh: no score left over from a game the save already played.
+    put(ctx, g, 'ForceWin', force, label);
     for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
     try { if (val(g, 'IsSimmed')) writeField(g, 'IsSimmed', false); } catch { /* */ }
+    for (const k of ['HomeTeamStatus', 'AwayTeamStatus']) { try { if (String(val(g, k)) !== 'Pending') writeField(g, k, 'Pending'); } catch { /* */ } }
     ctx.changes.push(text);
   };
 
   let wi = 0, di = 0;
   for (const conf of ['AFC', 'NFC']) {
-    const s = seeds[conf];
-    const playing = s.slice(byes);
-    const games: [Rec, Rec][] = [];
-    for (let i = 0; i < Math.floor(playing.length / 2); i++) games.push([playing[playing.length - 1 - i], playing[i]]); // away, home
-    if (teamsIn === 8 && firstRound === 'divisional') {
-      for (const [away, home] of games) setGame(dvr[di++], away, home, 'HomeScheduled', `${conf} divisional`);
-      continue;
+    const slots = [...seeds[conf], ...ghosts[conf]]; // seeds 1..7
+    const isGhost = (r: Rec) => ghosts[conf].includes(r);
+    // Madden's shape: seed 1 sits out; 2v7, 3v6, 4v5.
+    for (const [h, a] of [[1, 6], [2, 5], [3, 4]] as [number, number][]) {
+      const home = slots[h], away = slots[a];
+      if (!home || !away) { ctx.changes.push(`${conf}: missing slot ${h + 1} or ${a + 1}`); continue; }
+      const force: 'Home' | 'Away' | 'None' = isGhost(away) && !isGhost(home) ? 'Home' : isGhost(home) && !isGhost(away) ? 'Away' : 'None';
+      setGame(wc[wi++], away, home, 'HomeScheduled', force, `${conf} wild card ${h + 1}v${a + 1}`);
     }
-    for (const [away, home] of games) setGame(wc[wi++], away, home, 'HomeScheduled', `${conf} wild card`);
-    // Bye teams host divisional games. With three byes the 2-v-3 game is already known.
-    if (byes === 1) setGame(dvr[di++], null, s[0], 'HomeScheduled', `${conf} divisional bye`);
-    if (byes === 2) { setGame(dvr[di++], null, s[0], 'HomeScheduled', `${conf} divisional bye`); setGame(dvr[di++], null, s[1], 'HomeScheduled', `${conf} divisional bye`); }
-    if (byes === 3) { setGame(dvr[di++], null, s[0], 'HomeScheduled', `${conf} divisional bye`); setGame(dvr[di++], s[2], s[1], 'HomeScheduled', `${conf} divisional`); }
+    setGame(dvr[di++], null, slots[0], 'HomeScheduled', 'None', `${conf} divisional bye`);
   }
-  for (const g of wc.slice(wi)) setGame(g, null, null, 'Unscheduled', 'surplus wild card');
-  for (const g of dvr.slice(di)) setGame(g, null, null, 'Unscheduled', 'surplus divisional');
+  for (const g of dvr.slice(di)) setGame(g, null, null, 'Unscheduled', 'None', 'divisional (awaits winners)');
 
-  // Seeds and clinch flags as the game writes them.
+  // Seeds and clinch flags as the game writes them; ghosts read as wild cards.
   for (const conf of ['AFC', 'NFC']) {
-    seeds[conf].forEach((r, i) => {
+    const slots = [...seeds[conf], ...ghosts[conf]];
+    slots.forEach((r, i) => {
       const rec = teams.records[r.row];
       put(ctx, rec, 'CurSeasonConfStanding', i, `${r.name} seed`);
-      put(ctx, rec, 'PlayoffStatus', i === 0 ? 'ClinchedConf' : divWinners.has(r) ? 'ClinchedDivBerth' : 'ClinchedWCBerth', `${r.name} status`);
+      put(ctx, rec, 'PlayoffStatus', i === 0 ? 'ClinchedConf' : divWinners.has(r) && seeds[conf].includes(r) ? 'ClinchedDivBerth' : 'ClinchedWCBerth', `${r.name} status`);
     });
-    for (const r of recs.filter((x) => x.conf === conf && !seeds[conf].includes(x))) put(ctx, teams.records[r.row], 'PlayoffStatus', 'FirstNotClinched', `${r.name} status`);
+    for (const r of recs.filter((x) => x.conf === conf && !slots.includes(x))) {
+      if (String(val(teams.records[r.row], 'PlayoffStatus')) !== 'FirstNotClinched') put(ctx, teams.records[r.row], 'PlayoffStatus', 'FirstNotClinched', `${r.name} status`);
+    }
   }
 }
 
@@ -362,7 +379,7 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName);
-  const suffix: Record<string, string> = { bracket: `EXP-BRACKET${opt('teams', '8')}${opt('first-round', 'wildcard') === 'divisional' ? 'D' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'bracket': await bracketPreset(ctx); break;
