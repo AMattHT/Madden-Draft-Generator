@@ -1,5 +1,5 @@
 {
-  "_about": "One-line descriptions and display names for the Madden 27 persona DNA traits shown in the player profile. All of it is the game's own text: the PersonaDNA enum table inside the legacy franchise data blob common/franchise/frantkdata/0/franchise-tuning-binary (an FTC file, zlib-deflated; each row is description NUL display-name), exported with the MMC Frosty Editor's Legacy Explorer on 2026-09-06. Note the game labels Diva as 'Particular'.",
+  "_about": "One-line descriptions and display names for the Madden 27 persona DNA traits shown in the player profile. All of it is the game's own text: the PersonaDNA enum table inside the legacy franchise data blob common/franchise/frantkdata/0/franchise-tuning-binary (an FTC file, zlib-deflated; each row is description NUL display-name), exported with the MMC Frosty Editor's Legacy Explorer on 2026-09-06. Note the game labels Diva as 'Particular'. The 'focus' block is the PersonaFocus enum from the same file (the player's Active Mindset Focus, one of four, stored at 0xf2 of the M27 draft record).",
   "descriptions": {
     "Invalid": "This player is transparent.",
     "TeamFirst": "Chooses team fit over personal gain.",
@@ -196,5 +196,27 @@
     "Uncompromising",
     "Unpredictable",
     "Wary"
-  ]
+  ],
+  "focus": {
+    "LoveOfTheGame": {
+      "id": 0,
+      "label": "Love of the Game",
+      "description": "This player loves the sport of football and will do anything to keep playing the sport they love."
+    },
+    "Winning": {
+      "id": 1,
+      "label": "Winning",
+      "description": "This player cares about winning and being part of an organization that constantly tries to field contending teams."
+    },
+    "PersonalAccolades": {
+      "id": 2,
+      "label": "Personal Accolades",
+      "description": "This player cares about being the best they can be and wants opportunities to prove that."
+    },
+    "Financial": {
+      "id": 3,
+      "label": "Financial",
+      "description": "This player cares about making the most money and having outside of football fame opportunities."
+    }
+  }
 }

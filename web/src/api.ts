@@ -145,6 +145,14 @@ export interface PersonaTrait {
   hasIcon?: boolean;
 }
 
+/** One of the four M27 mindset-focus options (separate from the DNA traits). */
+export interface PersonaFocusOption {
+  id: number;
+  name: string;
+  label: string;
+  description?: string | null;
+}
+
 export interface FranchiseInfo {
   name: string;
   sizeBytes: number;
@@ -375,6 +383,8 @@ export const api = {
 
   /** Selectable M27 persona DNA traits (id + name) for the persona editor. */
   personaDnaTraits: () => jget<{ traits: PersonaTrait[] }>('/api/lookups/persona-dna').then((r) => r.traits),
+  /** Traits plus the four mindset-focus options, one request. */
+  personaLookups: () => jget<{ traits: PersonaTrait[]; focus?: PersonaFocusOption[] }>('/api/lookups/persona-dna').then((r) => ({ traits: r.traits, focus: r.focus ?? [] })),
 
   /** The whole player pool for the class builder; fetched once per session. */
   /** The 32 franchises a "By team" class can be built for. */

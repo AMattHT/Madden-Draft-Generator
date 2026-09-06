@@ -36,6 +36,7 @@ export interface PlayerRow {
   team?: TeamInfo; // drafting team (nflverse, 1980+), joined by overall pick
   combine?: CombineMeasurements | null; // NFL combine testing (nflverse, 2000+)
   persona?: string[]; // M27 persona DNA trait names (only present when gameVersion='m27')
+  focus?: string; // M27 mindset focus enum name (LoveOfTheGame / Winning / PersonalAccolades / Financial)
   /** Why an LB-labeled source player landed at edge vs SAM/MIKE/WILL (null when not an LB source). */
   frontSeven?: FrontSevenInfo | null;
   gear?: Record<string, string>; // era-default equipment (editor slot -> asset) the export writes

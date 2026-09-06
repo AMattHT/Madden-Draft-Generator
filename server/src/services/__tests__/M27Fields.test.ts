@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assignM27Fields, decodeBirthdate, ROOKIE_REFERENCE_SEASON } from '../M27Fields';
+import { assignM27Fields, decodeBirthdate, focusFor, ROOKIE_REFERENCE_SEASON } from '../M27Fields';
 
 function base(over: Record<string, unknown> = {}) {
   return {
@@ -64,4 +64,15 @@ test('assignment is deterministic for the same seed', () => {
   const a = base(); const b = base();
   assignM27Fields(a, { birthDate: null }, 'same'); assignM27Fields(b, { birthDate: null }, 'same');
   assert.deepEqual([a.personalityRating, a.focus, a.hidden87, a.hidden9c, a.birthdate], [b.personalityRating, b.focus, b.hidden87, b.hidden9c, b.birthdate]);
+});
+
+test('focusFor previews the focus assignM27Fields writes for the same seed; an explicit focus wins', () => {
+  for (const seed of ['seed-a', 'seed-b', 'Ja|Marr|3', 'x|y|17|v2']) {
+    const p = base();
+    assignM27Fields(p, { birthDate: null }, seed);
+    assert.equal(p.focus, focusFor(seed), seed);
+  }
+  const pinned = base({ focus: 2 });
+  assignM27Fields(pinned, { birthDate: null }, 'seed-a');
+  assert.equal(pinned.focus, 2);
 });

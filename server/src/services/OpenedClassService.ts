@@ -134,6 +134,7 @@ function rowsFor(e: Entry): PreviewResult {
       portrait: plpo ? `/api/portrait/plpo/${plpo}` : null,
       gamePortrait: own ? `/api/portrait/plpo/${own}` : null,
       persona: e.gameVersion === 'm27' && dna ? dna.map((d) => PersonaService.name(d)) : undefined,
+      focus: e.gameVersion === 'm27' && Number.isFinite(Number(p.focus)) ? PersonaService.focusName(Number(p.focus)) : undefined,
       gear: gearSlots(p),
       ratings,
     } as PreviewRow;

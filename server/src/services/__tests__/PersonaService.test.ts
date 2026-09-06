@@ -38,3 +38,13 @@ test('every selectable trait carries the game description and display name', () 
   assert.equal(traits.find((t) => t.name === 'Opportunistic')?.description, 'Acts fast when a good chance appears.');
   assert.equal(traits.find((t) => t.name === 'Confident')?.description, "Believes in his value and won't settle.");
 });
+
+test('the four mindset-focus options carry the game text in enum order', () => {
+  const focus = PersonaService.focusList();
+  assert.deepEqual(focus.map((f) => f.name), ['LoveOfTheGame', 'Winning', 'PersonalAccolades', 'Financial']);
+  assert.deepEqual(focus.map((f) => f.id), [0, 1, 2, 3]);
+  assert.equal(focus[0].label, 'Love of the Game');
+  for (const f of focus) assert.ok(f.description, f.name);
+  assert.equal(PersonaService.focusName(3), 'Financial');
+  assert.equal(PersonaService.focusName(9), '#9');
+});

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PlayerRow, GearOption, FrontSevenInfo } from '../types';
-import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait } from '../api';
+import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait, type PersonaFocusOption } from '../api';
 import { POS_NAMES, DEV_NAMES, ATTR_GROUPS, humanize, fmtHeight, keyAttrsForPosition, tierColor } from '../constants';
 import { RatingChip, DevBadge, Icon, ICONS, Pill } from './ui';
 import { RadarChart } from './RadarChart';
@@ -49,20 +49,28 @@ function TraitCard({ t, onRemove }: { t: PersonaTrait; onRemove?: () => void }) 
  */
 function PersonaSection({
   generated,
+  generatedFocus,
   patch,
   onEdit,
 }: {
   generated?: string[];
+  generatedFocus?: string;
   patch: Record<string, number | string>;
   onEdit: (field: string, value: string) => void;
 }) {
   const [traits, setTraits] = useState<PersonaTrait[]>([]);
+  const [focusOptions, setFocusOptions] = useState<PersonaFocusOption[]>([]);
   const [adding, setAdding] = useState(false);
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    api.personaDnaTraits().then(setTraits).catch(() => {});
+    api.personaLookups().then((r) => { setTraits(r.traits); setFocusOptions(r.focus); }).catch(() => {});
   }, []);
+
+  // Mindset focus: one of four, its own field in the record (0xf2), separate from the trait slots.
+  const focusEdited = patch.focus != null && patch.focus !== '';
+  const generatedFocusId = focusOptions.find((f) => f.name === generatedFocus)?.id;
+  const focusId = focusEdited ? Number(patch.focus) : generatedFocusId;
 
   const idOf = new Map(traits.map((t) => [t.name, t.id]));
   const byId = new Map(traits.map((t) => [t.id, t]));
@@ -83,6 +91,33 @@ function PersonaSection({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+          Mindset focus <span className="font-medium normal-case tracking-normal text-muted">· one of four · separate from the traits</span>
+        </div>
+        {focusEdited && generatedFocusId != null && (
+          <button onClick={() => onEdit('focus', String(generatedFocusId))} title="Restore the generated focus" className="rounded-md px-2 py-1 text-[11px] text-muted underline-offset-2 transition-colors hover:text-neutral-200 hover:underline">
+            Reset
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+        {(focusOptions.length ? focusOptions : generatedFocus ? [{ id: -1, name: generatedFocus, label: humanTrait(generatedFocus) }] : []).map((f) => {
+          const on = f.id === focusId || (f.id === -1);
+          return (
+            <button
+              key={f.name}
+              onClick={() => { if (f.id >= 0) onEdit('focus', String(f.id)); }}
+              aria-pressed={on}
+              title={f.description ?? f.label}
+              className={`flex min-h-[76px] flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left transition-colors ${on ? 'border-legend/50 bg-legend/10' : 'border-border hover:border-legend/40 hover:bg-surface-2'}`}
+            >
+              <span className={`text-[11px] font-semibold uppercase tracking-wide ${on ? 'text-legend-light' : 'text-neutral-200'}`}>{f.label}</span>
+              {f.description && <span className="line-clamp-3 text-[10px] leading-snug text-neutral-400">{f.description}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border/60 pt-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
           Persona DNA <span className="font-medium normal-case tracking-normal text-muted">· {ids.length}/5 slots · written into the M27 export</span>
         </div>
@@ -741,7 +776,7 @@ export function ProfileModal({
 
         {row.persona && (
           <div ref={personaRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
-            <PersonaSection generated={row.persona} patch={patch} onEdit={onEdit} />
+            <PersonaSection generated={row.persona} generatedFocus={row.focus} patch={patch} onEdit={onEdit} />
           </div>
         )}
 

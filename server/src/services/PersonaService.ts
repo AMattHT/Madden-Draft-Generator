@@ -31,6 +31,11 @@ export const DNA = {
   Stubborn: 59, Transparent: 60, Uncompromising: 61, Unpredictable: 62, Wary: 63,
 } as const;
 
+/** Mindset focus (PersonaFocus): one of four per player, separate from the DNA traits.
+ *  Order is the game's enum (the draft record stores the id at 0xf2). */
+export const FOCUS = { LoveOfTheGame: 0, Winning: 1, PersonalAccolades: 2, Financial: 3 } as const;
+const FOCUS_NAME_BY_ID: Record<number, string> = Object.fromEntries(Object.entries(FOCUS).map(([k, v]) => [v, k]));
+
 /** Trait -> icon family (data/lookups/m27-persona-icon-map.json): the game draws
  *  persona DNA with eight pictures (Leader, Scholar, Fighter, ...), not one per trait. */
 let familyCache: Record<string, string> | null = null;
@@ -47,15 +52,16 @@ function iconFamilies(): Record<string, string> {
 
 /** The game's one-line description and display name per trait
  *  (data/lookups/m27-persona-descriptions.json, read from the M27 franchise data). */
-interface PersonaText { descriptions: Record<string, string>; labels: Record<string, string> }
+interface FocusText { id: number; label: string; description: string }
+interface PersonaText { descriptions: Record<string, string>; labels: Record<string, string>; focus: Record<string, FocusText> }
 let textCache: PersonaText | null = null;
 function personaText(): PersonaText {
   if (textCache) return textCache;
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-persona-descriptions.json'), 'utf8')) as Partial<PersonaText>;
-    textCache = { descriptions: raw.descriptions ?? {}, labels: raw.labels ?? {} };
+    textCache = { descriptions: raw.descriptions ?? {}, labels: raw.labels ?? {}, focus: raw.focus ?? {} };
   } catch {
-    textCache = { descriptions: {}, labels: {} };
+    textCache = { descriptions: {}, labels: {}, focus: {} };
   }
   return textCache;
 }
@@ -197,6 +203,22 @@ export const PersonaService = {
   /** The game's display name for a trait (e.g. Diva is shown as "Particular"); enum name if unknown. */
   label(name: string): string {
     return personaText().labels[name] ?? name;
+  },
+
+  /** Enum name for a mindset-focus id (0-3); "#n" when out of range. */
+  focusName(id: number): string {
+    return FOCUS_NAME_BY_ID[id] ?? `#${id}`;
+  },
+
+  /** The four mindset-focus options with the game's label and description, in enum order. */
+  focusList(): { id: number; name: string; label: string; description: string | null }[] {
+    const text = personaText().focus;
+    return Object.entries(FOCUS).map(([name, id]) => ({
+      id,
+      name,
+      label: text[name]?.label ?? name.replace(/([a-z])([A-Z])/g, '$1 $2'),
+      description: text[name]?.description ?? null,
+    }));
   },
 
   /** The selectable trait list for the persona editor (id + name, sorted). Excludes

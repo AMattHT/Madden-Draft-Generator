@@ -34,9 +34,9 @@ r.get('/lookups/face-scans', (req, res) => {
   res.json({ gameVersion: gv, scans: LikenessService.faceScans(gv) });
 });
 
-/** Selectable M27 persona DNA traits (id + name) for the persona editor. */
+/** Selectable M27 persona DNA traits and the four mindset-focus options for the persona editor. */
 r.get('/lookups/persona-dna', (_req, res) => {
-  res.json({ traits: PersonaService.list() });
+  res.json({ traits: PersonaService.list(), focus: PersonaService.focusList() });
 });
 
 r.get('/lookups/:name', (req, res) => {

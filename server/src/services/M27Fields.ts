@@ -97,6 +97,15 @@ export interface M27PlayerBits {
  * so the preview and the export agree. Leaves any value the caller already set
  * (e.g. a real M27 face's portrait PID, or a user edit) untouched.
  */
+/** The mindset focus (0-3) assignM27Fields will draw for `seedKey` when the prospect
+ *  has no explicit focus: same seeded stream, same draws in the same order (the
+ *  personality gaussian is consumed first unless a rating was preset). */
+export function focusFor(seedKey: string, personalityPreset = false): number {
+  const rand = seededRng(`m27|${seedKey}`);
+  if (!personalityPreset) gauss(rand);
+  return sampleHistogram(load().focus, rand);
+}
+
 export function assignM27Fields(prospect: Record<string, unknown>, bits: M27PlayerBits, seedKey: string): void {
   const rand = seededRng(`m27|${seedKey}`);
   const s = load();

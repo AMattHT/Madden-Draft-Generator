@@ -1,7 +1,7 @@
 import { MdcService, MdcProspect } from './MdcService';
 import { CuratedGearService } from './CuratedGearService';
 import { Mdc27Service } from './Mdc27Service';
-import { assignM27Fields, commentaryIdFor } from './M27Fields';
+import { assignM27Fields, commentaryIdFor, focusFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
 import { M27RookieRatingsService, type EaRookie } from './M27RookieRatingsService';
 import { genericHeadPid } from './M27Fields';
@@ -524,6 +524,7 @@ export interface PreviewRow {
   team?: TeamInfo; // drafting team (from nflverse, 1980+), joined by overall pick
   combine?: CombineMeasurements | null; // NFL combine testing (nflverse, 2000+)
   persona?: string[]; // M27 persona DNA trait names (only set when gameVersion='m27')
+  focus?: string; // M27 mindset focus enum name (LoveOfTheGame / Winning / PersonalAccolades / Financial)
   /** Why an LB-labeled player landed at edge vs SAM/MIKE/WILL (null for non-LB sources). */
   frontSeven?: { role: string | null; reason: string; scheme: string | null; team: string | null; sackRate: number | null } | null;
   /** The era-default equipment this prospect will export with (editor slot -> asset),
@@ -660,6 +661,13 @@ export function applyEdits(prospects: MdcProspect[], edits?: ClassEdits, gameVer
           .map((s) => parseInt(s.trim(), 10))
           .filter((n) => Number.isFinite(n) && n >= 1 && n <= 63 && n !== 2); // 2 = WinAtAllCosts (game filters it from rookies)
         p.personaDNA = [...new Set(ids)].slice(0, 5);
+        continue;
+      }
+      // Mindset focus edit (M27): one of the four PersonaFocus ids. Set before
+      // assignM27Fields, which only samples a focus for players without one.
+      if (k === 'focus') {
+        const n = Number(raw);
+        if ([0, 1, 2, 3].includes(n)) p.focus = n;
         continue;
       }
       // Face pick: a gen_* generic head code. Drive it via PEPS (M26Writer routes a
@@ -946,6 +954,10 @@ export const DraftClassBuilder = {
             Number(p.devTrait) || 0
           ).map(PersonaService.name)
         : undefined;
+      // Same seed the M27 writer hands assignM27Fields, so the card shows the focus that exports.
+      const focus = gameVersion === 'm27'
+        ? PersonaService.focusName(focusFor(`${p.firstName}|${p.lastName}|${i}${opts.variant ? `|v${opts.variant}` : ''}`))
+        : undefined;
       return {
         id: i + 1,
         pick: i + 1,
@@ -1003,6 +1015,7 @@ export const DraftClassBuilder = {
         })(),
         combine: base.combine ?? null,
         persona,
+        focus,
         frontSeven: base.frontSeven
           ? { role: base.frontSeven.role, reason: base.frontSeven.reason, scheme: base.frontSeven.scheme, team: base.frontSeven.team, sackRate: base.frontSeven.sackRate }
           : null,

@@ -6,7 +6,9 @@
 
 **Persona descriptions from the game.** Every persona DNA card and picker entry now shows the
 game's own one-line description and display name for the trait, read from Madden 27's franchise
-data (Diva appears as "Particular", as it does in the game).
+data (Diva appears as "Particular", as it does in the game). The section also shows the
+player's mindset focus (Love of the Game, Winning, Personal Accolades or Financial) as its own
+picker under the traits, with the game's wording, and the choice is written into the export.
 
 **Likeness review.** The Appearance builder shows the player's real photo beside the faces, and
 the board has an "Unverified faces" filter that lists only the players whose skin tone is a

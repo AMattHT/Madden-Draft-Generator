@@ -18,7 +18,7 @@ export type DisplayRow = PlayerRow & { edited?: boolean };
 
 /** Edit keys that never change the game's overall (everything else - ratings,
  *  position, archetype, a legacy overall target - does). */
-const BIO_KEYS = new Set(['firstName', 'lastName', 'homeTown', 'devTrait', 'college', 'homeState', 'heightInches', 'weight', 'age', 'jerseyNum', 'bodyType', 'personaDNA', 'skinTone', 'faceAsset', 'genericHeadName']);
+const BIO_KEYS = new Set(['firstName', 'lastName', 'homeTown', 'devTrait', 'college', 'homeState', 'heightInches', 'weight', 'age', 'jerseyNum', 'bodyType', 'personaDNA', 'focus', 'skinTone', 'faceAsset', 'genericHeadName']);
 
 /** Attribute column id -> ratings key, so sorting an attribute column reads the
  *  rating the header names. Derived from the table's own column list so the two
