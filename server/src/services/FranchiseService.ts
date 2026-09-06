@@ -22,10 +22,10 @@ const CONTRACT_SALARY_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractSala
 const CONTRACT_BONUS_FIELDS = Array.from({ length: 8 }, (_, i) => `ContractBonus${i}`);
 
 /** The main franchise Player table + the 32-team Team table (bep713 FranchiseTableId). */
-const PLAYER_TABLE_UID = 1612938518;
-const TEAM_TABLE_UID = 637929298;
-const SEASONGAME_TABLE_UID = 1607878349; // SeasonGame (schedule)
-const SEASONINFO_TABLE_UID = 3123991521; // SeasonInfo (current week/type/year)
+export const PLAYER_TABLE_UID = 1612938518;
+export const TEAM_TABLE_UID = 637929298;
+export const SEASONGAME_TABLE_UID = 1607878349; // SeasonGame (schedule)
+export const SEASONINFO_TABLE_UID = 3123991521; // SeasonInfo (current week/type/year)
 const ROSTERINFO_TABLE_UID = 2907326382; // RosterInfo (MaxFreeAgentsSize etc. — read-only)
 const DRAFTPICK_FUTURE_POOL_UID = 2546719563; // future draft-pick pool (OriginalTeam vs CurrentTeam)
 const CHARVISUALS_TABLE_UID = 1429178382; // CharacterVisuals (RawData = loadout JSON, table3 blob)
@@ -97,14 +97,14 @@ export interface CapResetResult {
 
 export type GameVersion = 'm26' | 'm27';
 
-function savesDir(gameVersion: GameVersion = 'm26'): string {
+export function savesDir(gameVersion: GameVersion = 'm26'): string {
   if (gameVersion === 'm27') return M27_SAVES_DIR;
   return process.env.MADDEN_SAVES_DIR || path.join(os.homedir(), 'Documents', 'Madden NFL 26', 'Saves');
 }
 
 /** Open a franchise save and refuse one from the other game: the M27 contract
  *  model and enums differ, so a tool written against one must not touch the other. */
-async function openSave(inputPath: string, gameVersion: GameVersion): Promise<any> {
+export async function openSave(inputPath: string, gameVersion: GameVersion): Promise<any> {
   const expected = gameVersion === 'm27' ? 27 : 26;
   const file = await madden.create(inputPath, { autoParse: true });
   const year = Number(file.gameYear) || null;
@@ -123,7 +123,7 @@ const missingFieldsSeen = new Set<string>();
  * changed. Missing fields are skipped with a one-time warning (or thrown when
  * `required`), so a tool never claims work it did not do.
  */
-function writeField(rec: any, name: string, value: unknown, required = false): boolean {
+export function writeField(rec: any, name: string, value: unknown, required = false): boolean {
   const fields = rec?.fields as Record<string, any> | undefined;
   const field = fields?.[name];
   if (!field) {
@@ -147,7 +147,7 @@ function writeField(rec: any, name: string, value: unknown, required = false): b
 }
 
 /** A valid CAREER-* output name (so Madden lists it), derived from the input, never the input itself. */
-function outputNameFor(inputName: string, suffix: string, override?: string): string {
+export function outputNameFor(inputName: string, suffix: string, override?: string): string {
   if (override) return override;
   const base = inputName.replace(/-AUTOSAVE$/i, '').replace(/-(CAPRESET|PLAYERS|EDITED|ROSTER|RELOCATE|REBRAND)(-.*)?$/i, '');
   return `${base}-${suffix}`;
