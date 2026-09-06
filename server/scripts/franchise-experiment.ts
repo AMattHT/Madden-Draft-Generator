@@ -321,7 +321,9 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
     if (dryRun) { ctx.changes.push(text + ' (dry run)'); return; }
     try { g.AwayTeam = away ? ref(away.row) : NULL_REF; g.HomeTeam = home ? ref(home.row) : NULL_REF; } catch (e) { ctx.changes.push(`${label}: ref FAILED ${(e as Error).message}`); return; }
     put(ctx, g, 'GameStatus', status, label);
-    if (status === 'Unscheduled') { put(ctx, g, 'AwayScore', 0, label); put(ctx, g, 'HomeScore', 0, label); }
+    // A rewritten row starts fresh: no score left over from a game the save already played.
+    for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
+    try { if (val(g, 'IsSimmed')) writeField(g, 'IsSimmed', false); } catch { /* */ }
     ctx.changes.push(text);
   };
 
@@ -360,7 +362,7 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName);
-  const suffix: Record<string, string> = { bracket: `EXP-BRACKET${opt('teams', '8')}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { bracket: `EXP-BRACKET${opt('teams', '8')}${opt('first-round', 'wildcard') === 'divisional' ? 'D' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'bracket': await bracketPreset(ctx); break;
