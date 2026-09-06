@@ -394,6 +394,8 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
  *   --part flags    Team.PlayoffStatus / CurSeasonConfStanding for the 8-team seeding only
  *   --part playedteams  reset the played wild-card rows AND swap one team on each
  *   --part forceall ForceWin on the six empty wild-card rows of a week-18 save (Home x4, Away x2)
+ *   --part weekcount  SeasonInfo.NflseasonWeekCount 23 -> 19 only
+ *   --part blankweeks empty the regular-season rows from week 14 on only
  *   --part divrows  rewrite the four divisional rows as the ghost bracket does
  */
 async function bisectPreset(ctx: Ctx): Promise<void> {
@@ -454,6 +456,19 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
         ctx.changes.push(label + ' rewritten');
       } catch (e) { ctx.changes.push(`${label} FAILED ${(e as Error).message}`); }
     }
+  } else if (part === 'weekcount') {
+    // Only SeasonInfo.NflseasonWeekCount 23 -> 19 (14 regular-season weeks + 5 post-season).
+    const si = file.getTableByUniqueId(SEASONINFO_TABLE_UID); await si.readRecords();
+    put(ctx, si.records[0], 'NflseasonWeekCount', 14 + (Number(val(si.records[0], 'PostSeasonNumWeeks')) || 5), 'SeasonInfo');
+  } else if (part === 'blankweeks') {
+    // Only empty the regular-season rows from week 14 on (null teams + Unscheduled), like the bye rows.
+    let n = 0;
+    for (const g of sg.records) {
+      if (g.isEmpty || val(g, 'SeasonWeekType') !== 'RegularSeason' || Number(val(g, 'SeasonWeek')) < 14 || /^0*$/.test(String(val(g, 'HomeTeam')))) continue;
+      if (!dryRun) { try { g.HomeTeam = NULL_REF; g.AwayTeam = NULL_REF; } catch (e) { ctx.changes.push(`row: ref clear FAILED ${(e as Error).message}`); continue; } put(ctx, g, 'GameStatus', 'Unscheduled', `game ${val(g, 'SeasonGameID')}`); }
+      n++;
+    }
+    ctx.changes.push(`emptied ${n} regular-season rows from week 14 on`);
   } else if (part === 'flags') {
     const { recs, cmp } = await readField(ctx);
     for (const conf of ['AFC', 'NFC']) {
