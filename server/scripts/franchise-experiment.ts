@@ -393,6 +393,7 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
  *   --part reset    put the already-played wild-card rows back to HomeScheduled with zero scores
  *   --part flags    Team.PlayoffStatus / CurSeasonConfStanding for the 8-team seeding only
  *   --part playedteams  reset the played wild-card rows AND swap one team on each
+ *   --part forceall ForceWin on the six empty wild-card rows of a week-18 save (Home x4, Away x2)
  *   --part divrows  rewrite the four divisional rows as the ghost bracket does
  */
 async function bisectPreset(ctx: Ctx): Promise<void> {
@@ -419,6 +420,12 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
       put(ctx, g, 'GameStatus', 'HomeScheduled', label);
       for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
     }
+  } else if (part === 'forceall') {
+    // Week-18 save: ForceWin on the six still-empty wild-card rows. The game fills the teams
+    // when it advances (rows 0-5 = AFC 2v7, NFC 2v7, AFC 3v6, NFC 3v6, AFC 4v5, NFC 4v5, as
+    // observed); if the flag survives, Home on the first four and Away on the last two sends
+    // seeds 2, 3 and 5 through in each conference, which the bracket screen will show.
+    wc.forEach((g: any, i: number) => put(ctx, g, 'ForceWin', i < 4 ? 'Home' : 'Away', `wild-card row ${i}`));
   } else if (part === 'playedteams') {
     // Reset the played wild-card rows AND change one team on each (what the ghost bracket does to them).
     const spare = ctx.teamRows.get('Bills')!, spare2 = ctx.teamRows.get('Jets')!, spare3 = ctx.teamRows.get('Saints')!, spare4 = ctx.teamRows.get('Bears')!, spare5 = ctx.teamRows.get('Dolphins')!;
