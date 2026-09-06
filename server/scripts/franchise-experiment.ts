@@ -379,9 +379,10 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName);
-  const suffix: Record<string, string> = { bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
+    case 'noop': ctx.changes.push('no edits: open + save only (control)'); break;
     case 'bracket': await bracketPreset(ctx); break;
     case 'field': await fieldPreset(ctx); break;
     case 'divisions': await divisionsPreset(ctx); break;
