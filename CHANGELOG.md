@@ -8,8 +8,7 @@
 - Open already made draft classes with File → Open.
 - Persona DNA in the editor now shows icons and descriptions.
 - Focus in the editor.
-- Likeness review: the real photo beside the faces, an "Unverified faces" filter, and skin tone
-  read from a photo.
+- Skin tone can be read from a photo in the Appearance builder.
 
 ## 1.2.1
 

@@ -83,8 +83,6 @@ export function ClassView({
   const [spoilers, setSpoilers] = useState(false);
   // Likeness review: only the generic faces whose tone is a guess (no photo
   // evidence) and that the user has not fixed yet.
-  const [unverified, setUnverified] = useState(false);
-  const isUnverified = (r: PlayerRow) => r.face !== 'asset' && (r.toneSource === 'prior' || r.toneSource === 'csv') && !r.likenessFixed;
   const [showOpts, setShowOpts] = useState(false);
   const allTime = data.league === 'all-time';
   const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
@@ -194,7 +192,6 @@ export function ClassView({
       const q = search.toLowerCase();
       r = r.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
     }
-    if (unverified) r = r.filter(isUnverified);
     const sorted = [...r];
     const desc = sort.startsWith('-');
     const col = desc ? sort.slice(1) : sort;
@@ -216,7 +213,7 @@ export function ClassView({
       return cmp * dir || a.pick - b.pick;
     });
     return sorted;
-  }, [effRows, pos, search, sort, unverified]);
+  }, [effRows, pos, search, sort]);
 
   const editedCount = Object.keys(edits).length;
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
@@ -362,12 +359,9 @@ export function ClassView({
             total={data.count}
             spoilers={spoilers}
             setSpoilers={setSpoilers}
-            unverified={unverified}
-            setUnverified={setUnverified}
-            unverifiedCount={effRows.filter(isUnverified).length}
           />
           <div className="min-h-0 flex-1 overflow-auto">
-            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} showReference={unverified} />
+            <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} />
           </div>
         </section>
       </div>

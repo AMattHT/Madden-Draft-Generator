@@ -130,7 +130,7 @@ export function MetaStrip({
       {data.source !== 'file' && <span className="h-4 w-px bg-border" />}
       {data.source !== 'file' && <span
         className="text-[11px] text-neutral-400"
-        title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, or a curated record). Tick "Unverified faces" in the toolbar to review the rest.`}
+        title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, or a curated record). Open a player to check the rest.`}
       >
         <b className="tabular-nums text-neutral-200">{verified}</b>/{data.rows.length} faces verified
       </span>}
