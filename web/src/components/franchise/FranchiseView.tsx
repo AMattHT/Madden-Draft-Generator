@@ -10,9 +10,10 @@ import { FaTrimTool } from './FaTrimTool';
 import { RelocationTool } from './RelocationTool';
 import { DraftPickResetTool } from './DraftPickResetTool';
 import { ScheduleViewer } from './ScheduleViewer';
+import { HistoricSeasonTool } from './HistoricSeasonTool';
 import { ToolStack } from './shared';
 
-type Tab = 'cap' | 'players' | 'roster' | 'teams' | 'draft' | 'schedule';
+type Tab = 'cap' | 'players' | 'roster' | 'teams' | 'draft' | 'schedule' | 'historic';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'cap', label: 'Cap' },
   { id: 'players', label: 'Players' },
@@ -20,10 +21,11 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'teams', label: 'Teams' },
   { id: 'draft', label: 'Draft Tools' },
   { id: 'schedule', label: 'Schedule' },
+  { id: 'historic', label: 'Historic season' },
 ];
 
 // Our own generated outputs — a fresh session should default to the user's real save, not one of these.
-const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAND|RELOCATE)$/i;
+const OUTPUT_SUFFIX = /-(CAPRESET|PLAYERS|ROSTER|TRAITS|FATRIM|DRAFTPICKS|REBRAND|RELOCATE|AGED\d+|EXP-[A-Z0-9]+|HISTORIC\d*)$/i;
 const fmtDate = (ms: number) => new Date(ms).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 export function FranchiseView(props: {
@@ -157,6 +159,7 @@ export function FranchiseView(props: {
               </>
             )}
             {tab === 'schedule' && <ScheduleViewer save={selected} />}
+            {tab === 'historic' && <HistoricSeasonTool save={selected} gameVersion={props.gameVersion} />}
           </ToolStack>
         )}
       </div>

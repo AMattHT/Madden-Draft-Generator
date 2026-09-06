@@ -1,7 +1,24 @@
 import { Router, Request, Response } from 'express';
 import { FranchiseService, CapResetOptions, PlayerEditOptions, PlayerFieldEdit, RelocateRebrandOptions, TraitRealismOptions, FaTrimOptions, DraftPickResetOptions, AdvanceRosterOptions } from '../services/FranchiseService';
 
+import { HistoricFranchiseService } from '../services/HistoricFranchiseService';
+
 const router = Router();
+
+/** Baked historic seasons (and their era rules) the historic-season tool can preview. */
+router.get('/franchise/historic/seasons', (_req: Request, res: Response) => {
+  try { res.json({ seasons: HistoricFranchiseService.seasons() }); }
+  catch (e) { res.status(500).json({ error: (e as Error).message }); }
+});
+
+/** Read-only preview of a season pack against a save: team map, layout, rules, companion bracket. */
+router.post('/franchise/historic/preview', async (req: Request, res: Response) => {
+  const { fileName, year } = (req.body ?? {}) as { fileName?: string; year?: number };
+  if (!fileName) return res.status(400).json({ error: 'fileName required' });
+  if (!year) return res.status(400).json({ error: 'year required' });
+  try { res.json(await HistoricFranchiseService.preview(fileName, Number(year), versionOf(req.body))); }
+  catch (e) { res.status(500).json({ error: (e as Error).message }); }
+});
 
 /** 'm27' when the request says so, else 'm26'. Every franchise tool reads the
  *  save from that game's folder and refuses a save from the other game. */

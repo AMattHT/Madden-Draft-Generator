@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Features
+
+- Historic season preview in the franchise tools (Madden 27): pick a past season and see its clubs,
+  divisions, rules and playoff bracket against your save.
+
 ### Bug fixes
 
 - Players who were drafted twice because they didn't sign the first time (Bo Jackson, 1986

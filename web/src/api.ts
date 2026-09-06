@@ -336,6 +336,30 @@ export interface DraftPickResetResult {
   poolRows: number; traded: number; restored: number; restores: DraftPickRestore[];
 }
 
+export interface EraRules {
+  from: number; to: number; label: string; teams: number; conferences: number; divisionsPerConference: number;
+  gamesPerTeam: number; regularSeasonWeeks: number;
+  playoff: { teams: number; divisionWinners: number; wildCards: number; byes: number; rounds: string[] };
+  rosterLimit: number; salaryCap: boolean; tradeDeadline: boolean; notes: string[];
+}
+export interface HistoricSeasonOption { year: number; era: EraRules | null; teams: number }
+export interface TeamRecord { name: string; teamIndex: number; wins: number; losses: number; ties: number; pointsFor: number; pointsAgainst: number }
+export interface BracketSeed { seed: number; team: string; record: string; via: 'division' | 'wildcard'; division: string; bye: boolean }
+export interface HistoricRule { key: string; label: string; wanted: string; current: string; status: 'matches' | 'differs' | 'unknown' | 'guidance' }
+export interface HistoricPreview {
+  input: string; year: number; era: EraRules;
+  pack: { teams: number; games: number; rosterRows: number; rosterMatched: number; playoffGames: number };
+  teamMap: { key: string; name: string; division: string; modernName: string; teamIndex: number | null; currentDivision: string | null }[];
+  parked: { name: string; teamIndex: number | null }[];
+  layout: { division: string; conference: string; teams: string[]; fits: boolean }[];
+  saveLayout: { division: string; teams: string[] }[];
+  schedule: { packWeeks: number; packGames: number; saveRegularWeeks: number; saveRegularGames: number; currentWeekType: string; currentWeek: number };
+  rules: HistoricRule[];
+  standings: TeamRecord[];
+  bracket: { format: EraRules['playoff']; conferences: Record<string, BracketSeed[]>; games: { round: string; away: string; home: string }[]; notes: string[] };
+  warnings: string[];
+}
+
 export interface ScheduleGame {
   away: string; home: string; played: boolean;
   awayScore: number; homeScore: number; status: string;
@@ -598,6 +622,23 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileName, edits , gameVersion: franchiseGameVersion }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${res.status}`);
+    }
+    return res.json();
+  },
+
+  /** Baked historic seasons for the historic-season tool. */
+  franchiseHistoricSeasons: () => jget<{ seasons: HistoricSeasonOption[] }>('/api/franchise/historic/seasons').then((r) => r.seasons),
+
+  /** Read-only preview of a season pack against a save (team map, layout, rules, companion bracket). */
+  async franchiseHistoricPreview(fileName: string, year: number): Promise<HistoricPreview> {
+    const res = await fetch('/api/franchise/historic/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileName, year, gameVersion: franchiseGameVersion }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
