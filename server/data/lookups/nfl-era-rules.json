@@ -1,5 +1,5 @@
 {
-  "_about": "League structure and rules by season range, for the historic-season franchise tools. 'from'..'to' inclusive; the first matching era wins. playoff: divisionWinners and wildCards are PER CONFERENCE, byes per conference; teams is the whole field. Sources: NFL playoff history (8 teams 1970-77, 10 from 1978, 12 from 1990, 14 from 2020) and the season alignments.",
+  "_about": "League structure and rules by season range, for the historic-season franchise tools. 'from'..'to' inclusive; the first matching era wins. playoff: divisionWinners and wildCards are PER CONFERENCE, byes per conference (teams that skip the first round: 1978-89 all three division winners sat out the lone wild-card game); teams is the whole field. Sources: NFL playoff history (8 teams 1970-77, 10 from 1978, 12 from 1990, 14 from 2020) and the season alignments.",
   "eras": [
     {
       "from": 1970, "to": 1975, "label": "Post-merger, 26 teams",
@@ -18,7 +18,7 @@
     {
       "from": 1978, "to": 1989, "label": "16 games, 10-team playoff",
       "teams": 28, "conferences": 2, "divisionsPerConference": 3, "gamesPerTeam": 16, "regularSeasonWeeks": 16,
-      "playoff": { "teams": 10, "divisionWinners": 3, "wildCards": 2, "byes": 1, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
+      "playoff": { "teams": 10, "divisionWinners": 3, "wildCards": 2, "byes": 3, "rounds": ["Wild Card", "Divisional", "Conference Championship", "Super Bowl"] },
       "rosterLimit": 45, "salaryCap": false, "tradeDeadline": true,
       "notes": ["1982 strike season: 9 games and a 16-team tournament (not modelled).", "1987 strike: 15 games with replacement players."]
     },

@@ -49,11 +49,11 @@ export const EraRulesService = {
     return eras();
   },
 
-  /** Number of playoff games per round for a format (wild card, divisional, conference, super bowl). */
+  /** Playoff games per round for a format. The first round is the wild-card week for
+   *  every field but the 8-team one (1970-77), which opened with four divisional games. */
   gamesPerRound(p: PlayoffFormat): { wildCard: number; divisional: number; conference: number; superBowl: number } {
     const perConf = p.divisionWinners + p.wildCards;
-    const wildCard = perConf > 4 || p.byes > 0 ? 2 * (perConf - p.byes) / 2 : 0;
-    // 8-team fields (1970-77) skip the wild-card round: 4 divisional games.
-    return { wildCard: p.teams <= 8 ? 0 : wildCard, divisional: 4, conference: 2, superBowl: 1 };
+    const firstRound = 2 * Math.floor((perConf - p.byes) / 2);
+    return { wildCard: p.teams <= 8 ? 0 : firstRound, divisional: 4, conference: 2, superBowl: 1 };
   },
 };
