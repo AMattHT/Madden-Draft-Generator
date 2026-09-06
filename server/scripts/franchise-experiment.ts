@@ -10,6 +10,8 @@
  *   npx tsx scripts/franchise-experiment.ts swap-players
  *   npx tsx scripts/franchise-experiment.ts all-1975       (field 0/0 + divisions --park + season14)
  *   npx tsx scripts/franchise-experiment.ts bracket        --teams 8|10|12 [--parked] [--ghost-from worst|parked]
+ *   npx tsx scripts/franchise-experiment.ts bisect         --part force|teams|reset|flags   (one kind of edit)
+ *   npx tsx scripts/franchise-experiment.ts noop           (control: open + save, no edits)
  *
  * Every writing preset saves `CAREER-<base>-EXP-<PRESET>` into the Madden 27 Saves folder
  * (or prints what it would change with --dry-run). Default input: the newest CAREER-* save.
@@ -374,15 +376,59 @@ async function bracketPreset(ctx: Ctx): Promise<void> {
   }
 }
 
+/**
+ * Bisect the bracket write on a wild-card-week save: one kind of edit per copy.
+ *   --part force    ForceWin=Home on every wild-card row not yet played (nothing else)
+ *   --part teams    re-pair the not-yet-played wild-card rows only (teams swapped, statuses kept)
+ *   --part reset    put the already-played wild-card rows back to HomeScheduled with zero scores
+ *   --part flags    Team.PlayoffStatus / CurSeasonConfStanding for the 8-team seeding only
+ */
+async function bisectPreset(ctx: Ctx): Promise<void> {
+  const { file, teams } = ctx;
+  const part = opt('part', 'force');
+  const sg = file.getTableByUniqueId(SEASONGAME_TABLE_UID); await sg.readRecords();
+  const wc = sg.records.filter((g: any) => !g.isEmpty && val(g, 'SeasonWeekType') === 'WildcardPlayoff' && Number(val(g, 'SeasonWeek')) >= 18);
+  const played = (g: any) => /Won$|Tied/.test(String(val(g, 'GameStatus')));
+  const teamName = (g: any, k: string) => { try { return ctx.teamByRow[g.getReferenceDataByKey(k).rowNumber]; } catch { return '-'; } };
+  if (part === 'force') {
+    for (const g of wc.filter((x: any) => !played(x))) put(ctx, g, 'ForceWin', 'Home', `${teamName(g, 'AwayTeam')} @ ${teamName(g, 'HomeTeam')}`);
+  } else if (part === 'teams') {
+    const open = wc.filter((x: any) => !played(x));
+    for (const g of open) {
+      const h = g.getReferenceDataByKey('HomeTeam').rowNumber, a = g.getReferenceDataByKey('AwayTeam').rowNumber;
+      const label = `${teamName(g, 'AwayTeam')} @ ${teamName(g, 'HomeTeam')} -> swapped home/away`;
+      if (dryRun) { ctx.changes.push(label + ' (dry run)'); continue; }
+      try { g.HomeTeam = teams.getBinaryReferenceToRecord(a); g.AwayTeam = teams.getBinaryReferenceToRecord(h); ctx.changes.push(label); } catch (e) { ctx.changes.push(`${label} FAILED ${(e as Error).message}`); }
+    }
+    if (!open.length) ctx.changes.push('no unplayed wild-card rows to re-pair');
+  } else if (part === 'reset') {
+    for (const g of wc.filter((x: any) => played(x))) {
+      const label = `${teamName(g, 'AwayTeam')} @ ${teamName(g, 'HomeTeam')} reset`;
+      put(ctx, g, 'GameStatus', 'HomeScheduled', label);
+      for (const k of ['AwayScore', 'HomeScore', 'AwayScoreQuarter1', 'AwayScoreQuarter2', 'AwayScoreQuarter3', 'AwayScoreQuarter4', 'AwayScoreOT', 'HomeScoreQuarter1', 'HomeScoreQuarter2', 'HomeScoreQuarter3', 'HomeScoreQuarter4', 'HomeScoreOT']) { try { if (Number(val(g, k))) writeField(g, k, 0); } catch { /* */ } }
+    }
+  } else if (part === 'flags') {
+    const { recs, cmp } = await readField(ctx);
+    for (const conf of ['AFC', 'NFC']) {
+      const mine = recs.filter((r) => r.conf === conf);
+      const divisions = [...new Set(mine.map((r) => r.division))];
+      const winners = divisions.map((d) => mine.filter((r) => r.division === d).sort(cmp)[0]).sort(cmp);
+      winners.forEach((r, i) => { put(ctx, teams.records[r.row], 'CurSeasonConfStanding', i, `${r.name} seed`); put(ctx, teams.records[r.row], 'PlayoffStatus', i === 0 ? 'ClinchedConf' : 'ClinchedDivBerth', `${r.name} status`); });
+      for (const r of mine.filter((x) => !winners.includes(x))) if (String(val(teams.records[r.row], 'PlayoffStatus')) !== 'FirstNotClinched') put(ctx, teams.records[r.row], 'PlayoffStatus', 'FirstNotClinched', `${r.name} status`);
+    }
+  } else throw new Error(`unknown --part ${part}`);
+}
+
 // ---------------------------------------------------------------- main
 (async () => {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName);
-  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'noop': ctx.changes.push('no edits: open + save only (control)'); break;
+    case 'bisect': await bisectPreset(ctx); break;
     case 'bracket': await bracketPreset(ctx); break;
     case 'field': await fieldPreset(ctx); break;
     case 'divisions': await divisionsPreset(ctx); break;
