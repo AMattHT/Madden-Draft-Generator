@@ -328,6 +328,45 @@ function load(): Map<string, CareerBits[]> {
   return byKey;
 }
 
+/**
+ * Career passing and rushing for quarterbacks the draft table cannot see (it starts
+ * with the 1980 draft; supplemental picks are missing too), baked from Wikipedia
+ * infoboxes by scripts/bake-qb-rushing.ts. Without it Montana, Bradshaw and
+ * Staubach had no rushing record, so their archetype came from their build and
+ * their speed from that archetype (Montana: a lean Scrambler at 95).
+ *
+ * The infobox lists "Rushing yards" only when a quarterback ran enough for an
+ * editor to show it; the missing row is the record of a pocket passer, entered
+ * as the classic era's 25th-percentile rate. "Games played" is rarely shown for
+ * quarterbacks, so games come from the career span at 12 a season (Montana:
+ * 16 seasons -> 192, his real total).
+ */
+const POCKET_PASSER_YPG = 2.8;
+const GAMES_PER_SEASON = 12;
+let qbWiki: Map<string, Partial<CareerBits>> | null = null;
+function loadQbWiki(): Map<string, Partial<CareerBits>> {
+  if (qbWiki) return qbWiki;
+  qbWiki = new Map();
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'qb-rushing-wiki.json'), 'utf8')) as {
+      entries: Record<string, { status: string; passYards: number | null; rushYards: number | null; games: number | null; careerTo: number | null }>;
+    };
+    for (const [k, e] of Object.entries(raw.entries || {})) {
+      if (e.status !== 'ok') continue;
+      const year = parseInt(k.split('|')[0], 10);
+      const seasons = Math.max(1, (e.careerTo ?? year) - year + 1);
+      const games = e.games ?? seasons * GAMES_PER_SEASON;
+      qbWiki.set(k, {
+        passYards: e.passYards,
+        rushYards: e.rushYards ?? Math.round(POCKET_PASSER_YPG * games),
+        games,
+        careerTo: e.careerTo,
+      });
+    }
+  } catch { /* optional */ }
+  return qbWiki;
+}
+
 /** Curated careers for undrafted / supplemental stars (data/lookups/udfa_careers.json),
  *  keyed "<year>|<normalized name>". */
 let udfa: Map<string, Partial<CareerBits>> | null = null;
@@ -361,7 +400,7 @@ export const NflverseCareerService = {
       if (!hit && pick !== null) hit = [...list].sort((a, b) => (b.wav ?? -1) - (a.wav ?? -1))[0];
       if (!hit && pick === null) hit = list.find((b) => b.draftPick == null);
     }
-    const manual = MANUAL[nk] ?? loadUdfa().get(`${year}|${nk}`);
+    const manual = MANUAL[nk] ?? loadUdfa().get(`${year}|${nk}`) ?? loadQbWiki().get(`${year}|${nk}`);
     if (hit && manual) return merge(hit, manual);
     if (manual) return merge(empty(), manual);
     return hit ?? null;

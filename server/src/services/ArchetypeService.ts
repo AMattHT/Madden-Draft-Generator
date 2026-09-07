@@ -73,7 +73,8 @@ function usageArchetype(
     // yards without ever scrambling (Brady 1,123 over 335 games). Lamar/Newton/
     // Wilson/Allen run 28-50 yds per game; Elway/Rodgers/Mahomes 15-17.
     const games = Math.max(1, c.games ?? Math.round(Math.max(1, (c.seasonsStarted ?? 1)) * 16));
-    if (rushYds / games >= 22 && rushAtt / games >= 3.5) return 3; // Scrambler
+    // Attempts are unknown for the Wikipedia-baked careers; yards alone decide then.
+    if (rushYds / games >= 22 && (c.rushAtts == null || rushAtt / games >= 3.5)) return 3; // Scrambler
     if (ht >= 75 && wt >= 230) return 1; // Strong Arm
     return 0; // Field General
   }

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fortySpeedFloor, qbRushPercentile } from '../AttributeModel';
+import { NflverseCareerService } from '../NflverseCareerService';
 
 test('fortySpeedFloor: elite 40 times earn an absolute speed floor, ordinary ones none', () => {
   assert.equal(fortySpeedFloor(4.21), 99); // Xavier Worthy
@@ -24,4 +25,16 @@ test('qbRushPercentile: career rushing places an untested quarterback, per era',
   assert.ok(qbRushPercentile(c(4928, 161), 2005)! < 0.93);
   assert.equal(qbRushPercentile(c(100, 4), 2024), null); // too few games
   assert.equal(qbRushPercentile(null, 2024), null);
+});
+
+test('pre-1980 quarterbacks take passing and rushing from the Wikipedia bake', () => {
+  const montana = NflverseCareerService.get('Joe', 'Montana', 1979, 82)!;
+  assert.equal(montana.rushYards, 1676);
+  assert.equal(montana.passYards, 40551);
+  assert.equal(montana.games, 192); // 16 seasons at 12 a season, his real total
+  const p = qbRushPercentile(montana, 1979)!;
+  assert.ok(p > 0.65 && p < 0.8, String(p)); // 8.7 a game: a mobile pocket passer, not a runner
+  // No rushing row on the page = a pocket passer at the era's 25th percentile.
+  const moroski = NflverseCareerService.get('Mike', 'Moroski', 1979, undefined)!;
+  assert.ok(moroski.games! > 0 && moroski.rushYards === Math.round(2.8 * moroski.games!));
 });

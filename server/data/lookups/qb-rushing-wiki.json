@@ -1,0 +1,8339 @@
+{
+  "_source": "Wikipedia infobox career rushing for quarterbacks absent from nflverse draft_picks (pre-1980 drafts, supplemental picks). rushYards null = no rushing row shown. Baked by scripts/bake-qb-rushing.ts.",
+  "entries": {
+    "1937|mickeykobrosky": {
+      "page": "Mickey Kobrosky",
+      "passYards": 18,
+      "rushYards": 41,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1937,
+      "status": "ok"
+    },
+    "1937|sammybaugh": {
+      "page": "Sammy Baugh",
+      "passYards": 21886,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1939|antonstolfa": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1939,
+      "status": "no-page"
+    },
+    "1939|daveyobrien": {
+      "page": "Davey O'Brien",
+      "passYards": 2614,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1940,
+      "status": "ok"
+    },
+    "1939|fosterwatkins": {
+      "page": "Foster Watkins",
+      "passYards": 627,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1941,
+      "status": "ok"
+    },
+    "1939|larrycraig": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "no-page"
+    },
+    "1939|mikeperrie": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1939,
+      "status": "no-page"
+    },
+    "1939|sidluckman": {
+      "page": "Sid Luckman",
+      "passYards": 14686,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1950,
+      "status": "ok"
+    },
+    "1939|sollysherman": {
+      "page": "Solly Sherman",
+      "passYards": 58,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1940,
+      "status": "ok"
+    },
+    "1940|royzimmerman": {
+      "page": "Roy Zimmerman (American football)",
+      "passYards": 4801,
+      "rushYards": 244,
+      "rushTds": 6,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1940|tommythompson": {
+      "page": "Tommy Thompson (quarterback)",
+      "passYards": 10385,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1940|youngbussey": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1941,
+      "status": "no-page"
+    },
+    "1941|billglenn": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1944,
+      "status": "no-page"
+    },
+    "1941|charlieorourke": {
+      "page": "Charlie O'Rourke",
+      "passYards": 4039,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1941|jackodle": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1941|paulchristman": {
+      "page": "Paul Christman",
+      "passYards": 7294,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1950,
+      "status": "ok"
+    },
+    "1941|raymallouf": {
+      "page": "Ray Mallouf",
+      "passYards": 2504,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1941|russcotton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1942,
+      "status": "no-page"
+    },
+    "1942|budschwenk": {
+      "page": "Bud Schwenk",
+      "passYards": 3924,
+      "rushYards": 376,
+      "rushTds": 4,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1942|frankiealbert": {
+      "page": "Frankie Albert",
+      "passYards": 10795,
+      "rushYards": 1272,
+      "rushTds": 27,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1942|jackjacobs": {
+      "page": "Jack Jacobs",
+      "passYards": 3268,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1942|kencasanega": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "no-page"
+    },
+    "1942|tomfarris": {
+      "page": "Tom Farris",
+      "passYards": 108,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1943|paulgovernali": {
+      "page": "Paul Governali",
+      "passYards": 3348,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1944|angelobertelli": {
+      "page": "Angelo Bertelli",
+      "passYards": 972,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1944|billgarnaas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "no-page"
+    },
+    "1944|bobwaterfield": {
+      "page": "Bob Waterfield",
+      "passYards": 11849,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1944|bucketshirsch": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "no-page"
+    },
+    "1944|jessefreitas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "no-page"
+    },
+    "1944|jimgaffney": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1946,
+      "status": "no-page"
+    },
+    "1944|ottograham": {
+      "page": "Otto Graham",
+      "passYards": 23584,
+      "rushYards": 882,
+      "rushTds": 44,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1944|redcochran": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "no-page"
+    },
+    "1944|tommymont": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "no-page"
+    },
+    "1945|charleyeikenberg": {
+      "page": "Virgil Eikenberg",
+      "passYards": 116,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1945|charlieconerly": {
+      "page": "Charlie Conerly",
+      "passYards": 19488,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1945|clydeleforce": {
+      "page": "Clyde LeForce",
+      "passYards": 2961,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1945|jimhardy": {
+      "page": "Jim Hardy",
+      "passYards": 5690,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1945|nicksacrinty": {
+      "page": "Nick Sacrinty",
+      "passYards": 299,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1947,
+      "status": "ok"
+    },
+    "1945|paulcollins": {
+      "page": "Paul Collins (quarterback)",
+      "passYards": 43,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1945,
+      "status": "ok"
+    },
+    "1945|samvacanti": {
+      "page": "Sam Vacanti",
+      "passYards": 2338,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1946|boleydancewicz": {
+      "page": "Frank Dancewicz",
+      "passYards": 1551,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1946|frankbroyles": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1946|johnnylujack": {
+      "page": "Johnny Lujack",
+      "passYards": 6295,
+      "rushYards": 742,
+      "rushTds": 21,
+      "games": null,
+      "careerTo": 1951,
+      "status": "ok"
+    },
+    "1947|aljohnson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "no-page"
+    },
+    "1947|billmackrides": {
+      "page": "Bill Mackrides",
+      "passYards": 1583,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1953,
+      "status": "ok"
+    },
+    "1947|charleysarratt": {
+      "page": "Charley Sarratt",
+      "passYards": 48,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1947|ermalallen": {
+      "page": "Ermal Allen",
+      "passYards": 88,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1947,
+      "status": "ok"
+    },
+    "1947|erniecase": {
+      "page": "Ernie Case",
+      "passYards": 49,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1947,
+      "status": "ok"
+    },
+    "1948|bobbylayne": {
+      "page": "Bobby Layne",
+      "passYards": 26768,
+      "rushYards": 2451,
+      "rushTds": 25,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1948|fredenke": {
+      "page": "Fred Enke (American football)",
+      "passYards": 4169,
+      "rushYards": 640,
+      "rushTds": 1,
+      "games": null,
+      "careerTo": 1954,
+      "status": "ok"
+    },
+    "1948|georgeratterman": {
+      "page": "George Ratterman",
+      "passYards": 4279,
+      "rushYards": 31,
+      "rushTds": 6,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1948|giljohnson": {
+      "page": "Gil Johnson",
+      "passYards": 179,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1948|harrygilmer": {
+      "page": "Harry Gilmer",
+      "passYards": 3786,
+      "rushYards": 928,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1948|jimcamp": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "no-page"
+    },
+    "1948|normcox": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1947,
+      "status": "no-page"
+    },
+    "1948|paulcampbell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1948|perrymoss": {
+      "page": "Perry Moss",
+      "passYards": 20,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1948,
+      "status": "ok"
+    },
+    "1948|stanheath": {
+      "page": "Stan Heath (gridiron football)",
+      "passYards": 355,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1948|yatittle": {
+      "page": "Y. A. Tittle",
+      "passYards": 33070,
+      "rushYards": 1245,
+      "rushTds": 39,
+      "games": null,
+      "careerTo": 1964,
+      "status": "ok"
+    },
+    "1949|bobbythomason": {
+      "page": "Bobby Thomason",
+      "passYards": 9480,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1957,
+      "status": "ok"
+    },
+    "1949|bobdemoss": {
+      "page": "Bob DeMoss",
+      "passYards": 60,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1949|donpanciera": {
+      "page": "Don Panciera",
+      "passYards": 1383,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1949|franktripucka": {
+      "page": "Frank Tripucka",
+      "passYards": 10282,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1949|georgeblanda": {
+      "page": "George Blanda",
+      "passYards": 26920,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1949|jimfinks": {
+      "page": "Jim Finks",
+      "passYards": 8622,
+      "rushYards": 294,
+      "rushTds": 12,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1949|johnrauch": {
+      "page": "John Rauch",
+      "passYards": 959,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1951,
+      "status": "ok"
+    },
+    "1949|nicksebek": {
+      "page": "Nick Sebek",
+      "passYards": 0,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1950,
+      "status": "ok"
+    },
+    "1949|normvanbrocklin": {
+      "page": "Norm Van Brocklin",
+      "passYards": 23611,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1949|stanheath": {
+      "page": "Stan Heath (gridiron football)",
+      "passYards": 355,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1950|adrianburk": {
+      "page": "Adrian Burk",
+      "passYards": 7001,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1950|arniegaliffa": {
+      "page": "Arnold Galiffa",
+      "passYards": 183,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1954,
+      "status": "ok"
+    },
+    "1950|bobceleri": {
+      "page": "Bob Celeri",
+      "passYards": 2287,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1950|bobdemoss": {
+      "page": "Bob DeMoss",
+      "passYards": 60,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "ok"
+    },
+    "1950|bobgambold": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1953,
+      "status": "no-page"
+    },
+    "1950|butchsongin": {
+      "page": "Butch Songin",
+      "passYards": 4347,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1950|eddielebaron": {
+      "page": "Eddie LeBaron",
+      "passYards": 13399,
+      "rushYards": 650,
+      "rushTds": 9,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1950|raymallouf": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1949,
+      "status": "unverified"
+    },
+    "1950|steveromanik": {
+      "page": "Steve Romanik",
+      "passYards": 2556,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1954,
+      "status": "ok"
+    },
+    "1950|tobinrote": {
+      "page": "Tobin Rote",
+      "passYards": 18850,
+      "rushYards": 3128,
+      "rushTds": 37,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1950|travistidwell": {
+      "page": "Travis Tidwell",
+      "passYards": 493,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1951,
+      "status": "ok"
+    },
+    "1951|adrianburk": {
+      "page": "Adrian Burk",
+      "passYards": 7001,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1951|bobwilliams": {
+      "page": "Bob Williams (quarterback)",
+      "passYards": 981,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1951|fredbenners": {
+      "page": "Fred Benners",
+      "passYards": 320,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1951|johnmodeltford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1951|yatittle": {
+      "page": "Y. A. Tittle",
+      "passYards": 33070,
+      "rushYards": 1245,
+      "rushTds": 39,
+      "games": null,
+      "careerTo": 1964,
+      "status": "ok"
+    },
+    "1952|aldorow": {
+      "page": "Al Dorow",
+      "passYards": 7708,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1952|babeparilli": {
+      "page": "Babe Parilli",
+      "passYards": 22681,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1952|billywade": {
+      "page": "Bill Wade",
+      "passYards": 18530,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1952|dickhorn": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1958,
+      "status": "no-page"
+    },
+    "1952|donheinrich": {
+      "page": "Don Heinrich",
+      "passYards": 2287,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1952|donklosterman": {
+      "page": "Don Klosterman (American football)",
+      "passYards": 47,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1952,
+      "status": "ok"
+    },
+    "1952|edbrown": {
+      "page": "Ed Brown (quarterback)",
+      "passYards": 15600,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1965,
+      "status": "ok"
+    },
+    "1952|garykerkorian": {
+      "page": "Gary Kerkorian",
+      "passYards": 1862,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1952|harryagganis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1952|patbrady": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1954,
+      "status": "no-page"
+    },
+    "1952|tomdublinski": {
+      "page": "Tom Dublinski",
+      "passYards": 1300,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1952|tommyoconnell": {
+      "page": "Tommy O'Connell",
+      "passYards": 3261,
+      "rushYards": 72,
+      "rushTds": 4,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1953|billbrehany": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1953|charliemaloy": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1953|dalesamuels": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1953|eddiecrowder": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1953|edmioduszewski": {
+      "page": "Ed Mioduszewski",
+      "passYards": 113,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1953,
+      "status": "ok"
+    },
+    "1953|halledyard": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1953,
+      "status": "no-page"
+    },
+    "1953|jackscarbath": {
+      "page": "Jack Scarbath",
+      "passYards": 1868,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1953|jimroot": {
+      "page": "Jim Root (gridiron football)",
+      "passYards": 1482,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1953|paulheld": {
+      "page": "Paul Held",
+      "passYards": 332,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1953|rudybukich": {
+      "page": "Rudy Bukich",
+      "passYards": 8433,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1953|tedmarchibroda": {
+      "page": "Ted Marchibroda",
+      "passYards": 2169,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1957,
+      "status": "ok"
+    },
+    "1953|williethrower": {
+      "page": "Willie Thrower",
+      "passYards": 27,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1953|zekebratkowski": {
+      "page": "Zeke Bratkowski",
+      "passYards": 10345,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1971,
+      "status": "ok"
+    },
+    "1954|bobbygarrett": {
+      "page": "Bobby Garrett",
+      "passYards": 143,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1954,
+      "status": "ok"
+    },
+    "1954|bobclatterbuck": {
+      "page": "Bob Clatterbuck",
+      "passYards": 1032,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1954|cottondavidson": {
+      "page": "Cotton Davidson",
+      "passYards": 11760,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1954|jimhaluska": {
+      "page": "Jim Haluska",
+      "passYards": 8,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1954|lamarmchan": {
+      "page": "Lamar McHan",
+      "passYards": 9449,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1954|paullarson": {
+      "page": "Paul Larson (American football)",
+      "passYards": 61,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1954|tomyewcic": {
+      "page": "Tom Yewcic",
+      "passYards": 1374,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1955|charliebrackins": {
+      "page": "Charlie Brackins",
+      "passYards": 0,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1955|daveleggett": {
+      "page": "Dave Leggett",
+      "passYards": 0,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1955,
+      "status": "ok"
+    },
+    "1955|georgeshaw": {
+      "page": "George Shaw (American football)",
+      "passYards": 5829,
+      "rushYards": 431,
+      "rushTds": 6,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1955|johnborton": {
+      "page": "John Borton",
+      "passYards": 22,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1957,
+      "status": "ok"
+    },
+    "1955|johnnyunitas": {
+      "page": "Johnny Unitas",
+      "passYards": 40239,
+      "rushYards": 1777,
+      "rushTds": 13,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1955|petevann": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1955|ralphguglielmi": {
+      "page": "Ralph Guglielmi",
+      "passYards": 4119,
+      "rushYards": 633,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1955|viceaton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1955,
+      "status": "no-page"
+    },
+    "1956|bartstarr": {
+      "page": "Bart Starr",
+      "passYards": 24718,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1971,
+      "status": "ok"
+    },
+    "1956|bobbyfox": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|bobbylance": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|eagleday": {
+      "page": "Eagle Day",
+      "passYards": 194,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1956|earlmorrall": {
+      "page": "Earl Morrall",
+      "passYards": 20809,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1956|eddiewest": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|emlindbeck": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|fredwyant": {
+      "page": "Fred Wyant",
+      "passYards": 17,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1956,
+      "status": "ok"
+    },
+    "1956|georgeherring": {
+      "page": "George Herring",
+      "passYards": 1297,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1956|georgewelsh": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|jerrygustafson": {
+      "page": "Jerry Gustafson",
+      "passYards": 1214,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1956|jimmiller": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "unverified"
+    },
+    "1956|johnpolzer": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|johnroach": {
+      "page": "John Roach (American football)",
+      "passYards": 2765,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1964,
+      "status": "ok"
+    },
+    "1956|johnshearer": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|johnstephans": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|peteneft": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|rodhermes": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1956|tomspiers": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|bobbycox": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|bobwinters": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|chuckcurtis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|cornysalvaterra": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|jackkemp": {
+      "page": "Jack Kemp",
+      "passYards": 21218,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1957|johnbrodie": {
+      "page": "John Brodie",
+      "passYards": 31548,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1957|kennyploen": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|lendawson": {
+      "page": "Len Dawson",
+      "passYards": 28711,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1957|miltplum": {
+      "page": "Milt Plum",
+      "passYards": 17536,
+      "rushYards": 531,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1957|ronnieknox": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1957,
+      "status": "no-page"
+    },
+    "1957|ronniequillian": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1957|sonnyjurgensen": {
+      "page": "Sonny Jurgensen",
+      "passYards": 32224,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1957|tomdimitroff": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "no-page"
+    },
+    "1957|wademitchell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|aljacks": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|bobbrodhead": {
+      "page": "Bob Brodhead",
+      "passYards": 75,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "ok"
+    },
+    "1958|dannolan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|frankryan": {
+      "page": "Frank Ryan (American football)",
+      "passYards": 16042,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1958|jimninowski": {
+      "page": "Jim Ninowski",
+      "passYards": 7133,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1958|jimvanpelt": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|joefrancis": {
+      "page": "Joe Francis (American football)",
+      "passYards": 266,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1959,
+      "status": "ok"
+    },
+    "1958|kenmodeltford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|kinghill": {
+      "page": "King Hill",
+      "passYards": 5553,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1958|mackreynolds": {
+      "page": "M. C. Reynolds",
+      "passYards": 2932,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1958|mickeytrimarki": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1958|tomforrestal": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1959|bobptacek": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1959,
+      "status": "no-page"
+    },
+    "1959|buddyhumphrey": {
+      "page": "Buddy Humphrey",
+      "passYards": 1094,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1959|dickjamieson": {
+      "page": "Dick Jamieson",
+      "passYards": 586,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1959|dickwood": {
+      "page": "Dick Wood",
+      "passYards": 7153,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1959|donallard": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "no-page"
+    },
+    "1959|frankkremblas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1959|jimgrazione": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1959|joekapp": {
+      "page": "Joe Kapp",
+      "passYards": 5911,
+      "rushYards": 611,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1959|johnnygreen": {
+      "page": "Johnny Green (gridiron football)",
+      "passYards": 3921,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1959|leegrosscup": {
+      "page": "Lee Grosscup",
+      "passYards": 1086,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1959|mitchogiego": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1959|randyduncan": {
+      "page": "Randy Duncan",
+      "passYards": 361,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1959|tomflores": {
+      "page": "Tom Flores",
+      "passYards": 11959,
+      "rushYards": 307,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1960|bobbylackey": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|bobcolburn": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|bobwaters": {
+      "page": "Bob Waters",
+      "passYards": 707,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1960|butchsongin": {
+      "page": "Butch Songin",
+      "passYards": 4347,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1960|charleyjohnson": {
+      "page": "Charley Johnson",
+      "passYards": 24410,
+      "rushYards": 539,
+      "rushTds": 10,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1960|charliemilstead": {
+      "page": "Charlie Milstead",
+      "passYards": 43,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1960|davegrosz": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|deanlook": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "no-page"
+    },
+    "1960|dicknorman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "no-page"
+    },
+    "1960|dicksoergel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|donmeredith": {
+      "page": "Don Meredith",
+      "passYards": 17199,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1960|francurci": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|georgeizo": {
+      "page": "George Izo",
+      "passYards": 1791,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1960|harveywhite": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1960,
+      "status": "no-page"
+    },
+    "1960|ivantoncic": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|jackcummings": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|jackgroner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|jackylee": {
+      "page": "Jacky Lee",
+      "passYards": 6191,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1960|jamesmonroe": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|jimstclair": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|jimwalden": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|johntalley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|kentalkington": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|lowellhughes": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|olintreadway": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|philipsnowden": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|richielucas": {
+      "page": "Richie Lucas",
+      "passYards": 596,
+      "rushYards": 153,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": 1961,
+      "status": "ok"
+    },
+    "1960|sammccord": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|stevejohnson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|vernoncole": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1960|warrenrabb": {
+      "page": "Warren Rabb",
+      "passYards": 1782,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1961|bencharles": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|billykilmer": {
+      "page": "Billy Kilmer",
+      "passYards": 20495,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1961|bobschloredt": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|bryantharvard": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|charleyjohnson": {
+      "page": "Charley Johnson",
+      "passYards": 24410,
+      "rushYards": 539,
+      "rushTds": 10,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1961|davegrosz": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|dicknorman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1961,
+      "status": "no-page"
+    },
+    "1961|dickthornton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "unverified"
+    },
+    "1961|donfuell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|frantarkenton": {
+      "page": "Fran Tarkenton",
+      "passYards": 47003,
+      "rushYards": 3674,
+      "rushTds": 32,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1961|howarddyer": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|jackmoynihan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|jakegibbs": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|lowndesshingler": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|mikejones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|mikemcfarland": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|normsnead": {
+      "page": "Norm Snead",
+      "passYards": 30797,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1961|rayramsey": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1961|ronmiller": {
+      "page": "Ron Miller (American football)",
+      "passYards": 250,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1961|terrynofsinger": {
+      "page": "Terry Nofsinger",
+      "passYards": 1357,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "ok"
+    },
+    "1961|valkeckin": {
+      "page": "Val Keckin",
+      "passYards": 64,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1962,
+      "status": "ok"
+    },
+    "1962|bencharles": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|bobjoiner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|charliefurlow": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|dennisspurlock": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|eddiewilson": {
+      "page": "Eddie Wilson (American football)",
+      "passYards": 1251,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1965,
+      "status": "ok"
+    },
+    "1962|edtrancygier": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|galeweidner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|glynngriffing": {
+      "page": "Glynn Griffing",
+      "passYards": 306,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1963,
+      "status": "ok"
+    },
+    "1962|joezuger": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|johnanabo": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|johnfurman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|johnhadl": {
+      "page": "John Hadl",
+      "passYards": 33503,
+      "rushYards": 1112,
+      "rushTds": 16,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1962|johnmccormick": {
+      "page": "John McCormick (American football)",
+      "passYards": 2895,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1962|melmelin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|melrideout": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|pattrammell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|romangabriel": {
+      "page": "Roman Gabriel",
+      "passYards": 29444,
+      "rushYards": 1304,
+      "rushTds": 30,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1962|ronherman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|sonnygibbs": {
+      "page": "Sonny Gibbs",
+      "passYards": 3,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1964,
+      "status": "ok"
+    },
+    "1962|waltrappold": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1962|wilburnhollis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|billking": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|billnelsen": {
+      "page": "Bill Nelsen",
+      "passYards": 14165,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1963|billymoore": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|darylelamonica": {
+      "page": "Daryle Lamonica",
+      "passYards": 19154,
+      "rushYards": 640,
+      "rushTds": 14,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1963|davemathieson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|dennisclaridge": {
+      "page": "Dennis Claridge",
+      "passYards": 484,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1963|donbreaux": {
+      "page": "Don Breaux",
+      "passYards": 1339,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1963|dontrull": {
+      "page": "Don Trull",
+      "passYards": 3980,
+      "rushYards": 428,
+      "rushTds": 14,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1963|garycuozzo": {
+      "page": "Gary Cuozzo",
+      "passYards": 7402,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1963|jonanabo": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|mickeyslaughter": {
+      "page": "Mickey Slaughter",
+      "passYards": 3607,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1963|miketaliaferro": {
+      "page": "Mike Taliaferro",
+      "passYards": 5241,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1963|patmccarthy": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1963|peteliske": {
+      "page": "Pete Liske",
+      "passYards": 5170,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1963|ronvanderkelen": {
+      "page": "Ron Vander Kelen",
+      "passYards": 1375,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "ok"
+    },
+    "1963|terrybaker": {
+      "page": "Terry Baker",
+      "passYards": 154,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1965,
+      "status": "ok"
+    },
+    "1964|billmunson": {
+      "page": "Bill Munson",
+      "passYards": 12896,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1964|bobberry": {
+      "page": "Bob Berry (American football)",
+      "passYards": 9197,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1964|dickshiner": {
+      "page": "Dick Shiner",
+      "passYards": 4801,
+      "rushYards": 161,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1964|garywood": {
+      "page": "Gary Wood",
+      "passYards": 2575,
+      "rushYards": 425,
+      "rushTds": 6,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1964|georgemira": {
+      "page": "George Mira",
+      "passYards": 2110,
+      "rushYards": 379,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1971,
+      "status": "ok"
+    },
+    "1964|henryschichtle": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1964,
+      "status": "no-page"
+    },
+    "1964|jackankerson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1964|jackconcannon": {
+      "page": "Jack Concannon",
+      "passYards": 6270,
+      "rushYards": 1026,
+      "rushTds": 12,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1964|jerryrhome": {
+      "page": "Jerry Rhome",
+      "passYards": 1628,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1971,
+      "status": "ok"
+    },
+    "1964|johnstofa": {
+      "page": "John Stofa",
+      "passYards": 1758,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1964|larryrakestraw": {
+      "page": "Larry Rakestraw",
+      "passYards": 589,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1964|petebeathard": {
+      "page": "Pete Beathard",
+      "passYards": 8176,
+      "rushYards": 680,
+      "rushTds": 11,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1964|rogerstaubach": {
+      "page": "Roger Staubach",
+      "passYards": 22700,
+      "rushYards": 2264,
+      "rushTds": 20,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1964|roncalcagno": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1964|ronsmith": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "no-page"
+    },
+    "1964|tommywade": {
+      "page": "Tommy Wade",
+      "passYards": 470,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1965|archieroberts": {
+      "page": "Archie Roberts (American football)",
+      "passYards": 11,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "ok"
+    },
+    "1965|billyguyanderson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "no-page"
+    },
+    "1965|bobschweickert": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "no-page"
+    },
+    "1965|charliegreen": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "no-page"
+    },
+    "1965|craigfertig": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|craigmorton": {
+      "page": "Craig Morton",
+      "passYards": 27908,
+      "rushYards": null,
+      "rushTds": 12,
+      "games": null,
+      "careerTo": 1982,
+      "status": "ok"
+    },
+    "1965|dannythomas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|dansimrell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|garylane": {
+      "page": "Gary Lane (gridiron football)",
+      "passYards": 254,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1965|georgehaffner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|georgewilson": {
+      "page": "George Wilson (quarterback)",
+      "passYards": 764,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1965|jerrywhelchel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|joenamath": {
+      "page": "Joe Namath",
+      "passYards": 27663,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1965|johnhankinson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|johnhuarte": {
+      "page": "John Huarte",
+      "passYards": 230,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1965|johntorok": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|karlsweetan": {
+      "page": "Karl Sweetan",
+      "passYards": 3210,
+      "rushYards": 306,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1965|patscreen": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|stevetensi": {
+      "page": "Steve Tensi",
+      "passYards": 5558,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1965|tomlaframboise": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1965|tommyers": {
+      "page": "Tom Myers (quarterback)",
+      "passYards": 16,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1966|benjydial": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "no-page"
+    },
+    "1966|bennyrussell": {
+      "page": "Benny Russell",
+      "passYards": 3,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1966|billylaird": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|daveneilson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|edbuzzell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|garysnook": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|jackwhite": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|jimhart": {
+      "page": "Jim Hart (American football)",
+      "passYards": 34665,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1966|jimleclair": {
+      "page": "Jim LeClair (quarterback)",
+      "passYards": 676,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1966|jimward": {
+      "page": "Jim Ward (quarterback)",
+      "passYards": 165,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1971,
+      "status": "ok"
+    },
+    "1966|kenlucas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|kentnix": {
+      "page": "Kent Nix",
+      "passYards": 3644,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1966|mikebrundage": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1966|randyjohnson": {
+      "page": "Randy Johnson (quarterback)",
+      "passYards": 8329,
+      "rushYards": 573,
+      "rushTds": 10,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1966|ricknorton": {
+      "page": "Rick Norton",
+      "passYards": 1815,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1966|ronmeyer": {
+      "page": "Ron Meyer (quarterback)",
+      "passYards": 59,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1966,
+      "status": "ok"
+    },
+    "1966|scottyglacken": {
+      "page": "Scotty Glacken",
+      "passYards": 84,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "ok"
+    },
+    "1966|stevesloan": {
+      "page": "Steve Sloan",
+      "passYards": 134,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1967,
+      "status": "ok"
+    },
+    "1966|timvangalder": {
+      "page": "Tim Van Galder",
+      "passYards": 434,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1967|benmonroe": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|billbuckner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|bobbiletnikoff": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|bobdavis": {
+      "page": "Bob Davis (quarterback)",
+      "passYards": 1553,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1967|bobgriese": {
+      "page": "Bob Griese",
+      "passYards": 25092,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1980,
+      "status": "ok"
+    },
+    "1967|brucematte": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|coreycolehour": {
+      "page": "Corey Colehour",
+      "passYards": 2256,
+      "rushYards": 82,
+      "rushTds": 6,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1967|dannytalbott": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|davebennett": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|davelewis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "no-page"
+    },
+    "1967|donhorn": {
+      "page": "Don Horn",
+      "passYards": 3369,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1967|kaystephenson": {
+      "page": "Kay Stephenson",
+      "passYards": 481,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1967|paulbrothers": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|paulkrause": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|rickegloff": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|stevelaub": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|stevespurrier": {
+      "page": "Steve Spurrier",
+      "passYards": 6878,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1967|terrysouthall": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|timjones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|vidalcarlin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1967|virgilcarter": {
+      "page": "Virgil Carter",
+      "passYards": 5063,
+      "rushYards": 640,
+      "rushTds": 8,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1968|billystevens": {
+      "page": "Billy Stevens",
+      "passYards": 12,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "ok"
+    },
+    "1968|boblee": {
+      "page": "Bob Lee (quarterback)",
+      "passYards": 5034,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1980,
+      "status": "ok"
+    },
+    "1968|brucelemmerman": {
+      "page": "Bruce Lemmerman",
+      "passYards": 370,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1968|dandarragh": {
+      "page": "Dan Darragh",
+      "passYards": 1353,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1968|dannyholman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|deweywarren": {
+      "page": "Dewey Warren",
+      "passYards": 506,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1968|dongault": {
+      "page": "Don Gault",
+      "passYards": 67,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1968|garybeban": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "no-page"
+    },
+    "1968|garydavis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|gregbarton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "no-page"
+    },
+    "1968|greglandry": {
+      "page": "Greg Landry",
+      "passYards": 16052,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1968|henryjohnson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|jeffbeaver": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|jimalcorn": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|jimhaynie": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|johnschneider": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|kenstabler": {
+      "page": "Ken Stabler",
+      "passYards": 27938,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1968|kimhammond": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1969,
+      "status": "no-page"
+    },
+    "1968|kimking": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1968|mikelivingston": {
+      "page": "Mike Livingston",
+      "passYards": 11295,
+      "rushYards": 682,
+      "rushTds": 7,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1968|ronnieleesouth": {
+      "page": "Ronnie Lee South",
+      "passYards": 129,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1968,
+      "status": "ok"
+    },
+    "1968|samwyche": {
+      "page": "Sam Wyche",
+      "passYards": 1748,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1968|tomsherman": {
+      "page": "Tom Sherman (American football)",
+      "passYards": 1219,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1969|alanpastrana": {
+      "page": "Alan Pastrana",
+      "passYards": 420,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1969|alwoodall": {
+      "page": "Al Woodall",
+      "passYards": 2970,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1969|bobbelden": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|bobbydouglass": {
+      "page": "Bobby Douglass",
+      "passYards": 6493,
+      "rushYards": 2654,
+      "rushTds": 22,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1969|bobnaponic": {
+      "page": "Bob Naponic",
+      "passYards": 85,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1970,
+      "status": "ok"
+    },
+    "1969|briandowling": {
+      "page": "Brian Dowling (American football)",
+      "passYards": 383,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1969|busterobrien": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|eddhargett": {
+      "page": "Edd Hargett",
+      "passYards": 2727,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1969|edroseborough": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|gregcook": {
+      "page": "Greg Cook",
+      "passYards": 1865,
+      "rushYards": 148,
+      "rushTds": 1,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1969|jamesharris": {
+      "page": "James \"Shack\" Harris",
+      "passYards": 8136,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1969|larrygood": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|martydomres": {
+      "page": "Marty Domres",
+      "passYards": 4904,
+      "rushYards": 679,
+      "rushTds": 10,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1969|onreejackson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|sonnywade": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1969|terryhanratty": {
+      "page": "Terry Hanratty",
+      "passYards": 2510,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1969|timcarr": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|billcappleman": {
+      "page": "Bill Cappleman",
+      "passYards": 82,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1970|bobbycutburth": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|bobbystewart": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|bobleahy": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|dennisshaw": {
+      "page": "Dennis Shaw",
+      "passYards": 6347,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1970|edbaker": {
+      "page": "Ed Baker (quarterback)",
+      "passYards": 47,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1970|frankpatrick": {
+      "page": "Frank Patrick (quarterback)",
+      "passYards": 107,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1970|gordonslade": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|jimdelgaizo": {
+      "page": "Jim Del Gaizo",
+      "passYards": 648,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1970|larryarnold": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|mikecilek": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|mikeholmgren": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|mikephipps": {
+      "page": "Mike Phipps",
+      "passYards": 10506,
+      "rushYards": 1278,
+      "rushTds": 13,
+      "games": null,
+      "careerTo": 1981,
+      "status": "ok"
+    },
+    "1970|rickarrington": {
+      "page": "Rick Arrington",
+      "passYards": 950,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1970|rustyclark": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1970|steveramsey": {
+      "page": "Steve Ramsey (American football)",
+      "passYards": 6437,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1970|terrybradshaw": {
+      "page": "Terry Bradshaw",
+      "passYards": 27989,
+      "rushYards": 2257,
+      "rushTds": 32,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1970|wayneclark": {
+      "page": "Wayne Clark (quarterback)",
+      "passYards": 745,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1971|archiemanning": {
+      "page": "Archie Manning",
+      "passYards": 23911,
+      "rushYards": 2197,
+      "rushTds": 18,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1971|billbynum": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|bobbyscott": {
+      "page": "Bobby Scott (American football)",
+      "passYards": 2781,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1981,
+      "status": "ok"
+    },
+    "1971|buddylee": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|bustyunderwood": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|charlierichards": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|chuckhixson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|craigblackford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|danpastorini": {
+      "page": "Dan Pastorini",
+      "passYards": 18515,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1971|davemays": {
+      "page": "Dave Mays",
+      "passYards": 937,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1971|donmilan": {
+      "page": "Don Milan",
+      "passYards": 181,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1971|frankharris": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|jimplunkett": {
+      "page": "Jim Plunkett",
+      "passYards": 25882,
+      "rushYards": 1337,
+      "rushTds": 14,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1971|joereed": {
+      "page": "Joe Reed (quarterback)",
+      "passYards": 2825,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1971|joetheismann": {
+      "page": "Joe Theismann",
+      "passYards": 25206,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1985,
+      "status": "ok"
+    },
+    "1971|karldouglas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|kenanderson": {
+      "page": "Ken Anderson (quarterback)",
+      "passYards": 32838,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1971|leohart": {
+      "page": "Leo Hart",
+      "passYards": 53,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1972,
+      "status": "ok"
+    },
+    "1971|lynndickey": {
+      "page": "Lynn Dickey",
+      "passYards": 23322,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1985,
+      "status": "ok"
+    },
+    "1971|ronmaciejowski": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|scotthunter": {
+      "page": "Scott Hunter (American football)",
+      "passYards": 4756,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1971|stevegoepel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1971|timvondulm": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|brianlinstrom": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|briansipe": {
+      "page": "Brian Sipe",
+      "passYards": 23713,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1972|craigcurry": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|deancarlson": {
+      "page": "Dean Carlson",
+      "passYards": 116,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1972|donbunce": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|ericguthrie": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|garywichard": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|gordonlongmire": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|jameshamilton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|jerrytagge": {
+      "page": "Jerry Tagge",
+      "passYards": 1583,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1972|jimfassel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|joegilliam": {
+      "page": "Joe Gilliam",
+      "passYards": 2103,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1972|johnreaves": {
+      "page": "John Reaves",
+      "passYards": 3617,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1987,
+      "status": "ok"
+    },
+    "1972|kellycochrane": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|mikeernst": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|mikefranks": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|neilgraff": {
+      "page": "Neil Graff",
+      "passYards": 288,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1972|patsullivan": {
+      "page": "Pat Sullivan (American football)",
+      "passYards": 1155,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1972|rustylachaussee": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1972|vanbrownson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|bertjones": {
+      "page": "Bert Jones",
+      "passYards": 18190,
+      "rushYards": null,
+      "rushTds": null,
+      "games": 102,
+      "careerTo": 1982,
+      "status": "ok"
+    },
+    "1973|billdemory": {
+      "page": "Bill Demory",
+      "passYards": 159,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1973|billdonckers": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|danfouts": {
+      "page": "Dan Fouts",
+      "passYards": 43040,
+      "rushYards": 476,
+      "rushTds": 13,
+      "games": null,
+      "careerTo": 1987,
+      "status": "ok"
+    },
+    "1973|danwerner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|dennismorrison": {
+      "page": "Dennis Morrison",
+      "passYards": 227,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "ok"
+    },
+    "1973|donstrock": {
+      "page": "Don Strock",
+      "passYards": 5349,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1988,
+      "status": "ok"
+    },
+    "1973|eddiemcashan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|ericcrone": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|garydanielson": {
+      "page": "Gary Danielson",
+      "passYards": 13764,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1973|garyhuff": {
+      "page": "Gary Huff",
+      "passYards": 4329,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1973|garykeithley": {
+      "page": "Gary Keithley",
+      "passYards": 369,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1973,
+      "status": "ok"
+    },
+    "1973|joeferguson": {
+      "page": "Joe Ferguson",
+      "passYards": 29817,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1990,
+      "status": "ok"
+    },
+    "1973|johnhufnagel": {
+      "page": "John Hufnagel",
+      "passYards": 357,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1973|johnmadeya": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|matthewreed": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|mikerae": {
+      "page": "Mike Rae",
+      "passYards": 1536,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1973|mikewells": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "no-page"
+    },
+    "1973|randymattingly": {
+      "page": "Randy Mattingly",
+      "passYards": 812,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1973|ronjaworski": {
+      "page": "Ron Jaworski",
+      "passYards": 28190,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1989,
+      "status": "ok"
+    },
+    "1973|tedmcnulty": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|tompierantozzi": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|tonyadams": {
+      "page": "Tony Adams (quarterback)",
+      "passYards": 2733,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1987,
+      "status": "ok"
+    },
+    "1973|typaine": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1973|wayneestabrook": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|alanchadwick": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|billtroup": {
+      "page": "Bill Troup",
+      "passYards": 2047,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1974|bobobrowski": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|carlsummerell": {
+      "page": "Carl Summerell",
+      "passYards": 157,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1974|craigholland": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|dannywhite": {
+      "page": "Danny White",
+      "passYards": 21959,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1988,
+      "status": "ok"
+    },
+    "1974|davidjaynes": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "no-page"
+    },
+    "1974|dieterbrock": {
+      "page": "Dieter Brock",
+      "passYards": 2658,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1974|donvangalder": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|frankkolch": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|garymarangi": {
+      "page": "Gary Marangi",
+      "passYards": 1373,
+      "rushYards": 328,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1974|garyvalbuena": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|gregghare": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|jessefreitas": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "no-page"
+    },
+    "1974|joebarnes": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1974,
+      "status": "no-page"
+    },
+    "1974|joepisarcik": {
+      "page": "Joe Pisarcik",
+      "passYards": 5552,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1974|keithbobo": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|kimmcquilken": {
+      "page": "Kim McQuilken",
+      "passYards": 1135,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1974|larrycipa": {
+      "page": "Larry Cipa",
+      "passYards": 424,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1975,
+      "status": "ok"
+    },
+    "1974|mikeboryla": {
+      "page": "Mike Boryla",
+      "passYards": 2838,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1974|norrisweese": {
+      "page": "Norris Weese",
+      "passYards": 1887,
+      "rushYards": 362,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1974|pielpennington": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1974|tomowen": {
+      "page": "Tom Owen (American football)",
+      "passYards": 2300,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1981,
+      "status": "ok"
+    },
+    "1974|willcureton": {
+      "page": "Will Cureton",
+      "passYards": 95,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1975|alvinwhite": {
+      "page": "Alvin White (American football)",
+      "passYards": 936,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1975|billmalouf": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|bobavellini": {
+      "page": "Bob Avellini",
+      "passYards": 7111,
+      "rushYards": 225,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1975|carlosbrown": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "no-page"
+    },
+    "1975|chriskupec": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|condredgeholloway": {
+      "page": "Condredge Holloway",
+      "passYards": 25193,
+      "rushYards": null,
+      "rushTds": null,
+      "games": 181,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1975|davidhumm": {
+      "page": "David Humm",
+      "passYards": 753,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1975|garysheide": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|harryknight": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|jimmcmillan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|jimzorn": {
+      "page": "Jim Zorn",
+      "passYards": 21115,
+      "rushYards": 1504,
+      "rushTds": 17,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1975|jjjones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|johngraham": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|mikenott": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|mitchanderson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|nealjeffrey": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "no-page"
+    },
+    "1975|pathaden": {
+      "page": "Pat Haden",
+      "passYards": 9296,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1981,
+      "status": "ok"
+    },
+    "1975|rickworley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|stevebartkowski": {
+      "page": "Steve Bartkowski",
+      "passYards": 24124,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1975|stevegrogan": {
+      "page": "Steve Grogan",
+      "passYards": 26886,
+      "rushYards": 2176,
+      "rushTds": 35,
+      "games": null,
+      "careerTo": 1990,
+      "status": "ok"
+    },
+    "1975|stevejoachim": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "no-page"
+    },
+    "1975|tomdoyle": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1975|tomshuman": {
+      "page": "Tom Shuman",
+      "passYards": 1253,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1976|billbowerman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|billsalmon": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|bobbateman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|chrisrowland": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|corneliusgreene": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|craignagel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|craigpenrose": {
+      "page": "Craig Penrose",
+      "passYards": 711,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1976|davebuckey": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|geneswick": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|gregkokal": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|jackberry": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|jebblount": {
+      "page": "Jeb Blount",
+      "passYards": 522,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "ok"
+    },
+    "1976|jeffgrantz": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|jerrygolsteyn": {
+      "page": "Jerry Golsteyn",
+      "passYards": 1077,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1976|joebruner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|lynnhieber": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|markdriscoll": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|mikekirkland": {
+      "page": "Mike Kirkland (American football)",
+      "passYards": 211,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1976|mikekruczek": {
+      "page": "Mike Kruczek",
+      "passYards": 1185,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1980,
+      "status": "ok"
+    },
+    "1976|parnelldickinson": {
+      "page": "Parnell Dickinson",
+      "passYards": 210,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1976,
+      "status": "ok"
+    },
+    "1976|richardtodd": {
+      "page": "Richard Todd (American football)",
+      "passYards": 20610,
+      "rushYards": 932,
+      "rushTds": 14,
+      "games": null,
+      "careerTo": 1985,
+      "status": "ok"
+    },
+    "1976|scottbull": {
+      "page": "Scott Bull",
+      "passYards": 992,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1976|scottgardner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|stevehamilton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|stevekincannon": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1976|stevemyer": {
+      "page": "Steve Myer",
+      "passYards": 851,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1976|terryluck": {
+      "page": "Terry Luck",
+      "passYards": 316,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1977|cliffolander": {
+      "page": "Cliff Olander",
+      "passYards": 125,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1977|cliffstoudt": {
+      "page": "Cliff Stoudt",
+      "passYards": 4506,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1989,
+      "status": "ok"
+    },
+    "1977|davidwhitehurst": {
+      "page": "David Whitehurst",
+      "passYards": 6205,
+      "rushYards": 242,
+      "rushTds": 7,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1977|fredbesana": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1977|glenncarano": {
+      "page": "Glenn Carano",
+      "passYards": 304,
+      "rushYards": null,
+      "rushTds": null,
+      "games": 36,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1977|guidomerkens": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1977|junejones": {
+      "page": "June Jones",
+      "passYards": 923,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1977|markvitali": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1977|mattrobinson": {
+      "page": "Matt Robinson (American football)",
+      "passYards": 3519,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1982,
+      "status": "ok"
+    },
+    "1977|mikecordova": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1977|randydean": {
+      "page": "Randy Dean",
+      "passYards": 279,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "ok"
+    },
+    "1977|randyhedberg": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "no-page"
+    },
+    "1977|samadkins": {
+      "page": "Sam Adkins (American football)",
+      "passYards": 232,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1981,
+      "status": "ok"
+    },
+    "1977|stevedeberg": {
+      "page": "Steve DeBerg",
+      "passYards": 34241,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1998,
+      "status": "ok"
+    },
+    "1977|stevemathieson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1977|stevepisarkiewicz": {
+      "page": "Steve Pisarkiewicz",
+      "passYards": 804,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1980,
+      "status": "ok"
+    },
+    "1977|tomduniven": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1977,
+      "status": "no-page"
+    },
+    "1977|tommykramer": {
+      "page": "Tommy Kramer",
+      "passYards": 24777,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1990,
+      "status": "ok"
+    },
+    "1977|vinceevans": {
+      "page": "Vince Evans",
+      "passYards": 9485,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1995,
+      "status": "ok"
+    },
+    "1977|vinceferragamo": {
+      "page": "Vince Ferragamo",
+      "passYards": 11336,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1978|billkenney": {
+      "page": "Bill Kenney",
+      "passYards": 17277,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1988,
+      "status": "ok"
+    },
+    "1978|dennissproul": {
+      "page": "Dennis Sproul",
+      "passYards": 87,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1978|dougwilliams": {
+      "page": "Doug Williams (quarterback)",
+      "passYards": 16998,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1989,
+      "status": "ok"
+    },
+    "1978|edburns": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1978|giffordnielsen": {
+      "page": "Gifford Nielsen",
+      "passYards": 3255,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1978|guybenjamin": {
+      "page": "Guy Benjamin",
+      "passYards": 439,
+      "rushYards": null,
+      "rushTds": null,
+      "games": 19,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1978|johnhurley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1978|keithmyers": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1978|markmanges": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "no-page"
+    },
+    "1978|markmiller": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1979,
+      "status": "no-page"
+    },
+    "1978|mattcavanaugh": {
+      "page": "Matt Cavanaugh",
+      "passYards": 4332,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1991,
+      "status": "ok"
+    },
+    "1978|mikerieker": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1978|patryan": {
+      "page": "Pat Ryan (American football)",
+      "passYards": 4320,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1991,
+      "status": "ok"
+    },
+    "1978|petewoods": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1978|robhertel": {
+      "page": "Rob Hertel",
+      "passYards": 9,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1978,
+      "status": "ok"
+    },
+    "1978|warrenmoon": {
+      "page": "Warren Moon",
+      "passYards": 49325,
+      "rushYards": 1736,
+      "rushTds": 22,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1979|chuckfusina": {
+      "page": "Chuck Fusina",
+      "passYards": 198,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1979|danmanucci": {
+      "page": "Dan Manucci",
+      "passYards": 132,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1987,
+      "status": "ok"
+    },
+    "1979|dansanders": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|daverader": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|davidmarler": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|jackthompson": {
+      "page": "Jack Thompson (American football)",
+      "passYards": 5315,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1984,
+      "status": "ok"
+    },
+    "1979|jeffknapple": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|jeffkomlo": {
+      "page": "Jeff Komlo",
+      "passYards": 2603,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1983,
+      "status": "ok"
+    },
+    "1979|jeffrutledge": {
+      "page": "Jeff Rutledge",
+      "passYards": 3628,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1992,
+      "status": "ok"
+    },
+    "1979|joemontana": {
+      "page": "Joe Montana",
+      "passYards": 40551,
+      "rushYards": 1676,
+      "rushTds": 20,
+      "games": null,
+      "careerTo": 1994,
+      "status": "ok"
+    },
+    "1979|larryfortner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|mikeloyd": {
+      "page": "Mike Loyd",
+      "passYards": 49,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1979|mikemoroski": {
+      "page": "Mike Moroski",
+      "passYards": 2864,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1979|philsimms": {
+      "page": "Phil Simms",
+      "passYards": 33462,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1993,
+      "status": "ok"
+    },
+    "1979|rickleach": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1979|stevedils": {
+      "page": "Steve Dils",
+      "passYards": 5816,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 1988,
+      "status": "ok"
+    },
+    "1979|stevefuller": {
+      "page": "Steve Fuller (American football)",
+      "passYards": 7156,
+      "rushYards": 908,
+      "rushTds": 11,
+      "games": null,
+      "careerTo": 1986,
+      "status": "ok"
+    },
+    "1980|danhartwig": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1980|davekrieg": {
+      "page": "Dave Krieg",
+      "passYards": 38147,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1980|genebradley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1980|jimmyjordan": {
+      "page": "Jimmy Jordan (quarterback)",
+      "passYards": 2583,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1980|kevinscanlon": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1980|mikewright": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1980|toddkrueger": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|bradwright": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|brianbuckley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|gregknafelc": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|jeffkemp": {
+      "page": "Jeff Kemp",
+      "passYards": 6230,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1981|joeadams": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|markoconnell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|mikeford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|nickiehall": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|philkessel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1981|timclifford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|boblane": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|danferaday": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|johnfourcade": {
+      "page": "John Fourcade",
+      "passYards": 2312,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1982|luctousignant": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|mikekerrigan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|ronreeves": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|stevemichuta": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1982|stevesandon": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1983|alanrisher": {
+      "page": "Alan Risher",
+      "passYards": 564,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1983|bobbyhebert": {
+      "page": "Bobby Hebert",
+      "passYards": 21683,
+      "rushYards": 602,
+      "rushTds": 1,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1983|bobhewko": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1983|cletecasper": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1983|davidmangrum": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1983|joedufek": {
+      "page": "Joe Dufek",
+      "passYards": 829,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1983|scottlindquist": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1983|scotttinsley": {
+      "page": "Scott Tinsley",
+      "passYards": 637,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|davidarcher": {
+      "page": "David Archer (quarterback)",
+      "passYards": 4337,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|markcasale": {
+      "page": "Mark Casale",
+      "passYards": 515,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|randyessington": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1984|rickneuheisel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1984|rickyturner": {
+      "page": "Ricky Turner",
+      "passYards": 92,
+      "rushYards": null,
+      "rushTds": 2,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|sandyosiecki": {
+      "page": "Sandy Osiecki",
+      "passYards": 64,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|scottstankavage": {
+      "page": "Scott Stankavage",
+      "passYards": 66,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1984|steveyoung": {
+      "page": "Steve Young",
+      "passYards": 33124,
+      "rushYards": 4239,
+      "rushTds": 43,
+      "games": null,
+      "careerTo": 1999,
+      "status": "ok"
+    },
+    "1984|toddhons": {
+      "page": "Todd Hons",
+      "passYards": 552,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1985|berniekosar": {
+      "page": "Bernie Kosar",
+      "passYards": 23301,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1985|buddyfunck": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1985|galegilbert": {
+      "page": "Gale Gilbert",
+      "passYards": 1544,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1985|johnconner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1985|larrymiller": {
+      "page": "Larry Miller (American football)",
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1985|miketomczak": {
+      "page": "Mike Tomczak",
+      "passYards": 16079,
+      "rushYards": 526,
+      "rushTds": 9,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1985|paulberner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1985|scottbarry": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1985|stevecalabria": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1986|chrishegg": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1986|jeffwickersham": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1986|kenkarcher": {
+      "page": "Ken Karcher",
+      "passYards": 756,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1986|martyhorn": {
+      "page": "Marty Horn",
+      "passYards": 68,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1986|mikebusch": {
+      "page": "Mike Busch (American football)",
+      "passYards": 278,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1986|mikehold": {
+      "page": "Mike Hold",
+      "passYards": 123,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1986|robbiebosco": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1986|scottwoolf": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1986|seansalisbury": {
+      "page": "Sean Salisbury",
+      "passYards": 3824,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1986|williegillus": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|adrianbreen": {
+      "page": "Adrian Breen (American football)",
+      "passYards": 9,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|alexespinoza": {
+      "page": "Alex Espinoza",
+      "passYards": 69,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|billransdell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|bobbleier": {
+      "page": "Bob Bleier",
+      "passYards": 181,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|edrubbert": {
+      "page": "Ed Rubbert",
+      "passYards": 532,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|erikkramer": {
+      "page": "Erik Kramer",
+      "passYards": 15337,
+      "rushYards": 217,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|jeffvanraaphorst": {
+      "page": "Jeff Van Raaphorst",
+      "passYards": 174,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|jimcrocicchia": {
+      "page": "Jim Crocicchia",
+      "passYards": 89,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|jimkarsatos": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|johnpaye": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|kenlambiotte": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|lorensnyder": {
+      "page": "Loren Snyder",
+      "passYards": 44,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|mattstevens": {
+      "page": "Matt Stevens (quarterback)",
+      "passYards": 315,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|mikeshula": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1987|montemcguire": {
+      "page": "Monte McGuire",
+      "passYards": 23,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|seanpayton": {
+      "page": "Sean Payton",
+      "passYards": 79,
+      "rushYards": 28,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|shawnhalloran": {
+      "page": "Shawn Halloran",
+      "passYards": 263,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1987|toddwhitten": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|budkeyes": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|dannymccoin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|dannymcmanus": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|davidweber": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|donmcpherson": {
+      "page": "Don McPherson",
+      "passYards": 3248,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1988|mikeperez": {
+      "page": "Mike Perez (American football)",
+      "passYards": 18875,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1988|rickstrom": {
+      "page": "Rick Strom (American football)",
+      "passYards": 162,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1988|steveslayden": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1988|toddsantos": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|bobjean": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|brentsnyder": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|chuckhartlieb": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|jasongarrett": {
+      "page": "Jason Garrett",
+      "passYards": 2042,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1989|jeffgraham": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|paulsinger": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|stevetaylor": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|stevewalsh": {
+      "page": "Steve Walsh (American football)",
+      "passYards": 7875,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1989|terrencejones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|timmrosenbach": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1989|toddphilcox": {
+      "page": "Todd Philcox",
+      "passYards": 1138,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1989|waynejohnson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|clementegordon": {
+      "page": "Clemente Gordon",
+      "passYards": 2329,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1990|genebenhart": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|gerrygdowski": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|johngromos": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|kirkbaumgartner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|majorharris": {
+      "page": "Major Harris (American football)",
+      "passYards": 300,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1990|reggieslack": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|toddellis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1990|toddhammel": {
+      "page": "Todd Hammel",
+      "passYards": 28022,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1991|bradgoebel": {
+      "page": "Brad Goebel",
+      "passYards": 299,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1991|dougpederson": {
+      "page": "Doug Pederson",
+      "passYards": 2762,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1991|jeffbridewell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1991|larrywanke": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1991|patohara": {
+      "page": "Pat O'Hara",
+      "passYards": 13383,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1992|chrishakel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|corneliusbenton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|darianhagan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|davebrown": {
+      "page": "Dave Brown (quarterback)",
+      "passYards": 10248,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1992|keithenmccant": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|markbarsotti": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|mattrodgers": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1992|mikepawlawski": {
+      "page": "Mike Pawlawski",
+      "passYards": 16673,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1992|rickyjones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1993|jamiemartin": {
+      "page": "Jamie Martin (American football)",
+      "passYards": 3814,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1993|shanematthews": {
+      "page": "Shane Matthews",
+      "passYards": 4756,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1994|jayfiedler": {
+      "page": "Jay Fiedler",
+      "passYards": 11844,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1994|jeffbrohm": {
+      "page": "Jeff Brohm",
+      "passYards": 353,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1994|jeffgarcia": {
+      "page": "Jeff Garcia",
+      "passYards": 25537,
+      "rushYards": 2140,
+      "rushTds": 26,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1994|kurtwarner": {
+      "page": "Kurt Warner",
+      "passYards": 32344,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1995|chadmay": {
+      "page": "Chad May",
+      "passYards": 2027,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1995|jaybarker": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1995|jerrycolquitt": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1995|johnwalsh": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1995|kellyholcomb": {
+      "page": "Kelly Holcomb",
+      "passYards": 5916,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1995|turkknisley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1996|damonhuard": {
+      "page": "Damon Huard",
+      "passYards": 6303,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|jamesritchey": {
+      "page": "James Ritchey",
+      "passYards": 15,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|jonkitna": {
+      "page": "Jon Kitna",
+      "passYards": 29745,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|jonstark": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1996|kylewachholtz": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1996|mikecawley": {
+      "page": "Mike Cawley",
+      "passYards": 762,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|raylucas": {
+      "page": "Ray Lucas",
+      "passYards": 3029,
+      "rushYards": 396,
+      "rushTds": 4,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|scottmilanovich": {
+      "page": "Scott Milanovich",
+      "passYards": 9,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1996|spencefischer": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1996|tommiefrazier": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1997|henryburris": {
+      "page": "Henry Burris",
+      "passYards": 63227,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1997|jakedelhomme": {
+      "page": "Jake Delhomme",
+      "passYards": 20975,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1997|mikequinn": {
+      "page": "Mike Quinn",
+      "passYards": 20,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1997|ronmcada": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1997|toddbouman": {
+      "page": "Todd Bouman",
+      "passYards": 1905,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1997|tonycorbin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1998|johndutton": {
+      "page": "John Dutton (quarterback)",
+      "passYards": 37981,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1998|ronpowlus": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1999|anthonywright": {
+      "page": "Anthony Wright (American football)",
+      "passYards": 3590,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1999|joshmcdaniels": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "1999|kevindaft": {
+      "page": "Kevin Daft",
+      "passYards": 135,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "1999|mattlytle": {
+      "page": "Matt Lytle",
+      "passYards": 133,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2000|billyvolek": {
+      "page": "Billy Volek",
+      "passYards": 3754,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2000|clintstoerner": {
+      "page": "Clint Stoerner",
+      "passYards": 367,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2000|dougjohnson": {
+      "page": "Doug Johnson (American football)",
+      "passYards": 2600,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2000|giovannicarmazzi": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2000|jajuanseider": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2000|kevinthompson": {
+      "page": "Kevin Thompson (American football)",
+      "passYards": 8,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2000|travisbrown": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2001|cleolemon": {
+      "page": "Cleo Lemon",
+      "passYards": 2185,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2001|joshbooty": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2001|joshheupel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2001|timhasselbeck": {
+      "page": "Tim Hasselbeck",
+      "passYards": 1012,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2001|torywoodbury": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|brandondoman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|brettmarshall": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|chadhutchinson": {
+      "page": "Chad Hutchinson",
+      "passYards": 2466,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2002|jeffkelly": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|quinngray": {
+      "page": "Quinn Gray",
+      "passYards": 1328,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2002|sethburford": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|shaunhill": {
+      "page": "Shaun Hill",
+      "passYards": 8295,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2002|stevebellisari": {
+      "page": "Steve Bellisari",
+      "passYards": 2547,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2002|vinnybredenburg": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2002|wespate": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2003|bradbanks": {
+      "page": "Brad Banks",
+      "passYards": 1195,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2003|daveirwin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2003|tonyromo": {
+      "page": "Tony Romo",
+      "passYards": 34183,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2004|andyhall": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2004|benmcdaniels": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2004|bjsymons": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2004|caseybramlet": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2004|jaredlorenzen": {
+      "page": "Jared Lorenzen",
+      "passYards": 28,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2004|jeffsmoker": {
+      "page": "Jeff Smoker",
+      "passYards": 5550,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2004|joshharris": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2005|adrianmcpherson": {
+      "page": "Adrian McPherson",
+      "passYards": 1505,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2005|brockberlin": {
+      "page": "Brock Berlin",
+      "passYards": 159,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2005|davidgreene": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2005|jameskilian": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2005|stefanlefors": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2005|timmychang": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2006|djshockley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2006|justinzwick": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "unverified"
+    },
+    "2006|marcusvick": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2006|mattring": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2006|omarjacobs": {
+      "page": "Omar Jacobs",
+      "passYards": 1755,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2007|jeffrowe": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2007|mattmoore": {
+      "page": "Matt Moore (American football)",
+      "passYards": 7597,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2008|alexbrink": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2008|andrewoodson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2008|calebhanie": {
+      "page": "Caleb Hanie",
+      "passYards": 1079,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2008|coltbrennan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2008|erikainge": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2008|johndavidbooty": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2008|xavierlee": {
+      "page": "Xavier Lee",
+      "passYards": 910,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2009|brianhoyer": {
+      "page": "Brian Hoyer",
+      "passYards": 10899,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2009|chadmartin": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2009|chasedaniel": {
+      "page": "Chase Daniel",
+      "passYards": 1746,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2009|grahamharrell": {
+      "page": "Graham Harrell",
+      "passYards": 20,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2009|miketeel": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2009|natedavis": {
+      "page": "Nate Davis (quarterback)",
+      "passYards": 544,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2009|rhettbomar": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2010|danlefevour": {
+      "page": "Dan LeFevour",
+      "passYards": 2620,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2010|jonathancrompton": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2010|maxhall": {
+      "page": "Max Hall (gridiron football)",
+      "passYards": 370,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2010|seancanfield": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2010|thadlewis": {
+      "page": "Thad Lewis",
+      "passYards": 1296,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2010|zacrobinson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2011|nathanenderle": {
+      "page": "Nathan Enderle",
+      "passYards": 195,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2011|rickystanzi": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2011|scotttolzien": {
+      "page": "Scott Tolzien",
+      "passYards": 1065,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|alextanney": {
+      "page": "Alex Tanney",
+      "passYards": 100,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|austindavis": {
+      "page": "Austin Davis (American football)",
+      "passYards": 2548,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|bjcoleman": {
+      "page": "B. J. Coleman",
+      "passYards": 629,
+      "rushYards": 6,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|casekeenum": {
+      "page": "Case Keenum",
+      "passYards": 15175,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|chandlerharnish": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2012|dominiquedavis": {
+      "page": "Dominique Davis",
+      "passYards": 34,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|kellenmoore": {
+      "page": "Kellen Moore",
+      "passYards": 779,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2012|mattsimms": {
+      "page": "Matt Simms (American football)",
+      "passYards": 195,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2013|alexcarder": {
+      "page": "Alex Carder",
+      "passYards": 324,
+      "rushYards": 56,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2013|bradsorensen": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|calebterbush": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|collinklein": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|daynecrist": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|jamesvandenberg": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|jefftuel": {
+      "page": "Jeff Tuel",
+      "passYards": 309,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2013|mattmcgloin": {
+      "page": "Matt McGloin",
+      "passYards": 1868,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2013|mattscott": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|ryangriffin": {
+      "page": "Ryan Griffin (quarterback)",
+      "passYards": 18,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": 2022,
+      "status": "ok"
+    },
+    "2013|tylerbray": {
+      "page": "Tyler Bray",
+      "passYards": 18,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2013|tylerwilson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2013|zacdysert": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|aaronmurray": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|connorshaw": {
+      "page": "Connor Shaw",
+      "passYards": 177,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2014|jeffmatthews": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|keithwenning": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|stephenmorris": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|tajhboyd": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2014|travispartridge": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2015|devingardner": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2015|garrettgrayson": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2015|jakewaters": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2015|taylorheinicke": {
+      "page": "Taylor Heinicke",
+      "passYards": 6663,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2016|brandondoughty": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2016|christianhackenberg": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2016|jakecoker": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2016|joecallahan": {
+      "page": "Joe Callahan (American football)",
+      "passYards": 11,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2016|trevoneboykin": {
+      "page": "Trevone Boykin",
+      "passYards": 145,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2017|bradkaaya": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2017|cooperrush": {
+      "page": "Cooper Rush",
+      "passYards": 3766,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2017|jackdelrio": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2017|nickmullens": {
+      "page": "Nick Mullens",
+      "passYards": 6448,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2017|pjwalker": {
+      "page": "P. J. Walker",
+      "passYards": 2135,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2017|taysomhill": {
+      "page": "Taysom Hill",
+      "passYards": 2426,
+      "rushYards": 2551,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2018|alexmcgough": {
+      "page": "Alex McGough",
+      "passYards": 2565,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2018|dannyetling": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2018|johnwolford": {
+      "page": "John Wolford",
+      "passYards": 626,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2018|jtbarrett": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2018|kyleallen": {
+      "page": "Kyle Allen (American football)",
+      "passYards": 4753,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2018|tannerlee": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2018|timboyle": {
+      "page": "Tim Boyle (American football)",
+      "passYards": 1210,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2019|brettrypien": {
+      "page": "Brett Rypien",
+      "passYards": 950,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2019|claytonthorson": {
+      "page": "Clayton Thorson",
+      "passYards": 987,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2019|davidblough": {
+      "page": "David Blough",
+      "passYards": 1435,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2019|devlinhodges": {
+      "page": "Devlin Hodges",
+      "passYards": 1063,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2019|jakebrowning": {
+      "page": "Jake Browning",
+      "passYards": 2707,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|anthonygordon": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2020|brianlewerke": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2020|bryceperkins": {
+      "page": "Bryce Perkins",
+      "passYards": 161,
+      "rushYards": 90,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|colemcdonald": {
+      "page": "Cole McDonald",
+      "passYards": 45,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|jamesmorgan": {
+      "page": "James Morgan (gridiron football)",
+      "passYards": 210,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|khaliltate": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2020|natestanley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2020|nathanrourke": {
+      "page": "Nathan Rourke",
+      "passYards": 11174,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|reidsinnett": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2020|sheapatterson": {
+      "page": "Shea Patterson",
+      "passYards": 1020,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2020|tylerhuntley": {
+      "page": "Tyler Huntley",
+      "passYards": 3212,
+      "rushYards": 795,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2022|carsonstrong": {
+      "page": "Carson Strong",
+      "passYards": 266,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2022|deriqking": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2022|mattcorral": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2023|elijahwesley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2023|malikcunningham": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2023|maxduggan": {
+      "page": "Max Duggan",
+      "passYards": 563,
+      "rushYards": 300,
+      "rushTds": 5,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2023|stetsonbennett": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2023|tommydevito": {
+      "page": "Tommy DeVito (American football)",
+      "passYards": 1358,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2023|tysonbagent": {
+      "page": "Tyson Bagent",
+      "passYards": 917,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2024|aidenlongwell": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|austinreed": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|carterbradley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|devinleary": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|emoryjones": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|jackplummer": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|johnrhysplumlee": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|jordantravis": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|kedonslovis": {
+      "page": "Kedon Slovis",
+      "passYards": -2,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2024|kevinbradley": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|lamarmcgee": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|michaelpratt": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2024|samhartman": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|bradycook": {
+      "page": "Brady Cook",
+      "passYards": 739,
+      "rushYards": 49,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2025|cammiller": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|connerbazelak": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|djuiagalelei": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|grahammertz": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|kurtisrourke": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|kylemccord": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|maxbrosmer": {
+      "page": "Max Brosmer",
+      "passYards": 328,
+      "rushYards": 11,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "ok"
+    },
+    "2025|sethhenigan": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|tommymellott": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    },
+    "2025|willhoward": {
+      "page": null,
+      "passYards": null,
+      "rushYards": null,
+      "rushTds": null,
+      "games": null,
+      "careerTo": null,
+      "status": "no-page"
+    }
+  }
+}
