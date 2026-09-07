@@ -49,7 +49,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const positionLocked = !!(curated || chartLabel);
 
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
-  const c = await CombineService.get(p.firstName, p.lastName, p.draftYear);
+  const c = await CombineService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
 
   const nv = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
 

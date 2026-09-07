@@ -13,6 +13,10 @@
 
 - Players who were drafted twice because they didn't sign the first time (Bo Jackson, 1986
   and 1987) now appear only in the draft they signed from.
+- Combine results now reach players the lookup names differently (Riq Woolen's 4.26 was
+  missing under "Tariq"), so their speed reflects the 40 they ran.
+- Sub-4.50 forties now set a speed floor at every position (4.26 is 98, 4.40 is 94), so
+  blazing corners and receivers are no longer held to their group's average spread.
 - Skin tone no longer borrows another man's reading when two players share a name and draft
   year (Alex Smith the 2005 quarterback was drawn dark off the tight end's).
 

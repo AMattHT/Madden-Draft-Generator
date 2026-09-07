@@ -95,6 +95,29 @@ function onDistribution(p: number, st: AttrStat | undefined, positionMean: numbe
   return clampRating(Math.max(lo, Math.min(hi, v)));
 }
 
+/**
+ * Speed a 40 time earns on its own, whatever the position. The percentile
+ * placement above compresses the fastest men in a fast group: among corners a
+ * 4.26 is only the 99.7th percentile, and the group's rookie spread (std 2) puts
+ * that at 95, while Madden's own rookies run 96-98 at that time (Woolen 4.26,
+ * Thornton 4.28, Worthy 4.21 at 98). A 40 is an absolute measure, so the top
+ * end gets an absolute floor; anything slower than 4.50 keeps the percentile
+ * value alone. Piecewise-linear between the anchors.
+ */
+const FORTY_SPEED_FLOOR: Array<[number, number]> = [
+  [4.20, 99], [4.24, 98], [4.28, 97], [4.32, 96], [4.36, 95], [4.40, 94], [4.45, 92], [4.50, 90],
+];
+export function fortySpeedFloor(forty: number): number | null {
+  if (!Number.isFinite(forty) || forty > FORTY_SPEED_FLOOR[FORTY_SPEED_FLOOR.length - 1][0]) return null;
+  if (forty <= FORTY_SPEED_FLOOR[0][0]) return FORTY_SPEED_FLOOR[0][1];
+  for (let i = 1; i < FORTY_SPEED_FLOOR.length; i++) {
+    const [t0, s0] = FORTY_SPEED_FLOOR[i - 1];
+    const [t1, s1] = FORTY_SPEED_FLOOR[i];
+    if (forty <= t1) return Math.round(s0 + ((forty - t0) / (t1 - t0)) * (s1 - s0));
+  }
+  return null;
+}
+
 /** Athletic attributes from combine testing, scored within the position group. */
 export function combineAttrs(posId: number, c: CombineMeasurements, profile: PosProfile): Record<string, number> {
   const group = PositionMapper.groupFromId(posId);
@@ -107,11 +130,13 @@ export function combineAttrs(posId: number, c: CombineMeasurements, profile: Pos
   };
   const p40 = pct('forty');
   if (p40 != null) {
-    out.speed = onDistribution(p40, st.speed, mean('speed'));
+    const floor = fortySpeedFloor(c.forty as number);
+    out.speed = Math.max(onDistribution(p40, st.speed, mean('speed')), floor ?? 1);
     // Acceleration is short-area burst: blend the 40 with the explosion drills.
     const bursts = [pct('vertical'), pct('broad'), pct('shuttle'), pct('cone')].filter((x): x is number => x != null);
     const pAcc = bursts.length ? 0.55 * p40 + 0.45 * (bursts.reduce((s, x) => s + x, 0) / bursts.length) : p40;
-    out.acceleration = onDistribution(pAcc, st.acceleration, mean('acceleration'));
+    // A blazer's burst is never far behind his top speed.
+    out.acceleration = Math.max(onDistribution(pAcc, st.acceleration, mean('acceleration')), floor != null ? floor - 3 : 1);
   }
   const pBench = pct('bench');
   if (pBench != null) out.strength = onDistribution(pBench, st.strength, mean('strength'));

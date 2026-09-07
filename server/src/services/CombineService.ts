@@ -27,6 +27,7 @@ const CACHE_FILE = path.join(CACHE_DIR, 'nflverse_combine.csv');
 
 interface RawRow {
   draft_year: string;
+  draft_ovr: string;
   season: string;
   player_name: string;
   pos: string;
@@ -53,6 +54,9 @@ const htInches = (s: string | undefined): number | null => {
 };
 
 let byKey: Map<string, CombineData> | null = null;
+// draft year|overall pick -> combine row, for players the lookup names differently
+// (Riq Woolen is "Tariq Woolen" at the combine; Ziggy Hood is "Evander Hood" in the lookup).
+let byPick: Map<string, { data: CombineData; playerName: string }> | null = null;
 let loading: Promise<void> | null = null;
 // rating group -> drill -> ascending sorted values (for within-position percentiles)
 let drillsByGroup: Map<string, Record<string, number[]>> | null = null;
@@ -72,6 +76,7 @@ async function ensureLoaded(): Promise<void> {
       }
       const rows = parseCsvFile<RawRow>(CACHE_FILE);
       const map = new Map<string, CombineData>();
+      const picks = new Map<string, { data: CombineData; playerName: string }>();
       const drills = new Map<string, Record<string, number[]>>();
       for (const r of rows) {
         const name = normalizeName(r.player_name);
@@ -94,11 +99,14 @@ async function ensureLoaded(): Promise<void> {
         };
         const year = parseInt(r.draft_year, 10) || parseInt(r.season, 10);
         if (year) map.set(`${name}|${year}`, data);
+        const pick = parseInt(r.draft_ovr, 10);
+        if (r.draft_year && pick) picks.set(`${parseInt(r.draft_year, 10)}|${pick}`, { data, playerName: r.player_name });
         // also key by combine season as a fallback (undrafted / draft_year gaps)
         const season = parseInt(r.season, 10);
         if (season) map.set(`${name}|${season}`, data);
       }
       byKey = map;
+      byPick = picks;
       for (const g of drills.values()) for (const d of DRILLS) g[d].sort((a, b) => a - b);
       drillsByGroup = drills;
     })().catch((e) => {
@@ -107,6 +115,13 @@ async function ensureLoaded(): Promise<void> {
     });
   }
   return loading;
+}
+
+/** Does the combine file's full name carry this surname? Suffixes and middle
+ *  names are common ("Odell Beckham Jr."), so the surname only has to appear. */
+export function surnameMatches(playerName: string, lastName: string): boolean {
+  const last = normalizeName(lastName);
+  return last.length >= 2 && normalizeName(playerName).includes(last);
 }
 
 export const CombineService = {
@@ -126,13 +141,21 @@ export const CombineService = {
     return LOWER_IS_BETTER.has(drill) ? 1 - below : below;
   },
 
-  /** Combine data for a player by name + draft year, or undefined. Empty on failure. */
-  async get(firstName: string, lastName: string, draftYear: number): Promise<CombineData | undefined> {
+  /**
+   * Combine data for a player by name + draft year, falling back to draft year +
+   * overall pick when the lookup spells his first name differently (nickname,
+   * legal name). The pick match still has to carry his surname so a pick that
+   * disagrees between the two files cannot hand him someone else's testing.
+   */
+  async get(firstName: string, lastName: string, draftYear: number, draftPick?: number | null): Promise<CombineData | undefined> {
     try {
       await ensureLoaded();
     } catch {
       return undefined;
     }
-    return byKey?.get(`${normalizeName(`${firstName} ${lastName}`)}|${draftYear}`);
+    const byName = byKey?.get(`${normalizeName(`${firstName} ${lastName}`)}|${draftYear}`);
+    if (byName || !draftPick) return byName;
+    const hit = byPick?.get(`${draftYear}|${draftPick}`);
+    return hit && surnameMatches(hit.playerName, lastName) ? hit.data : undefined;
   },
 };
