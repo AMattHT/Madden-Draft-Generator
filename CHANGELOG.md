@@ -15,6 +15,9 @@
   and 1987) now appear only in the draft they signed from.
 - Combine results now reach players the lookup names differently (Riq Woolen's 4.26 was
   missing under "Tariq"), so their speed reflects the 40 they ran.
+- Madden 27 portrait pack: retired players the game ships no portrait for (Tom Brady, Cam
+  Newton) get a recycled portrait id, and the matching images are written for the MMC
+  Portrait Manager. Toggle next to Save to Madden.
 - Legend portraits the game keys under another spelling now reach their players (Michael
   Vick, Eric Dickerson, Cam Wake, Napoleon Kaufman and 13 more).
 - Quarterbacks drafted before 1980 now carry their career passing and rushing (from

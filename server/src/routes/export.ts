@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { DraftClassBuilder, GenOptions, parseGenMode } from '../services/DraftClassBuilder';
 import { PortraitModService } from '../services/PortraitModService';
+import { PortraitPackService } from '../services/PortraitPackService';
 import { FranchiseService } from '../services/FranchiseService';
 import { M27_SAVES_DIR } from '../config/paths';
 import { enrichedClass, allTimeGreatsClass, boardClass, teamGreatsClass, parseBoard } from '../services/DraftEnrichment';
@@ -33,6 +34,7 @@ r.post('/export/mdc', async (req, res) => {
     autoStrength: !!req.body?.autoStrength,
     variant: Math.max(0, Math.round(Number(req.body?.variant) || 0)),
     include: (Array.isArray(req.body?.include) ? req.body.include : []).map((x: unknown) => Number(x)).filter((n: number) => Number.isInteger(n) && n >= 0),
+    portraitPack: !!req.body?.portraitPack,
   };
 
   // An opened .mdc: apply the edits to the file's own prospects and write them
@@ -79,11 +81,14 @@ r.post('/export/mdc', async (req, res) => {
   }
 
   const outGame: 'm26' | 'm27' = fileOut ? fileOut.gameVersion : gameVersion;
-  const { buffer, count, truncated, dropped, likeness } = fileOut
-    ? { buffer: fileOut.buffer, count: fileOut.count, truncated: false, dropped: [] as { firstName: string; lastName: string }[], likeness: { asset: 0, generic: 0, withPortrait: 0, customPortrait: 0 } }
+  const built = fileOut
+    ? { buffer: fileOut.buffer, count: fileOut.count, truncated: false, dropped: [] as { firstName: string; lastName: string }[], likeness: { asset: 0, generic: 0, withPortrait: 0, customPortrait: 0 }, portraitPack: undefined }
     : outGame === 'm27'
       ? DraftClassBuilder.buildMdc27(players, edits, mode, gearEdits, opts)
       : DraftClassBuilder.buildMdc(players, edits, mode, gearEdits, opts);
+  const { buffer, count, truncated, dropped, likeness } = built;
+  // The portrait pack folder for the ids the class just wrote (M27 only).
+  const pack = built.portraitPack?.length ? await PortraitPackService.write(built.portraitPack, PortraitPackService.dirFor(filename)) : null;
 
   // saveToSaves: write the class straight into the Madden Saves folder (the name
   // is already Madden's CAREERDRAFT-* convention) so it shows up in Franchise →
@@ -101,7 +106,7 @@ r.post('/export/mdc', async (req, res) => {
     fs.writeFileSync(tmp, buffer);
     if (overwrote) fs.copyFileSync(outPath, `${outPath}.bak`);
     fs.renameSync(tmp, outPath);
-    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness, overwrote, backup: overwrote ? `${outPath}.bak` : null, gameVersion: outGame });
+    return res.json({ saved: true, path: outPath, filename, count, truncated, dropped: dropped.length, likeness, overwrote, backup: overwrote ? `${outPath}.bak` : null, gameVersion: outGame, portraitPack: pack });
   }
 
   res.setHeader('Content-Type', 'application/octet-stream');
@@ -114,6 +119,10 @@ r.post('/export/mdc', async (req, res) => {
   res.setHeader('X-Likeness-Portrait', String(likeness.withPortrait));
   res.setHeader('X-Likeness-CustomPortrait', String(likeness.customPortrait));
   if (dropped.length) res.setHeader('X-Dropped-Count', String(dropped.length));
+  if (pack) {
+    res.setHeader('X-Portrait-Pack-Count', String(pack.count));
+    res.setHeader('X-Portrait-Pack-Dir', encodeURIComponent(pack.dir));
+  }
   return res.send(buffer);
 });
 

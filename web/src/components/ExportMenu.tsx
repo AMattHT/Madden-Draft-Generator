@@ -91,6 +91,16 @@ export function ExportMenu({
   }
   const [busy, setBusy] = useState<'mdc' | 'saves' | 'portraits' | null>(null);
   const [msg, setMsg] = useState<Msg>(null);
+  // M27 portrait pack: retired players the game ships no portrait for (Brady,
+  // Newton) get a recycled portrait id, and the matching images are written for
+  // the MMC Portrait Manager. On by default: without the mod they look as before.
+  const [portraitPack, setPortraitPack] = useState<boolean>(() => {
+    try { return localStorage.getItem('mdc.portraitPack') !== '0'; } catch { return true; }
+  });
+  useEffect(() => { try { localStorage.setItem('mdc.portraitPack', portraitPack ? '1' : '0'); } catch { /* ignore */ } }, [portraitPack]);
+  const usePack = gameVersion === 'm27' && portraitPack;
+  const packNote = (p: { dir: string; count: number } | null | undefined) =>
+    p && p.count > 0 ? ` Portrait pack: ${p.count} portrait${p.count === 1 ? '' : 's'} written to ${p.dir} — import that folder with the MMC Portrait Manager (Image Library Manager) so those players show their faces.` : '';
 
   // Auto-dismiss successful toasts; errors stay until dismissed.
   useEffect(() => {
@@ -117,11 +127,11 @@ export function ExportMenu({
     setBusy('mdc');
     setMsg(null);
     try {
-      const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts, gameVersion);
+      const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack);
       const savesHint = gameVersion === 'm27' ? 'Documents\\Madden NFL 27\\saves' : 'Documents\\Madden NFL 26\\Saves';
       setMsg({
         ok: true,
-        text: `Downloaded ${draftOpts.source === 'file' ? (draftOpts.name || 'CAREERDRAFT') : draftOpts.source === 'picked' || draftOpts.source === 'team' ? classFileName(draftOpts.name) : draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS` : `CAREERDRAFT-${year}DRAFT`} — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.`,
+        text: `Downloaded ${draftOpts.source === 'file' ? (draftOpts.name || 'CAREERDRAFT') : draftOpts.source === 'picked' || draftOpts.source === 'team' ? classFileName(draftOpts.name) : draftOpts.source === 'alltime' ? 'CAREERDRAFT-ALLTIMEGREATS' : draftOpts.source === 'decade' ? `CAREERDRAFT-${draftOpts.decade}sGREATS` : `CAREERDRAFT-${year}DRAFT`} — ${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}. Move it into ${savesHint}, or use “Save to Madden Saves” next time to skip that step.${packNote(r.portraitPack)}`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Export failed: ${(e as Error).message}` });
@@ -134,11 +144,11 @@ export function ExportMenu({
     setBusy('saves');
     setMsg(null);
     try {
-      const r = await api.saveMdcToSaves(year, league, edits, mode, gearEdits, draftOpts, gameVersion);
+      const r = await api.saveMdcToSaves(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack);
       const ow = (r as { overwrote?: boolean }).overwrote;
       setMsg({
         ok: true,
-        text: `Saved ${r.filename} (${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}) to your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder${ow ? ' — replaced the previous export (kept as .bak)' : ''}. In Madden: Franchise → Choose Draft Class → it’s already there.`,
+        text: `Saved ${r.filename} (${r.count} prospects${editedCount ? `, ${editedCount} edited` : ''}) to your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder${ow ? ' — replaced the previous export (kept as .bak)' : ''}. In Madden: Franchise → Choose Draft Class → it’s already there.${packNote(r.portraitPack)}`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Save to Madden Saves failed: ${(e as Error).message}` });
@@ -180,7 +190,13 @@ export function ExportMenu({
   useEffect(() => () => { if (actionsRef) actionsRef.current = null; }, [actionsRef]);
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center gap-3">
+      {gameVersion === 'm27' && !isFile && (
+        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-400" title="Write a portrait pack for retired players Madden 27 has no portrait for (Tom Brady, Cam Newton…). Import the folder with the MMC Portrait Manager; without it they show a generic portrait as before.">
+          <input type="checkbox" checked={portraitPack} onChange={(e) => setPortraitPack(e.target.checked)} className="h-3 w-3 accent-primary" />
+          Portrait pack
+        </label>
+      )}
       <button
         onClick={saveToSaves}
         disabled={!!busy}

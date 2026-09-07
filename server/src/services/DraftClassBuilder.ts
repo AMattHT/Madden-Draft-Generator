@@ -5,6 +5,7 @@ import { assignM27Fields, commentaryIdFor, focusFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
 import { M27RookieRatingsService, type EaRookie } from './M27RookieRatingsService';
 import { genericHeadPid } from './M27Fields';
+import { PortraitPackService, PackAssignment } from './PortraitPackService';
 import { EraBioService } from './EraBioService';
 import { PlayerLookupService } from './PlayerLookupService';
 import { TwoWayService, TwoWayInfo } from './TwoWayService';
@@ -68,6 +69,9 @@ export interface GenOptions {
    *  though the year has more players than the 402 slots: each takes the slot of
    *  the weakest remaining keeper, so everyone else's pick number is unchanged. */
   include?: number[];
+  /** M27: give retired players the game ships no portrait for a recycled portrait
+   *  id and write the matching portrait pack (PortraitPackService). */
+  portraitPack?: boolean;
   /** Variant seed: 0 = the canonical class; any other value re-rolls every
    *  seeded choice (attribute noise, faces, gear, persona, builds) while the
    *  player list, order and overalls stay the same. */
@@ -337,7 +341,11 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // Archetype from career usage when we have it (Carter = Physical, not Slot),
   // else the closest Madden height/weight profile.
   const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, player.draftPick);
-  const archetype = customArchetype(player, posName) ?? eaArchetype(it.ea, posName) ?? ArchetypeService.assign(posName, heightInches, weight, career, player.combine);
+  // A pre-combine quarterback with no career record has nothing to say he ran:
+  // a pocket passer, not the Scrambler a lean build would suggest.
+  const noRecordQb = posName === 'QB' && !career && player.combine?.forty == null && player.draftYear < 1980;
+  const archetype = customArchetype(player, posName) ?? eaArchetype(it.ea, posName)
+    ?? (noRecordQb ? 0 : ArchetypeService.assign(posName, heightInches, weight, career, player.combine));
   const { attrs, ovrMean } = CalibrationService.archetypeAttrs(posName, archetype, gameVersion);
 
   const prospect: MdcProspect = {};
@@ -477,6 +485,8 @@ export interface BuildResult {
   truncated: boolean;
   dropped: DroppedPlayer[];
   likeness: LikenessStats;
+  /** M27 with opts.portraitPack: the prospects pointed at a pack portrait. */
+  portraitPack?: PackAssignment[];
 }
 
 /** User edits keyed by pick number -> { field: value } (overall, devTrait,
@@ -1050,6 +1060,8 @@ export const DraftClassBuilder = {
     applyEdits(prospects, edits, 'm27');
     applyGearEdits(prospects, gearEdits);
     const capped = players.slice(0, LOGICAL_CAPACITY);
+    // Pack portraits pin before assignM27Fields so a generic head keeps the id.
+    const portraitPack = opts.portraitPack ? PortraitPackService.apply(prospects as Array<Record<string, unknown>>, capped) : undefined;
     prospects.forEach((p, i) => {
       const posId = Number(p.position) || 0;
       if (!p.personaDNA) {
@@ -1064,6 +1076,6 @@ export const DraftClassBuilder = {
     });
     const template = Mdc27Service.loadTemplate();
     const buffer = Mdc27Service.write(prospects, template);
-    return { buffer, count: prospects.length, truncated, dropped, likeness };
+    return { buffer, count: prospects.length, truncated, dropped, likeness, portraitPack };
   },
 };
