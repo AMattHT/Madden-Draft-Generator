@@ -44,7 +44,11 @@ const key = (first: string, last: string, year: number) =>
 
 export const CuratedSkinToneService = {
   /** Recorded tone (1-7) for this player, or null when he is not curated. */
-  toneFor(first: string, last: string, draftYear: number | null | undefined): number | null {
+  toneFor(first: string, last: string, draftYear: number | null | undefined, college?: string | null): number | null {
+    if (draftYear != null && college) {
+      const q = load()[`${key(first, last, draftYear)}|${normalizeName(college)}`];
+      if (typeof q === 'number') return q;
+    }
     if (draftYear == null) return null;
     const v = load()[key(first, last, draftYear)];
     return typeof v === 'number' && v >= 1 && v <= 7 ? v : null;

@@ -55,3 +55,9 @@ test('same-name men of the same school are kept apart when the earlier one had h
   assert.equal(clay(1978).length, 1);
   assert.equal(clay(2009).length, 1);
 });
+
+test('namesakes: two different men of one name in one draft are counted, one man is not', () => {
+  assert.equal(PlayerLookupService.namesakes('Alex', 'Smith', 2005), 2); // Utah QB and Stanford TE
+  assert.equal(PlayerLookupService.namesakes('Jack', 'Lambert', 1974), 1);
+  assert.equal(PlayerLookupService.namesakes('Nobody', 'Zzyzx', 1990), 0);
+});

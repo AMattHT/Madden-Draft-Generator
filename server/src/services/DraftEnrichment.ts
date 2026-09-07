@@ -74,11 +74,15 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, p.position, p.draftYear) : null;
   // The wiki tone was read from the row's Wikipedia photo; if that photo was
   // sanitized away (icon, or another same-named player's picture) the tone goes too.
-  const wiki = p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
-  const trusted = p.race != null && p.race !== 7 ? p.race : null;
+  // Two men of one name in one draft (2005: Alex Smith QB/Utah and Alex Smith TE/Stanford)
+  // share every name-keyed reading, so neither the wiki tone nor the CSV race can say
+  // which man it describes: both go quiet and the portrait + prior decide.
+  const ambiguous = PlayerLookupService.namesakes(p.firstName, p.lastName, p.draftYear) > 1;
+  const wiki = !ambiguous && p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
+  const trusted = !ambiguous && p.race != null && p.race !== 7 ? p.race : null;
   // A recorded tone wins outright. It exists for players the evidence cannot
   // reach or reads wrong, and inference has nothing to add to a known answer.
-  const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear);
+  const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear, p.college);
   // The NFL was segregated from 1934 to 1945, and no black player was drafted
   // until 1949. For a player drafted in that window a dark tone is not an
   // unlikely guess, it is an impossible one -- so this overrides the portrait

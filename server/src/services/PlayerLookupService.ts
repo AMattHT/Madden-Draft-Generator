@@ -835,6 +835,18 @@ export const PlayerLookupService = {
     return score(best) >= 20 ? best : null;
   },
 
+  /**
+   * How many different men of this name were drafted in `draftYear` (distinct colleges).
+   * Two or more means any evidence keyed by name + year alone (the Wikipedia tone table,
+   * the CSV race column) may describe the other man: 2005 has Alex Smith the Utah QB and
+   * Alex Smith the Stanford TE, and the QB was being drawn dark off the TE's reading.
+   */
+  namesakes(first: string, last: string, draftYear: number): number {
+    load();
+    const group = (byNormName?.get(normName(first, last)) ?? []).filter((p) => p.draftYear === draftYear);
+    return new Set(group.map((p) => normalizeName(p.college))).size || group.length;
+  },
+
   /** All draft years present in the local lookup, ascending. */
   years(): number[] {
     load();

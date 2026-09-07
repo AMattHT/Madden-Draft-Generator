@@ -13,6 +13,8 @@
 
 - Players who were drafted twice because they didn't sign the first time (Bo Jackson, 1986
   and 1987) now appear only in the draft they signed from.
+- Skin tone no longer borrows another man's reading when two players share a name and draft
+  year (Alex Smith the 2005 quarterback was drawn dark off the tight end's).
 
 ## 1.3.0
 
