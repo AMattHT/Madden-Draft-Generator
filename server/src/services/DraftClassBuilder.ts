@@ -349,6 +349,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   const generated = generateAttributes({
     posId, profile, archAttrs: attrs, archOvrMean: ovrMean, overall, rand,
     combine: player.combine, uncapped: mode === 'retro',
+    career, draftYear: player.draftYear,
   });
   Object.assign(prospect, generated);
   prospect.archetype = archetype;

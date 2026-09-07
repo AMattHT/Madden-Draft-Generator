@@ -1,4 +1,5 @@
 import { CombineMeasurements } from '../types/player';
+import type { CareerBits } from './NflverseCareerService';
 import { AttrStat, CalibrationService, PosProfile } from './CalibrationService';
 import { CombineService } from './CombineService';
 import { OVRWeightsCalculator } from './OVRWeightsCalculator';
@@ -81,6 +82,10 @@ export interface GenerateInput {
   overall: number; // target overall
   rand: () => number; // seeded
   combine?: CombineMeasurements | null;
+  /** Career line (rushing) and draft year: a quarterback without a 40 gets his
+   *  speed from how much he ran, not from the archetype's spread. */
+  career?: CareerBits | null;
+  draftYear?: number;
   /** Career-retrospective mode rates beyond Madden's rookie range; let the
    *  observed max stretch instead of pinning elite legends to a rookie ceiling. */
   uncapped?: boolean;
@@ -114,6 +119,35 @@ export function fortySpeedFloor(forty: number): number | null {
     const [t0, s0] = FORTY_SPEED_FLOOR[i - 1];
     const [t1, s1] = FORTY_SPEED_FLOOR[i];
     if (forty <= t1) return Math.round(s0 + ((forty - t0) / (t1 - t0)) * (s1 - s0));
+  }
+  return null;
+}
+
+/**
+ * Quarterback speed from career rushing when there is no 40 time.
+ *
+ * Without testing, speed was archetype mean + noise with the QB residual (5.7),
+ * and that residual is mostly the Scrambler / pocket split the archetype already
+ * carries; Caleb Williams drew +11 and came out 96. Rushing yards per game is the
+ * evidence the record keeps: quantiles of drafted quarterbacks with 16+ games,
+ * per era because pre-2000 passers ran far less (Cunningham's 30.6 is the top of
+ * his era, the 90th percentile of this one). Placed on the QB speed distribution
+ * the way a 40 is: Daniels 48.7 -> 91, Williams 25.8 -> 85, Penix 5.8 -> 75,
+ * Lamar Jackson 56.2 -> 96, against Madden's 91 / 84 / 79 / 96.
+ */
+const QB_RUSH_YPG_QUANTILES: Record<'modern' | 'classic', Array<[number, number]>> = {
+  modern: [[0, 0.02], [2.2, 0.10], [4.9, 0.25], [9.4, 0.50], [15.6, 0.75], [27.2, 0.90], [36.9, 0.95], [42.7, 0.98], [56, 0.999]],
+  classic: [[0, 0.02], [0.7, 0.10], [2.8, 0.25], [5.1, 0.50], [9.2, 0.75], [15.6, 0.90], [18.3, 0.95], [23.0, 0.98], [31, 0.999]],
+};
+export function qbRushPercentile(career: CareerBits | null | undefined, draftYear: number | undefined): number | null {
+  if (!career || career.rushYards == null || !career.games || career.games < 8) return null;
+  const ypg = Math.max(0, career.rushYards / career.games);
+  const table = QB_RUSH_YPG_QUANTILES[(draftYear ?? 2000) >= 2000 ? 'modern' : 'classic'];
+  if (ypg >= table[table.length - 1][0]) return table[table.length - 1][1];
+  for (let i = 1; i < table.length; i++) {
+    const [y0, p0] = table[i - 1];
+    const [y1, p1] = table[i];
+    if (ypg <= y1) return p0 + ((ypg - y0) / (y1 - y0)) * (p1 - p0);
   }
   return null;
 }
@@ -164,12 +198,19 @@ export function generateAttributes(input: GenerateInput): Record<string, number>
     let v = base + slope * delta + noise;
     if (st) {
       const lo = Math.max(1, st.min - 4);
-      const hi = input.uncapped ? 99 : Math.min(99, st.max + 4);
+      // Skill attributes may stretch past the observed range (the reconciler
+      // needs the room); a physical attribute with no evidence behind it does
+      // not go beyond what Madden's own classes show.
+      const hi = input.uncapped ? 99 : Math.min(99, FIXED_ATTRS.has(k) ? st.max : st.max + 4);
       v = Math.max(lo, Math.min(hi, v));
     }
     out[k] = clampRating(v);
   }
   if (input.combine) Object.assign(out, combineAttrs(posId, input.combine, profile));
+  if (PositionMapper.name(posId) === 'QB' && input.combine?.forty == null) {
+    const p = qbRushPercentile(input.career, input.draftYear);
+    if (p != null) out.speed = onDistribution(p, stats.speed, profile.attrs.speed ?? 78);
+  }
   return out;
 }
 

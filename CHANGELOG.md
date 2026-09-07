@@ -15,6 +15,8 @@
   and 1987) now appear only in the draft they signed from.
 - Combine results now reach players the lookup names differently (Riq Woolen's 4.26 was
   missing under "Tariq"), so their speed reflects the 40 they ran.
+- Quarterbacks without a 40 time take their speed from how much they ran (Caleb Williams
+  was 96), and no untested player exceeds the speed Madden's own classes show.
 - Sub-4.50 forties now set a speed floor at every position (4.26 is 98, 4.40 is 94), so
   blazing corners and receivers are no longer held to their group's average spread.
 - Skin tone no longer borrows another man's reading when two players share a name and draft
