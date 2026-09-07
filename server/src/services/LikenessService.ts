@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { firstNameVariants } from './PlayerLookupService';
 import path from 'path';
 import { LOOKUPS_DIR, CACHE_DIR } from '../config/paths';
 import { BaselinePlayer } from '../types/player';
@@ -79,6 +80,10 @@ function catalogFor(version: 'm26' | 'm27'): FaceCatalog {
     }
     for (const k of (v.legendPortraits ?? []) as string[]) cat.legendPortraits.add(k);
     for (const [k, pid] of Object.entries(v.legendPids ?? {})) cat.legendPids.set(k, Number(pid));
+    for (const [gameKey, ours] of Object.entries(LEGEND_KEY_ALIASES)) {
+      const pid = cat.legendPids.get(gameKey);
+      if (pid != null) for (const k of ours) if (!cat.legendPids.has(k)) cat.legendPids.set(k, pid);
+    }
     for (const k of (v.playerPortraits ?? []) as string[]) cat.playerPortraits.add(k);
     for (const k of (v.genericHeadAccessory ?? []) as string[]) cat.headAccessory.add(k.toLowerCase());
   } catch { /* catalog absent — M27 falls back to the save-only map, M26 to the lookup */ }
@@ -121,6 +126,47 @@ const ACCEPT_PRESET_HEADS = process.env.MADDEN_PRESET_HEADS === '1';
  *  gone too. Off by default for M27 (generic head); MADDEN27_TRUST_M26_HEADS=1 to
  *  try them in-game. */
 const M27_TRUST_ALL_M26_HEADS = process.env.MADDEN27_TRUST_M26_HEADS === '1';
+/**
+ * The game's legend-portrait keys that no lookup name reaches as written: the
+ * artists' spellings ("Erick Dickerson", "Napolean Kaufman", "Jimmey Smith"),
+ * suffixes and tags ("Kellen Winslow Sr", "Mark Clayton Dolphins", "Mike Ditka
+ * Player"), and nicknames the lookup writes differently. Keys are surname+first
+ * with everything but letters removed; the value lists the lookup's key(s). 24
+ * of M27's 523 legend keys were unreached; these cover the ones that are players
+ * in the lookup (Rich Eisen, Fritz Pollard, Red Grange and the undrafted Frank
+ * Minnifield / Kyle Eckel are not; "lt" is ambiguous).
+ */
+const LEGEND_KEY_ALIASES: Record<string, string[]> = {
+  jonesedtootall: ['jonestootall', 'jonesed'],
+  markclaytondolphins: ['claytonmark'],
+  newmanterrance: ['newmanterence'],
+  hintonsrchris: ['hintonchris'],
+  smithjimmey: ['smithjimmy'],
+  jimcovert: ['covertjimbo', 'covertjim'],
+  wakecam: ['wakecameron'],
+  vickmike: ['vickmichael'],
+  dicklane: ['lanenighttrain', 'lanedick'],
+  kellenwinslowsr: ['winslowkellen'],
+  dickersonerick: ['dickersoneric'],
+  formanchuck: ['foremanchuck'],
+  ditkamikeplayer: ['ditkamike'],
+  maddenjohnplayer: ['maddenjohn'],
+  deanperrymichael: ['perrymichaeldean', 'perrymichael'],
+  ismailraghib: ['ismailrocket'],
+  kaufmannapolean: ['kaufmannapoleon'],
+};
+
+/** The legends-portrait PID under any spelling of the first name, or undefined. */
+function legendPidFor(cat: FaceCatalog, firstName: string, lastName: string): number | undefined {
+  const l = lastName.toLowerCase().replace(/[^a-z]/g, '');
+  for (const first of firstNameVariants(firstName)) {
+    const f = first.replace(/[^a-z]/g, '');
+    const pid = cat.legendPids.get(l + f) ?? cat.legendPids.get(f + l);
+    if (pid != null) return pid;
+  }
+  return undefined;
+}
+
 /** Write lookup ids for legends that only have a legends portrait (no scan) on M27. */
 const M27_TRUST_LEGEND_IDS = process.env.MADDEN27_TRUST_LEGEND_IDS === '1';
 let m26Scans: Array<{ id: string; name: string; asset: string; portraitPid?: number; image?: string }> | null = null;
@@ -318,7 +364,7 @@ export const LikenessService = {
     const cat = catalogFor(version);
     const f = player.firstName.toLowerCase().replace(/[^a-z]/g, '');
     const l = player.lastName.toLowerCase().replace(/[^a-z]/g, '');
-    const legend = cat.legendPids.get(l + f) ?? cat.legendPids.get(f + l);
+    const legend = legendPidFor(cat, player.firstName, player.lastName);
     const roster = /roster/.test(head.source) ? head.portraitPid : 0;
     const regular = cat.playerPortraits.has(l + f) || cat.playerPortraits.has(f + l) ? (player.photoId || head.portraitPid || 0) : 0;
     if (version === 'm26') {
@@ -404,10 +450,7 @@ export const LikenessService = {
   /** The legends-portrait PID for this player in `version`, or 0. Works without a
    *  head: a generic-head prospect can still show the real menu portrait. */
   legendPortraitPid(firstName: string, lastName: string, version: 'm26' | 'm27'): number {
-    const cat = catalogFor(version);
-    const f = firstName.toLowerCase().replace(/[^a-z]/g, '');
-    const l = lastName.toLowerCase().replace(/[^a-z]/g, '');
-    return cat.legendPids.get(l + f) ?? cat.legendPids.get(f + l) ?? 0;
+    return legendPidFor(catalogFor(version), firstName, lastName) ?? 0;
   },
 
   /** Does the game ship a legends portrait for this player (plpo_legends_<name>)? */

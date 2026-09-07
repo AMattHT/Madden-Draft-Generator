@@ -750,6 +750,19 @@ function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
 }
 
 /** Legal first name -> the forms a player was listed under (both directions are tried). */
+/** Every spelling a first name goes by, both ways (michael -> mike, mike -> michael),
+ *  the name itself first. Shared with the portrait catalog, whose legend keys use
+ *  whatever the game's artists typed ("Mike Vick" for the lookup's Michael). */
+export function firstNameVariants(first: string): string[] {
+  const nk = normalizeName(first);
+  if (!reverseNicknames) {
+    reverseNicknames = new Map();
+    for (const [formal, nicks] of Object.entries(NICKNAMES)) for (const n of nicks) (reverseNicknames.get(n) ?? reverseNicknames.set(n, []).get(n)!).push(formal);
+  }
+  return [...new Set([nk, ...(NICKNAMES[nk] ?? []), ...(reverseNicknames.get(nk) ?? [])])];
+}
+let reverseNicknames: Map<string, string[]> | null = null;
+
 const NICKNAMES: Record<string, string[]> = {
   william: ['bill', 'billy', 'will', 'willie'], robert: ['bob', 'bobby', 'rob', 'robbie'], richard: ['dick', 'rick', 'rich', 'richie'],
   james: ['jim', 'jimmy'], john: ['jack', 'johnny'], charles: ['chuck', 'charlie'], michael: ['mike'], thomas: ['tom', 'tommy'],

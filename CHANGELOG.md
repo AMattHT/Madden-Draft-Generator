@@ -15,6 +15,10 @@
   and 1987) now appear only in the draft they signed from.
 - Combine results now reach players the lookup names differently (Riq Woolen's 4.26 was
   missing under "Tariq"), so their speed reflects the 40 they ran.
+- Legend portraits the game keys under another spelling now reach their players (Michael
+  Vick, Eric Dickerson, Cam Wake, Napoleon Kaufman and 13 more).
+- Quarterbacks drafted before 1980 now carry their career passing and rushing (from
+  Wikipedia), so Montana is a pocket passer instead of a 95-speed scrambler.
 - Quarterbacks without a 40 time take their speed from how much they ran (Caleb Williams
   was 96), and no untested player exceeds the speed Madden's own classes show.
 - Sub-4.50 forties now set a speed floor at every position (4.26 is 98, 4.40 is 94), so
