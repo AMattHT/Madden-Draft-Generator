@@ -170,7 +170,7 @@ function infobox(html: string): string | null {
 /** Wikipedia's thumbnail host with tracking parameters -> the plain upload URL the lookup uses. */
 const plainImageUrl = (src: string) =>
   src.replace(/&amp;/g, '&').replace(/\?.*$/, '').replace(/^https:\/\/thumb\.wikimedia\.org\//, 'https://upload.wikimedia.org/');
-interface Bio { image: string | null; proBowls: number; allPro1: number; isHOF: boolean; careerTo: number | null; games: number | null; verified: boolean }
+interface Bio { heightInches: number | null; weight: number | null; image: string | null; proBowls: number; allPro1: number; isHOF: boolean; careerTo: number | null; games: number | null; verified: boolean }
 async function bio(p: SupplementalPick): Promise<Bio | null> {
   for (const title of [`${p.first} ${p.last}`, `${p.first} ${p.last} (American football)`, `${p.first} ${p.last} (${p.position === 'QB' ? 'quarterback' : 'American football'})`]) {
     const html = await wikiHtml(title);
@@ -191,7 +191,12 @@ async function bio(p: SupplementalPick): Promise<Bio | null> {
     const block = hist >= 0 ? text.slice(hist, stops.length ? Math.min(...stops) : hist + 800) : '';
     const years = [...block.matchAll(/\b(19[3-9]\d|20[0-2]\d)\b/g)].map((m) => parseInt(m[1], 10)).filter((y) => y >= p.year && y <= p.year + 25);
     if (/present/i.test(block)) years.push(new Date().getFullYear());
+    // "Listed height 6 ft 5 in (1.96 m)" / "Listed weight 291 lb (132 kg)"; older boxes say "Height".
+    const ht = /[Hh]eight\D{0,4}(\d)\s*ft\s*(\d{1,2})\s*in/.exec(text);
+    const wt = /[Ww]eight\D{0,4}(\d{2,3})\s*lb/.exec(text);
     return {
+      heightInches: ht ? parseInt(ht[1], 10) * 12 + parseInt(ht[2], 10) : null,
+      weight: wt ? parseInt(wt[1], 10) : null,
       image: img ? plainImageUrl(img.startsWith('//') ? `https:${img}` : img) : null,
       proBowls: count(/(?:(\d+)×\s*)?Pro Bowl\b/),
       allPro1: count(/(?:(\d+)×\s*)?First-team All-Pro/),
@@ -247,12 +252,12 @@ async function main(): Promise<void> {
     if (b) bios++;
     const q = (s: string) => (/[",]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s);
     const to = b?.careerTo ?? '';
-    csvRows.push([q(p.last), q(p.first), q(p.college), 'UD', 'UD', String(p.year), p.position, '', '', '', '', '', '', '', String(p.year), String(to), b ? String(b.allPro1) : '', b ? String(b.proBowls) : '', '', '', 'NFL', '', '', b?.image ?? '', '', b?.isHOF ? 'TRUE' : 'FALSE'].join(','));
+    csvRows.push([q(p.last), q(p.first), q(p.college), 'UD', 'UD', String(p.year), p.position, '', '', '', '', '', b?.heightInches != null ? String(b.heightInches) : '', b?.weight != null ? String(b.weight) : '', String(p.year), String(to), b ? String(b.allPro1) : '', b ? String(b.proBowls) : '', '', '', 'NFL', '', '', b?.image ?? '', '', b?.isHOF ? 'TRUE' : 'FALSE'].join(','));
     const key = `${p.year}|${p.first} ${p.last}`;
     if (b && !careers.players[key]) {
       careers.players[key] = { proBowls: b.proBowls, allPro1: b.allPro1, careerTo: b.careerTo, isHOF: b.isHOF, ...(b.games != null ? { games: b.games } : {}) };
     }
-    console.log(`  + ${p.year} ${p.first} ${p.last} ${p.position} ${p.college}${b ? ` | PB ${b.proBowls} AP1 ${b.allPro1}${b.isHOF ? ' HOF' : ''} to ${b.careerTo ?? '?'}` : ' | no page'}`);
+    console.log(`  + ${p.year} ${p.first} ${p.last} ${p.position} ${p.college}${b ? ` | PB ${b.proBowls} AP1 ${b.allPro1}${b.isHOF ? ' HOF' : ''} to ${b.careerTo ?? '?'} ${b.heightInches ?? '?'}in ${b.weight ?? '?'}lb` : ' | no page'}`);
   }
   const csv = fs.readFileSync(LOOKUP_CSV, 'utf8');
   const sep = csv.endsWith('\r\n') ? '' : '\r\n';
