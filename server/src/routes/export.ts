@@ -127,6 +127,21 @@ r.post('/export/mdc', async (req, res) => {
 });
 
 /**
+ * Write the full Madden 27 portrait pack: every portrait the app holds that the
+ * game no longer ships (about 5,100), named by the player's own id, for one
+ * import with the MMC Portrait Manager. Files already written are kept unless
+ * `?force=1`.
+ */
+r.post('/export/portrait-pack/all', async (req, res) => {
+  try {
+    const result = await PortraitPackService.writeFull({ force: req.query.force === '1' });
+    return res.json(result);
+  } catch (e) {
+    return res.status(500).json({ error: (e as Error).message });
+  }
+});
+
+/**
  * Build a Frosty-import custom-portrait folder for a year: downloads real
  * photos for prospects who have no in-game face, crops them, names each by the
  * recycled PLPO slot, and writes a manifest. The matching .mdc already points

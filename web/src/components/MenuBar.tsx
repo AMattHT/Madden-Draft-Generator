@@ -84,6 +84,7 @@ export function MenuBar({
         { kind: 'item', label: a?.isFile ? 'Save back to Madden Saves folder' : 'Save to Madden Saves folder', disabled: noClass, onSelect: act((x) => x.saveToSaves()) },
         { kind: 'item', label: 'Export as a CSV…', hint: 'all attributes', disabled: noClass, onSelect: act((x) => x.downloadCsv()) },
         { kind: 'item', label: 'Build 2D portrait pack…', hint: 'PFR / Wikipedia', disabled: noClass || !a?.canBuildPortraits, onSelect: act((x) => x.buildPortraits()) },
+        { kind: 'item', label: 'Build Madden 27 portrait pack…', hint: 'MMC Portrait Manager', disabled: noClass, onSelect: act((x) => x.buildFullPortraitPack()) },
       ],
     },
     {

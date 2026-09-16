@@ -20,6 +20,8 @@ export interface ExportActions {
   downloadCsv: () => void;
   buildPortraits: () => void;
   canBuildPortraits: boolean;
+  /** Write the full Madden 27 portrait pack for the MMC Portrait Manager. */
+  buildFullPortraitPack: () => void;
   exportEditsJson: () => void;
   importEditsPick: () => void;
   clearAllEdits: () => void;
@@ -89,18 +91,19 @@ export function ExportMenu({
       setMsg({ ok: false, text: `Import failed: ${(e as Error).message}` });
     }
   }
-  const [busy, setBusy] = useState<'mdc' | 'saves' | 'portraits' | null>(null);
+  const [busy, setBusy] = useState<'mdc' | 'saves' | 'portraits' | 'fullpack' | null>(null);
   const [msg, setMsg] = useState<Msg>(null);
   // M27 portrait pack: retired players the game ships no portrait for (Brady,
-  // Newton) get a recycled portrait id, and the matching images are written for
-  // the MMC Portrait Manager. On by default: without the mod they look as before.
+  // Newton) get their own portrait id, which the pack supplies to the game through
+  // the MMC Portrait Manager. Off until the user has imported the pack: without it
+  // those ids would show the blank shield.
   const [portraitPack, setPortraitPack] = useState<boolean>(() => {
-    try { return localStorage.getItem('mdc.portraitPack') !== '0'; } catch { return true; }
+    try { return localStorage.getItem('mdc.portraitPack') === '1'; } catch { return false; }
   });
   useEffect(() => { try { localStorage.setItem('mdc.portraitPack', portraitPack ? '1' : '0'); } catch { /* ignore */ } }, [portraitPack]);
   const usePack = gameVersion === 'm27' && portraitPack;
   const packNote = (p: { dir: string; count: number } | null | undefined) =>
-    p && p.count > 0 ? ` Portrait pack: ${p.count} portrait${p.count === 1 ? '' : 's'} written to ${p.dir} — import that folder with the MMC Portrait Manager (Image Library Manager) so those players show their faces.` : '';
+    p && p.count > 0 ? ` ${p.count} player${p.count === 1 ? '' : 's'} point at portrait-pack ids (their subset is in ${p.dir}); they show once the Madden 27 portrait pack is imported with the MMC Portrait Manager.` : '';
 
   // Auto-dismiss successful toasts; errors stay until dismissed.
   useEffect(() => {
@@ -157,6 +160,22 @@ export function ExportMenu({
     }
   }
 
+  async function buildFullPortraitPack() {
+    setBusy('fullpack');
+    setMsg({ ok: true, text: 'Writing the Madden 27 portrait pack (about 5,100 portraits, a minute or two)…' });
+    try {
+      const r = await api.buildFullPortraitPack();
+      setMsg({
+        ok: true,
+        text: `Madden 27 portrait pack: ${r.count} portraits written${r.skipped ? `, ${r.skipped} already there` : ''}${r.errors?.length ? `, ${r.errors.length} failed` : ''} in ${r.dir}. Import that folder once with the MMC Portrait Manager (Image Library Manager), then export classes with “Portrait pack” on.`,
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: `Portrait pack failed: ${(e as Error).message}` });
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function buildPortraits() {
     setBusy('portraits');
     setMsg({ ok: true, text: 'Downloading PFR/Wikipedia headshots…' });
@@ -182,7 +201,7 @@ export function ExportMenu({
   // The File / Edit menus drive these; refreshed every render so counts stay current.
   if (actionsRef) {
     actionsRef.current = {
-      downloadMdc, saveToSaves, downloadCsv, buildPortraits, canBuildPortraits,
+      downloadMdc, saveToSaves, downloadCsv, buildPortraits, canBuildPortraits, buildFullPortraitPack,
       exportEditsJson: downloadEditsJson, importEditsPick: () => fileRef.current?.click(), clearAllEdits,
       editedCount, isFile,
     };
@@ -192,7 +211,7 @@ export function ExportMenu({
   return (
     <div className="relative flex items-center gap-3">
       {gameVersion === 'm27' && !isFile && (
-        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-400" title="Write a portrait pack for retired players Madden 27 has no portrait for (Tom Brady, Cam Newton…). Import the folder with the MMC Portrait Manager; without it they show a generic portrait as before.">
+        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-400" title="Point retired players Madden 27 has no portrait for (Tom Brady, Cam Newton…) at their own portrait ids. Needs the Madden 27 portrait pack imported once with the MMC Portrait Manager (File → Build Madden 27 portrait pack); without it they show a blank portrait.">
           <input type="checkbox" checked={portraitPack} onChange={(e) => setPortraitPack(e.target.checked)} className="h-3 w-3 accent-primary" />
           Portrait pack
         </label>
@@ -204,7 +223,7 @@ export function ExportMenu({
         className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-white shadow-[0_2px_10px_rgba(47,107,255,0.3)] transition-colors hover:bg-primary-light disabled:opacity-50"
       >
         <Icon path={ICONS.download} className="h-3.5 w-3.5" />
-        {busy === 'saves' ? 'Saving…' : busy === 'mdc' ? 'Exporting…' : busy === 'portraits' ? 'Downloading…' : 'Save to Madden'}
+        {busy === 'saves' ? 'Saving…' : busy === 'mdc' ? 'Exporting…' : busy === 'portraits' ? 'Downloading…' : busy === 'fullpack' ? 'Writing pack…' : 'Save to Madden'}
       </button>
       <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) importEditsFile(f); e.target.value = ''; }} />
 

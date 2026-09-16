@@ -574,6 +574,13 @@ export const api = {
     return res.json();
   },
 
+  /** Write the full Madden 27 portrait pack (every portrait the game lacks). */
+  buildFullPortraitPack: (force = false) =>
+    fetch(`/api/export/portrait-pack/all${force ? '?force=1' : ''}`, { method: 'POST' }).then(async (r) => {
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
+      return r.json() as Promise<{ dir: string; count: number; skipped: number; errors: string[] }>;
+    }),
+
   buildPortraits: (year: number, league: string, limit?: number) =>
     fetch(`/api/export/portraits/${year}?league=${league}${limit ? `&limit=${limit}` : ''}`, {
       method: 'POST',
