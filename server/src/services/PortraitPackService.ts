@@ -181,7 +181,13 @@ async function downloadCdn(url: string, cachePath: string): Promise<string> {
  * depth=1, mips=1, srgb=True.
  */
 async function writeDds(source: string, out: string): Promise<void> {
-  const rgba = await sharp(source).resize(SIZE, SIZE, { kernel: 'lanczos3', fit: 'cover' }).ensureAlpha().raw().toBuffer();
+  const meta = await sharp(source).metadata();
+  let img = sharp(source).resize(SIZE, SIZE, { kernel: 'lanczos3', fit: 'cover' });
+  // An upscale from the 128px pack art or a 96-256px disc headshot comes out soft;
+  // an unsharp mask after the resize brings the edges back without ringing at this
+  // strength. A picture already at or above the output size is left alone.
+  if ((meta.width ?? 0) < SIZE) img = img.sharpen({ sigma: 1.5, m1: 1.0, m2: 2.5 });
+  const rgba = await img.ensureAlpha().raw().toBuffer();
   const header = Buffer.alloc(4 + 124 + 20);
   header.write('DDS ', 0, 'ascii');
   header.writeUInt32LE(124, 4); // header size
