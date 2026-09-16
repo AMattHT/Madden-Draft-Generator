@@ -38,7 +38,8 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // Reclassify the generic linebacker bucket: 3-4 OLB pass rushers become edges
   // (LEDG/REDG) and off-ball backers get a pinned SAM/MIKE/WILL where the career
   // signals (sacks, interceptions, scheme, PFF) support it.
-  const f7 = LB_BUCKET.test(p.position.trim()) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
+  // A recorded role applies whatever the source label says (a pinned edge listed as DE).
+  const f7 = LB_BUCKET.test(p.position.trim()) || FrontSevenService.pinnedRole(p) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
   // Pre-2001 defensive backs: no depth charts, so split corner vs safety by build.
   const dbSplit = !curated && !e?.positionLabel && p.draftYear < 2001 ? PositionMapper.dbByBuild(p.position, p.weight, p.draftYear) : null;
   // A depth-chart slot never moves a quarterback or a specialist to the line or
@@ -47,7 +48,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const label = curated ?? chartLabel ?? f7?.label ?? dbSplit ?? null;
   // A slot that came from real data (curation or a depth chart) must survive the
   // class-level cohort balancing.
-  const positionLocked = !!(curated || chartLabel);
+  const positionLocked = !!(curated || chartLabel || f7?.frontSeven?.lock);
 
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);

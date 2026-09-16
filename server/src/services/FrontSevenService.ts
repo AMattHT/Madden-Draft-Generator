@@ -51,15 +51,21 @@ export const FrontSevenService = {
   reloadCurated(): void {
     curatedCache = null;
   },
+  /** The recorded role for this man (data/lookups/curated-front-seven.json), or null. */
+  pinnedRole(p: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear'>): 'EDGE' | 'SAM' | 'MIKE' | 'WILL' | null {
+    return curatedRoles()[`${normalizeName(`${p.firstName} ${p.lastName}`)}|${p.draftYear}`] ?? null;
+  },
   /** `pickTeam` is the nflverse team code from the draft-pick join (year classes);
    *  when absent the drafting team comes from nflverse by name. */
   resolve(p: BaselinePlayer, pickTeam?: string | null): FrontSevenResolution {
     // A recorded role (data/lookups/curated-front-seven.json, kept by the player
     // editor tool) wins outright: { "roles": { "lawrencetaylor|1981": "EDGE" } }.
-    const pinned = curatedRoles()[`${normalizeName(`${p.firstName} ${p.lastName}`)}|${p.draftYear}`];
+    const pinned = this.pinnedRole(p);
     if (pinned) {
       const info: FrontSevenInfo = { role: pinned, reason: 'curated', lock: true, scheme: null, team: null, sackRate: null };
-      return { label: pinned === 'EDGE' ? 'DE' : pinned, frontSeven: info };
+      // 'EDGE' rather than 'DE': the label mapper turns a 290-lb "DE" into a tackle,
+      // and a pinned edge (Reggie White at 300) must stay an edge.
+      return { label: pinned, frontSeven: info };
     }
     const raw = RosterPositionService.raw(p.firstName, p.lastName);
     // A same-name collision with a non-front-seven player must not steer the verdict.
