@@ -262,12 +262,17 @@ export const PortraitPackService = {
     for (const r of parseCsvFile<Record<string, string>>(MAPPING_FILE)) {
       const pid = parseInt(r['PID'], 10);
       const plpo = (r['Portrait'] || '').trim();
-      if (!pid || !plpo || (r['Type'] || '').trim() === 'generic' || shippedPids().has(pid)) continue;
+      if (!pid || !plpo || (r['Type'] || '').trim() === 'generic') continue;
       const name = (r['Player Name'] || '').trim();
       const [first, ...rest] = name.split(' ');
+      const dropped = overrideFor(first || '', rest.join(' '), null, plpo);
+      // An id the game ships is only written when a better picture was dropped in
+      // (it then replaces the game's own image); otherwise the pack art stands in
+      // for the ids the game dropped.
+      if (shippedPids().has(pid)) { if (dropped) out.push({ pid, plpo, kind: 'file', name, source: dropped }); continue; }
       const packFile = path.join(PACK_ART_DIR, `${plpo}.jpg`);
-      const source = overrideFor(first || '', rest.join(' '), null, plpo) ?? (fs.existsSync(packFile) ? packFile : null);
-      if (source) out.push({ pid, plpo, kind: 'own', name, source });
+      const source = dropped ?? (fs.existsSync(packFile) ? packFile : null);
+      if (source) out.push({ pid, plpo, kind: dropped ? 'file' : 'own', name, source });
     }
     for (const year of PlayerLookupService.years()) {
       for (const p of PlayerLookupService.byYear(year)) {
@@ -361,6 +366,11 @@ To use:
 The full pack (${FULL_PACK_NAME}) covers every class; a class's own folder is
 the subset that class uses. Custom ids are remembered on this machine
 (custom-ids.json next to the packs), so a player keeps his id across exports.
+
+Better pictures: a file dropped into portrait-sources replaces the pack art for
+that player, and for a portrait the game already ships (a legend such as Joe
+Montana, plpo_legends_JoeMontana_Profile.png) it is written under the game's own
+id and replaces the game's image on import.
 
 Other portrait mods: copy any portrait .fbmod you also use into the other-mods
 folder next to the packs and build again. Every id that mod adds is left out of

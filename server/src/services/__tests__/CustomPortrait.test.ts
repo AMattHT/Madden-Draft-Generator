@@ -72,6 +72,15 @@ test('a Madden-disc headshot is a source on its own', () => {
   assert.ok(a[0].pid >= CUSTOM_PID_BASE);
 });
 
+test('a dropped-in picture for a portrait the game ships goes into the full pack under the game id', async () => {
+  const file = path.join(tmp, 'sources', 'plpo_legends_JoeMontana_Profile.png'); // Montana's shipped legend portrait, id 5628
+  assert.ok(!PortraitPackService.fullPackEntries().some((e) => e.pid === 5628));
+  fs.writeFileSync(file, await sharp({ create: { width: 64, height: 64, channels: 3, background: '#a33' } }).png().toBuffer());
+  const hit = PortraitPackService.fullPackEntries().find((e) => e.pid === 5628);
+  assert.ok(hit && hit.kind === 'file' && /Montana/.test(hit.name), JSON.stringify(hit));
+  fs.unlinkSync(file);
+});
+
 test('the custom range is above every id the game or the mapping uses, and survives the M27 writer', () => {
   const shipped = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-shipped-portrait-pids.json'), 'utf8')).pids as number[];
   assert.ok(Math.max(...shipped) < CUSTOM_PID_BASE);
