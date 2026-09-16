@@ -41,9 +41,9 @@ import { CustomPortraitIdService } from './CustomPortraitIdService';
 const SHIPPED_FILE = path.join(LOOKUPS_DIR, 'm27-shipped-portrait-pids.json');
 const MAPPING_FILE = path.join(LOOKUPS_DIR, 'PID_Portrait_Mapping.csv');
 const PACK_ART_DIR = path.join(DATA_ROOT, 'portraits');
-/** Output size. The library stores 512px, but the pack art is 128px, so 256
- *  carries everything it has at a quarter of the bytes (5,000+ files). */
-const SIZE = 256;
+/** Output size: the library's own 512px, so an imported portrait matches the
+ *  game's (the pack art is 128px and the disc headshots 96-256px, upscaled). */
+const SIZE = 512;
 export const FULL_PACK_NAME = 'M27-ALL-PORTRAITS';
 
 export type PackKind = 'own' | 'file' | 'retro' | 'cdn';
@@ -176,7 +176,9 @@ async function downloadCdn(url: string, cachePath: string): Promise<string> {
  * Write the picture as an uncompressed DDS (DX10 header, R8G8B8A8_UNORM_SRGB, one
  * mip). The Portrait Manager's texture importer takes R8G8B8A8 or BC7 and insists
  * on the sRGB variant, then re-encodes to the library's own BC7 on import; a plain
- * RGBA file needs no encoder here. 256x256x4 = 256 KB per portrait.
+ * RGBA file needs no encoder here. 512x512x4 = 1 MB per portrait on disk; the
+ * editor's import log reads it as source=DDS, type=TT_2d, format=R8G8B8A8_SRGB,
+ * depth=1, mips=1, srgb=True.
  */
 async function writeDds(source: string, out: string): Promise<void> {
   const rgba = await sharp(source).resize(SIZE, SIZE, { kernel: 'lanczos3', fit: 'cover' }).ensureAlpha().raw().toBuffer();

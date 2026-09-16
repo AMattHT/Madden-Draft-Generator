@@ -46,7 +46,9 @@ test('a dropped-in picture gives a player with no portrait id a stable custom id
   assert.equal(dds.toString('ascii', 0, 4), 'DDS ');
   assert.equal(dds.toString('ascii', 84, 88), 'DX10');
   assert.equal(dds.readUInt32LE(128), 29); // R8G8B8A8_UNORM_SRGB: the importer insists on an sRGB variant
-  assert.equal(dds.length, 4 + 124 + 20 + 256 * 256 * 4);
+  assert.equal(dds.length, 4 + 124 + 20 + 512 * 512 * 4); // the library's own 512px
+  assert.equal(dds.readUInt32LE(12), 512);
+  assert.equal(dds.readUInt32LE(28), 1); // one mip
   fs.unlinkSync(file);
 });
 
