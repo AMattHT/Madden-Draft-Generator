@@ -212,7 +212,8 @@
     "dave|lutz|1983": 2,
     "gary|dunn|1976": 2,
     "ray|hamilton|1973": 2,
-    "alex|smith|2005|utah": 2
+    "alex|smith|2005|utah": 2,
+    "gary|zimmerman|1984": 1
   },
   "_review": "Top 100 of scripts/audit-skin-tone.ts (exposure x doubt) reviewed against public record, in two passes of 50. 16 wrong in the first, 17 in the second -- the priors behind them sit at 50-76%, so a third being wrong is what that confidence means. Players confirmed correct are recorded too, so a reviewed player is never reviewed twice and a later change to the prior cannot move him."
 }

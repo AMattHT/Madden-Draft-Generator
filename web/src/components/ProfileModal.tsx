@@ -452,6 +452,14 @@ export function ProfileModal({
                   also {row.twoWay.roles.join(' · ')}
                 </span>
               )}
+              {row.supplemental && (
+                <span
+                  title={`Selected in the ${row.draftYear} NFL supplemental draft, round ${row.supplemental.round}${row.supplemental.team ? ` by the ${row.supplemental.team.name}` : ''}. A supplemental pick has no overall pick number; the club gave up that round's pick the next year. He is placed after the round's regular picks.`}
+                  className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[10px] text-legend-light"
+                >
+                  Supplemental
+                </span>
+              )}
               {row.frontSeven && row.frontSeven.role && (
                 <span
                   title={frontSevenTitle(row.frontSeven)}
@@ -463,7 +471,7 @@ export function ProfileModal({
             </div>
             <div className="mt-1.5 text-xs text-muted">
               {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
-              {row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
+              {row.supplemental ? ` · Supplemental Rd ${row.supplemental.round}` : row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
           </div>
           {onNavigate && (

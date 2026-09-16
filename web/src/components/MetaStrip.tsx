@@ -134,6 +134,14 @@ export function MetaStrip({
       >
         <b className="tabular-nums text-neutral-200">{verified}</b>/{data.rows.length} faces verified
       </span>}
+      {data.rows.some((r) => r.supplemental) && (
+        <>
+          <span className="h-4 w-px bg-border" />
+          <span className="text-[11px] text-neutral-400" title="Supplemental-draft selections: each sits after his round's regular picks and is marked S in the table.">
+            <b className="tabular-nums text-neutral-200">{data.rows.filter((r) => r.supplemental).length}</b> supplemental
+          </span>
+        </>
+      )}
       {data.dropped && data.dropped.length > 0 && (
         <>
           <span className="h-4 w-px bg-border" />

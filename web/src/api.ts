@@ -167,7 +167,7 @@ export interface SaveMdcResult {
   count: number;
   likeness: LikenessStats;
   /** M27 portrait pack written next to the export (null when off or empty). */
-  portraitPack?: { dir: string; count: number; errors: string[] } | null;
+  portraitPack?: { dir: string; count: number; missing: number; errors: string[] } | null;
 }
 
 export interface CapResetOptions {
@@ -518,12 +518,13 @@ export const api = {
     gearEdits?: GearEdits,
     draftOpts?: ClassRequestOpts,
     gameVersion: GameVersion = 'm26',
-    portraitPack = false
+    portraitPack = false,
+    portraitCdn = false
   ) {
     const res = await fetch('/api/export/mdc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, gameVersion, portraitPack }),
+      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, gameVersion, portraitPack, portraitCdn }),
     });
     if (!res.ok) throw new Error(`export failed: HTTP ${res.status}`);
     const blob = await res.blob();
@@ -547,7 +548,7 @@ export const api = {
       count: res.headers.get('X-Prospect-Count'),
       asset: res.headers.get('X-Likeness-Asset'),
       custom: res.headers.get('X-Likeness-CustomPortrait'),
-      portraitPack: packDir ? { dir: decodeURIComponent(packDir), count: Number(res.headers.get('X-Portrait-Pack-Count') || 0) } : null,
+      portraitPack: packDir ? { dir: decodeURIComponent(packDir), count: Number(res.headers.get('X-Portrait-Pack-Count') || 0), missing: Number(res.headers.get('X-Portrait-Pack-Missing') || 0) } : null,
     };
   },
 
@@ -560,12 +561,13 @@ export const api = {
     gearEdits: GearEdits | undefined,
     draftOpts?: ClassRequestOpts,
     gameVersion: GameVersion = 'm26',
-    portraitPack = false
+    portraitPack = false,
+    portraitCdn = false
   ): Promise<SaveMdcResult> {
     const res = await fetch('/api/export/mdc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, saveToSaves: true, gameVersion, portraitPack }),
+      body: JSON.stringify({ year, league, edits, mode, gearEdits, ...draftOpts, saveToSaves: true, gameVersion, portraitPack, portraitCdn }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));

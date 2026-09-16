@@ -200,6 +200,7 @@ export function PlayerTable({
                   <span className="inline-flex items-center gap-1.5">
                     {r.edited && <span className="text-gold" title="edited">●</span>}
                     {r.firstName} {r.lastName}
+                    {r.supplemental && <span className="rounded border border-legend/40 px-1 text-[9px] uppercase tracking-wider text-legend-light" title={`Supplemental draft pick, round ${r.supplemental.round}`}>S</span>}
                   </span>
                 </span>
               </td>

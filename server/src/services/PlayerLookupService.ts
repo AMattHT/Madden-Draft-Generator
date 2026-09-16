@@ -6,6 +6,8 @@ import { HistoricalAccoladeService } from './HistoricalAccoladeService';
 import { NflverseCareerService } from './NflverseCareerService';
 import { PositionMapper } from './PositionMapper';
 import { RatingService } from './RatingService';
+import { SupplementalDraftService } from './SupplementalDraftService';
+import { nflversePick } from '../types/player';
 
 export interface PlayerSearchResult {
   firstName: string;
@@ -223,6 +225,7 @@ function load(): void {
   dedupSharedAssets(merged);
   sanitizeWikiPhotos(merged);
   sanitizeLegendPortraits(merged);
+  applySupplementalPicks(merged);
   byYear = new Map();
   byNormName = new Map();
   byLastName = new Map();
@@ -245,6 +248,29 @@ function load(): void {
     byKey.set(k, p);
   }
 }
+
+/**
+ * Mark supplemental-draft selections (data/lookups/supplemental-picks.json). The
+ * CSV stores them as undrafted -- or, for Steve Young 1984, as round 1 / pick 1
+ * next to Irving Fryar's real pick 1 -- so the table is the source: the round
+ * comes from it and the overall pick is cleared (a supplemental pick has none),
+ * which keeps every pick-keyed join (team, measurements, career) off another
+ * man's row. Ordering puts him after his round's regular picks (see pickOrder).
+ */
+function applySupplementalPicks(list: BaselinePlayer[]): void {
+  for (const p of list) {
+    const s = SupplementalDraftService.find(p.firstName, p.lastName, p.draftYear, p.college);
+    if (!s) continue;
+    p.supplemental = { round: s.round, pick: s.pick, team: s.team };
+    p.draftRound = s.round;
+    p.draftPick = null;
+  }
+}
+
+/** Sort value within a round: regular picks by overall pick, then the round's
+ *  supplemental picks in ordinal order, then the undrafted. */
+const pickOrder = (p: BaselinePlayer): number =>
+  p.draftPick ?? (p.supplemental ? 900 + (p.supplemental.pick ?? 99) : 999);
 
 /**
  * The 1960 AFL draft (a positional/territorial selection) carries no order in the
@@ -326,7 +352,7 @@ function sanitizeLegendPortraits(players: BaselinePlayer[]): void {
     // The namesake this rule exists for -- the 1969 Hofstra cornerback Jim
     // Thorpe, drafted round 17 -- has no career under either source, so he is
     // still caught.
-    const career = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+    const career = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, nflversePick(p));
     const wav = p.wav ?? career?.wav ?? 0;
     const proBowls = p.proBowls ?? career?.proBowls ?? 0;
     const allPro1 = p.allPro1 ?? career?.allPro1 ?? 0;
@@ -742,7 +768,7 @@ function dedupDualDraft(list: BaselinePlayer[]): BaselinePlayer[] {
         accompl(b) - accompl(a) ||
         (a.league.toUpperCase() === 'NFL' ? 0 : 1) - (b.league.toUpperCase() === 'NFL' ? 0 : 1) ||
         (a.draftRound ?? 99) - (b.draftRound ?? 99) ||
-        (a.draftPick ?? 999) - (b.draftPick ?? 999)
+        pickOrder(a) - pickOrder(b)
     )[0];
     for (const p of grp) if (p !== keep) drop.add(p);
   }
@@ -880,7 +906,7 @@ export const PlayerLookupService = {
       const ar = a.draftRound ?? 99;
       const br = b.draftRound ?? 99;
       if (ar !== br) return ar - br;
-      return (a.draftPick ?? 999) - (b.draftPick ?? 999);
+      return pickOrder(a) - pickOrder(b);
     });
   },
 

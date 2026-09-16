@@ -5,7 +5,7 @@ import { assignM27Fields, commentaryIdFor, focusFor } from './M27Fields';
 import { generateAttributes, reconcileToTarget, RATING_KEYS } from './AttributeModel';
 import { M27RookieRatingsService, type EaRookie } from './M27RookieRatingsService';
 import { genericHeadPid } from './M27Fields';
-import { PortraitPackService, PackAssignment } from './PortraitPackService';
+import { PortraitPackService, PackAssignment, MissingPortrait } from './PortraitPackService';
 import { EraBioService } from './EraBioService';
 import { PlayerLookupService } from './PlayerLookupService';
 import { TwoWayService, TwoWayInfo } from './TwoWayService';
@@ -26,7 +26,8 @@ import { PortraitSlotService } from './PortraitSlotService';
 import { LaunchRatingsService, LaunchEntry } from './LaunchRatingsService';
 import { AwardsService } from './AwardsService';
 import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
-import { BaselinePlayer, CombineMeasurements, ToneSource } from '../types/player';
+import { BaselinePlayer, CombineMeasurements, ToneSource, nflversePick } from '../types/player';
+import { SupplementalDraftService } from './SupplementalDraftService';
 import { TeamInfo } from './TeamService';
 import { PortraitService } from './PortraitService';
 import { GEAR_SLOT_TYPES, slotOfElement, waistConflict } from './GearOptionsService';
@@ -72,6 +73,8 @@ export interface GenOptions {
   /** M27: give retired players the game ships no portrait for a recycled portrait
    *  id and write the matching portrait pack (PortraitPackService). */
   portraitPack?: boolean;
+  /** With portraitPack: also download NFL/ESPN headshots for players with no other picture. */
+  portraitCdn?: boolean;
   /** Variant seed: 0 = the canonical class; any other value re-rolls every
    *  seeded choice (attribute noise, faces, gear, persona, builds) while the
    *  player list, order and overalls stay the same. */
@@ -340,7 +343,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   // then attributes from THAT archetype's profile so ratings match the role.
   // Archetype from career usage when we have it (Carter = Physical, not Slot),
   // else the closest Madden height/weight profile.
-  const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, player.draftPick);
+  const career = NflverseCareerService.get(player.firstName, player.lastName, player.draftYear, nflversePick(player));
   // A pre-combine quarterback with no career record has nothing to say he ran:
   // a pocket passer, not the Scrambler a lean build would suggest.
   const noRecordQb = posName === 'QB' && !career && player.combine?.forty == null && player.draftYear < 1980;
@@ -363,7 +366,7 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.archetype = archetype;
   // Two-way players: the other role lives in the ratings (Baugh punts, Blanda
   // kicks, a 1940s end covers), then the primary overall is re-solved around it.
-  const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId, player.draftPick);
+  const twoWay = TwoWayService.rolesFor(player.firstName, player.lastName, player.draftYear, posId, nflversePick(player));
   if (twoWay) TwoWayService.apply(prospect as Record<string, number>, twoWay.roles, overall);
   // Launch Day lens: EA's own release-day attributes replace the generated ones
   // wherever the edition recorded them (older editions lack a few keys, which
@@ -397,7 +400,8 @@ function toProspect(it: RankedItem, portraitPid?: number, gameVersion: 'm26' | '
   prospect.bodyType = bodyTypeFor(posName, weight, rand); // the game's build mix for the position/weight
   prospect.draftable = 1;
   prospect.draftRound = player.draftRound ?? 63; // 63 = UDFA
-  prospect.draftPick = withinRoundPick(player.draftPick);
+  // A supplemental pick carries his round and in-round ordinal (0 when unknown).
+  prospect.draftPick = player.supplemental ? (player.supplemental.pick ?? 0) : withinRoundPick(player.draftPick);
   prospect.overall = overall;
   prospect.devTrait = devTrait;
 
@@ -487,6 +491,8 @@ export interface BuildResult {
   likeness: LikenessStats;
   /** M27 with opts.portraitPack: the prospects pointed at a pack portrait. */
   portraitPack?: PackAssignment[];
+  /** M27 with opts.portraitPack: real players still without a picture. */
+  portraitPackMissing?: MissingPortrait[];
 }
 
 /** User edits keyed by pick number -> { field: value } (overall, devTrait,
@@ -507,6 +513,8 @@ export interface PreviewRow {
   archetypeName: string;
   round: number | null;
   draftPick: number | null;
+  /** Supplemental-draft selection: round, in-round ordinal, drafting club. */
+  supplemental: { round: number; pick: number | null; team: TeamInfo | null } | null;
   wav: number | null;
   wavSource: string;
   /** Index of this player in the year's source list (stable; GenOptions.include uses it). */
@@ -982,13 +990,14 @@ export const DraftClassBuilder = {
         archetypeName: LookupService.idToName('archetype', Number(p.archetype) || 0) || '',
         round: base.draftRound,
         draftPick: base.draftPick,
+        supplemental: base.supplemental ? { round: base.supplemental.round, pick: base.supplemental.pick, team: SupplementalDraftService.teamInfo(base.supplemental.team, base.draftYear) } : null,
         // Predicted players (pre-1960 / missing wAV): show the draft-slot estimate
         // (matches what actually drives their OVR) instead of the raw/absent value.
         wav: base.wavSource === 'predicted' ? RatingService.predictedWav(base) : base.wav,
         // 'launch' = overall and attributes are EA's release-day numbers (Launch Day lens).
         wavSource: launched.has(i) ? 'launch' : base.wavSource,
         srcIdx: keptIdx[i],
-        twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0, base.draftPick),
+        twoWay: TwoWayService.rolesFor(base.firstName, base.lastName, base.draftYear, Number(p.position) || 0, nflversePick(base)),
         face,
         faceSource: face === 'asset' ? (real?.source ?? 'lookup') : null,
         skinTone: Number(base.race) >= 1 && Number(base.race) <= 8 ? Number(base.race) : 4,
@@ -1061,7 +1070,8 @@ export const DraftClassBuilder = {
     applyGearEdits(prospects, gearEdits);
     const capped = players.slice(0, LOGICAL_CAPACITY);
     // Pack portraits pin before assignM27Fields so a generic head keeps the id.
-    const portraitPack = opts.portraitPack ? PortraitPackService.apply(prospects as Array<Record<string, unknown>>, capped) : undefined;
+    const portraitPack = opts.portraitPack ? PortraitPackService.apply(prospects as Array<Record<string, unknown>>, capped, { cdn: opts.portraitCdn }) : undefined;
+    const portraitPackMissing = portraitPack ? PortraitPackService.missing(prospects as Array<Record<string, unknown>>, capped, portraitPack) : undefined;
     prospects.forEach((p, i) => {
       const posId = Number(p.position) || 0;
       if (!p.personaDNA) {
@@ -1071,11 +1081,11 @@ export const DraftClassBuilder = {
       // Birthdate, PersonalityRating, Focus, QB style, body-type enum, hidden bytes,
       // generic-head portrait PID — everything the game fills and reads back verbatim.
       const base = capped[i];
-      const career = base ? NflverseCareerService.get(base.firstName, base.lastName, base.draftYear, base.draftPick) : null;
+      const career = base ? NflverseCareerService.get(base.firstName, base.lastName, base.draftYear, nflversePick(base)) : null;
       assignM27Fields(p, { birthDate: career?.birthDate ?? null }, `${p.firstName}|${p.lastName}|${i}${opts.variant ? `|v${opts.variant}` : ''}`);
     });
     const template = Mdc27Service.loadTemplate();
     const buffer = Mdc27Service.write(prospects, template);
-    return { buffer, count: prospects.length, truncated, dropped, likeness, portraitPack };
+    return { buffer, count: prospects.length, truncated, dropped, likeness, portraitPack, portraitPackMissing };
   },
 };

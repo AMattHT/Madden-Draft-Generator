@@ -16,7 +16,8 @@ import { PhotoLookService } from './PhotoLookService';
 import { TeamDraftService } from './TeamDraftService';
 import { LikenessOverrideService } from './LikenessOverrideService';
 import type { ToneSource } from '../types/player';
-import { BaselinePlayer } from '../types/player';
+import { BaselinePlayer, nflversePick } from '../types/player';
+import { SupplementalDraftService } from './SupplementalDraftService';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
 const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
@@ -51,7 +52,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
 
-  const nv = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+  const nv = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, nflversePick(p));
 
   // Accuracy priority — height/weight: combine (measured) > pick-join > nflverse name > CSV.
   const height = c?.heightInches ?? e?.heightInches ?? nv?.heightInches ?? null;
@@ -200,7 +201,7 @@ export async function enrichedClass(
   const baseline = PlayerLookupService.byYear(year, league);
   const enrich = await TeamService.byYear(year);
   const real = await Promise.all(
-    baseline.map((p) => enrichOne(p, enrich.size && p.draftPick != null ? enrich.get(p.draftPick) : undefined))
+    baseline.map((p) => enrichOne(p, enrich.size && p.draftPick != null ? enrich.get(p.draftPick) : supplementalEnrichment(p)))
   );
   // Pad to a full Madden-sized class with generated undrafted generics.
   const fillers = opts.fill ? GenericFillerService.build(year, real) : [];
@@ -224,7 +225,14 @@ export async function allTimeGreatsClass(range?: { from: number; to: number }): 
 async function enrichAcrossYears(players: BaselinePlayer[]): Promise<BaselinePlayer[]> {
   const years = [...new Set(players.map((p) => p.draftYear))];
   const byYear = new Map(await Promise.all(years.map(async (y) => [y, await TeamService.byYear(y)] as const)));
-  return Promise.all(players.map((p) => enrichOne(p, p.draftPick != null ? byYear.get(p.draftYear)?.get(p.draftPick) : undefined)));
+  return Promise.all(players.map((p) => enrichOne(p, p.draftPick != null ? byYear.get(p.draftYear)?.get(p.draftPick) : supplementalEnrichment(p))));
+}
+
+/** A supplemental pick has no overall pick to join the team table on; his club
+ *  comes from the supplemental table and nothing else is joined. */
+function supplementalEnrichment(p: BaselinePlayer): PickEnrichment | undefined {
+  const team = p.supplemental ? SupplementalDraftService.teamInfo(p.supplemental.team, p.draftYear) : null;
+  return team ? { team, positionLabel: null, age: null, heightInches: null, weight: null } : undefined;
 }
 
 /** Greatness score the All-Time class ranks by (wAV + accolades + HOF bonus). */

@@ -12,6 +12,8 @@ export interface PlayerRow {
   draftYear: number; // the player's own draft year (all-time classes mix many)
   round: number | null;
   draftPick: number | null;
+  /** Supplemental-draft selection: round, in-round ordinal, drafting club. */
+  supplemental?: { round: number; pick: number | null; team?: TeamInfo | null } | null;
   wav: number | null;
   wavSource: string; // 'actual' | 'predicted' | 'preset'
   srcIdx?: number; // index in the year's source list (stable; used to include/exclude)

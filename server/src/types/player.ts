@@ -6,6 +6,10 @@ export interface BaselinePlayer {
   draftYear: number;
   draftRound: number | null;
   draftPick: number | null;
+  /** Selected in an NFL supplemental draft: a round (the club forfeits that
+   *  round's pick the next year) but no overall pick; placed after the round's
+   *  regular picks. `pick` is the in-round ordinal when known. */
+  supplemental?: { round: number; pick: number | null; team: string | null } | null;
   position: string; // raw source position label (HB, DE, OLB, ...)
   jersey: number | null;
   league: string; // NFL | AFL | AAFC | ...
@@ -106,4 +110,13 @@ export interface DraftClassResponse {
   counts: { drafted: number; undrafted: number; freeAgents: number; total: number };
   prospects: BaselinePlayer[];
   freeAgents: BaselinePlayer[];
+}
+
+/** The pick to hand nflverse for a player: his overall pick; for a supplemental
+ *  pick the in-round ordinal (players.csv stores it there) or unknown; null =
+ *  undrafted, so a same-name draftee's row is never his. */
+export function nflversePick(p: Pick<BaselinePlayer, 'draftPick' | 'supplemental'>): number | null | undefined {
+  if (p.draftPick != null) return p.draftPick;
+  if (p.supplemental) return p.supplemental.pick ?? undefined;
+  return null;
 }

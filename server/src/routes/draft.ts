@@ -20,7 +20,7 @@ const r = Router();
 async function attachTeams(preview: PreviewResult, year: number, enrich: Map<number, PickEnrichment>): Promise<void> {
   if (enrich.size) {
     for (const row of preview.rows) {
-      const t = row.draftPick != null ? enrich.get(row.draftPick)?.team : undefined;
+      const t = (row.draftPick != null ? enrich.get(row.draftPick)?.team : undefined) ?? row.supplemental?.team ?? undefined;
       if (t) row.team = t;
     }
   } else if (year === 2026) {
@@ -166,7 +166,7 @@ r.post('/draft/custom', async (req, res) => {
     if (!players.length) return res.status(404).json({ error: 'no players' });
     const preview = DraftClassBuilder.preview(players, mode, opts, gameVersion);
     const badge = { abbr: team.key, name: team.name, logo: team.logo };
-    for (const row of preview.rows) if (row.draftPick != null) row.team = badge;
+    for (const row of preview.rows) if (row.draftPick != null || row.supplemental) row.team = badge;
     return res.json({ year: 0, league: `team:${team.key}`, mode, gameVersion, source: 'team', name: team.name, team, generatedCount, ...preview });
   }
 

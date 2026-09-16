@@ -113,6 +113,7 @@ function rowsFor(e: Entry): PreviewResult {
       archetypeName: LookupService.idToName('archetype', Number(p.archetype) || 0) || '',
       round: Number(p.draftRound) > 0 && Number(p.draftRound) < 63 ? Number(p.draftRound) : null,
       draftPick: Number(p.draftPick) || null,
+      supplemental: null,
       wav: null,
       wavSource: 'preset', // as the file has him; no career behind the number
       srcIdx: i,

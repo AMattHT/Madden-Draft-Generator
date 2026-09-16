@@ -72,7 +72,7 @@ const chipInfo = (name: string, year?: number): TeamInfo => {
   };
 };
 
-function resolveWikiTeam(fullName: string, year?: number): TeamInfo {
+export function resolveWikiTeam(fullName: string, year?: number): TeamInfo {
   // Strip wikilinks, then trade notes / league suffix (e.g. "… NFL (from New Orleans)").
   const name = fullName
     .replace(/\[\[|\]\]/g, '')

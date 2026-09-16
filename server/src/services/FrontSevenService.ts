@@ -1,4 +1,4 @@
-import { BaselinePlayer, FrontSevenInfo } from '../types/player';
+import { BaselinePlayer, FrontSevenInfo, nflversePick } from '../types/player';
 import fs from 'fs';
 import path from 'path';
 import { normalizeName } from '../util/csv';
@@ -68,7 +68,7 @@ export const FrontSevenService = {
       return { label: 'DT', frontSeven: null };
     }
 
-    const career = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+    const career = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, nflversePick(p));
     const team = (pickTeam || career?.draftTeam || '').trim().toUpperCase() || null;
     const to = p.careerTo ?? career?.careerTo ?? null;
     const spanEnd = Math.min(p.draftYear + EARLY_CAREER_SEASONS - 1, to != null && to >= p.draftYear ? to : p.draftYear + EARLY_CAREER_SEASONS - 1);

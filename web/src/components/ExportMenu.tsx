@@ -102,8 +102,15 @@ export function ExportMenu({
   });
   useEffect(() => { try { localStorage.setItem('mdc.portraitPack', portraitPack ? '1' : '0'); } catch { /* ignore */ } }, [portraitPack]);
   const usePack = gameVersion === 'm27' && portraitPack;
-  const packNote = (p: { dir: string; count: number } | null | undefined) =>
-    p && p.count > 0 ? ` ${p.count} player${p.count === 1 ? '' : 's'} point at portrait-pack ids (their subset is in ${p.dir}); they show once the Madden 27 portrait pack is imported with the MMC Portrait Manager.` : '';
+  // Also fetch NFL/ESPN headshots for players with no other picture (network).
+  const [portraitCdn, setPortraitCdn] = useState<boolean>(() => {
+    try { return localStorage.getItem('mdc.portraitCdn') === '1'; } catch { return false; }
+  });
+  useEffect(() => { try { localStorage.setItem('mdc.portraitCdn', portraitCdn ? '1' : '0'); } catch { /* ignore */ } }, [portraitCdn]);
+  const packNote = (p: { dir: string; count: number; missing?: number } | null | undefined) =>
+    p && (p.count > 0 || (p.missing ?? 0) > 0)
+      ? ` ${p.count} player${p.count === 1 ? '' : 's'} point at portrait-pack ids (their subset is in ${p.dir}); they show once the Madden 27 portrait pack is imported with the MMC Portrait Manager.${p.missing ? ` ${p.missing} still have no picture — see missing.csv there for the file names to drop in.` : ''}`
+      : '';
 
   // Auto-dismiss successful toasts; errors stay until dismissed.
   useEffect(() => {
@@ -130,7 +137,7 @@ export function ExportMenu({
     setBusy('mdc');
     setMsg(null);
     try {
-      const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack);
+      const r = await api.downloadMdc(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack, usePack && portraitCdn);
       const savesHint = gameVersion === 'm27' ? 'Documents\\Madden NFL 27\\saves' : 'Documents\\Madden NFL 26\\Saves';
       setMsg({
         ok: true,
@@ -147,7 +154,7 @@ export function ExportMenu({
     setBusy('saves');
     setMsg(null);
     try {
-      const r = await api.saveMdcToSaves(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack);
+      const r = await api.saveMdcToSaves(year, league, edits, mode, gearEdits, draftOpts, gameVersion, usePack, usePack && portraitCdn);
       const ow = (r as { overwrote?: boolean }).overwrote;
       setMsg({
         ok: true,
@@ -214,6 +221,12 @@ export function ExportMenu({
         <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-400" title="Point retired players Madden 27 has no portrait for (Tom Brady, Cam Newton…) at their own portrait ids. Needs the Madden 27 portrait pack imported once with the MMC Portrait Manager (File → Build Madden 27 portrait pack); without it they show a blank portrait.">
           <input type="checkbox" checked={portraitPack} onChange={(e) => setPortraitPack(e.target.checked)} className="h-3 w-3 accent-primary" />
           Portrait pack
+        </label>
+      )}
+      {usePack && !isFile && (
+        <label className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] text-slate-400" title="For players with no Madden portrait and no disc headshot, download the NFL/ESPN headshot nflverse links to (network; cached after the first export).">
+          <input type="checkbox" checked={portraitCdn} onChange={(e) => setPortraitCdn(e.target.checked)} className="h-3 w-3 accent-primary" />
+          fetch NFL headshots
         </label>
       )}
       <button
