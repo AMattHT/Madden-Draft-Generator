@@ -19,7 +19,7 @@
   sits on Irving Fryar's pick, and the 1984 USFL/CFL supplemental draft (Reggie White, Gary
   Zimmerman, Mike Rozier) is in the 1984 class.
 - Players who never had a Madden portrait can get one in the portrait pack: a picture you
-  drop in, their Madden 2001–2003 disc headshot, or their NFL headshot on request. The pack
+  drop in, their Madden 2001–2017 disc headshot, or their NFL headshot on request. The pack
   lists who is still missing.
 - Madden 27 portrait pack: File → Build Madden 27 portrait pack writes every portrait the
   app holds that the game no longer ships (about 5,100, Tom Brady and Cam Newton among

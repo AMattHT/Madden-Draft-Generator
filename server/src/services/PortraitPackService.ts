@@ -28,7 +28,7 @@ import { CustomPortraitIdService } from './CustomPortraitIdService';
  *     exactly because the game dropped the image.
  *   - A player with no id gets a custom one (CustomPortraitIdService, 60000+) when
  *     we have a picture of him: a file the user dropped into portrait-sources,
- *     the Madden 2001–2003 disc headshot (RetroHeadshotService), or, on request,
+ *     the Madden 2001–2017 disc headshot (RetroHeadshotService), or, on request,
  *     his NFL/ESPN headshot (the url nflverse carries).
  * The full pack (File → Build Madden 27 portrait pack) is every own-id portrait
  * plus every custom one with a picture on disk, named <pid>.png, imported once
@@ -299,7 +299,7 @@ is exported with "Portrait pack" on:
   - a retired player's own Madden portrait id (Tom Brady 494, Cam Newton 4439),
     which the game no longer uses;
   - a custom id from 60000 up for a player who never had a Madden portrait, when
-    the app has a picture of him: a file you dropped in, his Madden 2001-2003
+    the app has a picture of him: a file you dropped in, his Madden 2001-2017
     disc headshot, or his NFL/ESPN headshot when you ticked that option.
 manifest.csv lists id, asset name, status (own / file / retro / cdn), player and
 image source. missing.csv lists the class's players still without a picture and
