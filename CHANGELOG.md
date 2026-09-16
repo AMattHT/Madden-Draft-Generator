@@ -20,7 +20,8 @@
   Zimmerman, Mike Rozier) is in the 1984 class.
 - Players who never had a Madden portrait can get one in the portrait pack: a picture you
   drop in, their Madden 2001–2017 disc headshot, or their NFL headshot on request. The pack
-  lists who is still missing.
+  lists who is still missing. Other portrait mods you use go in the other-mods folder and
+  their ids are left out of the pack.
 - Madden 27 portrait pack: File → Build Madden 27 portrait pack writes every portrait the
   app holds that the game no longer ships (about 5,100, Tom Brady and Cam Newton among
   them) for one import with the MMC Portrait Manager; with "Portrait pack" on next to Save

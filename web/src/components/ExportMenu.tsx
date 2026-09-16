@@ -174,7 +174,7 @@ export function ExportMenu({
       const r = await api.buildFullPortraitPack();
       setMsg({
         ok: true,
-        text: `Madden 27 portrait pack: ${r.count} portraits written${r.skipped ? `, ${r.skipped} already there` : ''}${r.errors?.length ? `, ${r.errors.length} failed` : ''} in ${r.dir}. Import that folder once with the MMC Portrait Manager (Image Library Manager), then export classes with “Portrait pack” on.`,
+        text: `Madden 27 portrait pack: ${r.count} portraits written${r.skipped ? `, ${r.skipped} already there` : ''}${r.otherMod ? `, ${r.otherMod} left to other mods` : ''}${r.errors?.length ? `, ${r.errors.length} failed` : ''} in ${r.dir}. Import that folder once with the MMC Portrait Manager (Image Library Manager), then export classes with “Portrait pack” on. Portrait mods you also use go in the other-mods folder next to the packs; their ids are skipped.`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Portrait pack failed: ${(e as Error).message}` });

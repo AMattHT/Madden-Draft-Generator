@@ -75,6 +75,27 @@ export interface PackOptions {
  *  <plpo>.png; it wins over every other source. CDN downloads are cached under
  *  cdn/ so a re-export is offline. */
 let overrideDir = path.join(CACHE_DIR, 'portrait-sources');
+/** Other portrait mods (.fbmod) dropped here: every id one of them adds is left
+ *  out of our pack, so two mods never fight over an image. A Frosty mod lists the
+ *  resources it touches in plain text (assets/added/plpo_id_<pid>) even though
+ *  the MMC build encrypts the image data, so no decoding is needed. */
+let otherModsDir = path.join(CACHE_DIR, 'portrait-packs', 'other-mods');
+let otherModsCache: { stamp: string; ids: Map<number, string> } | null = null;
+
+/** Portrait ids claimed by the mods in other-mods, with the mod file each came from. */
+function otherModIds(): Map<number, string> {
+  let files: string[] = [];
+  try { files = fs.readdirSync(otherModsDir).filter((f) => /\.fbmod$/i.test(f)).sort(); } catch { /* no folder */ }
+  const stamp = files.map((f) => `${f}:${fs.statSync(path.join(otherModsDir, f)).mtimeMs}`).join('|');
+  if (otherModsCache && otherModsCache.stamp === stamp) return otherModsCache.ids;
+  const ids = new Map<number, string>();
+  for (const f of files) {
+    const text = fs.readFileSync(path.join(otherModsDir, f)).toString('latin1');
+    for (const m of text.matchAll(/assets\/added\/plpo_id_(\d+)/g)) if (!ids.has(Number(m[1]))) ids.set(Number(m[1]), f);
+  }
+  otherModsCache = { stamp, ids };
+  return ids;
+}
 
 let shipped: Set<number> | null = null;
 function shippedPids(): Set<number> {
@@ -209,11 +230,13 @@ export const PortraitPackService = {
 
   /** Write one class's subset: <pid>.png per player, manifest.csv (with status),
    *  missing.csv (players still without a picture), README.txt. */
-  async write(assignments: PackAssignment[], outDir: string, missing: MissingPortrait[] = []): Promise<{ dir: string; count: number; missing: number; errors: string[] }> {
+  async write(assignments: PackAssignment[], outDir: string, missing: MissingPortrait[] = []): Promise<{ dir: string; count: number; missing: number; otherMod: number; errors: string[] }> {
     fs.mkdirSync(outDir, { recursive: true });
     const errors: string[] = [];
-    let count = 0;
+    const taken = otherModIds();
+    let count = 0, otherMod = 0;
     for (const a of assignments) {
+      if (taken.has(a.pid)) { otherMod++; continue; } // another mod supplies this id; the class still points at it
       try {
         const source = a.kind === 'cdn' && /^https?:/.test(a.source) ? await downloadCdn(a.source, cdnCachePath(a)) : a.source;
         await writePng(source, path.join(outDir, `${a.pid}.png`));
@@ -223,12 +246,12 @@ export const PortraitPackService = {
         missing = [...missing, { index: a.index, firstName: a.firstName, lastName: a.lastName, draftYear: a.draftYear, expectedFile: expectedFileName(a) }];
       }
     }
-    const csv = ['pid,plpo,status,player,draft_year,source', ...assignments.map((a) => `${a.pid},${a.plpo},${a.kind},"${a.firstName} ${a.lastName}",${a.draftYear},"${path.basename(a.source)}"`)].join('\n');
+    const csv = ['pid,plpo,status,player,draft_year,source', ...assignments.map((a) => `${a.pid},${a.plpo},${taken.has(a.pid) ? `other-mod:${taken.get(a.pid)}` : a.kind},"${a.firstName} ${a.lastName}",${a.draftYear},"${path.basename(a.source)}"`)].join('\n');
     fs.writeFileSync(path.join(outDir, 'manifest.csv'), csv + '\n');
     const miss = ['player,draft_year,drop_in_portrait_sources_as', ...missing.map((m) => `"${m.firstName} ${m.lastName}",${m.draftYear},${m.expectedFile}`)].join('\n');
     fs.writeFileSync(path.join(outDir, 'missing.csv'), miss + '\n');
     fs.writeFileSync(path.join(outDir, 'README.txt'), README);
-    return { dir: outDir, count, missing: missing.length, errors };
+    return { dir: outDir, count, missing: missing.length, otherMod, errors };
   },
 
   /** Every portrait the app can supply that M27 lacks: own-id portraits (about
@@ -259,14 +282,21 @@ export const PortraitPackService = {
   },
 
   /** Write the whole pack once; files already present are kept unless `force`. */
-  async writeFull(opts: { force?: boolean } = {}): Promise<{ dir: string; count: number; skipped: number; errors: string[] }> {
+  async writeFull(opts: { force?: boolean } = {}): Promise<{ dir: string; count: number; skipped: number; otherMod: number; errors: string[] }> {
     const dir = this.dirFor(FULL_PACK_NAME);
     fs.mkdirSync(dir, { recursive: true });
     const entries = this.fullPackEntries();
     const errors: string[] = [];
-    let count = 0, skipped = 0;
+    const taken = otherModIds();
+    let count = 0, skipped = 0, otherMod = 0;
     for (const e of entries) {
       const out = path.join(dir, `${e.pid}.png`);
+      if (taken.has(e.pid)) {
+        // Another mod supplies this id: leave it out, and drop a file an earlier run wrote.
+        otherMod++;
+        if (fs.existsSync(out)) fs.unlinkSync(out);
+        continue;
+      }
       if (!opts.force && fs.existsSync(out)) { skipped++; continue; }
       try {
         await writePng(e.source, out);
@@ -275,10 +305,10 @@ export const PortraitPackService = {
         errors.push(`${e.name}: ${(err as Error).message}`);
       }
     }
-    const csv = ['pid,plpo,status,player,source', ...entries.map((e) => `${e.pid},${e.plpo},${e.kind},"${e.name}","${path.basename(e.source)}"`)].join('\n');
+    const csv = ['pid,plpo,status,player,source', ...entries.map((e) => `${e.pid},${e.plpo},${taken.has(e.pid) ? `other-mod:${taken.get(e.pid)}` : e.kind},"${e.name}","${path.basename(e.source)}"`)].join('\n');
     fs.writeFileSync(path.join(dir, 'manifest.csv'), csv + '\n');
     fs.writeFileSync(path.join(dir, 'README.txt'), README);
-    return { dir, count, skipped, errors };
+    return { dir, count, skipped, otherMod, errors };
   },
 
   get sourcesDir(): string {
@@ -288,6 +318,21 @@ export const PortraitPackService = {
   /** Tests: read dropped-in pictures from another folder. */
   useSourcesDir(dir: string): void {
     overrideDir = dir;
+  },
+
+  get otherModsDir(): string {
+    return otherModsDir;
+  },
+
+  /** Ids other portrait mods supply (see other-mods), with the file each came from. */
+  otherModIds(): Map<number, string> {
+    return otherModIds();
+  },
+
+  /** Tests: read other mods from another folder. */
+  useOtherModsDir(dir: string): void {
+    otherModsDir = dir;
+    otherModsCache = null;
   },
 };
 
@@ -316,4 +361,9 @@ To use:
 The full pack (${FULL_PACK_NAME}) covers every class; a class's own folder is
 the subset that class uses. Custom ids are remembered on this machine
 (custom-ids.json next to the packs), so a player keeps his id across exports.
+
+Other portrait mods: copy any portrait .fbmod you also use into the other-mods
+folder next to the packs and build again. Every id that mod adds is left out of
+this pack (status other-mod in manifest.csv), so the two never fight over an
+image; the class still points at the id and the other mod's picture shows.
 `;

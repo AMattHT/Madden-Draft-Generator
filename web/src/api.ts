@@ -580,7 +580,7 @@ export const api = {
   buildFullPortraitPack: (force = false) =>
     fetch(`/api/export/portrait-pack/all${force ? '?force=1' : ''}`, { method: 'POST' }).then(async (r) => {
       if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `HTTP ${r.status}`);
-      return r.json() as Promise<{ dir: string; count: number; skipped: number; errors: string[] }>;
+      return r.json() as Promise<{ dir: string; count: number; skipped: number; otherMod: number; errors: string[] }>;
     }),
 
   buildPortraits: (year: number, league: string, limit?: number) =>
