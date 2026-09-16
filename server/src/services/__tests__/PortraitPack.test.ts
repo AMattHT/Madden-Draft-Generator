@@ -56,7 +56,7 @@ test('ids another portrait mod adds are left out of the pack; the class still po
     const out = await PortraitPackService.write(a, path.join(tmp, 'pack'));
     assert.equal(out.count, 0);
     assert.equal(out.otherMod, 1);
-    assert.ok(!fs.existsSync(path.join(tmp, 'pack', '494.png')));
+    assert.ok(!fs.existsSync(path.join(tmp, 'pack', '494.dds')));
     assert.match(fs.readFileSync(path.join(tmp, 'pack', 'manifest.csv'), 'utf8'), /494,plpo_BradyTom,other-mod:Legend Portraits\.fbmod/);
   } finally {
     PortraitPackService.useOtherModsDir(path.join(tmp, 'none'));

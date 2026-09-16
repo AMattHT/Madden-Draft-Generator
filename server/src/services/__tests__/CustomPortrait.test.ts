@@ -42,7 +42,11 @@ test('a dropped-in picture gives a player with no portrait id a stable custom id
   const out = await PortraitPackService.write(a, path.join(tmp, 'pack'), PortraitPackService.missing(prospects, [p], a));
   assert.equal(out.count, 1);
   assert.equal(out.missing, 0);
-  assert.ok(fs.existsSync(path.join(tmp, 'pack', `${a[0].pid}.png`)));
+  const dds = fs.readFileSync(path.join(tmp, 'pack', `${a[0].pid}.dds`));
+  assert.equal(dds.toString('ascii', 0, 4), 'DDS ');
+  assert.equal(dds.toString('ascii', 84, 88), 'DX10');
+  assert.equal(dds.readUInt32LE(128), 29); // R8G8B8A8_UNORM_SRGB: the importer insists on an sRGB variant
+  assert.equal(dds.length, 4 + 124 + 20 + 256 * 256 * 4);
   fs.unlinkSync(file);
 });
 

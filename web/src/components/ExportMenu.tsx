@@ -109,7 +109,7 @@ export function ExportMenu({
   useEffect(() => { try { localStorage.setItem('mdc.portraitCdn', portraitCdn ? '1' : '0'); } catch { /* ignore */ } }, [portraitCdn]);
   const packNote = (p: { dir: string; count: number; missing?: number } | null | undefined) =>
     p && (p.count > 0 || (p.missing ?? 0) > 0)
-      ? ` ${p.count} player${p.count === 1 ? '' : 's'} point at portrait-pack ids (their subset is in ${p.dir}); they show once the Madden 27 portrait pack is imported with the MMC Portrait Manager.${p.missing ? ` ${p.missing} still have no picture — see missing.csv there for the file names to drop in.` : ''}`
+      ? ` ${p.count} player${p.count === 1 ? '' : 's'} point at portrait-pack ids (their subset is in ${p.dir}); they show once the Madden 27 portrait pack is imported (MMC editor: Tools → Portrait Manager → Import Player Portraits).${p.missing ? ` ${p.missing} still have no picture — see missing.csv there for the file names to drop in.` : ''}`
       : '';
 
   // Auto-dismiss successful toasts; errors stay until dismissed.
@@ -174,7 +174,7 @@ export function ExportMenu({
       const r = await api.buildFullPortraitPack();
       setMsg({
         ok: true,
-        text: `Madden 27 portrait pack: ${r.count} portraits written${r.skipped ? `, ${r.skipped} already there` : ''}${r.otherMod ? `, ${r.otherMod} left to other mods` : ''}${r.errors?.length ? `, ${r.errors.length} failed` : ''} in ${r.dir}. Import that folder once with the MMC Portrait Manager (Image Library Manager), then export classes with “Portrait pack” on. Portrait mods you also use go in the other-mods folder next to the packs; their ids are skipped.`,
+        text: `Madden 27 portrait pack: ${r.count} portraits written${r.skipped ? `, ${r.skipped} already there` : ''}${r.otherMod ? `, ${r.otherMod} left to other mods` : ''}${r.errors?.length ? `, ${r.errors.length} failed` : ''} in ${r.dir}. In the MMC editor use Tools → Portrait Manager → Import Player Portraits and pick that folder itself, export the mod, apply it, then export classes with “Portrait pack” on. Portrait mods you also use go in the other-mods folder next to the packs; their ids are skipped.`,
       });
     } catch (e) {
       setMsg({ ok: false, text: `Portrait pack failed: ${(e as Error).message}` });

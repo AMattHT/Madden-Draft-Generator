@@ -31,8 +31,10 @@ import { CustomPortraitIdService } from './CustomPortraitIdService';
  *     the Madden 2001–2017 disc headshot (RetroHeadshotService), or, on request,
  *     his NFL/ESPN headshot (the url nflverse carries).
  * The full pack (File → Build Madden 27 portrait pack) is every own-id portrait
- * plus every custom one with a picture on disk, named <pid>.png, imported once
- * with the MMC Frosty Editor's Portrait Manager; a class exported with the option
+ * plus every custom one with a picture on disk, written as <pid>.dds (the only
+ * form the MMC Frosty Editor's Portrait Manager imports: "a folder of DDS files,
+ * each named the ID you wish to assign"), imported once through Tools > Portrait
+ * Manager > Import Player Portraits; a class exported with the option
  * on pins those ids. Without the mod such a prospect shows the blank shield, so
  * the option is what decides whether the id is written.
  */
@@ -170,9 +172,33 @@ async function downloadCdn(url: string, cachePath: string): Promise<string> {
   return cachePath;
 }
 
-async function writePng(source: string, out: string): Promise<void> {
-  const png = await sharp(source).resize(SIZE, SIZE, { kernel: 'lanczos3', fit: 'cover' }).png().toBuffer();
-  fs.writeFileSync(out, png);
+/**
+ * Write the picture as an uncompressed DDS (DX10 header, R8G8B8A8_UNORM_SRGB, one
+ * mip). The Portrait Manager's texture importer takes R8G8B8A8 or BC7 and insists
+ * on the sRGB variant, then re-encodes to the library's own BC7 on import; a plain
+ * RGBA file needs no encoder here. 256x256x4 = 256 KB per portrait.
+ */
+async function writeDds(source: string, out: string): Promise<void> {
+  const rgba = await sharp(source).resize(SIZE, SIZE, { kernel: 'lanczos3', fit: 'cover' }).ensureAlpha().raw().toBuffer();
+  const header = Buffer.alloc(4 + 124 + 20);
+  header.write('DDS ', 0, 'ascii');
+  header.writeUInt32LE(124, 4); // header size
+  header.writeUInt32LE(0x1 | 0x2 | 0x4 | 0x8 | 0x1000, 8); // CAPS | HEIGHT | WIDTH | PITCH | PIXELFORMAT
+  header.writeUInt32LE(SIZE, 12); // height
+  header.writeUInt32LE(SIZE, 16); // width
+  header.writeUInt32LE(SIZE * 4, 20); // pitch
+  header.writeUInt32LE(0, 24); // depth
+  header.writeUInt32LE(1, 28); // mip count
+  header.writeUInt32LE(32, 76); // pixel format size
+  header.writeUInt32LE(0x4, 80); // DDPF_FOURCC
+  header.write('DX10', 84, 'ascii');
+  header.writeUInt32LE(0x1000, 108); // DDSCAPS_TEXTURE
+  header.writeUInt32LE(29, 128); // DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+  header.writeUInt32LE(3, 132); // D3D10_RESOURCE_DIMENSION_TEXTURE2D
+  header.writeUInt32LE(0, 136); // misc flag
+  header.writeUInt32LE(1, 140); // array size
+  header.writeUInt32LE(0, 144); // misc flags 2
+  fs.writeFileSync(out, Buffer.concat([header, rgba]));
 }
 
 const eligible = (prospect: Record<string, unknown>, p: BaselinePlayer | undefined): p is BaselinePlayer =>
@@ -228,7 +254,7 @@ export const PortraitPackService = {
     return assignments;
   },
 
-  /** Write one class's subset: <pid>.png per player, manifest.csv (with status),
+  /** Write one class's subset: <pid>.dds per player, manifest.csv (with status),
    *  missing.csv (players still without a picture), README.txt. */
   async write(assignments: PackAssignment[], outDir: string, missing: MissingPortrait[] = []): Promise<{ dir: string; count: number; missing: number; otherMod: number; errors: string[] }> {
     fs.mkdirSync(outDir, { recursive: true });
@@ -239,7 +265,7 @@ export const PortraitPackService = {
       if (taken.has(a.pid)) { otherMod++; continue; } // another mod supplies this id; the class still points at it
       try {
         const source = a.kind === 'cdn' && /^https?:/.test(a.source) ? await downloadCdn(a.source, cdnCachePath(a)) : a.source;
-        await writePng(source, path.join(outDir, `${a.pid}.png`));
+        await writeDds(source, path.join(outDir, `${a.pid}.dds`));
         count++;
       } catch (e) {
         errors.push(`${a.firstName} ${a.lastName}: ${(e as Error).message}`);
@@ -295,7 +321,7 @@ export const PortraitPackService = {
     const taken = otherModIds();
     let count = 0, skipped = 0, otherMod = 0;
     for (const e of entries) {
-      const out = path.join(dir, `${e.pid}.png`);
+      const out = path.join(dir, `${e.pid}.dds`);
       if (taken.has(e.pid)) {
         // Another mod supplies this id: leave it out, and drop a file an earlier run wrote.
         otherMod++;
@@ -304,12 +330,14 @@ export const PortraitPackService = {
       }
       if (!opts.force && fs.existsSync(out)) { skipped++; continue; }
       try {
-        await writePng(e.source, out);
+        await writeDds(e.source, out);
         count++;
       } catch (err) {
         errors.push(`${e.name}: ${(err as Error).message}`);
       }
     }
+    // Earlier builds wrote PNGs, which the importer ignores; clear them out.
+    for (const f of fs.readdirSync(dir)) if (/^\d+\.png$/.test(f)) fs.unlinkSync(path.join(dir, f));
     const csv = ['pid,plpo,status,player,source', ...entries.map((e) => `${e.pid},${e.plpo},${taken.has(e.pid) ? `other-mod:${taken.get(e.pid)}` : e.kind},"${e.name}","${path.basename(e.source)}"`)].join('\n');
     fs.writeFileSync(path.join(dir, 'manifest.csv'), csv + '\n');
     fs.writeFileSync(path.join(dir, 'README.txt'), README);
@@ -344,8 +372,8 @@ export const PortraitPackService = {
 const README = `Madden 27 portrait pack
 =======================
 Menu portraits Madden 27 does not ship, for players in generated draft classes.
-Each PNG is named by the portrait id the app writes for that player when a class
-is exported with "Portrait pack" on:
+Each DDS file is named by the portrait id the app writes for that player when a
+class is exported with "Portrait pack" on:
   - a retired player's own Madden portrait id (Tom Brady 494, Cam Newton 4439),
     which the game no longer uses;
   - a custom id from 60000 up for a player who never had a Madden portrait, when
@@ -358,10 +386,13 @@ the file name to drop into the app cache's portrait-sources folder
 
 To use:
   1. Open the MMC Frosty Editor for Madden 27 and go to
-     Tools > Portrait Manager > Image Library Manager.
-  2. With assetlibrary_playerportraits_brt selected, import this folder
-     (each <id>.png is stored under that id).
-  3. Save the mod, apply it, launch Madden and import the draft class as usual.
+     Tools > Portrait Manager > Import Player Portraits.
+  2. When it asks for the folder, pick THIS folder (the one holding the .dds
+     files, not its parent). Each <id>.dds becomes the portrait with that id.
+  3. File > Export Mod, then apply the mod in the Mod Manager, launch Madden and
+     import the draft class as usual.
+The importer reads DDS files only and takes the id from the file name; that is
+why the pack is written this way.
 
 The full pack (${FULL_PACK_NAME}) covers every class; a class's own folder is
 the subset that class uses. Custom ids are remembered on this machine
