@@ -76,7 +76,7 @@ export function DraftBoard({
             <section key={round} className="glass flex w-[272px] shrink-0 flex-col rounded-xl">
               <header className="accent-line flex items-center justify-between rounded-t-xl border-b border-white/[0.06] px-3 py-2">
                 <span className="font-display text-xs font-bold uppercase tracking-[0.12em] text-neutral-200">
-                  {round ? `Round ${round}` : 'Unrounded'}
+                  {round ? `Round ${round}` : 'Undrafted'}
                 </span>
                 <span className="text-[11px] tabular-nums text-muted">
                   {list.length} pick{list.length === 1 ? '' : 's'}

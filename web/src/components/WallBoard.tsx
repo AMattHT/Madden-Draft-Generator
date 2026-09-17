@@ -85,7 +85,7 @@ export function WallBoard({
         return (
           <section key={round ?? 'none'} className="mb-4">
             <header className="mb-2 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-neutral-300">
-              <span>{round ? `Round ${round}` : 'Unrounded'}</span>
+              <span>{round ? `Round ${round}` : 'Undrafted'}</span>
               <span className="font-semibold tracking-wide text-neutral-500">
                 {pos === 'ALL' ? `${list.length} picks` : `${shown} of ${list.length}`}
               </span>

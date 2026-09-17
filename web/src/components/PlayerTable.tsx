@@ -249,7 +249,7 @@ function RoundBand({ round, count, elite, xf, spoilers }: { round: number | null
     <tr style={{ height: ROW_H }} className="bg-primary/[0.07]">
       <td colSpan={99} className="px-3">
         <span className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light">
-          <span>{round ? `Round ${round}` : 'Unrounded'}</span>
+          <span>{round ? `Round ${round}` : 'Undrafted'}</span>
           <span className="font-semibold tracking-wide text-neutral-500">{count} pick{count === 1 ? '' : 's'}</span>
           {spoilers && elite > 0 && <span className="font-semibold tracking-wide text-success-light">{elite} rated 80+</span>}
           {spoilers && xf > 0 && <span className="font-semibold tracking-wide text-red-300">{xf} X-Factor{xf === 1 ? '' : 's'}</span>}
