@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { PlayerLookupService } from '../services/PlayerLookupService';
-import { TeamDraftService } from '../services/TeamDraftService';
-import type { TeamInfo } from '../services/TeamService';
+import { PoolCatalogService } from '../services/PoolCatalogService';
 
 const r = Router();
 
@@ -16,8 +15,7 @@ r.get('/players/search', (req, res) => {
  *  each with the club that drafted him when a source records it. */
 r.get('/players/catalog', async (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  const teams = await TeamDraftService.draftTeams().catch(() => new Map<string, { team: TeamInfo }>());
-  res.json({ players: PlayerLookupService.catalog().map((p) => ({ ...p, team: teams.get(p.key)?.team ?? null })) });
+  res.json({ players: await PoolCatalogService.balanced() });
 });
 
 export default r;

@@ -22,7 +22,7 @@
 
 ### Bug fixes
 
-- The pool balances its cosmetic positions the way a draft class does (edges split LEDG/REDG, tackles, guards, safeties and off-ball backers toward Madden's mix) instead of nearly every end being LEDG, and a player added to a roster keeps the slot the pool showed.
+- The pool balances its cosmetic positions the way a draft class does, club by club (each club's draftees split LEDG/REDG evenly; tackles, guards, safeties and off-ball backers toward Madden's mix) instead of nearly every end being LEDG, and a player added to a roster keeps the slot the pool showed.
 - The player pool shows the position a draft class would give a player (Rod Woodson at free safety, Julius Peppers at edge).
 - Career-rated legends keep their physical attributes near the position ceiling instead of running to 99: Carl Eller added to a roster is an 89-speed edge, not 98. This also applies to the Career lens in draft classes.
 
