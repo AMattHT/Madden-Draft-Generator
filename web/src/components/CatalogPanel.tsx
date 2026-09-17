@@ -3,6 +3,10 @@ import { displayPortrait } from '../api';
 import { POS_GROUP_ORDER, POS_NAMES } from '../constants';
 import type { CatalogPlayer } from '../types';
 import { Portrait, TeamLogo } from './ui';
+import { VirtualList } from './VirtualList';
+
+/** Compact row height (h-10), shared with the windowed list. */
+const ROW_H = 40;
 
 const SHOW_MAX = 400;
 type SortKey = 'year' | 'name' | 'pos' | 'pick' | 'wav' | 'cal' | 'pb' | 'team';
@@ -49,10 +53,13 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   const [era, setEra] = useState('ALL');
   const [league, setLeague] = useState('ALL');
   const [hof, setHof] = useState(false);
+  const [club, setClub] = useState('ALL');
   const [sort, setSort] = useState<SortKey>('cal');
 
   const years = useMemo(() => [...new Set((catalog ?? []).map((p) => p.year))].sort((a, b) => a - b), [catalog]);
   const leagues = useMemo(() => [...new Set((catalog ?? []).map((p) => p.league))].sort(), [catalog]);
+  // Drafting clubs as named in their draft season (the Cardinals appear as Chicago, St. Louis, Phoenix and Arizona).
+  const clubs = useMemo(() => [...new Set((catalog ?? []).map((p) => p.team?.name).filter((n): n is string => !!n))].sort(), [catalog]);
 
   const list = useMemo(() => {
     if (!catalog) return [];
@@ -61,6 +68,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       ? (era === 'ALL' ? catalog : catalog.filter((p) => p.year >= Number(era) && p.year < Number(era) + 10))
       : catalog.filter((p) => p.year >= from && p.year <= to);
     if (grp !== 'ALL') r = r.filter((p) => (compact ? p.mpos === grp : p.grp === grp));
+    if (compact && club !== 'ALL') r = r.filter((p) => p.team?.name === club);
     if (league !== 'ALL') r = r.filter((p) => p.league === league);
     if (hof) r = r.filter((p) => p.hof);
     if (hidden) r = r.filter((p) => !hidden(p.key));
@@ -76,7 +84,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       : sort === 'pb' ? b.pb - a.pb || b.cal - a.cal
       : b.cal - a.cal || (b.wav ?? -1) - (a.wav ?? -1));
     return r;
-  }, [catalog, q, grp, from, to, era, league, hof, sort, compact, hidden]);
+  }, [catalog, q, grp, from, to, era, league, hof, sort, compact, hidden, club]);
 
   useEffect(() => { onListChange?.(list.map((p) => p.key)); }, [list, onListChange]);
 
@@ -98,6 +106,10 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           <select value={era} onChange={(e) => setEra(e.target.value)} className={sel} title="Draft decade">
             {ERAS.map((e) => <option key={e} value={e}>{e === 'ALL' ? 'All eras' : `${e}s`}</option>)}
           </select>
+          <select value={club} onChange={(e) => setClub(e.target.value)} className={`${sel} max-w-40`} title="Drafted by">
+            <option value="ALL">All clubs</option>
+            {clubs.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
           <label className="flex items-center gap-1.5 text-xs text-neutral-300">
             <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="accent-primary" />HOF
           </label>
@@ -110,17 +122,20 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           </select>
           <span className="ml-auto text-xs tabular-nums text-muted">{list.length.toLocaleString()} match</span>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto">
-          {error && (
-            <div className="m-4 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
-              Couldn't load the player catalog: {error} <button onClick={onRetry} className="ml-2 underline">Retry</button>
-            </div>
-          )}
-          {!catalog && !error && <div className="px-4 py-8 text-center text-sm text-muted">Loading the player pool…</div>}
-          {catalog && list.slice(0, SHOW_MAX).map((p) => {
+        <VirtualList items={catalog ? list : []} rowHeight={ROW_H} keyOf={(p) => p.key}
+          before={<>
+            {error && (
+              <div className="m-4 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
+                Couldn't load the player catalog: {error} <button onClick={onRetry} className="ml-2 underline">Retry</button>
+              </div>
+            )}
+            {!catalog && !error && <div className="px-4 py-8 text-center text-sm text-muted">Loading the player pool…</div>}
+          </>}
+          after={catalog && list.length === 0 ? <div className="px-3 py-6 text-center text-sm text-neutral-500">Nobody matches.</div> : null}
+          render={(p) => {
             const st = status(p.key);
             return (
-              <div key={p.key} className={`flex items-center gap-2.5 border-b border-border/60 px-3 py-1.5 text-sm ${st ? 'bg-success/5' : 'hover:bg-surface-2/70'}`}>
+              <div className={`flex h-10 items-center gap-2.5 border-b border-border/60 px-3 text-sm ${st ? 'bg-success/5' : 'hover:bg-surface-2/70'}`}>
                 <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
                 <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
                   {p.first} {p.last}
@@ -143,14 +158,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                 )}
               </div>
             );
-          })}
-          {catalog && list.length === 0 && <div className="px-3 py-6 text-center text-sm text-neutral-500">Nobody matches.</div>}
-          {catalog && list.length > SHOW_MAX && (
-            <div className="border-t border-border px-4 py-2 text-center text-xs text-muted">
-              Showing {SHOW_MAX} of {list.length.toLocaleString()} — narrow the search or filters to see the rest.
-            </div>
-          )}
-        </div>
+          }} />
       </div>
     );
   }

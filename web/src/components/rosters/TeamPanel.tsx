@@ -3,6 +3,10 @@ import type { RosterData, TeamInfo } from '../../types';
 import { groupByPosition, type ViewPlayer } from '../../rosterDoc';
 import { PlayerRow, btnCls, selectCls } from './RosterBuilder';
 import { TeamLogo } from '../ui';
+import { VirtualList } from '../VirtualList';
+
+/** PlayerRow height (h-10), shared with the windowed list. */
+const ROW_H = 40;
 
 const ROSTER_LIMIT = 53;
 /** The strip's first tile: every player in the file, no team filter. */
@@ -53,12 +57,10 @@ export function TeamStrip({ data, players, logos, selectedTeam, onSelectTeam, on
 
 /** The one list: the selected team's players grouped by position (or every player, flat),
  *  each row with Move to…, Cut or Remove, and Edit; rows drag onto the strip above. */
-export function TeamPanel({ data, players, truncated, grouped, selectedTeam, onMove, onRemove, onEdit, readOnly, emptyText, logos }: {
+export function TeamPanel({ data, players, grouped, selectedTeam, onMove, onRemove, onEdit, readOnly, emptyText, logos }: {
   data: RosterData;
   /** Already filtered and sorted by the builder. */
   players: ViewPlayer[];
-  /** The builder cut the whole-file list short. */
-  truncated: boolean;
   /** Group by position with headers (a single team) or list flat (the whole file). */
   grouped: boolean;
   selectedTeam: number;
@@ -100,9 +102,12 @@ export function TeamPanel({ data, players, truncated, grouped, selectedTeam, onM
       } />
   );
 
+  const empty = players.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{emptyText}</div>;
+  // The whole file (thousands of rows) is windowed; a team is small enough to render whole, with its position headers.
+  if (!grouped) return <VirtualList items={players} rowHeight={ROW_H} keyOf={(p) => p.id} before={empty} render={row} />;
   return (
     <div className="min-h-0 flex-1 overflow-auto">
-      {players.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{emptyText}</div>}
+      {empty}
       {groups.map((g) => (
         <div key={g.position || 'all'}>
           {g.position && (
@@ -113,7 +118,6 @@ export function TeamPanel({ data, players, truncated, grouped, selectedTeam, onM
           {g.players.map(row)}
         </div>
       ))}
-      {truncated && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500. Pick a team above or narrow the search.</div>}
     </div>
   );
 }

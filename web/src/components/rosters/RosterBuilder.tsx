@@ -12,7 +12,6 @@ import { ALL_TEAMS, TeamPanel, TeamStrip } from './TeamPanel';
 
 export const selectCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
 export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
-const LIST_MAX = 1500;
 const EMPTY_CTX: CardCtx = { traits: [], focus: [], colleges: [], archetypes: {} };
 
 /** One row of the list: a roster player with his team mark. */
@@ -23,7 +22,7 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }:
 }) {
   return (
     <div draggable={!!onDragStart} onDragStart={onDragStart} onClick={onClick}
-      className={`flex items-center gap-2.5 border-b border-border/60 px-3 py-1.5 text-sm ${onClick ? 'cursor-pointer' : ''} ${selected ? 'bg-primary/10' : 'hover:bg-surface-2/70'}`}>
+      className={`flex h-10 items-center gap-2.5 border-b border-border/60 px-3 text-sm ${onClick ? 'cursor-pointer' : ''} ${selected ? 'bg-primary/10' : 'hover:bg-surface-2/70'}`}>
       <Portrait src={p.portrait} size="xs" />
       <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
         {p.edited && <span className="mr-1 text-gold" title="edited">●</span>}{p.firstName} {p.lastName}
@@ -103,7 +102,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
   // The one list: the selected team (or everyone), then position group, search and sort.
   const teamOnly = selectedTeam !== ALL_TEAMS;
-  const filtered = useMemo(() => {
+  const rows = useMemo(() => {
     let r = teamOnly ? players.filter((p) => p.teamId === selectedTeam) : players;
     if (pos !== 'ALL') r = r.filter((p) => p.position === pos);
     if (search.trim()) { const q = search.toLowerCase(); r = r.filter((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)); }
@@ -116,8 +115,6 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
       return a.positionId - b.positionId || b.overall - a.overall;
     });
   }, [players, selectedTeam, teamOnly, pos, search, sort]);
-  // The whole file is long; a team is never cut short.
-  const rows = useMemo(() => (teamOnly ? filtered : filtered.slice(0, LIST_MAX)), [filtered, teamOnly]);
   const grouped = teamOnly && sort === 'pos';
 
   const move = (pgid: number, teamId: number) => {
@@ -260,14 +257,14 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
                 <option value="age">Sort: Age</option>
                 <option value="team">Sort: Team</option>
               </select>
-              <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{filtered.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
+              <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>
           ) : (
             <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Add to… picks the team for each player, rated by career; edit anything afterwards.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
           )}
         </div>
         {tab === 'roster' ? (
-          <TeamPanel data={data} players={rows} truncated={filtered.length > rows.length} grouped={grouped} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={setEditing} readOnly={readOnly} emptyText={emptyText} />
+          <TeamPanel data={data} players={rows} grouped={grouped} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={setEditing} readOnly={readOnly} emptyText={emptyText} />
         ) : (
           <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly} addTeams={addTeams} />
         )}
