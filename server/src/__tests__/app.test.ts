@@ -35,3 +35,35 @@ test('a rejected async route handler returns 500 JSON instead of killing the pro
     server.close();
   }
 });
+
+function post(port: number, path: string, body: unknown): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const req = http.request({ host: '127.0.0.1', port, path, method: 'POST', headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(data) } }, (res) => {
+      let out = '';
+      res.on('data', (c) => (out += c));
+      res.on('end', () => resolve({ status: res.statusCode || 0, body: out }));
+    });
+    req.on('error', reject);
+    req.end(data);
+  });
+}
+
+test('POST /api/roster/build validates its body', async () => {
+  const { default: roster } = await import('../routes/roster');
+  const app = express();
+  app.use(express.json());
+  app.use('/api', roster);
+  attachErrorHandling(app);
+  const server = await new Promise<http.Server>((r) => {
+    const s = app.listen(0, '127.0.0.1', () => r(s));
+  });
+  try {
+    const port = (server.address() as { port: number }).port;
+    const res = await post(port, '/api/roster/build', { name: 'x' });
+    assert.equal(res.status, 400);
+    assert.match(JSON.parse(res.body).error, /baseName/);
+  } finally {
+    server.close();
+  }
+});
