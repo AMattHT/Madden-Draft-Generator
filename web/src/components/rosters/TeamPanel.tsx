@@ -7,12 +7,14 @@ const ROSTER_LIMIT = 53;
 
 /** Team chips (with counts) and the selected team's roster grouped by position. Rows can be
  *  moved with a menu, cut, edited, or dragged onto another team chip. */
-export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onEdit, readOnly }: {
+export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly }: {
   data: RosterData;
   players: ViewPlayer[];
   selectedTeam: number;
   onSelectTeam: (teamId: number) => void;
   onMove: (pgid: number, teamId: number) => void;
+  /** Take an added pool player off the roster entirely (he is not in the base file). */
+  onRemove: (tempId: string) => void;
   onEdit: (pgid: number) => void;
   readOnly: boolean;
 }) {
@@ -84,7 +86,11 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
                     ) : (
                       <>
                         <button disabled={readOnly} onClick={() => setMoving(p.id)} className={`${btnCls} px-2 py-0.5`}>Move to…</button>
-                        {!isFa && <button disabled={readOnly} onClick={() => onMove(p.id, fa)} className={`${btnCls} px-2 py-0.5`}>Cut</button>}
+                        {p.added && p.tempId ? (
+                          <button disabled={readOnly} onClick={() => onRemove(p.tempId!)} className={`${btnCls} px-2 py-0.5`} title="Take him off this roster">Remove</button>
+                        ) : (
+                          !isFa && <button disabled={readOnly} onClick={() => onMove(p.id, fa)} className={`${btnCls} px-2 py-0.5`}>Cut</button>
+                        )}
                         <button disabled={readOnly} onClick={() => onEdit(p.id)} className={`${btnCls} px-2 py-0.5`}>Edit</button>
                       </>
                     )}
