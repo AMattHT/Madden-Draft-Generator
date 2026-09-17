@@ -6,29 +6,25 @@ import { YearPicker } from './YearPicker';
 import { PlayerSearch } from './PlayerSearch';
 import { Icon, ICONS, IconButton, Segmented } from './ui';
 
-function GameToggle({ gameVersion, onSetGameVersion, pinned }: { gameVersion: GameVersion; onSetGameVersion: (v: GameVersion) => void; pinned: GameVersion | null }) {
+function GameToggle({ gameVersion, pinned, onChangeGame }: { gameVersion: GameVersion; pinned: GameVersion | null; onChangeGame?: () => void }) {
+  const label = gameLabel(pinned ?? gameVersion);
   // A per-game build is locked to its game: show which, don't offer a switch.
-  if (pinned) {
+  if (pinned || !onChangeGame) {
     return (
-      <span
-        className="inline-flex h-8 items-center rounded-lg border border-gold/35 bg-gold/10 px-3 text-xs font-bold tracking-wide text-gold"
-        title={`This app builds classes for ${gameLabel(pinned)}`}
-      >
-        {gameLabel(pinned)}
+      <span className="inline-flex h-8 items-center rounded-lg border border-gold/35 bg-gold/10 px-3 text-xs font-bold tracking-wide text-gold" title={`This app builds for ${label}`}>
+        {label}
       </span>
     );
   }
   return (
-    <Segmented
-      accent="gold"
-      label="Target game"
-      value={gameVersion}
-      onChange={onSetGameVersion}
-      options={[
-        { value: 'm26', label: 'M26', title: 'Build classes for Madden 26 (4296-byte format)' },
-        { value: 'm27', label: 'M27', title: 'Build classes for Madden 27 (5876-byte format + persona DNA)' },
-      ]}
-    />
+    <button
+      onClick={onChangeGame}
+      title="Change which Madden the classes and rosters are for"
+      className="press inline-flex h-8 items-center gap-1.5 rounded-lg border border-gold/35 bg-gold/10 px-3 text-xs font-bold tracking-wide text-gold transition-colors hover:bg-gold/20"
+    >
+      {label}
+      <Icon path={ICONS.chevronDown} className="h-3 w-3 opacity-70" />
+    </button>
   );
 }
 
@@ -76,6 +72,7 @@ export function TopBar({
   gameVersion,
   onSetGameVersion,
   pinnedGame,
+  onChangeGame,
   franchiseEnabled,
   showLeague,
   league,
@@ -99,6 +96,8 @@ export function TopBar({
   gameVersion: GameVersion;
   onSetGameVersion: (v: GameVersion) => void;
   pinnedGame: GameVersion | null;
+  /** Reopen the first-run game choice (dev build only). */
+  onChangeGame?: () => void;
   franchiseEnabled: boolean;
   showLeague: boolean;
   league: string;
@@ -121,7 +120,7 @@ export function TopBar({
           <button onClick={onGoHome} title="Home" className="press flex items-center gap-3 rounded-xl pr-1 transition-opacity hover:opacity-85">
             <LogoMark />
             <div className="hidden text-left leading-tight sm:block">
-              <div className="font-display text-[13px] font-bold text-neutral-50">{productTitle(pinnedGame)}</div>
+              <div className="font-display text-[13px] font-bold text-neutral-50">{productTitle(pinnedGame ?? gameVersion)}</div>
               <div className="text-[11px] font-medium tracking-wide text-muted">{franchiseEnabled ? TAGLINE : 'Draft classes · Rosters'}</div>
             </div>
           </button>
@@ -142,15 +141,15 @@ export function TopBar({
           )}
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 text-[11px] font-medium text-muted sm:flex" title={connected ? 'The local backend is answering' : 'The local backend is not answering'}>
-            <span className={`relative flex h-2 w-2 ${connected ? '' : 'opacity-90'}`}>
-              {connected && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" style={{ animationDuration: '2.4s' }} />}
-              <span className={`relative inline-flex h-2 w-2 rounded-full ${connected ? 'bg-success' : 'bg-danger'}`} />
+          {/* The backend only gets a mention when it is missing. */}
+          {!connected && (
+            <span className="inline-flex h-8 items-center gap-2 rounded-lg border border-danger/40 bg-danger/10 px-3 text-[11px] font-semibold text-red-200" title="The local backend is not answering">
+              <span className="h-2 w-2 rounded-full bg-danger" />
+              Backend offline
             </span>
-            <span className="hidden lg:inline">{connected ? 'Connected' : 'Offline'}</span>
-          </div>
+          )}
           {draft && <span className="hidden h-6 w-px bg-white/[0.07] sm:block" />}
-          {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} pinned={pinnedGame} />}
+          {draft && <GameToggle gameVersion={gameVersion} pinned={pinnedGame} onChangeGame={onChangeGame} />}
           {draft && showLeague && <Segmented label="League" value={league} onChange={onSetLeague} options={LEAGUES} />}
           {draft && (
             <Segmented label="Rating lens" value={mode} onChange={onSetMode} options={LENS} />

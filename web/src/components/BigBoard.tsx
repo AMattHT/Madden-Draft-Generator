@@ -190,15 +190,30 @@ export function BigBoard({
   start = Math.max(0, start - OVERSCAN);
   end = Math.min(items.length, end + OVERSCAN);
 
+  // The band that governs the first row in view, pinned above the window.
+  let firstVisible = 0;
+  while (firstVisible < items.length && offsets[firstVisible + 1] <= scrollTop) firstVisible++;
+  let bandIdx = firstVisible;
+  while (bandIdx > 0 && items[bandIdx].kind !== 'band') bandIdx--;
+  const pinned = items[bandIdx]?.kind === 'band' ? items[bandIdx] : null;
+
   if (rows.length === 0) return <div className="grid h-full place-items-center text-sm text-muted">No players match the current filter.</div>;
 
   return (
     <div ref={scrollRef} onScroll={onScroll} className="h-full min-h-0 overflow-auto">
+      {pinned && pinned.kind === 'band' && (
+        <div className="sticky top-0 z-20 mx-auto max-w-[1100px]" style={{ height: 0 }}>
+          <div style={{ height: BAND_H }} className="flex items-center gap-3 bg-surface-1/95 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light shadow-[0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+            <span>{pinned.label}</span>
+            <span className="font-semibold normal-case tracking-normal text-neutral-500">{pinned.note} · {pinned.count}</span>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-[1100px]" style={{ height: total, position: 'relative' }}>
         <div style={{ transform: `translateY(${offsets[start]}px)` }}>
           {items.slice(start, end).map((it) =>
             it.kind === 'band' ? (
-              <div key={it.key} style={{ height: BAND_H }} className="sticky top-0 z-10 flex items-center gap-3 bg-surface-1/95 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light backdrop-blur-md">
+              <div key={it.key} style={{ height: BAND_H }} className="flex items-center gap-3 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light">
                 <span>{it.label}</span>
                 <span className="font-semibold normal-case tracking-normal text-neutral-500">{it.note} · {it.count}</span>
                 <span className="h-px flex-1 bg-white/[0.06]" />

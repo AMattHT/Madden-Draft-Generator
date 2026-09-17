@@ -17,6 +17,7 @@ import { UpdateBanner } from './components/UpdateBanner';
 import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
 import { BoardSkeleton, EmptyBoard } from './components/BoardStates';
+import { GamePicker } from './components/GamePicker';
 import { productTitle } from './brand';
 import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, GameVersion } from './types';
 
@@ -74,7 +75,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [archetypeOptions, setArchetypeOptions] = useState<Record<string, ArchetypeOption[]>>({});
   const [mode, setMode] = useState<GenMode>('madden');
-  const [gameVersion, setGameVersion] = useState<GameVersion>('m27');
+  // The game is chosen once at first run (a per-game build is pinned and never asks).
+  const GAME_KEY = 'game:choice';
+  const [gameVersion, setGameVersion] = useState<GameVersion>(() => { try { const v = localStorage.getItem(GAME_KEY); return v === 'm26' || v === 'm27' ? v : 'm27'; } catch { return 'm27'; } });
+  const [gameChosen, setGameChosen] = useState<boolean>(() => { try { return localStorage.getItem(GAME_KEY) != null; } catch { return true; } });
+  const [gamePickerOpen, setGamePickerOpen] = useState(false);
+  const [cfgLoaded, setCfgLoaded] = useState(false);
   // Per-game desktop builds pin the target game (no M26/M27 toggle); Franchise
   // Tools only appear when the server enables them (out of the 1.0.0 release).
   const [pinnedGame, setPinnedGame] = useState<GameVersion | null>(null);
@@ -377,6 +383,13 @@ export default function App() {
     [selected, select, mode]
   );
 
+  const pickGame = useCallback((v: GameVersion, remember: boolean) => {
+    try { if (remember) localStorage.setItem(GAME_KEY, v); else localStorage.removeItem(GAME_KEY); } catch { /* private mode */ }
+    setGameChosen(true);
+    setGamePickerOpen(false);
+    if (v !== gameVersion) changeGameVersion(v);
+  }, [gameVersion, changeGameVersion]);
+
   const changeLeague = useCallback(
     (lg: string) => {
       setLeagueOverride(lg);
@@ -545,6 +558,7 @@ export default function App() {
         setFranchiseEnabled(cfg.franchise);
         if (cfg.franchise) setView('home');
       } catch { /* older server: defaults stand */ }
+      setCfgLoaded(true);
       const ys = await api.years();
       setYears(ys);
       const def = ys.includes(2003) ? 2003 : ys[ys.length - 1];
@@ -586,6 +600,7 @@ export default function App() {
         gameVersion={gameVersion}
         onSetGameVersion={changeGameVersion}
         pinnedGame={pinnedGame}
+        onChangeGame={() => setGamePickerOpen(true)}
         franchiseEnabled={franchiseEnabled}
         showLeague={selected != null && isMergeEra(selected)}
         league={selected != null ? effLeague(selected) : 'NFL'}
@@ -613,7 +628,7 @@ export default function App() {
         <SideRail view={view} onSetView={setView} franchiseEnabled={franchiseEnabled} />
         <main className="min-w-0 flex-1">
           {view === 'rosters' && <RostersView gameVersion={gameVersion} />}
-          {view === 'home' && <HomePage onSelect={setView} franchiseEnabled={franchiseEnabled} title={productTitle(pinnedGame)} />}
+          {view === 'home' && <HomePage onSelect={setView} franchiseEnabled={franchiseEnabled} title={productTitle(pinnedGame ?? gameVersion)} />}
           {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}
@@ -679,6 +694,9 @@ export default function App() {
       )}
       {builder.open && <ClassStudio initial={builder.initial} onClose={closeBuilder} onGenerate={generatePicked} />}
       {openerOpen && <OpenClass onOpened={openedClass} onClose={() => setOpenerOpen(false)} pinnedGame={pinnedGame} />}
+      {!pinnedGame && cfgLoaded && (!gameChosen || gamePickerOpen) && (
+        <GamePicker current={gameVersion} onPick={pickGame} onDismiss={gameChosen ? () => setGamePickerOpen(false) : undefined} />
+      )}
     </div>
   );
 }
