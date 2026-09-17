@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { matchTeams, type PickTeam } from '../teamMatch';
 import { TeamLogo } from './ui';
 
@@ -35,7 +36,7 @@ export function TeamPicker({ teams, onPick, onCancel, placeholder = 'Add to…',
 
   return (
     <span className={`relative inline-block ${className}`}>
-      <input ref={inputRef} value={q} autoFocus={autoFocus} placeholder={placeholder} title="Type a city, nickname or abbreviation"
+      <input ref={inputRef} value={q} autoFocus={autoFocus} placeholder={placeholder} aria-label="Team: type a city, nickname or abbreviation"
         onFocus={show} onChange={(e) => { setQ(e.target.value); if (!open) show(); }}
         onBlur={() => { close(); onCancel?.(); }}
         onKeyDown={(e) => {
@@ -45,7 +46,9 @@ export function TeamPicker({ teams, onPick, onCancel, placeholder = 'Add to…',
           else if (e.key === 'Escape') { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
         }}
         className="w-24 rounded-md border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-xs text-primary placeholder:text-primary/80 focus:border-primary focus:outline-none" />
-      {open && (
+      {open && createPortal(
+        // A portal: inside the windowed list a transformed, scrolling ancestor would
+        // offset a fixed popover and clip it.
         <ul role="listbox" style={{ position: 'fixed', top: pos.top, left: pos.left, transform: pos.up ? 'translateY(-100%)' : undefined }}
           className="z-50 max-h-72 w-56 overflow-auto rounded-md border border-border-strong bg-surface-1 py-1 shadow-xl">
           {hits.length === 0 && <li className="px-2 py-1 text-xs text-muted">No team matches</li>}
@@ -58,7 +61,8 @@ export function TeamPicker({ teams, onPick, onCancel, placeholder = 'Add to…',
               <span className="ml-auto text-[10px] text-muted">{t.abbr}</span>
             </li>
           ))}
-        </ul>
+        </ul>,
+        document.body,
       )}
     </span>
   );
