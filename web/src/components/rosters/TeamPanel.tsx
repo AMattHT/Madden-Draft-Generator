@@ -1,15 +1,18 @@
 import { useMemo, useState } from 'react';
-import type { RosterData } from '../../types';
+import type { RosterData, TeamInfo } from '../../types';
 import { groupByPosition, type ViewPlayer } from '../../rosterDoc';
 import { PlayerRow, btnCls, selectCls } from './RosterBuilder';
+import { TeamLogo } from '../ui';
 
 const ROSTER_LIMIT = 53;
 
 /** Team chips (with counts) and the selected team's roster grouped by position. Rows can be
  *  moved with a menu, cut, edited, or dragged onto another team chip. */
-export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly, emptyText }: {
+export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly, emptyText, logos }: {
   data: RosterData;
   players: ViewPlayer[];
+  /** Team id -> logo mark; teams without one show their abbreviation. */
+  logos: Map<number, TeamInfo>;
   selectedTeam: number;
   onSelectTeam: (teamId: number) => void;
   onMove: (pgid: number, teamId: number) => void;
@@ -49,9 +52,10 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
           const n = counts.get(t.id) ?? 0;
           return (
             <button key={t.id} onClick={() => onSelectTeam(t.id)} onDragOver={allowDrop(t.id)} onDragLeave={() => setDragOver(null)} onDrop={drop(t.id)}
-              title={`${t.city} ${t.name}`}
-              className={`rounded-md px-2 py-1 text-[11px] font-semibold tabular-nums transition-colors ${t.id === selectedTeam ? 'bg-primary text-white' : dragOver === t.id ? 'bg-primary/30 text-neutral-100' : 'bg-surface-2 text-neutral-300 hover:bg-surface-3'}`}>
-              {t.abbr} <span className={n > ROSTER_LIMIT ? 'text-red-300' : 'opacity-70'}>{n}</span>
+              title={`${t.city} ${t.name}`} aria-pressed={t.id === selectedTeam}
+              className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-semibold tabular-nums transition-colors ${t.id === selectedTeam ? 'bg-primary text-white' : dragOver === t.id ? 'bg-primary/30 text-neutral-100' : 'bg-surface-2 text-neutral-300 hover:bg-surface-3'}`}>
+              {logos.get(t.id) ? <TeamLogo team={logos.get(t.id)} size="sm" /> : t.abbr}
+              <span className={n > ROSTER_LIMIT ? 'text-red-300' : 'opacity-80'}>{n}</span>
             </button>
           );
         })}
@@ -76,7 +80,7 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
               <span>{g.position}</span><span className="tabular-nums">{g.players.length}</span>
             </div>
             {g.players.map((p) => (
-              <PlayerRow key={p.id} p={p} onDragStart={readOnly ? undefined : (e) => e.dataTransfer.setData('text/plain', String(p.id))}
+              <PlayerRow key={p.id} p={p} logo={logos.get(p.teamId)} onDragStart={readOnly ? undefined : (e) => e.dataTransfer.setData('text/plain', String(p.id))}
                 trailing={
                   <span className="flex items-center gap-1">
                     {moving === p.id ? (

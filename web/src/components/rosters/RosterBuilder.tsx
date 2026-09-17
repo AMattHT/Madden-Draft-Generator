@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type ArchetypeOption, type PlayerFieldEdit } from '../../api';
-import type { CatalogPlayer, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc, RosterPlayer } from '../../types';
+import type { CatalogPlayer, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc, RosterPlayer, TeamInfo } from '../../types';
 import { addId, docCounts, groupByPosition, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
 import { rowFor, patchFor, editFromCard, type CardCtx } from '../../rosterCard';
+import { teamInfoMap } from '../../rosterTeams';
 import { groupForId } from '../../constants';
-import { DevBadge, Icon, ICONS, Portrait, RatingChip } from '../ui';
+import { DevBadge, Icon, ICONS, Portrait, RatingChip, TeamLogo } from '../ui';
 import { ProfileModal } from '../ProfileModal';
 import { CatalogPanel } from '../CatalogPanel';
 import { TeamPanel } from './TeamPanel';
@@ -18,8 +19,10 @@ export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 
 const EMPTY_CTX: CardCtx = { traits: [], focus: [], colleges: [], archetypes: {} };
 
 /** One row of the left panel: a base-roster player with his current team. */
-export function PlayerRow({ p, selected, onClick, onDragStart, trailing }: {
+export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }: {
   p: ViewPlayer; selected?: boolean; onClick?: () => void; onDragStart?: (e: React.DragEvent) => void; trailing?: React.ReactNode;
+  /** The team's logo mark; text when absent. */
+  logo?: TeamInfo;
 }) {
   return (
     <div draggable={!!onDragStart} onDragStart={onDragStart} onClick={onClick}
@@ -34,7 +37,9 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing }: {
       <RatingChip ovr={p.overall} size="sm" />
       <span className="w-6 text-right text-xs tabular-nums text-neutral-400">{p.age || ''}</span>
       <DevBadge dev={p.devTrait} />
-      <span className={`w-9 text-right text-xs ${p.moved ? 'text-gold' : 'text-neutral-400'}`} title={p.teamName ?? 'Free agent'}>{p.team ?? 'FA'}</span>
+      <span className={`inline-flex w-9 justify-end text-xs ${p.moved ? 'rounded ring-1 ring-gold/60' : ''} ${p.team ? '' : 'text-neutral-400'}`} title={`${p.teamName ?? 'Free agent'}${p.moved ? ' (moved)' : ''}`}>
+        {p.team && logo ? <TeamLogo team={logo} size="sm" /> : (p.team ?? 'FA')}
+      </span>
       {trailing}
     </div>
   );
@@ -90,6 +95,14 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
   const players = useMemo(() => viewPlayers(doc, data, previews), [doc, data, previews]);
   const counts = docCounts(doc, data);
+  // Team logos from the app's franchise list, matched to the roster's teams by nickname.
+  const [logos, setLogos] = useState<Map<number, TeamInfo>>(new Map());
+  useEffect(() => {
+    let alive = true;
+    api.franchises().then((f) => { if (alive) setLogos(teamInfoMap(data.teams, f)); }).catch(() => {});
+    return () => { alive = false; };
+  }, [data.teams]);
+  const isAdded = useCallback((key: string) => doc.adds.some((a) => a.key === key), [doc.adds]);
   const teams = useMemo(() => data.teams.filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.city.localeCompare(b.city)), [data]);
   const rows = useMemo(() => {
     let r = players.filter((p) => !p.added);
@@ -250,18 +263,18 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
               </div>
               <div className="min-h-0 flex-1 overflow-auto">
                 {rows.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{fresh ? 'Nothing here yet. Add players from the Pool tab.' : 'Nobody matches.'}</div>}
-                {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onClick={() => openCard('roster')(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
+                {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} logo={logos.get(p.teamId)} onClick={() => openCard('roster')(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
                 {rows.length > 1500 && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500 of {rows.length}. Narrow by team or position.</div>}
               </div>
             </>
           ) : (
             <>
               <div className="border-b border-border px-3 py-1.5 text-[11px] text-muted">Rated by career, added to the selected team. Age is his draft age plus four; edit anything afterwards.</div>
-              <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} onAdd={addFromPool} addDisabled={readOnly} />
+              <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly} />
             </>
           )}
         </section>
-        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
+        <TeamPanel data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
       </div>
 
       {editingPlayer && editingBase && editKey != null && (

@@ -64,8 +64,11 @@ Studio keeps the full table.
 - One toolbar: search, position group, era picker (All, 1930s … 2020s), HOF toggle, sort
   menu (Career, Name, Year, Position).
 - Rows in the Roster tab's style: portrait, name with a small HOF mark, position chip, year
-  and round ("1987 · Rd 1"), career-score chip, and Add on the right. Once added the row
-  shows the team abbreviation (or FA) in place of Add; "Rating…" while the server rates him.
+  and round ("1987 · Rd 1"), career-score chip, and Add on the right. "Rating…" replaces Add
+  while the server rates him; once added, the row leaves the list (he is on the roster now).
+- Teams show as logos, not text: the team chips in the team panel and the team mark on every
+  player row use the franchise logo the draft view already has, matched by nickname (city as
+  a fallback). Free agency stays "FA".
 - The first 400 matches are shown with the existing "narrow the search" footer.
 - A one-line hint above the list: "Rated by career, added to the selected team. Age is his
   draft age plus four; edit anything afterwards."

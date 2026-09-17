@@ -6,7 +6,8 @@
 
 - Roster players open in the same profile card as the draft editor, with names, college, build, archetype, persona and face editable.
 - Rosters can be built from scratch: empty teams, filled entirely from the player pool.
-- The Pool tab is a compact list with one toolbar.
+- The Pool tab is a compact list with one toolbar; a player you add leaves the list.
+- Team logos on the roster builder's team chips and player rows.
 
 ### Bug fixes
 

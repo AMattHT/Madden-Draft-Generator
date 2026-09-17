@@ -24,7 +24,7 @@ export interface CatalogStatus { label: string; title?: string }
  */
 const ERAS = ['ALL', ...Array.from({ length: 10 }, (_, i) => String(1930 + i * 10))];
 
-export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange, compact = false }: {
+export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange, compact = false, hidden }: {
   catalog: CatalogPlayer[] | null;
   error: string | null;
   onRetry: () => void;
@@ -36,6 +36,8 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   onListChange?: (keys: string[]) => void;
   /** Half-width layout (the roster builder): rows instead of the table, one toolbar with an era picker. */
   compact?: boolean;
+  /** Rows to leave out entirely (players already on the roster being built). */
+  hidden?: (key: string) => boolean;
 }) {
   const [q, setQ] = useState('');
   const [grp, setGrp] = useState('ALL');
@@ -58,6 +60,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
     if (grp !== 'ALL') r = r.filter((p) => p.grp === grp);
     if (league !== 'ALL') r = r.filter((p) => p.league === league);
     if (hof) r = r.filter((p) => p.hof);
+    if (hidden) r = r.filter((p) => !hidden(p.key));
     if (needle) r = r.filter((p) => `${p.first} ${p.last} ${p.college}`.toLowerCase().includes(needle));
     const pickNo = (p: CatalogPlayer) => (p.round == null ? 99 : p.round) * 1000 + (p.pick ?? 999);
     r.sort((a, b) =>
@@ -69,7 +72,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       : sort === 'pb' ? b.pb - a.pb || b.cal - a.cal
       : b.cal - a.cal || (b.wav ?? -1) - (a.wav ?? -1));
     return r;
-  }, [catalog, q, grp, from, to, era, league, hof, sort, compact]);
+  }, [catalog, q, grp, from, to, era, league, hof, sort, compact, hidden]);
 
   useEffect(() => { onListChange?.(list.map((p) => p.key)); }, [list, onListChange]);
 
