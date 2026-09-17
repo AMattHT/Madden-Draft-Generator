@@ -83,10 +83,6 @@ export function HomePage({ onSelect, franchiseEnabled, title = `Madden ${NAME}` 
 
       <div className={`stagger relative mx-auto flex min-h-full w-full flex-col justify-center px-8 py-12 ${franchiseEnabled ? 'max-w-6xl' : 'max-w-5xl'}`}>
         <div className="max-w-2xl" style={{ ['--i' as string]: 0 }}>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-300 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary-light shadow-[0_0_8px_rgba(111,155,255,0.9)]" />
-            1936 – 2026 · every draft
-          </div>
           <h1 className="font-display text-4xl font-extrabold leading-[1.05] text-neutral-50 sm:text-5xl" style={{ textWrap: 'balance' }}>
             {title}
           </h1>

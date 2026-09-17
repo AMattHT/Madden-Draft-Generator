@@ -53,7 +53,6 @@ export function BoardSkeleton() {
 export function EmptyBoard() {
   return (
     <div className="relative grid h-full animate-fade-in place-items-center overflow-hidden">
-      <div aria-hidden className="field-grid absolute inset-0" />
       <div className="relative flex flex-col items-center text-center">
         <img src="/art/empty-board.webp" alt="" className="animate-float h-56 w-56 object-contain opacity-90 [mask-image:radial-gradient(60%_60%_at_50%_50%,#000_55%,transparent_100%)]" />
         <div className="font-display text-lg font-bold text-neutral-100">Pick a draft year</div>

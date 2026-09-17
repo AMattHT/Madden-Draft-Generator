@@ -40,7 +40,7 @@
   --shadow-gold: 0 0 0 1px rgba(245, 197, 24, 0.35), 0 8px 30px -8px rgba(245, 197, 24, 0.45);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 html,
@@ -152,18 +152,6 @@ button {
     background: linear-gradient(90deg, transparent, rgba(111, 155, 255, 0.7), transparent);
     pointer-events: none;
   }
-  .text-gradient-blue {
-    background: linear-gradient(135deg, #ffffff 0%, #9dbaff 45%, #6f9bff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .text-gradient-gold {
-    background: linear-gradient(135deg, #fff4c2 0%, #f5c518 55%, #d9a300 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
   .glow-primary {
     box-shadow: var(--shadow-glow);
   }
@@ -179,15 +167,6 @@ button {
     opacity: 0.035;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     mix-blend-mode: overlay;
-  }
-  /* Field grid — the home hero and empty states sit on a faint yard-line mesh. */
-  .field-grid {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(70% 70% at 50% 40%, #000 30%, transparent 100%);
-    -webkit-mask-image: radial-gradient(70% 70% at 50% 40%, #000 30%, transparent 100%);
   }
   .skeleton {
     position: relative;
@@ -234,7 +213,7 @@ button {
     animation: rise 0.28s var(--ease-out-expo) both;
   }
   .animate-pop {
-    animation: pop 0.26s var(--ease-spring) both;
+    animation: pop 0.26s var(--ease-out-expo) both;
   }
   .animate-view {
     animation: view-in 0.34s var(--ease-out-expo) both;
@@ -410,7 +389,7 @@ button {
   background: #cfd3db;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   transition:
-    transform 0.26s var(--ease-spring),
+    transform 0.26s var(--ease-out-expo),
     background 0.22s ease;
 }
 input:checked + .switch {

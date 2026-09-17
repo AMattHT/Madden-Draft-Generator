@@ -255,17 +255,17 @@ export function ClassView({
 
   /* ---- Title: the year as a big display numeral, or the custom class's name. ---- */
   const title = isFile ? (
-    <><span className="text-gradient-gold">{data.fileName || data.name || 'Opened class'}</span> <span className="text-neutral-500">· Madden {data.gameVersion === 'm27' ? '27' : '26'} file</span></>
+    <><span className="text-gold">{data.fileName || data.name || 'Opened class'}</span> <span className="text-neutral-500">· Madden {data.gameVersion === 'm27' ? '27' : '26'} file</span></>
   ) : data.source === 'picked' ? (
-    <><span className="text-neutral-500">Custom ·</span> <span className="text-gradient-gold">{data.name || 'My class'}</span></>
+    <><span className="text-neutral-500">Custom ·</span> <span className="text-gold">{data.name || 'My class'}</span></>
   ) : data.source === 'team' ? (
-    <><span className="text-gradient-gold">{data.name || 'Franchise'}</span> <span className="text-neutral-500">· All-Time Draft</span></>
+    <><span className="text-gold">{data.name || 'Franchise'}</span> <span className="text-neutral-500">· All-Time Draft</span></>
   ) : allTime ? (
-    <span className="text-gradient-gold">All-Time Greats</span>
+    <span className="text-gold">All-Time Greats</span>
   ) : decade ? (
-    <><span className="text-neutral-500">Greatest of the</span> <span className="text-gradient-gold">{decade}</span></>
+    <><span className="text-neutral-500">Greatest of the</span> <span className="text-gold">{decade}</span></>
   ) : (
-    <><span className="text-gradient-blue">{data.year}</span> <span className="text-neutral-400">{data.league === 'combined' ? 'AFL + NFL' : data.league} Draft</span></>
+    <><span className="text-neutral-50">{data.year}</span> <span className="text-neutral-400">{data.league === 'combined' ? 'AFL + NFL' : data.league} Draft</span></>
   );
 
   return (
