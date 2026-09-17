@@ -114,7 +114,7 @@ function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: 
 export const RosterBuildService = {
   /** Apply a document's moves and edits to a parsed base roster, in place. */
   apply(base: BaseRoster, doc: RosterBuildDoc): ApplyCounts {
-    const counts: ApplyCounts = { moved: 0, cut: 0, edited: 0, skipped: [] };
+    const counts: ApplyCounts = { moved: 0, cut: 0, edited: 0, added: 0, skipped: [] };
     const teamIds = new Set(base.teams.map((t) => t.id));
     for (const [idStr, teamId] of Object.entries(doc.moves ?? {})) {
       const pgid = Number(idStr);
