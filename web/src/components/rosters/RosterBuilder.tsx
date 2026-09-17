@@ -11,8 +11,8 @@ import { CatalogPanel } from '../CatalogPanel';
 import { ALL_TEAMS, TeamPanel, TeamStrip } from './TeamPanel';
 import { pickTeams } from '../../teamMatch';
 
-export const selectCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
-export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
+export const selectCls = 'rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
+export const btnCls = 'rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.07] disabled:opacity-50';
 const EMPTY_CTX: CardCtx = { traits: [], focus: [], colleges: [], archetypes: {} };
 
 /** One row of the list: a roster player with his team mark. */
@@ -23,14 +23,14 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }:
 }) {
   return (
     <div draggable={!!onDragStart} onDragStart={onDragStart} onClick={onClick}
-      className={`flex h-10 items-center gap-2.5 border-b border-border/60 px-3 text-sm ${onClick ? 'cursor-pointer' : ''} ${selected ? 'bg-primary/10' : 'hover:bg-surface-2/70'}`}>
+      className={`flex h-10 items-center gap-2.5 border-b border-white/[0.05] px-3 text-sm ${onClick ? 'cursor-pointer' : ''} ${selected ? 'bg-primary/10' : 'hover:bg-white/[0.035]'}`}>
       <Portrait src={p.portrait} size="xs" />
       <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
         {p.edited && <span className="mr-1 text-gold" title="edited">●</span>}{p.firstName} {p.lastName}
-        <span className="ml-1 text-[10px] text-muted">#{p.jersey}</span>
-        {p.added && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Added from the player pool">added</span>}
+        <span className="ml-1 text-[11px] text-muted">#{p.jersey}</span>
+        {p.added && <span className="ml-1 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold" title="Added from the player pool">added</span>}
       </span>
-      <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{p.position}</span>
+      <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.position}</span>
       <RatingChip ovr={p.overall} size="sm" />
       <span className="w-6 text-right text-xs tabular-nums text-neutral-400">{p.age || ''}</span>
       <DevBadge dev={p.devTrait} />
@@ -42,7 +42,7 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }:
   );
 }
 
-export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, onClose, onRebase }: {
+export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, onClose, onRebase, initialTeam }: {
   data: RosterData;
   doc: RosterDoc;
   readOnly: boolean;
@@ -51,6 +51,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   onSave: (doc: RosterDoc) => Promise<void>;
   onClose: () => void;
   onRebase: () => void;
+  /** The club the builder opens on (ALL_TEAMS for the whole file); default: the first alphabetically. */
+  initialTeam?: number;
 }) {
   const fresh = doc.fresh === true;
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -59,7 +61,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'pos' | 'ovr' | 'name' | 'age' | 'team'>('pos');
   // The strip's first team (alphabetical by abbreviation) starts selected.
-  const [selectedTeam, setSelectedTeam] = useState<number>(() => [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
+  const [selectedTeam, setSelectedTeam] = useState<number>(() => initialTeam ?? [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
 
   // The pool: the catalog loads when the tab first opens; each add is rated by the server
   // once (a preview) and that preview is what the list and the card show.
@@ -191,17 +193,17 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     const c = catalog?.find((p) => p.key === a.key);
     return `Could not rate ${c ? `${c.first} ${c.last}` : a.key} from the pool: ${previewErr[a.key]}. Remove him or try again.`;
   });
-  const tabCls = (on: boolean) => `rounded-md px-3 py-1 text-xs font-semibold transition-colors ${on ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'}`;
+  const tabCls = (on: boolean) => `rounded-md px-3 py-1 text-xs font-semibold transition-colors ${on ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'}`;
   const emptyText = fresh
     ? 'Nothing here yet. Switch to the Pool and add players.'
     : search.trim() || pos !== 'ALL' ? 'Nobody matches.' : 'Nobody here. Switch to the Pool, or drag players onto a team above.';
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-3">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <input value={doc.name} onChange={(e) => onChange({ ...doc, name: e.target.value, updatedAt: Date.now() })} placeholder="Roster name" disabled={readOnly}
-            className="w-64 rounded-md border border-border bg-surface-0 px-3 py-1.5 text-sm font-semibold text-neutral-100 placeholder:font-normal placeholder:text-muted focus:border-primary focus:outline-none disabled:opacity-60" />
+            className="w-64 rounded-md border border-white/[0.07] bg-black/30 px-3 py-1.5 text-sm font-semibold text-neutral-100 placeholder:font-normal placeholder:text-muted focus:border-primary focus:outline-none disabled:opacity-60" />
           <div className="text-xs text-neutral-400">
             {fresh ? <span className="text-neutral-200">from scratch</span> : <>from <span className="text-neutral-200">{doc.base.fileName}</span></>}
             {!fresh && <> · <b className="text-neutral-200">{counts.moved}</b> moved · <b className="text-neutral-200">{counts.cut}</b> cut</>}
@@ -231,8 +233,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
       <TeamStrip data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} readOnly={readOnly} />
 
-      <section className="mx-6 my-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
-        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+      <section className="mx-6 my-3 flex min-h-0 flex-1 flex-col overflow-hidden glass rounded-xl">
+        <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-3 py-2">
           <div className="flex items-center gap-0.5 rounded-lg border border-border-strong bg-surface-0 p-0.5">
             <button onClick={() => setTab('roster')} aria-pressed={tab === 'roster'} className={tabCls(tab === 'roster')}>Roster</button>
             <button onClick={() => setTab('pool')} aria-pressed={tab === 'pool'} className={tabCls(tab === 'pool')}>Pool</button>
@@ -241,7 +243,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
             <>
               <div className="relative">
                 <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"><Icon path={ICONS.search} className="h-4 w-4" /></span>
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players…" className="w-48 rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players…" className="w-48 rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none" />
               </div>
               <select value={pos} onChange={(e) => setPos(e.target.value)} className={selectCls} title="Madden position">
                 <option value="ALL">All positions</option>

@@ -39,7 +39,7 @@ export function PlayerBulkTools({ save, onWrote }: { save: string; onWrote?: () 
             Heal all injuries (clear injuries + injured reserve, league-wide)
           </label>
 
-          <div className="rounded-md border border-border/60 p-3">
+          <div className="rounded-md border border-white/[0.05] p-3">
             <label className="flex items-center gap-2 text-sm text-neutral-200">
               <input type="checkbox" checked={setDevOn} onChange={(e) => setSetDevOn(e.target.checked)} />
               Set development trait

@@ -40,10 +40,10 @@ export function RandomDraft({
   const lastUsed = drawOrder.length ? drawOrder[drawOrder.length - 1] : null; // real undo target
   const usedList = [...used].sort((a, b) => b - a); // chips: newest year first for scanning
 
-  const selectCls = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none';
+  const selectCls = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none';
 
   return (
-    <div className="rounded-lg border border-border bg-surface-1 p-4">
+    <div className="glass rounded-xl p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-bold tracking-tight">Random Draft Class</h2>
@@ -63,7 +63,7 @@ export function RandomDraft({
 
       {/* Year range */}
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Range</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Range</span>
         <select value={from} onChange={(e) => onSetRange(Number(e.target.value), Math.max(Number(e.target.value), to))} className={selectCls}>
           {sorted.map((y) => (
             <option key={y} value={y}>{y}</option>
@@ -95,7 +95,7 @@ export function RandomDraft({
           onClick={onUndo}
           disabled={lastUsed == null}
           title={lastUsed != null ? `Undo — put ${lastUsed} back` : 'Nothing to undo'}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100 disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-neutral-100 disabled:opacity-40"
         >
           <Icon path={ICONS.undo} className="h-4 w-4" />
           Undo{lastUsed != null ? ` (${lastUsed})` : ''}
@@ -109,9 +109,9 @@ export function RandomDraft({
       </div>
 
       {usedList.length > 0 && (
-        <div className="mt-4 border-t border-border/60 pt-3">
+        <div className="mt-4 border-t border-white/[0.05] pt-3">
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Used ({usedList.length})</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Used ({usedList.length})</span>
             <button onClick={onClear} className="text-[11px] text-muted hover:text-red-300">
               Reset — make all pickable again
             </button>
@@ -122,7 +122,7 @@ export function RandomDraft({
                 key={y}
                 onClick={() => onToggleUsed(y)}
                 title={`Put ${y} back into the pool`}
-                className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-medium tabular-nums text-neutral-300 transition-colors hover:bg-surface-3 hover:text-neutral-100"
+                className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs font-medium tabular-nums text-neutral-300 transition-colors hover:bg-white/[0.07] hover:text-neutral-100"
               >
                 {y}
                 <Icon path={ICONS.x} className="h-3 w-3 text-muted" />

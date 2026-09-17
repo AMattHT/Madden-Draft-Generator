@@ -210,7 +210,7 @@ function DonorBar({
     : [];
 
   return (
-    <div className="border-b border-border px-5 py-2.5">
+    <div className="border-b border-white/[0.06] px-5 py-2.5">
       <div className="flex items-center gap-2">
         <div className="relative w-72">
           <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
@@ -221,7 +221,7 @@ function DonorBar({
             onChange={(e) => { setQuery(e.target.value); setDonor(null); setApplied(false); }}
             onFocus={() => (results.length || status === 'empty' || status === 'error') && setOpen(true)}
             placeholder="Search a current Madden player… (Mahomes, Jefferson)"
-            className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+            className="w-full rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
           />
           {open && (
             <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-64 overflow-auto rounded-md border border-border-strong bg-surface-1 shadow-xl">
@@ -241,7 +241,7 @@ function DonorBar({
                 <button
                   key={r.id}
                   onClick={() => pickDonor(r)}
-                  className="flex w-full items-baseline justify-between gap-2 px-3 py-1.5 text-left text-sm text-neutral-200 hover:bg-surface-2"
+                  className="flex w-full items-baseline justify-between gap-2 px-3 py-1.5 text-left text-sm text-neutral-200 hover:bg-white/[0.06]"
                 >
                   <span className="font-medium">{r.name}</span>
                   <span className="shrink-0 text-[11px] text-muted">
@@ -271,7 +271,7 @@ function DonorBar({
             </button>
             <button
               onClick={() => { setDonor(null); setApplied(false); }}
-              className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200"
+              className="rounded-md p-1 text-muted hover:bg-white/[0.06] hover:text-neutral-200"
               aria-label="Clear donor"
             >
               <Icon path={ICONS.close} className="h-4 w-4" />
@@ -295,7 +295,7 @@ function DonorBar({
         <button
           onClick={() => fileRef.current?.click()}
           disabled={photoBusy}
-          className="shrink-0 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50"
+          className="shrink-0 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.07] disabled:opacity-50"
           title="Upload an on-field photo (helmet + uniform) to match gloves, visor, wristbands, socks"
         >
           {photoBusy ? 'Reading photo…' : 'Match from photo'}
@@ -312,7 +312,7 @@ function DonorBar({
             }
           }}
           placeholder="or paste an image URL (Wikipedia, nfl.com, direct .jpg)…"
-          className="min-w-0 flex-1 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+          className="min-w-0 flex-1 rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
         />
         <button
           onClick={() => photoUrl.trim() && runPhoto({ imageUrl: photoUrl.trim() })}
@@ -426,12 +426,12 @@ export function GearEditor({
         className="flex h-[80vh] w-[900px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
           <div>
             <div className="text-sm font-bold tracking-tight text-neutral-100">Equipment Builder</div>
-            <div className="text-[11px] text-muted">{playerName} {gameVersion === 'm27' && <span className="ml-1 rounded bg-legend/20 px-1 text-[9px] text-legend-light">M27</span>}</div>
+            <div className="text-[11px] text-muted">{playerName} {gameVersion === 'm27' && <span className="ml-1 rounded bg-legend/20 px-1 text-[11px] text-legend-light">M27</span>}</div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-white/[0.06] hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
         </div>
@@ -454,7 +454,7 @@ export function GearEditor({
                   >
                     <span className="flex items-center gap-1.5">
                       {g.group}
-                      {n > 0 && <span className="rounded bg-primary/20 px-1 text-[9px] font-bold text-primary-light">{n}</span>}
+                      {n > 0 && <span className="rounded bg-primary/20 px-1 text-[11px] font-bold text-primary-light">{n}</span>}
                     </span>
                     <Icon path={ICONS.chevronDown} className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
                   </button>
@@ -468,7 +468,7 @@ export function GearEditor({
                             setQuery('');
                           }}
                           className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs transition-colors ${
-                            active === slot ? 'bg-primary text-white' : 'text-neutral-300 hover:bg-surface-2'
+                            active === slot ? 'bg-primary text-white' : 'text-neutral-300 hover:bg-white/[0.06]'
                           }`}
                         >
                           <span>{label}</span>
@@ -484,7 +484,7 @@ export function GearEditor({
 
           {/* Gear grid */}
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex items-center gap-2 border-b border-border p-3">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] p-3">
               <div className="relative flex-1">
                 <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                   <Icon path={ICONS.search} className="h-4 w-4" />
@@ -493,13 +493,13 @@ export function GearEditor({
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={`Search ${activeLabel.toLowerCase()}…`}
-                  className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                  className="w-full rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                 />
               </div>
 
               {/* Helmet family + compat status */}
               {active === 'facemask' && helmetCompat && (
-                <div className="shrink-0 rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-[10px] text-neutral-300">
+                <div className="shrink-0 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-neutral-300">
                   Helmet family: <span className="font-semibold text-neutral-100">{compatLabel}</span>
                   {!showIncompatible && <span className="ml-1 text-primary-light">(compatible only)</span>}
                 </div>
@@ -509,7 +509,7 @@ export function GearEditor({
                 <button
                   onClick={() => onGearEdit(MIRROR[active], gearPatch[active] ?? '')}
                   title={`Copy this pick to ${ALL_SLOTS.find((s) => s.slot === MIRROR[active])?.label}`}
-                  className="shrink-0 whitespace-nowrap rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3"
+                  className="shrink-0 whitespace-nowrap rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
                 >
                   Copy → {ALL_SLOTS.find((s) => s.slot === MIRROR[active])?.label}
                 </button>
@@ -518,7 +518,7 @@ export function GearEditor({
               {active === 'facemask' && helmetCompat && (
                 <button
                   onClick={() => setShowIncompatible(!showIncompatible)}
-                  className={`shrink-0 rounded-md px-2 py-1 text-[10px] transition-colors ${showIncompatible ? 'bg-amber-500/20 text-amber-300' : 'bg-surface-2 text-neutral-300 hover:text-neutral-100'}`}
+                  className={`shrink-0 rounded-md px-2 py-1 text-[11px] transition-colors ${showIncompatible ? 'bg-amber-500/20 text-amber-300' : 'bg-surface-2 text-neutral-300 hover:text-neutral-100'}`}
                   title="Toggle showing facemasks that may not match the current helmet"
                 >
                   {showIncompatible ? 'Showing all' : 'Compat only'}
@@ -538,7 +538,7 @@ export function GearEditor({
               <button
                 onClick={() => onGearEdit(active, '')}
                 className={`flex flex-col items-center gap-1 rounded-lg border p-2 transition-colors ${
-                  current === '' ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
+                  current === '' ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-white/[0.06]'
                 }`}
               >
                 {(() => {
@@ -550,9 +550,9 @@ export function GearEditor({
                       {auto && img ? (
                         <img src={img} alt="" className="h-14 w-14 rounded object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
                       ) : (
-                        <span className="grid h-14 w-14 place-items-center rounded text-[10px] font-semibold uppercase text-muted">Auto</span>
+                        <span className="grid h-14 w-14 place-items-center rounded text-[11px] font-semibold uppercase text-muted">Auto</span>
                       )}
-                      <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-400" title={auto ? `Era default for ${year}: ${auto}` : 'Era default'}>
+                      <span className="line-clamp-2 text-center text-[11px] leading-tight text-neutral-400" title={auto ? `Era default for ${year}: ${auto}` : 'Era default'}>
                         {auto ? `Auto: ${opt?.label ?? auto.replace(/^Gear\w*?_/, '')}` : 'Era default'}
                       </span>
                     </>
@@ -565,13 +565,13 @@ export function GearEditor({
                   onClick={() => pick(active, o.value)}
                   title={o.label + (o.compatibility ? ` (compat: ${o.compatibility})` : '')}
                   className={`flex flex-col items-center gap-1 rounded-lg border p-2 transition-colors ${
-                    current === o.value ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
+                    current === o.value ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-white/[0.06]'
                   }`}
                 >
                   <GearThumb src={o.image} />
-                  <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-300">{o.label}</span>
+                  <span className="line-clamp-2 text-center text-[11px] leading-tight text-neutral-300">{o.label}</span>
                   {o.compatibility && active === 'facemask' && (
-                    <span className="text-[8px] text-muted">{o.compatibility}</span>
+                    <span className="text-[11px] text-muted">{o.compatibility}</span>
                   )}
                 </button>
               ))}
@@ -584,8 +584,8 @@ export function GearEditor({
 
         {/* "Wearing" strip: every overridden slot as a clickable thumb + reset all. */}
         {Object.keys(gearPatch).length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto border-t border-border px-3 py-2">
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">
+          <div className="flex items-center gap-2 overflow-x-auto border-t border-white/[0.06] px-3 py-2">
+            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted">
               Wearing ({Object.keys(gearPatch).length})
             </span>
             {Object.entries(gearPatch).map(([slot, asset]) => {
@@ -598,11 +598,11 @@ export function GearEditor({
                   onClick={() => setActive(slot)}
                   title={`${slotLabel}: ${opt?.label ?? asset}${isCurrentHelmet ? ` (family: ${compatLabel})` : ''}`}
                   className={`flex shrink-0 flex-col items-center gap-0.5 rounded-md border p-1 transition-colors ${
-                    active === slot ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
+                    active === slot ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-white/[0.06]'
                   }`}
                 >
                   <GearThumb src={opt?.image} size="sm" />
-                  <span className="max-w-14 truncate text-[9px] text-neutral-400">{slotLabel}</span>
+                  <span className="max-w-14 truncate text-[11px] text-neutral-400">{slotLabel}</span>
                 </button>
               );
             })}
@@ -610,7 +610,7 @@ export function GearEditor({
               onClick={() => {
                 for (const slot of Object.keys(gearPatch)) onGearEdit(slot, '');
               }}
-              className="ml-auto shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 transition-colors hover:bg-surface-2"
+              className="ml-auto shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[11px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
               title="Clear every override — back to era-appropriate gear"
             >
               Reset all to era default
@@ -618,7 +618,7 @@ export function GearEditor({
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-border px-5 py-2.5 text-[11px] text-muted">
+        <div className="flex items-center justify-between border-t border-white/[0.06] px-5 py-2.5 text-[11px] text-muted">
           <span>
             Picks are written when you save. 
             {gameVersion === 'm27' 
@@ -626,7 +626,7 @@ export function GearEditor({
               : ' Old-era classes get a period-correct facemask (Riddell TK two-bar) automatically.'} 
             Override here.
           </span>
-          <button onClick={onClose} className="rounded-md bg-surface-2 px-3 py-1.5 font-medium text-neutral-200 hover:bg-surface-3">
+          <button onClick={onClose} className="rounded-md bg-surface-2 px-3 py-1.5 font-medium text-neutral-200 hover:bg-white/[0.07]">
             Done
           </button>
         </div>

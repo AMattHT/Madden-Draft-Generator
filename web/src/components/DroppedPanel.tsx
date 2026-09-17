@@ -46,7 +46,7 @@ export function DroppedPanel({
     );
   }, [dropped, q, sort]);
 
-  const th = 'px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
+  const th = 'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-neutral-400';
   const sortBtn = (k: typeof sort, label: string) => (
     <button onClick={() => setSort(k)} className={`${th} ${sort === k ? 'text-neutral-100' : 'hover:text-neutral-200'}`}>{label}{sort === k ? ' ▾' : ''}</button>
   );
@@ -62,7 +62,7 @@ export function DroppedPanel({
         className="flex h-[82vh] w-[980px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between gap-4 border-b border-white/[0.06] px-5 py-3">
           <div>
             <div className="text-sm font-bold tracking-tight text-neutral-100">
               {dropped.length} players didn't fit the {data.year} class
@@ -71,11 +71,11 @@ export function DroppedPanel({
               The game holds 402. The weakest by career and draft slot were cut (rounds 1–3 never are). Include one and he takes the slot of the weakest remaining keeper — every other pick number stays put.
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-surface-2" aria-label="Close">Esc</button>
+          <button onClick={onClose} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-white/[0.06]" aria-label="Close">Esc</button>
         </div>
 
         {includedRows.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface-2/60 px-5 py-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] bg-surface-2/60 px-5 py-2 text-xs">
             <span className="text-neutral-400">Included:</span>
             {includedRows.map((r) => (
               <span key={r.id} className="flex items-center gap-1 rounded border border-success/40 bg-success/10 px-1.5 py-0.5 text-green-200">
@@ -86,12 +86,12 @@ export function DroppedPanel({
           </div>
         )}
 
-        <div className="flex items-center gap-3 border-b border-border px-5 py-2">
+        <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search name, college, position…"
-            className="w-72 rounded-md border border-border bg-surface-0 px-2 py-1 text-sm focus:border-primary focus:outline-none"
+            className="w-72 rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-sm focus:border-primary focus:outline-none"
           />
           <span className="text-xs text-neutral-500">{list.length} shown</span>
         </div>
@@ -111,7 +111,7 @@ export function DroppedPanel({
             </thead>
             <tbody>
               {list.map((d) => (
-                <tr key={d.idx} className="border-t border-border/50 hover:bg-surface-2/50">
+                <tr key={d.idx} className="border-t border-white/[0.05] hover:bg-white/[0.06]/50">
                   <td className="px-3 py-1.5 text-neutral-100">{d.firstName} {d.lastName}</td>
                   <td className="px-3 py-1.5 text-neutral-300">{d.position}</td>
                   <td className="px-3 py-1.5 text-neutral-300">{d.round != null ? `Rd ${d.round}${d.pick != null ? `, #${d.pick}` : ''}` : 'Undrafted'}</td>

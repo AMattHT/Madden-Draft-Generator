@@ -68,7 +68,7 @@ export function FranchiseView(props: {
       .catch((e) => setLoadErr(e.message));
   }, [props.gameVersion]);
 
-  const inputCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+  const inputCls = 'rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
 
   // Split the dropdown: the user's real franchise saves vs files this tool wrote
   // (-CAPRESET, -PLAYERS, …), so the picker stays readable as outputs accumulate.
@@ -83,9 +83,9 @@ export function FranchiseView(props: {
   return (
     <div className="flex h-full flex-col">
       {/* Shared save picker + tab nav */}
-      <div className="shrink-0 border-b border-border px-6 py-3">
+      <div className="shrink-0 border-b border-white/[0.06] px-6 py-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Save</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Save</span>
           <select value={selected} onChange={(e) => setSelected(e.target.value)} className={`${inputCls} min-w-[18rem]`}>
             {files.length === 0 && <option value="">No CAREER saves found</option>}
             <optgroup label="Your saves">
@@ -97,7 +97,7 @@ export function FranchiseView(props: {
               </optgroup>
             )}
           </select>
-          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-300" title="Franchise tools follow the game switch in the top bar">Madden {props.gameVersion === 'm27' ? '27' : '26'}</span>
+          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-300" title="Franchise tools follow the game switch in the top bar">Madden {props.gameVersion === 'm27' ? '27' : '26'}</span>
           {savesDir && <span className="hidden text-[11px] text-muted lg:inline">from {savesDir}</span>}
         </div>
 
@@ -108,7 +108,7 @@ export function FranchiseView(props: {
               onClick={() => setTab(t.id)}
               aria-pressed={tab === t.id}
               className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-                tab === t.id ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
+                tab === t.id ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'
               }`}
             >
               {t.label}
@@ -132,11 +132,11 @@ export function FranchiseView(props: {
             {tab === 'players' && (
               <>
                 <PlayerBulkTools save={selected} onWrote={refresh} />
-                <div className="border-t border-border/60" />
+                <div className="border-t border-white/[0.05]" />
                 <DevTraitsTool save={selected} onWrote={refresh} />
-                <div className="border-t border-border/60" />
+                <div className="border-t border-white/[0.05]" />
                 <AdvanceRosterTool save={selected} onWrote={refresh} />
-                <div className="border-t border-border/60" />
+                <div className="border-t border-white/[0.05]" />
                 <FaTrimTool save={selected} onWrote={refresh} />
               </>
             )}
@@ -154,7 +154,7 @@ export function FranchiseView(props: {
                   onToggleUsed={props.onToggleUsed}
                   onClear={props.onClearUsed}
                 />
-                <div className="border-t border-border/60" />
+                <div className="border-t border-white/[0.05]" />
                 <DraftPickResetTool save={selected} onWrote={refresh} />
               </>
             )}
