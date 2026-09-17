@@ -131,3 +131,56 @@ test('an add whose key is unknown is skipped and reported', skipWithoutRoster, a
   assert.equal(counts.added, 0);
   assert.ok(counts.skipped.some((s) => s.includes('nope')));
 });
+
+test('the card fields write to the player row, the persona row and the blob', skipWithoutRoster, async () => {
+  const base = await RosterFileService.openBase('ROSTER-Official');
+  const geno = base.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
+  const counts = RosterBuildService.apply(base, {
+    baseName: 'ROSTER-Official', name: 'x',
+    edits: { [geno.id]: { firstName: 'Eugene', lastName: 'Smithsonian-The-Third-Of-Them', college: 7, heightInches: 78, weight: 240, archetype: 2, personaDNA: [3, 4, 5], focus: 2, genericHead: 'gen_2_T_G_001', skinTone: 2 } },
+  }, new Map());
+  assert.equal(counts.edited, 1);
+  const file = await parseTdb2(splitContainer(RosterFileService.write(base.tdb2, base.header)).payload);
+  const row = file.PLAY.records.find((r) => intOf(r, 'PGID') === geno.id)!;
+  assert.equal(strOf(row, 'PFNA'), 'Eugene');
+  assert.equal(strOf(row, 'PLNA'), 'Smithsonian-The-Third-Of-Them'.slice(0, 20));
+  assert.equal(intOf(row, 'PCOL'), 7); assert.equal(intOf(row, 'PLTY'), 2);
+  assert.equal(intOf(row, 'PHGT'), 78); assert.equal(intOf(row, 'PWGT'), 80);
+  assert.equal(strOf(row, 'PEPS'), 'gen_2_T_G_001', 'a generic head replaces the scan in PEPS');
+  const prsn = file.PRSN.records.find((r) => intOf(r, 'PGID') === geno.id)!;
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7].map((i) => intOf(prsn, `DNA${i}`)), [3, 4, 5, 0, 0, 0, 0, 0]);
+  assert.equal(intOf(prsn, 'PRFC'), 2);
+  const blob = file.BLOB.records[0].fields.BLBM.value.records.find((r: any) => r.index === geno.id)!;
+  assert.equal(strOf(blob, 'CFNM'), 'Eugene'); assert.equal(strOf(blob, 'CLNM'), 'Smithsonian-The-Third-Of-Them'.slice(0, 20));
+  assert.equal(intOf(blob, 'HINC'), 78); assert.equal(intOf(blob, 'WLBS'), 240);
+  assert.equal(strOf(blob, 'GENR'), 'gen_2_T_G_001'); assert.equal(strOf(blob, 'ASNM'), '');
+  assert.equal(intOf(blob, 'SKNT'), 2);
+});
+
+test('a face scan edit writes the asset to the row and the blob', skipWithoutRoster, async () => {
+  const base = await RosterFileService.openBase('ROSTER-Official');
+  const geno = base.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
+  RosterBuildService.apply(base, { baseName: 'ROSTER-Official', name: 'x', edits: { [geno.id]: { faceAsset: 'MahomesIIPatrick_12635' } } }, new Map());
+  const file = await parseTdb2(splitContainer(RosterFileService.write(base.tdb2, base.header)).payload);
+  const row = file.PLAY.records.find((r) => intOf(r, 'PGID') === geno.id)!;
+  const blob = file.BLOB.records[0].fields.BLBM.value.records.find((r: any) => r.index === geno.id)!;
+  assert.equal(strOf(row, 'PEPS'), 'MahomesIIPatrick_12635');
+  assert.equal(strOf(blob, 'ASNM'), 'MahomesIIPatrick_12635');
+  assert.equal(strOf(blob, 'GENR'), 'gen_6_T_G_005', 'the generic head stays');
+});
+
+test('a fresh roster keeps only the added players', skipWithoutRoster, async () => {
+  const base = await RosterFileService.openBase('ROSTER-Official');
+  const baseIds = new Set(base.players.map((p) => p.id));
+  const bears = base.teams.find((t) => t.abbr === 'CHI')!;
+  const payton = await RosterAddService.generate('1975|NFL|walter|payton|4');
+  const counts = RosterBuildService.apply(base, { baseName: 'ROSTER-Official', name: 'x', fresh: true, adds: [{ tempId: 'a', key: payton.key, teamId: bears.id }] }, new Map([[payton.key, payton]]));
+  assert.equal(counts.added, 1);
+  const file = await parseTdb2(splitContainer(RosterFileService.write(base.tdb2, base.header)).payload);
+  assert.equal(file.PLAY.records.length, 1);
+  for (const t of ['PRSN', 'PLCT', 'DCHT', 'INJY']) assert.ok(!file[t].records.some((r: any) => baseIds.has(intOf(r, 'PGID'))), `${t} has no base rows`);
+  const blobs = file.BLOB.records[0].fields.BLBM.value.records;
+  assert.equal(blobs.length, 1);
+  assert.equal(file.TEAM.records.length, 33);
+  assert.ok(intOf(file.PLAY.records[0], 'PGID') > Math.max(...baseIds));
+});

@@ -9,6 +9,14 @@ export interface PlayerFieldEdit {
   bodyType?: string;   // Standard | Thin | Muscular | Heavy | Lean
   genericHead?: string; // gen_<tone>_...
   gear?: Record<string, string>; // GearOptionsService slot -> asset
+  firstName?: string; lastName?: string;
+  college?: number;      // college id
+  heightInches?: number; weight?: number;
+  archetype?: number;    // archetype id
+  personaDNA?: number[]; // up to 8 trait ids; empty slots are 0
+  focus?: number;        // 0..3
+  faceAsset?: string;    // a face-scan asset the game ships (sets PEPS and the blob's ASNM)
+  skinTone?: number;     // 1..8
 }
 
 /** A player from the app's pool placed on a team; his edits are keyed by tempId until he has a PGID. */
@@ -45,6 +53,7 @@ export interface RosterBuildDoc {
   moves?: Record<string, number>;    // PGID -> TGID (the free-agent team id cuts)
   edits?: Record<string, PlayerFieldEdit>; // PGID or tempId -> edits
   adds?: AddedPlayer[];
+  fresh?: boolean;                   // remove every base player before adding yours
 }
 
 export interface ApplyCounts { moved: number; cut: number; edited: number; added: number; skipped: string[] }

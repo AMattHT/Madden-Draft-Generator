@@ -36,7 +36,8 @@ class TDB2Parser extends FileParser {
                 this.bytes(0x1, (buf2) => {
                     this._readLebNumber(buf2, (numEntriesBuf) => {
                         table.numEntriesRaw = numEntriesBuf;
-                        this._onTableRecordStart(table);
+                        // Local change: a table with no records has nothing to read (an emptied injury or depth-chart table).
+                        if (table.numEntries === 0) this._checkTableEnd(table); else this._onTableRecordStart(table);
                     });
                 });
             }
@@ -47,7 +48,8 @@ class TDB2Parser extends FileParser {
                     this.bytes(0x1, (buf2) => {
                         this._readLebNumber(buf2, (numEntriesBuf) => {
                             table.numEntriesRaw = numEntriesBuf;
-                            this._onTableRecordStart(table);
+                            // Local change: a table with no records has nothing to read (an emptied injury or depth-chart table).
+                            if (table.numEntries === 0) this._checkTableEnd(table); else this._onTableRecordStart(table);
                         });
                     });
                 });
@@ -56,7 +58,8 @@ class TDB2Parser extends FileParser {
             {
                 this._readLebNumber(buf, (numEntriesBuf) => {
                     table.numEntriesRaw = numEntriesBuf;
-                    this._onTableRecordStart(table);
+                    // Local change: a table with no records has nothing to read (an emptied injury or depth-chart table).
+                    if (table.numEntries === 0) this._checkTableEnd(table); else this._onTableRecordStart(table);
                 });
             }
         });

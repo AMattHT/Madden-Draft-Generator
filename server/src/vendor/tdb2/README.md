@@ -9,6 +9,7 @@ alongside), commit 6c7eb93, taken 2026-09-16. Only the TDB2 path is here:
 Local changes:
 - requires flattened to `./`;
 - `TDB2Field.isDefaulted` + writer skip (fields that `_normalizeRecords` invented and
-  nobody changed are not written; the game omits them too).
+  nobody changed are not written; the game omits them too);
+- `TDB2Parser` accepts a table with zero records (an emptied injury or depth-chart table).
 
 Use through `services/Tdb2Engine.ts`, never directly.

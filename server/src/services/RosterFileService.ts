@@ -58,6 +58,13 @@ export interface RosterPlayer {
   ratings: Record<string, number>;
   /** From the player's visuals blob: body type (Standard…Lean), generic head, helmet and facemask assets; '' when absent. */
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
+  archetypeId: number;
+  collegeId: number;
+  homeState: number;
+  skinTone: number; // 1-8, from the blob
+  personaDNA: number[]; // persona trait ids (PRSN DNA0-7, zeros dropped)
+  focus: number; // 0-3 (PRSN PRFC)
+  face: 'asset' | 'generic'; // a scan the game ships, or a generic head
 }
 
 export interface RosterInfo {
@@ -194,7 +201,7 @@ function visualsOf(blob: Tdb2Record | undefined): RosterPlayer['visuals'] {
   return out;
 }
 
-function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: number, blob: Tdb2Record | undefined): RosterPlayer | null {
+function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: number, blob: Tdb2Record | undefined, prsn: Tdb2Record | undefined): RosterPlayer | null {
   const firstName = strOf(r, 'PFNA'), lastName = strOf(r, 'PLNA');
   if (!firstName && !lastName) return null;
   const ratings: Record<string, number> = {};
@@ -231,15 +238,24 @@ function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: num
     portrait: portraitFor(asset),
     ratings,
     visuals: visualsOf(blob),
+    archetypeId: intOf(r, 'PLTY'),
+    collegeId: intOf(r, 'PCOL'),
+    homeState: intOf(r, 'PHSN'),
+    skinTone: blob ? Math.max(1, Math.min(8, intOf(blob, 'SKNT', 4) || 4)) : 4,
+    personaDNA: prsn ? [0, 1, 2, 3, 4, 5, 6, 7].map((i) => intOf(prsn, `DNA${i}`)).filter((v) => v > 0) : [],
+    focus: prsn ? intOf(prsn, 'PRFC') : 0,
+    face: asset && !/^gen_/i.test(asset) ? 'asset' : 'generic',
   };
 }
 
 function buildPlayers(file: Tdb2File, teams: RosterTeam[], faId: number): RosterPlayer[] {
   const teamById = new Map(teams.map((t) => [t.id, t]));
   const blobs = new Map<number, Tdb2Record>(file.BLOB.records[0].fields.BLBM.value.records.map((b: Tdb2Record) => [b.index, b]));
+  const personas = new Map<number, Tdb2Record>((file.PRSN?.records ?? []).map((r: Tdb2Record) => [intOf(r, 'PGID'), r]));
   const out: RosterPlayer[] = [];
   for (const r of file.PLAY.records) {
-    const p = buildPlayer(r, teamById, faId, blobs.get(intOf(r, 'PGID')));
+    const pgid = intOf(r, 'PGID');
+    const p = buildPlayer(r, teamById, faId, blobs.get(pgid), personas.get(pgid));
     if (p) out.push(p);
   }
   return out;

@@ -106,3 +106,14 @@ test('an opened roster can be reopened as a base by id', skipWithoutRoster, asyn
   assert.equal(base.players.length, opened.count);
   await assert.rejects(RosterFileService.openOpened('0123456789abcdef'), /gone/);
 });
+
+test('the read model carries archetype and college ids, skin tone, persona and the face kind', skipWithoutRoster, async () => {
+  const data = await RosterFileService.parse(fs.readFileSync(OFFICIAL), 'ROSTER-Official');
+  const geno = data.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
+  assert.equal(geno.face, 'asset');
+  assert.equal(geno.skinTone, 6);
+  assert.deepEqual(geno.personaDNA, [45, 51, 17, 25, 32, 30]);
+  assert.equal(geno.focus, 0);
+  assert.ok(geno.collegeId > 0 && geno.archetypeId >= 0);
+  assert.ok(data.players.every((p) => p.face === 'asset' || p.face === 'generic'));
+});

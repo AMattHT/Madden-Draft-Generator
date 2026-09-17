@@ -17,7 +17,7 @@ r.post('/roster/build', async (req, res) => {
   const adds = b.adds ?? [];
   if (!Array.isArray(adds) || !adds.every(isAdd)) return res.status(400).json({ error: 'adds must be a list of { tempId, key, teamId }' });
   try {
-    return res.json(await RosterBuildService.build({ baseName: b.baseName, baseId: b.baseId, name: b.name, moves: b.moves ?? {}, edits: b.edits ?? {}, adds }));
+    return res.json(await RosterBuildService.build({ baseName: b.baseName, baseId: b.baseId, name: b.name, moves: b.moves ?? {}, edits: b.edits ?? {}, adds, fresh: b.fresh === true }));
   } catch (e) {
     return res.status(400).json({ error: (e as Error).message });
   }

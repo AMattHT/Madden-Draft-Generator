@@ -150,6 +150,8 @@ function addPlayer(base: BaseRoster, add: AddedPlayer, g: GeneratedRosterPlayer,
     draftRound: g.draftRound < 63 ? g.draftRound : null, draftPick: g.draftPick || null,
     assetName: g.assetName || null, portrait: g.portrait, ratings: { ...g.ratings },
     visuals: { bodyType: g.bodyType, genericHead: g.genericHead, helmet: g.gear.helmet ?? '', facemask: g.gear.facemask ?? '' },
+    archetypeId: g.archetypeId, collegeId: g.collegeId, homeState: g.homeStateId, skinTone: g.skinTone,
+    personaDNA: [...g.personaDNA], focus: g.focus, face: g.assetName ? 'asset' : 'generic',
   });
   return pgid;
 }
@@ -161,6 +163,12 @@ function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: 
   if (e.overall != null) { setInt(row, 'POVR', clamp99(e.overall)); touched = true; }
   if (e.age != null) { setInt(row, 'PAGE', Math.max(18, Math.min(50, Math.round(e.age)))); touched = true; }
   if (e.jersey != null) { setInt(row, 'PJEN', clamp99(e.jersey)); touched = true; }
+  if (e.firstName != null) { setStr(row, 'PFNA', String(e.firstName).slice(0, 16)); touched = true; }
+  if (e.lastName != null) { setStr(row, 'PLNA', String(e.lastName).slice(0, 20)); touched = true; }
+  if (e.college != null && Number.isFinite(e.college)) { setInt(row, 'PCOL', Math.max(0, Math.round(e.college))); touched = true; }
+  if (e.archetype != null && Number.isFinite(e.archetype)) { setInt(row, 'PLTY', Math.max(0, Math.round(e.archetype))); touched = true; }
+  if (e.heightInches != null) { setInt(row, 'PHGT', Math.max(60, Math.min(84, Math.round(e.heightInches)))); touched = true; }
+  if (e.weight != null) { setInt(row, 'PWGT', Math.max(0, Math.min(240, Math.round(e.weight) - 160))); touched = true; }
   if (e.position) {
     if (ROSTER_POSITIONS.includes(e.position)) { setInt(row, 'PPOS', ROSTER_POSITIONS.indexOf(e.position)); touched = true; }
     else skipped.push(`edit: unknown position ${e.position} for ${pgid}`);
@@ -178,9 +186,35 @@ function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: 
   }
   const blob = blobRow(base, pgid);
   if (e.jersey != null && blob) setInt(blob, 'CJNO', clamp99(e.jersey));
+  if (blob) {
+    if (e.firstName != null) setStr(blob, 'CFNM', String(e.firstName).slice(0, 16));
+    if (e.lastName != null) setStr(blob, 'CLNM', String(e.lastName).slice(0, 20));
+    if (e.heightInches != null) setInt(blob, 'HINC', Math.max(60, Math.min(84, Math.round(e.heightInches))));
+    if (e.weight != null) setInt(blob, 'WLBS', Math.max(160, Math.min(400, Math.round(e.weight))));
+    if (e.skinTone != null) setInt(blob, 'SKNT', Math.max(1, Math.min(8, Math.round(e.skinTone))));
+  }
+  // A generic head is written the way the game writes created players: the head name in
+  // PEPS as well as GENR, and no scan asset in the blob. A face scan (applied after, so it
+  // wins when both are present) sets PEPS and ASNM and leaves the generic head as a fallback.
   if (e.genericHead) {
-    if (/^gen_\d/i.test(e.genericHead) && blob) { setStr(blob, 'GENR', e.genericHead); touched = true; }
+    if (/^gen_\d/i.test(e.genericHead) && blob) { setStr(blob, 'GENR', e.genericHead); setStr(row, 'PEPS', e.genericHead); setStr(blob, 'ASNM', ''); touched = true; }
     else skipped.push(`edit: bad generic head ${e.genericHead} for ${pgid}`);
+  }
+  if (e.faceAsset) {
+    if (!/^gen_/i.test(e.faceAsset) && blob) { setStr(row, 'PEPS', e.faceAsset); setStr(blob, 'ASNM', e.faceAsset); touched = true; }
+    else skipped.push(`edit: bad face asset ${e.faceAsset} for ${pgid}`);
+  }
+  if (e.personaDNA || e.focus != null) {
+    const prsn = base.tdb2.PRSN.records.find((r) => intOf(r, 'PGID') === pgid);
+    if (!prsn) skipped.push(`edit: no persona row for ${pgid}`);
+    else {
+      if (e.personaDNA) {
+        const ids = [...new Set(e.personaDNA.map((n) => Math.round(Number(n))).filter((n) => n >= 1 && n <= 63))].slice(0, 8);
+        for (let i = 0; i < 8; i++) setInt(prsn, `DNA${i}`, ids[i] ?? 0);
+        touched = true;
+      }
+      if (e.focus != null && [0, 1, 2, 3].includes(Math.round(e.focus))) { setInt(prsn, 'PRFC', Math.round(e.focus)); touched = true; }
+    }
   }
   if (e.bodyType) {
     const { body } = blob ? loadouts(blob) : { body: null };
@@ -214,6 +248,7 @@ export const RosterBuildService = {
   apply(base: BaseRoster, doc: RosterBuildDoc, generated: Map<string, GeneratedRosterPlayer>): ApplyCounts {
     const counts: ApplyCounts = { moved: 0, cut: 0, edited: 0, added: 0, skipped: [] };
     const teamIds = new Set(base.teams.map((t) => t.id));
+    const baseIds = new Set(base.players.map((p) => p.id));
     const idOfTemp = new Map<string, number>();
     for (const add of doc.adds ?? []) {
       const g = generated.get(add.key);
@@ -221,6 +256,20 @@ export const RosterBuildService = {
       if (!teamIds.has(add.teamId)) { counts.skipped.push(`add: team ${add.teamId} is not in the base roster`); continue; }
       idOfTemp.set(add.tempId, addPlayer(base, add, g, counts.skipped));
       counts.added++;
+    }
+    // A roster from scratch: the adds were appended above with ids past the base maximum;
+    // everything the base file had goes, from every per-player table. Teams stay.
+    if (doc.fresh) {
+      const keepRow = (r: Tdb2Record) => !baseIds.has(intOf(r, 'PGID'));
+      for (const t of [base.tdb2.PLAY, base.tdb2.PRSN, base.tdb2.PLCT, base.tdb2.DCHT, base.tdb2.INJY] as (Tdb2Table | undefined)[]) {
+        if (!t) continue;
+        const keep = t.records.filter(keepRow);
+        t.records.length = 0; t.records.push(...keep); t.numEntries = keep.length;
+      }
+      const blobs: Tdb2Table = base.tdb2.BLOB.records[0].fields.BLBM.value;
+      const keepBlobs = blobs.records.filter((r) => !baseIds.has(r.index));
+      blobs.records.length = 0; blobs.records.push(...keepBlobs); blobs.numEntries = keepBlobs.length;
+      base.players = base.players.filter((p) => !baseIds.has(p.id));
     }
     for (const [idStr, teamId] of Object.entries(doc.moves ?? {})) {
       const pgid = Number(idStr);
