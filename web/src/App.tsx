@@ -553,7 +553,7 @@ export default function App() {
           setPinnedGame(pinned);
           setGameVersion(pinned);
           document.title = productTitle(pinned);
-          document.querySelector('link[rel="icon"]')?.setAttribute('href', `/icons/${pinned}.svg`);
+          document.querySelector('link[rel="icon"]')?.setAttribute('href', `/icons/${pinned}.png`);
         }
         setFranchiseEnabled(cfg.franchise);
         if (cfg.franchise) setView('home');
