@@ -139,6 +139,8 @@ why.
 
 Franchise tab -> new **League history** tool (`web/src/components/franchise/LeagueHistoryTool.tsx`):
 
+- New `history` tab ("League history") in `FranchiseView.tsx`; add `HISTORY` to its
+  `OUTPUT_SUFFIX` pattern so the written file is not picked as the default save.
 - Save picker (existing pattern), "Franchise starts in" year input, default = the save's
   `CurrentSeasonYear`, range 1934-2026.
 - Preview list: the seasons that will be written, each as year, title game, champion, score,
