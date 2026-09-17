@@ -125,6 +125,16 @@ function key(label: string | undefined | null): string {
   return tokens[0] || '';
 }
 
+/** What the board balancer needs to know about a player. */
+export interface BoardItem {
+  firstName: string;
+  lastName: string;
+  weight?: number | null;
+  /** The slot came from real data (a curated entry, a depth chart): never rebalanced. */
+  positionLocked?: boolean;
+  frontSeven?: { role: string | null; lock: boolean } | null;
+}
+
 export const PositionMapper = {
   /** Source label -> M26 position id (0-21). Defaults to WR(3) if unknown. */
   toM26Id(label: string | undefined | null): number {
@@ -175,10 +185,38 @@ export const PositionMapper = {
    *
    * Cohorts: edges [10 LEDG, 11 REDG]; off-ball LBs [13 SAM, 14 MIKE, 15 WILL].
    */
-  balanceCohort(ids: number[], members: number[]): number[] {
+  balanceCohort(ids: number[], members: number[], locked?: boolean[]): number[] {
     const set = new Set(members);
     let n = 0;
-    return ids.map((id) => (set.has(id) ? members[n++ % members.length] : id));
+    return ids.map((id, i) => (set.has(id) && !locked?.[i] ? members[n++ % members.length] : id));
+  },
+
+  /**
+   * The whole board's cosmetic cohorts evened out the way a draft class is built:
+   * edges round-robin LEDG/REDG, tackles, guards and safeties toward Madden's own
+   * mix around the players whose slot came from real data, off-ball 'backers by
+   * build. `pinned` entries (a roster add carrying the pool's position) never move.
+   * Deterministic for the same input order, so what the pool shows is what an add gets.
+   */
+  balanceBoard(ids: number[], items: BoardItem[], pinned?: boolean[]): number[] {
+    const lockedSlot = items.map((p, i) => !!pinned?.[i] || !!p.positionLocked);
+    let out = this.balanceCohort(ids, [10, 11], pinned); // LEDG / REDG (side is cosmetic, same build)
+    out = this.balanceCohortQuota(out, { 5: 0.55, 9: 0.45 }, lockedSlot);
+    out = this.balanceCohortQuota(out, { 6: 0.5, 8: 0.5 }, lockedSlot);
+    out = this.balanceCohortQuota(out, { 17: 0.5, 18: 0.5 }, lockedSlot);
+    // SAM/MIKE/WILL by build, but leave pinned 'backers alone: curated overrides (Ray
+    // Lewis, Lavonte David…) and front-seven verdicts (3-4 inside backer -> MIKE,
+    // coverage backer -> WILL, 4-3 blitzer -> SAM).
+    const lockedLb = items.map(
+      (p, i) => !!pinned?.[i] || this.overrideId(p.firstName, p.lastName) != null || (!!p.frontSeven?.lock && p.frontSeven.role !== 'EDGE' && p.frontSeven.role != null)
+    );
+    return this.balanceLbByBuild(out, items.map((p) => p.weight), lockedLb);
+  },
+
+  /** M26 position id for one of the game's names (LEDG -> 10), or null. */
+  idOfName(name: string): number | null {
+    const hit = Object.entries(M26_NAME).find(([, n]) => n === name);
+    return hit ? Number(hit[0]) : null;
   },
 
   /**

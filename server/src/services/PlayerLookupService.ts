@@ -987,11 +987,16 @@ export const PlayerLookupService = {
   catalog(): CatalogPlayer[] {
     load();
     if (catalogCache) return catalogCache;
-    catalogCache = [...byKey!.values()].map((p) => {
-      // The same position steps the rating path applies, so the pool shows the slot
-      // a draft class would give him (Rod Woodson at FS, Julius Peppers at edge).
-      const pos = positionLabelFor(p);
-      const posId = PositionMapper.resolve(p.firstName, p.lastName, pos.label, pos.weight);
+    // The same position steps the rating path applies, so the pool shows the slot a
+    // draft class would give him (Rod Woodson at FS, Julius Peppers at edge), and the
+    // whole pool is balanced like a class (edges split LEDG/REDG instead of nearly
+    // all LEDG); a roster add pins this slot so the roster gets what the pool showed.
+    const all = [...byKey!.values()];
+    const labels = all.map((p) => positionLabelFor(p));
+    const resolved = all.map((p, i) => PositionMapper.resolve(p.firstName, p.lastName, labels[i].label, labels[i].weight));
+    const posIds = PositionMapper.balanceBoard(resolved, all.map((p, i) => ({ firstName: p.firstName, lastName: p.lastName, weight: labels[i].weight, positionLocked: labels[i].locked, frontSeven: labels[i].frontSeven })));
+    catalogCache = all.map((p, i) => {
+      const posId = posIds[i];
       return {
         key: p.key!, first: p.firstName, last: p.lastName, pos: p.position,
         mpos: PositionMapper.name(posId), grp: PositionMapper.groupFromId(posId),

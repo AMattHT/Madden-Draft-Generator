@@ -5,10 +5,18 @@ import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
 import { LikenessService } from './LikenessService';
 import { commentaryIdFor, focusFor } from './M27Fields';
+import { PlayerLookupService } from './PlayerLookupService';
 import type { GeneratedRosterPlayer } from '../types/roster';
 
 const CACHE_MAX = 200;
 const cache = new Map<string, GeneratedRosterPlayer>();
+let poolPos: Map<string, number> | null = null;
+
+/** The pool's balanced slot for a key (the catalog is built once), or null. */
+function poolPositionId(key: string): number | null {
+  if (!poolPos) poolPos = new Map(PlayerLookupService.catalog().map((c) => [c.key, PositionMapper.idOfName(c.mpos)] as const).filter((e): e is readonly [string, number] => e[1] != null));
+  return poolPos.get(key) ?? null;
+}
 
 const num = (v: unknown, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
@@ -22,7 +30,9 @@ export const RosterAddService = {
     const { players } = await boardClass([{ key }], { fill: false });
     const player = players[0];
     if (!player) throw new Error(`player ${key} is not in the pool`);
-    const { prospects } = DraftClassBuilder.buildProspects([player], 'retro', {}, 'm27');
+    // A one-player class cannot balance its cohorts, so the pool's slot is pinned.
+    const pinned = poolPositionId(key);
+    const { prospects } = DraftClassBuilder.buildProspects([player], 'retro', pinned != null ? { pinPositions: new Map([[key, pinned]]) } : {}, 'm27');
     const p = prospects[0] as Record<string, unknown>;
     const positionId = num(p.position);
     const position = PositionMapper.name(positionId);

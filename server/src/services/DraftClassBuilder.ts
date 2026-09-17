@@ -70,6 +70,9 @@ export interface GenOptions {
    *  though the year has more players than the 402 slots: each takes the slot of
    *  the weakest remaining keeper, so everyone else's pick number is unchanged. */
   include?: number[];
+  /** Player key -> M26 position id already settled elsewhere (a roster add carries
+   *  the pool's balanced slot); these never move in the class-level balancing. */
+  pinPositions?: Map<string, number>;
   /** M27: give retired players the game ships no portrait for a recycled portrait
    *  id and write the matching portrait pack (PortraitPackService). */
   portraitPack?: boolean;
@@ -805,23 +808,13 @@ export const DraftClassBuilder = {
     // and off-ball LBs (nearly all "MLB" -> MIKE, ~80-98%). Side/role is cosmetic
     // within each cohort (LEDG/REDG share the EDGE group; SAM/MIKE/WILL share LB),
     // so round-robin each to an even split — deterministic, so preview == export.
-    let posIds = capped.map((p) => PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
-    posIds = PositionMapper.balanceCohort(posIds, [10, 11]); // LEDG / REDG (side is cosmetic — same build)
     // Offensive-line sides and safeties: the source lumps tackles as "T"/"OT" (-> LT)
     // and guards as "G" (-> LG), and pre-2001 safeties are split by build. Balance
     // toward Madden's own mix (LT 20 / RT 16, LG 13 / RG 13, FS 16 / SS 16 per
-    // class) around the players whose slot came from real data.
-    const lockedSlot = capped.map((p) => !!p.positionLocked);
-    posIds = PositionMapper.balanceCohortQuota(posIds, { 5: 0.55, 9: 0.45 }, lockedSlot);
-    posIds = PositionMapper.balanceCohortQuota(posIds, { 6: 0.5, 8: 0.5 }, lockedSlot);
-    posIds = PositionMapper.balanceCohortQuota(posIds, { 17: 0.5, 18: 0.5 }, lockedSlot);
-    // SAM/MIKE/WILL by build, but leave pinned 'backers alone: curated overrides (Ray
-    // Lewis, Lavonte David…) and front-seven verdicts (3-4 inside backer -> MIKE,
-    // coverage backer -> WILL, 4-3 blitzer -> SAM).
-    const lockedLb = capped.map(
-      (p) => PositionMapper.overrideId(p.firstName, p.lastName) != null || (!!p.frontSeven?.lock && p.frontSeven.role !== 'EDGE' && p.frontSeven.role != null)
-    );
-    posIds = PositionMapper.balanceLbByBuild(posIds, capped.map((p) => p.weight), lockedLb);
+    // class) around the players whose slot came from real data (PositionMapper.balanceBoard).
+    const pins = opts.pinPositions;
+    const resolved = capped.map((p) => (p.key ? pins?.get(p.key) : undefined) ?? PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
+    const posIds = PositionMapper.balanceBoard(resolved, capped, capped.map((p) => !!p.key && !!pins?.has(p.key)));
     const items: RankedItem[] = capped.map((player, index) => {
       const posId = posIds[index];
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
