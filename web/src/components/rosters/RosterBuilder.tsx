@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { api, type PlayerFieldEdit } from '../../api';
-import type { CatalogPlayer, GearOption, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc } from '../../types';
-import { docCounts, isDocEmpty, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
-import { groupForId, POS_NAMES } from '../../constants';
+import { api, type ArchetypeOption, type PlayerFieldEdit } from '../../api';
+import type { CatalogPlayer, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc, RosterPlayer } from '../../types';
+import { addId, docCounts, groupByPosition, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
+import { rowFor, patchFor, editFromCard, type CardCtx } from '../../rosterCard';
+import { groupForId } from '../../constants';
 import { DevBadge, Icon, ICONS, Portrait, RatingChip } from '../ui';
-import { PlayerEditPanel, type EditablePlayer } from '../PlayerEditPanel';
+import { ProfileModal } from '../ProfileModal';
 import { CatalogPanel } from '../CatalogPanel';
 import { TeamPanel } from './TeamPanel';
 
-const DEV_LABELS = ['Normal', 'Star', 'Superstar', 'XFactor'];
 const GROUPS: [string, string][] = [
   ['ALL', 'All positions'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['OL', 'OL'],
   ['EDGE', 'EDGE'], ['IDL', 'IDL'], ['LB', 'LB'], ['CB', 'CB'], ['S', 'S'], ['K', 'K'], ['P', 'P'],
 ];
 export const selectCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
 export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
+const EMPTY_CTX: CardCtx = { traits: [], focus: [], colleges: [], archetypes: {} };
 
 /** One row of the left panel: a base-roster player with his current team. */
 export function PlayerRow({ p, selected, onClick, onDragStart, trailing }: {
@@ -39,14 +40,6 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing }: {
   );
 }
 
-/** The base values the edit drawer lays a patch over: a base-file player, or a pool player's preview. */
-function editableOf(base: { position: string; overall: number; age: number; devTrait: number; jersey: number; ratings: Record<string, number>; visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string } }): EditablePlayer {
-  return {
-    position: base.position, overall: base.overall, age: base.age, dev: DEV_LABELS[base.devTrait] ?? 'Normal', jersey: base.jersey, ratings: base.ratings,
-    bodyType: base.visuals.bodyType, genericHead: base.visuals.genericHead, helmet: base.visuals.helmet, facemask: base.visuals.facemask,
-  };
-}
-
 export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, onClose, onRebase }: {
   data: RosterData;
   doc: RosterDoc;
@@ -57,8 +50,9 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   onClose: () => void;
   onRebase: () => void;
 }) {
+  const fresh = doc.fresh === true;
   const [savedAt, setSavedAt] = useState<number | null>(null);
-  const [tab, setTab] = useState<'roster' | 'pool'>('roster');
+  const [tab, setTab] = useState<'roster' | 'pool'>(fresh ? 'pool' : 'roster');
   const [team, setTeam] = useState('ALL');
   const [group, setGroup] = useState('ALL');
   const [search, setSearch] = useState('');
@@ -66,7 +60,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const [selectedTeam, setSelectedTeam] = useState(() => data.teams.find((t) => t.id !== data.freeAgentTeamId)?.id ?? data.freeAgentTeamId);
 
   // The pool: the catalog loads when the tab first opens; each add is rated by the server
-  // once (a preview) and that preview is what the team panel and the drawer show.
+  // once (a preview) and that preview is what the team panel and the card show.
   const [catalog, setCatalog] = useState<CatalogPlayer[] | null>(null);
   const [catalogErr, setCatalogErr] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, GeneratedRosterPlayer>>({});
@@ -110,6 +104,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
       return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
     });
   }, [players, team, group, search, sort]);
+  const teamRows = useMemo(() => groupByPosition(players.filter((p) => p.teamId === selectedTeam)).flatMap((g) => g.players), [players, selectedTeam]);
 
   const move = (pgid: number, teamId: number) => {
     if (readOnly) return;
@@ -131,25 +126,33 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     return { label: a.teamId === data.freeAgentTeamId ? 'FA' : t?.abbr ?? '?', title: 'Added to this roster' };
   };
 
-  // The edit drawer: gear options and generic heads load once; edits merge into the document.
-  const [editing, setEditing] = useState<number | null>(null);
-  const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
-  const [heads, setHeads] = useState<Record<string, string[]>>({});
+  // The profile card: the draft editor's, fed by the adapter; lookups load once.
+  const [ctx, setCtx] = useState<CardCtx>(EMPTY_CTX);
   useEffect(() => {
-    api.equipmentOptions(2026, 'm27').then(setGearOpts).catch(() => {});
-    api.genericHeads('m27').then(setHeads).catch(() => {});
+    let alive = true;
+    Promise.all([
+      api.personaLookups().catch(() => ({ traits: [], focus: [] })),
+      api.lookup('college').catch(() => [] as { id: number; name: string }[]),
+      api.archetypesByPosition().catch(() => ({} as Record<string, ArchetypeOption[]>)),
+    ]).then(([persona, colleges, archetypes]) => { if (alive) setCtx({ traits: persona.traits, focus: persona.focus, colleges, archetypes }); });
+    return () => { alive = false; };
   }, []);
+  const [editing, setEditing] = useState<number | null>(null);
+  const [navSource, setNavSource] = useState<'roster' | 'team'>('roster');
+  const openCard = (source: 'roster' | 'team') => (pgid: number) => { setNavSource(source); setEditing(pgid); };
+  const navRows = navSource === 'roster' ? rows : teamRows;
+  const navIndex = editing != null ? navRows.findIndex((p) => p.id === editing) : -1;
+  const navigatePlayer = (delta: number) => { const next = navRows[navIndex + delta]; if (next) setEditing(next.id); };
   const editingPlayer = editing != null ? players.find((p) => p.id === editing) ?? null : null;
   const editKey: number | string | null = editingPlayer ? (editingPlayer.added ? editingPlayer.tempId ?? null : editingPlayer.id) : null;
-  const editingBase: EditablePlayer | null = (() => {
+  const editingBase: RosterPlayer | null = (() => {
     if (!editingPlayer) return null;
     if (editingPlayer.added) {
       const a = doc.adds.find((x) => x.tempId === editingPlayer.tempId);
       const g = a ? previews[a.key] : undefined;
-      return g ? editableOf({ position: g.position, overall: g.overall, age: g.age, devTrait: g.devTrait, jersey: a?.jersey ?? g.jersey, ratings: g.ratings, visuals: { bodyType: g.bodyType, genericHead: g.genericHead, helmet: g.gear.helmet ?? '', facemask: g.gear.facemask ?? '' } }) : null;
+      return a && g ? playerFromPreview(g, addId(a.tempId), a.teamId, a.jersey) : null;
     }
-    const b = data.players.find((p) => p.id === editingPlayer.id);
-    return b ? editableOf(b) : null;
+    return data.players.find((p) => p.id === editingPlayer.id) ?? null;
   })();
   const edit = (id: number | string, patch: PlayerFieldEdit) => { if (!readOnly) onChange(withEdit(doc, id, patch)); };
 
@@ -167,7 +170,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     setExporting(true); setExportErr(null); setResult(null);
     try {
       await save();
-      const r = await api.rosterBuild({ baseName: doc.base.fromSaves ? doc.base.fileName : undefined, baseId: doc.base.openedId, name: doc.name, moves: doc.moves, edits: doc.edits, adds: doc.adds });
+      const r = await api.rosterBuild({ baseName: doc.base.fromSaves ? doc.base.fileName : undefined, baseId: doc.base.openedId, name: doc.name, moves: doc.moves, edits: doc.edits, adds: doc.adds, fresh });
       setResult(r);
     } catch (e) {
       setExportErr((e as Error).message);
@@ -181,6 +184,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     return `Could not rate ${c ? `${c.first} ${c.last}` : a.key} from the pool: ${previewErr[a.key]}. Remove him or try again.`;
   });
   const tabCls = (on: boolean) => `rounded-t-md px-3 py-1.5 text-xs font-semibold transition-colors ${on ? 'bg-surface-2 text-neutral-100' : 'text-neutral-400 hover:text-neutral-200'}`;
+  const emptyText = fresh ? 'Nothing here yet. Add players from the Pool tab.' : 'Nobody here. Drag players in from the roster list.';
 
   return (
     <div className="flex h-full flex-col">
@@ -189,7 +193,9 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
           <input value={doc.name} onChange={(e) => onChange({ ...doc, name: e.target.value, updatedAt: Date.now() })} placeholder="Roster name" disabled={readOnly}
             className="w-64 rounded-md border border-border bg-surface-0 px-3 py-1.5 text-sm font-semibold text-neutral-100 placeholder:font-normal placeholder:text-muted focus:border-primary focus:outline-none disabled:opacity-60" />
           <div className="text-xs text-neutral-400">
-            from <span className="text-neutral-200">{doc.base.fileName}</span> · <b className="text-neutral-200">{counts.moved}</b> moved · <b className="text-neutral-200">{counts.cut}</b> cut · <b className="text-neutral-200">{counts.edited}</b> edited · <b className="text-neutral-200">{counts.added}</b> added
+            {fresh ? <span className="text-neutral-200">from scratch</span> : <>from <span className="text-neutral-200">{doc.base.fileName}</span></>}
+            {!fresh && <> · <b className="text-neutral-200">{counts.moved}</b> moved · <b className="text-neutral-200">{counts.cut}</b> cut</>}
+            {' · '}<b className="text-neutral-200">{counts.edited}</b> edited · <b className="text-neutral-200">{counts.added}</b> added
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -208,7 +214,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
       {exportErr && <div className="mx-6 mt-3 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-red-200">{exportErr}</div>}
       {result && (
         <div className="mx-6 mt-3 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-xs text-green-100">
-          Wrote <code className="rounded bg-black/30 px-1">{result.output}</code> to the Madden 27 saves folder: {result.moved} moved, {result.cut} cut, {result.edited} edited, {result.added} added. In Madden: Load and Save, then Load, then Roster.
+          Wrote <code className="rounded bg-black/30 px-1">{result.output}</code> to the Madden 27 saves folder: {fresh ? '' : `${result.moved} moved, ${result.cut} cut, `}{result.edited} edited, {result.added} added. In Madden: Load and Save, then Load, then Roster.
           {result.skipped.length > 0 && <div className="mt-1 text-gold">Skipped: {result.skipped.join('; ')}</div>}
         </div>
       )}
@@ -240,45 +246,42 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
                   <option value="pos">Sort: Position</option>
                   <option value="age">Sort: Age</option>
                 </select>
-                <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length}</span> of {data.count}</span>
+                <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length}</span> of {fresh ? 0 : data.count}</span>
               </div>
               <div className="min-h-0 flex-1 overflow-auto">
-                {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onClick={() => setEditing(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
+                {rows.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{fresh ? 'Nothing here yet. Add players from the Pool tab.' : 'Nobody matches.'}</div>}
+                {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onClick={() => openCard('roster')(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
                 {rows.length > 1500 && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500 of {rows.length}. Narrow by team or position.</div>}
               </div>
             </>
           ) : (
             <>
               <div className="border-b border-border px-3 py-1.5 text-[11px] text-muted">Rated by career, added to the selected team. Age is his draft age plus four; edit anything afterwards.</div>
-              <CatalogPanel catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} onAdd={addFromPool} addDisabled={readOnly} />
+              <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} onAdd={addFromPool} addDisabled={readOnly} />
             </>
           )}
         </section>
-        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onRemove={remove} onEdit={setEditing} readOnly={readOnly} />
+        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
       </div>
 
       {editingPlayer && editingBase && editKey != null && (
-        <div className="fixed inset-0 z-40 flex justify-end bg-black/50" onClick={() => setEditing(null)}>
-          <aside className="flex h-full w-[28rem] max-w-full flex-col overflow-auto border-l border-border bg-surface-1 shadow-[0_0_48px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
-            <PlayerEditPanel
-              title={`${editingPlayer.firstName} ${editingPlayer.lastName}`}
-              subtitle={`${editingPlayer.teamName ?? 'Free agent'} · ${editingPlayer.yearsPro} yrs pro${editingPlayer.college ? ` · ${editingPlayer.college}` : ''}${editingPlayer.added ? ' · added from the pool' : ''}`}
-              positions={POS_NAMES}
-              player={editingBase}
-              edit={doc.edits[editKey]}
-              onEdit={(patch) => edit(editKey, patch)}
-              heads={heads}
-              gearOpts={gearOpts}
-              gameVersion="m27"
-              year={2026}
-              showJersey
-            />
-            <div className="mt-auto flex items-center justify-between gap-2 border-t border-border px-4 py-3">
-              <button onClick={() => { if (!readOnly) onChange(withoutEdits(doc, editKey)); }} disabled={readOnly || !doc.edits[editKey]} className={btnCls}>Reset edits</button>
-              <button onClick={() => setEditing(null)} className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-light">Done</button>
-            </div>
-          </aside>
-        </div>
+        <ProfileModal
+          mode="roster"
+          footer="Edits save with the roster and apply on export."
+          row={rowFor(editingBase, ctx)}
+          patch={patchFor(doc.edits[editKey], editingBase)}
+          gearPatch={{ ...rowFor(editingBase, ctx).gear, ...(doc.edits[editKey]?.gear ?? {}) }}
+          year={2026}
+          archetypeOptions={ctx.archetypes}
+          gameVersion="m27"
+          onEdit={(f, v) => { const e = editFromCard(f, v); if (e) edit(editKey, e); }}
+          onGearEdit={(slot, asset) => edit(editKey, { gear: { [slot]: asset } })}
+          onReset={() => { if (!readOnly) onChange(withoutEdits(doc, editKey)); }}
+          onClose={() => setEditing(null)}
+          onNavigate={navigatePlayer}
+          canPrev={navIndex > 0}
+          canNext={navIndex >= 0 && navIndex < navRows.length - 1}
+        />
       )}
     </div>
   );

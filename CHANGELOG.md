@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Roster players open in the same profile card as the draft editor, with names, college, build, archetype, persona and face editable.
+- Rosters can be built from scratch: empty teams, filled entirely from the player pool.
+- The Pool tab is a compact list with one toolbar.
+
+### Bug fixes
+
+- The player pool shows the position a draft class would give a player (Rod Woodson at free safety, Julius Peppers at edge).
+
 ## 1.4.0
 
 ### Features

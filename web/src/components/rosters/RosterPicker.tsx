@@ -7,11 +7,13 @@ const fmtWhen = (t: number) => new Date(t).toLocaleDateString([], { month: 'shor
 const btn = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
 
 /** Empty state of the Rosters view: a base file from the saves folder or elsewhere, or a roster saved earlier. */
-export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc }: {
+export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, onNew }: {
   savedDocs: RosterDoc[];
   onOpenBase: (data: RosterData, fromSaves: boolean) => void;
   onOpenDoc: (doc: RosterDoc) => void;
   onDeleteDoc: (id: string) => void;
+  /** Start a roster from scratch: empty teams, filled from the pool. Omitted while re-picking a base. */
+  onNew?: () => void;
 }) {
   const [state, setState] = useState<{ dir: string; files: SaveFileInfo[] } | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -39,10 +41,19 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc }: 
   return (
     <div className="mx-auto mt-8 grid w-[960px] max-w-full grid-cols-1 gap-5 lg:grid-cols-[1fr_20rem]">
       <div className="rounded-xl border border-border bg-surface-1 p-5">
-        <div className="text-sm font-bold tracking-tight text-neutral-100">Start from a roster</div>
-        <p className="mt-1 text-[12px] leading-relaxed text-neutral-400">
-          A Madden 27 ROSTER save: the game's own, one you downloaded, or one this app wrote. Move, cut and edit its players, then export a new file. The base file is never changed.
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-sm font-bold tracking-tight text-neutral-100">Start from a roster</div>
+            <p className="mt-1 text-[12px] leading-relaxed text-neutral-400">
+              A Madden 27 ROSTER save: the game's own, one you downloaded, or one this app wrote. Move, cut and edit its players, then export a new file. The base file is never changed.
+            </p>
+          </div>
+          {onNew && (
+            <button onClick={onNew} disabled={!!busy} title="Empty teams, filled from the player pool" className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-light disabled:opacity-50">
+              {busy === 'new' ? 'Opening…' : 'New roster'}
+            </button>
+          )}
+        </div>
         <div className="mt-4 rounded-lg border border-border bg-surface-0">
           <header className="flex items-baseline justify-between gap-2 border-b border-border px-3 py-2">
             <span className="text-xs font-semibold text-neutral-100">Madden 27 saves</span>
@@ -79,7 +90,7 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc }: 
             <div key={d.id} className="flex items-center gap-2 rounded-lg border border-border bg-surface-0 px-3 py-2">
               <button onClick={() => onOpenDoc(d)} className="min-w-0 flex-1 text-left">
                 <span className="block truncate text-sm font-medium text-neutral-100">{d.name || 'Untitled roster'}</span>
-                <span className="block truncate text-[10px] text-muted">from {d.base.fileName} · {fmtWhen(d.updatedAt)}</span>
+                <span className="block truncate text-[10px] text-muted">{d.fresh ? 'from scratch' : `from ${d.base.fileName}`} · {fmtWhen(d.updatedAt)}</span>
               </button>
               <button onClick={() => { if (confirm(`Delete "${d.name || 'Untitled roster'}"? The base file is not touched.`)) onDeleteDoc(d.id); }} className="text-[10px] text-muted hover:text-red-300">Delete</button>
             </div>

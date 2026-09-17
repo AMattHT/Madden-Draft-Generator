@@ -24,6 +24,18 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
   useEffect(refreshSaved, [refreshSaved]);
 
   const openBase = (data: RosterData, fromSaves: boolean) => { setOpen({ data, doc: newRosterDoc(data, fromSaves), readOnly: false, notice: null }); setErr(null); };
+  /** A roster from scratch: the game's own roster lends its container; the document starts empty. */
+  const openFresh = async () => {
+    setLoading('new'); setErr(null);
+    try {
+      const data = await api.rosterOpenSaved('ROSTER-Official');
+      setOpen({ data, doc: newRosterDoc(data, true, true), readOnly: false, notice: null });
+    } catch (e) {
+      setErr(`Could not open the game's roster to start from: ${(e as Error).message}`);
+    } finally {
+      setLoading(null);
+    }
+  };
 
   /** Re-read a saved roster's base: from the saves folder by name, else the server's kept copy. */
   const openDoc = async (doc: RosterDoc) => {
@@ -74,7 +86,7 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
         )}
         {err && <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-red-200">{err}</div>}
         {loading && <div className="mx-auto mt-2 w-[960px] max-w-full text-xs text-muted">Opening…</div>}
-        <RosterPicker savedDocs={saved} onOpenBase={openBase} onOpenDoc={openDoc} onDeleteDoc={del} />
+        <RosterPicker savedDocs={saved} onOpenBase={openBase} onOpenDoc={openDoc} onDeleteDoc={del} onNew={openFresh} />
       </div>
     );
   }

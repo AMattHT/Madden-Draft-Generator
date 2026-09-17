@@ -7,7 +7,7 @@ const ROSTER_LIMIT = 53;
 
 /** Team chips (with counts) and the selected team's roster grouped by position. Rows can be
  *  moved with a menu, cut, edited, or dragged onto another team chip. */
-export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly }: {
+export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly, emptyText }: {
   data: RosterData;
   players: ViewPlayer[];
   selectedTeam: number;
@@ -17,6 +17,8 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
   onRemove: (tempId: string) => void;
   onEdit: (pgid: number) => void;
   readOnly: boolean;
+  /** Shown when the selected team has nobody. */
+  emptyText?: string;
 }) {
   const [moving, setMoving] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
@@ -67,7 +69,7 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto" onDragOver={allowDrop(selectedTeam)} onDrop={drop(selectedTeam)}>
-        {onTeam.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">Nobody here. Drag players in from the roster list.</div>}
+        {onTeam.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{emptyText ?? 'Nobody here. Drag players in from the roster list.'}</div>}
         {groups.map((g) => (
           <div key={g.position}>
             <div className="sticky top-0 z-10 flex items-baseline justify-between bg-surface-2 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">

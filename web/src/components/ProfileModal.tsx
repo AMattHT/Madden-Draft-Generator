@@ -222,6 +222,8 @@ export function ProfileModal({
   canPrev = false,
   canNext = false,
   spoilers = true,
+  mode = 'draft',
+  footer,
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
@@ -238,7 +240,14 @@ export function ProfileModal({
   spoilers?: boolean;
   canPrev?: boolean;
   canNext?: boolean;
+  /** 'roster': a Rosters-view player. Always revealed; no draft slot, career value or combine; the
+   *  arrows step through the roster list rather than the board. */
+  mode?: 'draft' | 'roster';
+  /** The line in the sticky footer; defaults to the draft editor's. */
+  footer?: string;
 }) {
+  const roster = mode === 'roster';
+  if (roster) spoilers = true;
   // Avatar source chain (photo, then in-game portrait): imgErr counts how many
   // sources have failed so a dead photo URL falls back instead of going blank.
   const [imgErr, setImgErr] = useState(0);
@@ -293,7 +302,7 @@ export function ProfileModal({
       // appearance / persona picker) handles its own Escape; the profile stays.
       if (e.key === 'Escape') {
         if (gearOpen || appearOpen) return;
-        if ((e.target as HTMLElement | null)?.closest('[data-nested-editor]')) return;
+        if ((e.target as HTMLElement | null)?.closest?.('[data-nested-editor]')) return;
         onClose();
         return;
       }
@@ -471,7 +480,7 @@ export function ProfileModal({
             </div>
             <div className="mt-1.5 text-xs text-muted">
               {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
-              {row.supplemental ? ` · Supplemental Rd ${row.supplemental.round}` : row.round ? ` · Rd ${row.round}` : ''} {row.wav != null ? `· wAV ${row.wav}` : ''}
+              {roster ? '' : row.supplemental ? ` · Supplemental Rd ${row.supplemental.round}` : row.round ? ` · Rd ${row.round}` : ''} {!roster && row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
           </div>
           {onNavigate && (
@@ -479,7 +488,7 @@ export function ProfileModal({
               <button
                 onClick={() => onNavigate(-1)}
                 disabled={!canPrev}
-                title="Previous player on the board (←)"
+                title={roster ? 'Previous player (←)' : 'Previous player on the board (←)'}
                 aria-label="Previous player"
                 className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
               >
@@ -488,7 +497,7 @@ export function ProfileModal({
               <button
                 onClick={() => onNavigate(1)}
                 disabled={!canNext}
-                title="Next player on the board (→)"
+                title={roster ? 'Next player (→)' : 'Next player on the board (→)'}
                 aria-label="Next player"
                 className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
               >
@@ -508,7 +517,7 @@ export function ProfileModal({
           <div className="flex items-center gap-1 overflow-x-auto px-5 pb-2 pt-1">
             {(
               [
-                ['Scouting', scoutingRef],
+                ...(roster ? [] : ([['Scouting', scoutingRef]] as const)),
                 ['Ratings', ratingsRef],
                 ['Bio', bioRef],
                 ['Appearance', appearRef],
@@ -805,7 +814,7 @@ export function ProfileModal({
         </div>
 
         <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
-          <span className="text-[11px] text-muted">Edits save automatically &amp; apply to the .mdc export.</span>
+          <span className="text-[11px] text-muted">{footer ?? 'Edits save automatically & apply to the .mdc export.'}</span>
           <button
             onClick={() => {
               if (confirmReset) {

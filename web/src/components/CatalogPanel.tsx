@@ -22,7 +22,9 @@ export interface CatalogStatus { label: string; title?: string }
  * position group, year range, league and Hall of Fame filters, sortable columns,
  * an Add button per row. The caller owns what Add means.
  */
-export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange }: {
+const ERAS = ['ALL', ...Array.from({ length: 10 }, (_, i) => String(1930 + i * 10))];
+
+export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange, compact = false }: {
   catalog: CatalogPlayer[] | null;
   error: string | null;
   onRetry: () => void;
@@ -32,11 +34,14 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   toolbarExtra?: ReactNode;
   /** The filtered, sorted keys, for callers with a bulk action. */
   onListChange?: (keys: string[]) => void;
+  /** Half-width layout (the roster builder): rows instead of the table, one toolbar with an era picker. */
+  compact?: boolean;
 }) {
   const [q, setQ] = useState('');
   const [grp, setGrp] = useState('ALL');
   const [from, setFrom] = useState(1936);
   const [to, setTo] = useState(2026);
+  const [era, setEra] = useState('ALL');
   const [league, setLeague] = useState('ALL');
   const [hof, setHof] = useState(false);
   const [sort, setSort] = useState<SortKey>('cal');
@@ -47,7 +52,9 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   const list = useMemo(() => {
     if (!catalog) return [];
     const needle = q.trim().toLowerCase();
-    let r = catalog.filter((p) => p.year >= from && p.year <= to);
+    let r = compact
+      ? (era === 'ALL' ? catalog : catalog.filter((p) => p.year >= Number(era) && p.year < Number(era) + 10))
+      : catalog.filter((p) => p.year >= from && p.year <= to);
     if (grp !== 'ALL') r = r.filter((p) => p.grp === grp);
     if (league !== 'ALL') r = r.filter((p) => p.league === league);
     if (hof) r = r.filter((p) => p.hof);
@@ -62,7 +69,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       : sort === 'pb' ? b.pb - a.pb || b.cal - a.cal
       : b.cal - a.cal || (b.wav ?? -1) - (a.wav ?? -1));
     return r;
-  }, [catalog, q, grp, from, to, league, hof, sort]);
+  }, [catalog, q, grp, from, to, era, league, hof, sort, compact]);
 
   useEffect(() => { onListChange?.(list.map((p) => p.key)); }, [list, onListChange]);
 
@@ -71,6 +78,67 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   const sortBtn = (k: SortKey, label: string) => (
     <button onClick={() => setSort(k)} className={`${th} ${sort === k ? 'text-neutral-100' : 'hover:text-neutral-200'}`}>{label}{sort === k ? ' ▾' : ''}</button>
   );
+
+  if (compact) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${sel} w-44`} />
+          <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel}>
+            <option value="ALL">All positions</option>
+            {POS_GROUP_ORDER.map((g) => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <select value={era} onChange={(e) => setEra(e.target.value)} className={sel} title="Draft decade">
+            {ERAS.map((e) => <option key={e} value={e}>{e === 'ALL' ? 'All eras' : `${e}s`}</option>)}
+          </select>
+          <label className="flex items-center gap-1.5 text-xs text-neutral-300">
+            <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="accent-primary" />HOF
+          </label>
+          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={sel}>
+            <option value="cal">Sort: Career</option>
+            <option value="name">Sort: Name</option>
+            <option value="year">Sort: Year</option>
+            <option value="pos">Sort: Position</option>
+          </select>
+          <span className="ml-auto text-xs tabular-nums text-muted">{list.length.toLocaleString()} match</span>
+        </div>
+        <div className="min-h-0 flex-1 overflow-auto">
+          {error && (
+            <div className="m-4 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
+              Couldn't load the player catalog: {error} <button onClick={onRetry} className="ml-2 underline">Retry</button>
+            </div>
+          )}
+          {!catalog && !error && <div className="px-4 py-8 text-center text-sm text-muted">Loading the player pool…</div>}
+          {catalog && list.slice(0, SHOW_MAX).map((p) => {
+            const st = status(p.key);
+            return (
+              <div key={p.key} className={`flex items-center gap-2.5 border-b border-border/60 px-3 py-1.5 text-sm ${st ? 'bg-success/5' : 'hover:bg-surface-2/70'}`}>
+                <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
+                <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
+                  {p.first} {p.last}
+                  {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
+                </span>
+                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{p.mpos}</span>
+                <span className="w-20 text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
+                <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score">{p.cal}</span>
+                {st ? (
+                  <span className="w-14 rounded-md border border-success/40 bg-success/10 px-1.5 py-0.5 text-center text-xs text-success" title={st.title}>{st.label}</span>
+                ) : (
+                  <button onClick={() => onAdd(p.key)} disabled={addDisabled} className="w-14 rounded-md border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-xs text-primary hover:bg-primary/20 disabled:opacity-40">Add</button>
+                )}
+              </div>
+            );
+          })}
+          {catalog && list.length === 0 && <div className="px-3 py-6 text-center text-sm text-neutral-500">Nobody matches.</div>}
+          {catalog && list.length > SHOW_MAX && (
+            <div className="border-t border-border px-4 py-2 text-center text-xs text-muted">
+              Showing {SHOW_MAX} of {list.length.toLocaleString()} — narrow the search or filters to see the rest.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
