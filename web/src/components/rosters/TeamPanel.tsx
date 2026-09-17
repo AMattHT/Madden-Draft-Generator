@@ -6,15 +6,56 @@ import { TeamLogo } from '../ui';
 
 const ROSTER_LIMIT = 53;
 
-/** Team chips (with counts) and the selected team's roster grouped by position. Rows can be
- *  moved with a menu, cut, edited, or dragged onto another team chip. */
-export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, onRemove, onEdit, readOnly, emptyText, logos }: {
+/** The full-width team strip: every team as a large logo with its roster count beneath, the
+ *  selected one highlighted, each a drop target for a dragged player. Free agency is the last tile. */
+export function TeamStrip({ data, players, logos, selectedTeam, onSelectTeam, onMove, readOnly }: {
+  data: RosterData;
+  players: ViewPlayer[];
+  logos: Map<number, TeamInfo>;
+  selectedTeam: number;
+  onSelectTeam: (teamId: number) => void;
+  onMove: (pgid: number, teamId: number) => void;
+  readOnly: boolean;
+}) {
+  const [dragOver, setDragOver] = useState<number | null>(null);
+  const fa = data.freeAgentTeamId;
+  const teams = useMemo(() => data.teams.filter((t) => t.id !== fa).sort((a, b) => a.abbr.localeCompare(b.abbr)), [data, fa]);
+  const counts = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const p of players) m.set(p.teamId, (m.get(p.teamId) ?? 0) + 1);
+    return m;
+  }, [players]);
+  const drop = (teamId: number) => (e: React.DragEvent) => {
+    e.preventDefault(); setDragOver(null);
+    if (readOnly) return;
+    const pgid = Number(e.dataTransfer.getData('text/plain'));
+    if (pgid) onMove(pgid, teamId);
+  };
+  const allowDrop = (teamId: number) => (e: React.DragEvent) => { if (!readOnly) { e.preventDefault(); setDragOver(teamId); } };
+  const tile = (id: number, label: string, title: string, n: number, over: boolean, logo?: TeamInfo) => (
+    <button key={id} onClick={() => onSelectTeam(id)} onDragOver={allowDrop(id)} onDragLeave={() => setDragOver(null)} onDrop={drop(id)}
+      title={title} aria-pressed={id === selectedTeam}
+      className={`flex w-14 flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors ${id === selectedTeam ? 'bg-primary/20 ring-1 ring-primary' : over ? 'bg-primary/10 ring-1 ring-primary/60' : 'hover:bg-surface-2'}`}>
+      {logo ? <TeamLogo team={logo} size="lg" /> : <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[11px] font-bold text-neutral-300">{label}</span>}
+      <span className={`text-[11px] font-semibold tabular-nums ${id !== fa && n > ROSTER_LIMIT ? 'text-red-300' : id === selectedTeam ? 'text-neutral-100' : 'text-neutral-400'}`}>{n}</span>
+    </button>
+  );
+  return (
+    <div className="flex flex-wrap items-start gap-0.5 border-b border-border px-4 py-2">
+      {teams.map((t) => tile(t.id, t.abbr, `${t.city} ${t.name}`, counts.get(t.id) ?? 0, dragOver === t.id, logos.get(t.id)))}
+      {tile(fa, 'FA', 'Free agents', counts.get(fa) ?? 0, dragOver === fa)}
+    </div>
+  );
+}
+
+/** The selected team's roster grouped by position. Rows can be moved with a menu, cut,
+ *  edited, or dragged onto a team in the strip above. */
+export function TeamPanel({ data, players, selectedTeam, onMove, onRemove, onEdit, readOnly, emptyText, logos }: {
   data: RosterData;
   players: ViewPlayer[];
   /** Team id -> logo mark; teams without one show their abbreviation. */
   logos: Map<number, TeamInfo>;
   selectedTeam: number;
-  onSelectTeam: (teamId: number) => void;
   onMove: (pgid: number, teamId: number) => void;
   /** Take an added pool player off the roster entirely (he is not in the base file). */
   onRemove: (tempId: string) => void;
@@ -27,11 +68,6 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
   const [dragOver, setDragOver] = useState<number | null>(null);
   const fa = data.freeAgentTeamId;
   const teams = useMemo(() => data.teams.filter((t) => t.id !== fa).sort((a, b) => a.abbr.localeCompare(b.abbr)), [data, fa]);
-  const counts = useMemo(() => {
-    const m = new Map<number, number>();
-    for (const p of players) m.set(p.teamId, (m.get(p.teamId) ?? 0) + 1);
-    return m;
-  }, [players]);
   const onTeam = useMemo(() => players.filter((p) => p.teamId === selectedTeam), [players, selectedTeam]);
   const groups = useMemo(() => groupByPosition(onTeam), [onTeam]);
   const selected = data.teams.find((t) => t.id === selectedTeam);
@@ -46,27 +82,12 @@ export function TeamPanel({ data, players, selectedTeam, onSelectTeam, onMove, o
   const allowDrop = (teamId: number) => (e: React.DragEvent) => { if (!readOnly) { e.preventDefault(); setDragOver(teamId); } };
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
-      <div className="flex flex-wrap gap-1 border-b border-border px-2 py-2">
-        {teams.map((t) => {
-          const n = counts.get(t.id) ?? 0;
-          return (
-            <button key={t.id} onClick={() => onSelectTeam(t.id)} onDragOver={allowDrop(t.id)} onDragLeave={() => setDragOver(null)} onDrop={drop(t.id)}
-              title={`${t.city} ${t.name}`} aria-pressed={t.id === selectedTeam}
-              className={`inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-semibold tabular-nums transition-colors ${t.id === selectedTeam ? 'bg-primary text-white' : dragOver === t.id ? 'bg-primary/30 text-neutral-100' : 'bg-surface-2 text-neutral-300 hover:bg-surface-3'}`}>
-              {logos.get(t.id) ? <TeamLogo team={logos.get(t.id)} size="sm" /> : t.abbr}
-              <span className={n > ROSTER_LIMIT ? 'text-red-300' : 'opacity-80'}>{n}</span>
-            </button>
-          );
-        })}
-        <button onClick={() => onSelectTeam(fa)} onDragOver={allowDrop(fa)} onDragLeave={() => setDragOver(null)} onDrop={drop(fa)}
-          className={`rounded-md px-2 py-1 text-[11px] font-semibold tabular-nums ${isFa ? 'bg-primary text-white' : dragOver === fa ? 'bg-primary/30 text-neutral-100' : 'bg-surface-2 text-neutral-300 hover:bg-surface-3'}`}>
-          FA <span className="opacity-70">{counts.get(fa) ?? 0}</span>
-        </button>
-      </div>
-
-      <div className="flex items-baseline justify-between border-b border-border px-3 py-2">
-        <div className="text-sm font-bold text-neutral-100">{isFa ? 'Free agents' : selected ? `${selected.city} ${selected.name}` : ''}</div>
+    <section className={`flex min-h-0 flex-col overflow-hidden rounded-lg border bg-surface-1 ${dragOver === selectedTeam ? 'border-primary/60' : 'border-border'}`}>
+      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2">
+        <div className="flex items-center gap-2">
+          {!isFa && logos.get(selectedTeam) && <TeamLogo team={logos.get(selectedTeam)} size="md" />}
+          <div className="text-sm font-bold text-neutral-100">{isFa ? 'Free agents' : selected ? `${selected.city} ${selected.name}` : ''}</div>
+        </div>
         <div className="text-xs tabular-nums text-muted">
           {isFa ? `${onTeam.length} players` : <><span className={onTeam.length > ROSTER_LIMIT ? 'font-semibold text-red-300' : 'font-semibold text-neutral-300'}>{onTeam.length}</span> of {ROSTER_LIMIT}</>}
         </div>

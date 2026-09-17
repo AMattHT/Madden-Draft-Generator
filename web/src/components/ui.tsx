@@ -157,10 +157,10 @@ export function Portrait({ src, fallback, size = 'md' }: { src?: string | null; 
 
 /** Drafting-team mark: ESPN logo when available, else a neutral abbreviation
  *  chip (historical/relocated teams, or a missing logo). */
-export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' | 'md' }) {
+export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' | 'md' | 'lg' }) {
   const [broken, setBroken] = useState(false);
   useEffect(() => setBroken(false), [team?.logo]);
-  const dim = size === 'sm' ? 'h-5 w-5' : 'h-6 w-6';
+  const dim = size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-9 w-9' : 'h-6 w-6';
   if (!team) return <span className="text-xs text-muted">—</span>;
   if (team.logo && !broken) {
     return (

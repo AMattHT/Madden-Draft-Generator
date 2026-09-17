@@ -8,7 +8,7 @@ import { groupForId } from '../../constants';
 import { DevBadge, Icon, ICONS, Portrait, RatingChip, TeamLogo } from '../ui';
 import { ProfileModal } from '../ProfileModal';
 import { CatalogPanel } from '../CatalogPanel';
-import { TeamPanel } from './TeamPanel';
+import { TeamPanel, TeamStrip } from './TeamPanel';
 
 const GROUPS: [string, string][] = [
   ['ALL', 'All positions'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['OL', 'OL'],
@@ -232,6 +232,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
         </div>
       )}
 
+      <TeamStrip data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} readOnly={readOnly} />
+
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-6 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
           <div className="flex items-center gap-1 border-b border-border px-2 pt-2">
@@ -274,7 +276,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
             </>
           )}
         </section>
-        <TeamPanel data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
+        <TeamPanel data={data} players={players} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
       </div>
 
       {editingPlayer && editingBase && editKey != null && (
