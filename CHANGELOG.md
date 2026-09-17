@@ -14,6 +14,7 @@
 ### Bug fixes
 
 - The player pool shows the position a draft class would give a player (Rod Woodson at free safety, Julius Peppers at edge).
+- Career-rated legends keep their physical attributes near the position ceiling instead of running to 99: Carl Eller added to a roster is an 89-speed edge, not 98. This also applies to the Career lens in draft classes.
 
 ## 1.4.0
 

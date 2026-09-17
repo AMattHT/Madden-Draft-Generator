@@ -27,6 +27,10 @@ import { PositionMapper } from './PositionMapper';
 
 /** Attributes that come from athleticism (combine + build), never from career
  *  caliber: the reconciler must not pump them to hit an overall. */
+/** How far a career-rated legend's physical attributes may exceed the position's
+ *  rookie ceiling (an 86-speed edge class allows an 89-speed legend). */
+export const LEGEND_PHYSICAL_MARGIN = 3;
+
 export const FIXED_ATTRS = new Set([
   'speed', 'acceleration', 'agility', 'changeOfDirection', 'jumping', 'strength', 'throwPower',
 ]);
@@ -86,8 +90,8 @@ export interface GenerateInput {
    *  speed from how much he ran, not from the archetype's spread. */
   career?: CareerBits | null;
   draftYear?: number;
-  /** Career-retrospective mode rates beyond Madden's rookie range; let the
-   *  observed max stretch instead of pinning elite legends to a rookie ceiling. */
+  /** Career-retrospective mode rates beyond Madden's rookie range: skill
+   *  attributes run to 99; physicals get LEGEND_PHYSICAL_MARGIN over the observed max. */
   uncapped?: boolean;
 }
 
@@ -200,8 +204,12 @@ export function generateAttributes(input: GenerateInput): Record<string, number>
       const lo = Math.max(1, st.min - 4);
       // Skill attributes may stretch past the observed range (the reconciler
       // needs the room); a physical attribute with no evidence behind it does
-      // not go beyond what Madden's own classes show.
-      const hi = input.uncapped ? 99 : Math.min(99, FIXED_ATTRS.has(k) ? st.max : st.max + 4);
+      // not go beyond what Madden's own classes show. A career-rated legend's
+      // skills run to 99, but his athleticism stays near the position's ceiling:
+      // a 99 overall 1964 end is not a 98-speed edge.
+      const hi = FIXED_ATTRS.has(k)
+        ? Math.min(99, st.max + (input.uncapped ? LEGEND_PHYSICAL_MARGIN : 0))
+        : input.uncapped ? 99 : Math.min(99, st.max + 4);
       v = Math.max(lo, Math.min(hi, v));
     }
     out[k] = clampRating(v);
