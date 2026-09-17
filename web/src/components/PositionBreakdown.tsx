@@ -1,6 +1,15 @@
 import { useMemo } from 'react';
 import type { PlayerRow } from '../types';
-import { groupForId, POS_GROUP_ORDER } from '../constants';
+import { groupForId, POS_GROUP_ORDER, POS_NAMES } from '../constants';
+
+/** Chip order: the coarse groups, except the line and the edge, which split into
+ *  their exact spots so a tackle can be told from a guard and a left end from a right. */
+const SPLIT: Record<string, string[]> = { OL: ['LT', 'LG', 'C', 'RG', 'RT'], EDGE: ['LEDG', 'REDG'] };
+const CHIP_ORDER = POS_GROUP_ORDER.flatMap((g) => SPLIT[g] ?? [g]);
+const chipOf = (positionId: number): string => {
+  const g = groupForId(positionId);
+  return SPLIT[g] ? POS_NAMES[positionId] ?? g : g;
+};
 
 /**
  * Class composition strip: how many prospects at each position group, in draft-board
@@ -21,12 +30,12 @@ export function PositionBreakdown({
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const r of rows) {
-      const g = groupForId(r.positionId);
+      const g = chipOf(r.positionId);
       c[g] = (c[g] || 0) + 1;
     }
     return c;
   }, [rows]);
-  const groups = POS_GROUP_ORDER.filter((g) => counts[g]);
+  const groups = CHIP_ORDER.filter((g) => counts[g]);
 
   return (
     <div className={compact ? 'flex flex-wrap items-center gap-1' : 'glass flex flex-wrap items-center gap-1 rounded-xl px-3 py-2.5'}>
