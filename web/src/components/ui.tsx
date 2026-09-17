@@ -351,6 +351,9 @@ export function Portrait({
         alt=""
         loading="lazy"
         decoding="async"
+        // A cached image can be complete before the load handler is attached
+        // (a card remounted by the virtual scroller), so read its state on mount too.
+        ref={(el) => { if (el && el.complete && el.naturalWidth > 0) setLoaded(true); }}
         onLoad={() => setLoaded(true)}
         onError={() => setBroken((b) => b + 1)}
         className={`${dim} ${radius} shrink-0 bg-surface-2 object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'} ${size === 'fill' ? '' : 'ring-1 ring-white/[0.08]'} ${className}`}
