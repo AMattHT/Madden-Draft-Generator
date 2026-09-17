@@ -260,6 +260,18 @@ export interface RosterData {
   players: RosterPlayer[];
 }
 
+export interface AddedPlayer { tempId: string; key: string; teamId: number; jersey?: number }
+
+/** A pool player rated for a roster (the server's GeneratedRosterPlayer). */
+export interface GeneratedRosterPlayer {
+  key: string; firstName: string; lastName: string; positionId: number; position: string;
+  archetypeId: number; archetype: string | null; collegeId: number; college: string | null;
+  hometown: string; homeStateId: number; age: number; yearsPro: number; heightInches: number; weight: number; jersey: number;
+  overall: number; devTrait: number; draftYear: number; draftRound: number; draftPick: number;
+  ratings: Record<string, number>; assetName: string; genericHead: string; skinTone: number; bodyType: string;
+  gear: Record<string, string>; personaDNA: number[]; focus: number; commentaryId: number; portrait: string | null;
+}
+
 /** A roster the user is building: deltas against a base ROSTER file. */
 export interface RosterDoc {
   id: string;
@@ -267,13 +279,13 @@ export interface RosterDoc {
   /** fromSaves: the base was picked from the saves folder (export can name it); false for a browsed file (export uses openedId). */
   base: { fileName: string; openedId: string; sizeBytes: number; crc: number; fromSaves: boolean };
   moves: Record<number, number>;
-  adds: { tempId: string; key: string; teamId: number; jersey?: number }[];
+  adds: AddedPlayer[];
   edits: Record<string, import('./api').PlayerFieldEdit>;
   createdAt: number;
   updatedAt: number;
 }
 
 export interface RosterBuildResult {
-  moved: number; cut: number; edited: number; skipped: string[];
+  moved: number; cut: number; edited: number; added: number; skipped: string[];
   input: string; output: string; outputPath: string;
 }

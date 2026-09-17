@@ -1,5 +1,5 @@
 import type { PlayerFieldEdit } from './api';
-import type { RosterData, RosterDoc, RosterPlayer } from './types';
+import type { GeneratedRosterPlayer, RosterData, RosterDoc, RosterPlayer } from './types';
 import type { AppView } from './App';
 import { POS_NAMES, DEV_NAMES } from './constants';
 
@@ -7,6 +7,9 @@ import { POS_NAMES, DEV_NAMES } from './constants';
 export interface ViewPlayer extends RosterPlayer {
   edited: boolean;
   moved: boolean;
+  /** From the player pool (not in the base file); `tempId` keys his edits and moves. */
+  added: boolean;
+  tempId?: string;
 }
 
 export const POSITION_ORDER: string[] = POS_NAMES;
@@ -42,60 +45,108 @@ export function withMove(doc: RosterDoc, pgid: number, teamId: number, data: Ros
   return { ...doc, moves, updatedAt: Date.now() };
 }
 
-/** Merge a patch into a player's edits (ratings and gear merge one level deep). */
-export function withEdit(doc: RosterDoc, pgid: number, patch: PlayerFieldEdit): RosterDoc {
-  const prev = doc.edits[pgid] ?? {};
+/** Merge a patch into a player's edits (ratings and gear merge one level deep). Added players use their tempId. */
+export function withEdit(doc: RosterDoc, id: number | string, patch: PlayerFieldEdit): RosterDoc {
+  const prev = doc.edits[id] ?? {};
   const next: PlayerFieldEdit = { ...prev, ...patch };
   if (patch.ratings) next.ratings = { ...(prev.ratings ?? {}), ...patch.ratings };
   if (patch.gear) next.gear = { ...(prev.gear ?? {}), ...patch.gear };
-  return { ...doc, edits: { ...doc.edits, [pgid]: next }, updatedAt: Date.now() };
+  return { ...doc, edits: { ...doc.edits, [id]: next }, updatedAt: Date.now() };
 }
 
-export function withoutEdits(doc: RosterDoc, pgid: number): RosterDoc {
+export function withoutEdits(doc: RosterDoc, id: number | string): RosterDoc {
   const edits = { ...doc.edits };
-  delete edits[pgid];
+  delete edits[id];
   return { ...doc, edits, updatedAt: Date.now() };
+}
+
+/** A stable negative id for an added player, so he can sit in lists keyed by number. */
+export function addId(tempId: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < tempId.length; i++) { h ^= tempId.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return -((h >>> 0) % 1_000_000_000 + 1);
+}
+
+export const addedKeys = (doc: RosterDoc) => new Set(doc.adds.map((a) => a.key));
+
+/** Add a pool player to a team; a key already in the document is left where it is. */
+export function withAdd(doc: RosterDoc, key: string, teamId: number): RosterDoc {
+  if (doc.adds.some((a) => a.key === key)) return doc;
+  return { ...doc, adds: [...doc.adds, { tempId: newId(), key, teamId }], updatedAt: Date.now() };
+}
+
+export function withoutAdd(doc: RosterDoc, tempId: string): RosterDoc {
+  const edits = { ...doc.edits };
+  delete edits[tempId];
+  return { ...doc, adds: doc.adds.filter((a) => a.tempId !== tempId), edits, updatedAt: Date.now() };
+}
+
+export function withAddMove(doc: RosterDoc, tempId: string, teamId: number): RosterDoc {
+  return { ...doc, adds: doc.adds.map((a) => (a.tempId === tempId ? { ...a, teamId } : a)), updatedAt: Date.now() };
 }
 
 const DEV_KEY: Record<string, number> = { Normal: 0, Star: 1, Superstar: 2, XFactor: 3 };
 
-/** Every base player with moves and edits applied. */
-export function viewPlayers(doc: RosterDoc, data: RosterData): ViewPlayer[] {
-  const teamById = new Map(data.teams.map((t) => [t.id, t]));
-  return data.players.map((p) => {
-    const e = doc.edits[p.id];
-    const teamId = teamOf(doc, p);
-    const team = teamById.get(teamId);
-    const isFa = teamId === data.freeAgentTeamId || !team;
-    const position = e?.position && POS_NAMES.includes(e.position) ? e.position : p.position;
-    return {
-      ...p,
-      teamId,
-      team: isFa ? null : team!.abbr,
-      teamName: isFa ? null : `${team!.city} ${team!.name}`,
-      overall: e?.overall ?? p.overall,
-      age: e?.age ?? p.age,
-      jersey: e?.jersey ?? p.jersey,
-      position,
-      positionId: POS_NAMES.indexOf(position),
-      devTrait: e?.dev != null && e.dev in DEV_KEY ? DEV_KEY[e.dev] : p.devTrait,
-      ratings: e?.ratings ? { ...p.ratings, ...e.ratings } : p.ratings,
-      visuals: {
-        bodyType: e?.bodyType ?? p.visuals.bodyType,
-        genericHead: e?.genericHead ?? p.visuals.genericHead,
-        helmet: e?.gear?.helmet ?? p.visuals.helmet,
-        facemask: e?.gear?.facemask ?? p.visuals.facemask,
-      },
-      edited: !!e,
-      moved: doc.moves[p.id] != null,
-    };
-  });
+/** A player with his team resolved and an edit patch laid over him. */
+function overlay(p: RosterPlayer, e: PlayerFieldEdit | undefined, teamId: number, data: RosterData): RosterPlayer {
+  const team = data.teams.find((t) => t.id === teamId);
+  const isFa = teamId === data.freeAgentTeamId || !team;
+  const position = e?.position && POS_NAMES.includes(e.position) ? e.position : p.position;
+  return {
+    ...p,
+    teamId,
+    team: isFa ? null : team!.abbr,
+    teamName: isFa ? null : `${team!.city} ${team!.name}`,
+    overall: e?.overall ?? p.overall,
+    age: e?.age ?? p.age,
+    jersey: e?.jersey ?? p.jersey,
+    position,
+    positionId: POS_NAMES.indexOf(position),
+    devTrait: e?.dev != null && e.dev in DEV_KEY ? DEV_KEY[e.dev] : p.devTrait,
+    ratings: e?.ratings ? { ...p.ratings, ...e.ratings } : p.ratings,
+    visuals: {
+      bodyType: e?.bodyType ?? p.visuals.bodyType,
+      genericHead: e?.genericHead ?? p.visuals.genericHead,
+      helmet: e?.gear?.helmet ?? p.visuals.helmet,
+      facemask: e?.gear?.facemask ?? p.visuals.facemask,
+    },
+  };
 }
 
-export function docCounts(doc: RosterDoc, data: RosterData): { moved: number; cut: number; edited: number } {
+/** A pool player's preview as a roster player (before edits). */
+export function playerFromPreview(g: GeneratedRosterPlayer, id: number, teamId: number, jersey?: number): RosterPlayer {
+  return {
+    id, firstName: g.firstName, lastName: g.lastName, position: g.position, positionId: g.positionId,
+    teamId, team: null, teamName: null,
+    overall: g.overall, age: g.age, heightInches: g.heightInches, weight: g.weight, jersey: jersey ?? g.jersey,
+    yearsPro: g.yearsPro, devTrait: g.devTrait, archetype: g.archetype, college: g.college, hometown: g.hometown,
+    draftRound: g.draftRound < 63 ? g.draftRound : null, draftPick: g.draftPick || null,
+    assetName: g.assetName || null, portrait: g.portrait, ratings: { ...g.ratings },
+    visuals: { bodyType: g.bodyType, genericHead: g.genericHead, helmet: g.gear.helmet ?? '', facemask: g.gear.facemask ?? '' },
+  };
+}
+
+/** Every base player with moves and edits applied, then the adds that have a preview. */
+export function viewPlayers(doc: RosterDoc, data: RosterData, previews: Record<string, GeneratedRosterPlayer> = {}): ViewPlayer[] {
+  const out: ViewPlayer[] = data.players.map((p) => ({
+    ...overlay(p, doc.edits[p.id], teamOf(doc, p), data),
+    edited: !!doc.edits[p.id],
+    moved: doc.moves[p.id] != null,
+    added: false,
+  }));
+  for (const a of doc.adds) {
+    const g = previews[a.key];
+    if (!g) continue;
+    const base = playerFromPreview(g, addId(a.tempId), a.teamId, a.jersey);
+    out.push({ ...overlay(base, doc.edits[a.tempId], a.teamId, data), edited: !!doc.edits[a.tempId], moved: false, added: true, tempId: a.tempId });
+  }
+  return out;
+}
+
+export function docCounts(doc: RosterDoc, data: RosterData): { moved: number; cut: number; edited: number; added: number } {
   let moved = 0, cut = 0;
   for (const t of Object.values(doc.moves)) { if (t === data.freeAgentTeamId) cut++; else moved++; }
-  return { moved, cut, edited: Object.keys(doc.edits).length };
+  return { moved, cut, edited: Object.keys(doc.edits).length, added: doc.adds.length };
 }
 
 export function isDocEmpty(doc: RosterDoc): boolean {
