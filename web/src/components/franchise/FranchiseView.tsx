@@ -85,7 +85,7 @@ export function FranchiseView(props: {
       {/* Shared save picker + tab nav */}
       <div className="shrink-0 border-b border-white/[0.06] px-6 py-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Save</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Save</span>
           <select value={selected} onChange={(e) => setSelected(e.target.value)} className={`${inputCls} min-w-[18rem]`}>
             {files.length === 0 && <option value="">No CAREER saves found</option>}
             <optgroup label="Your saves">
@@ -97,7 +97,7 @@ export function FranchiseView(props: {
               </optgroup>
             )}
           </select>
-          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-300" title="Franchise tools follow the game switch in the top bar">Madden {props.gameVersion === 'm27' ? '27' : '26'}</span>
+          <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-neutral-300" title="Franchise tools follow the game switch in the top bar">Madden {props.gameVersion === 'm27' ? '27' : '26'}</span>
           {savesDir && <span className="hidden text-[11px] text-muted lg:inline">from {savesDir}</span>}
         </div>
 

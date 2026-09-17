@@ -109,7 +109,7 @@ export function TeamPanel({ data, players, grouped, selectedTeam, onMove, onRemo
       {groups.map((g) => (
         <div key={g.position || 'all'}>
           {g.position && (
-            <div className="sticky top-0 z-10 flex items-baseline justify-between bg-surface-2 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
+            <div className="sticky top-0 z-10 flex items-baseline justify-between bg-surface-2 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
               <span>{g.position}</span><span className="tabular-nums">{g.players.length}</span>
             </div>
           )}

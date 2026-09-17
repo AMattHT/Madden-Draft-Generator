@@ -98,7 +98,7 @@ function TeamStage({ data, fromSaves, onBack, onOpen }: {
               style={{ ['--i' as string]: Math.min(i, 24) }}
               className="press group relative flex h-[84px] flex-col items-center justify-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-2 transition-all duration-200 hover:border-white/[0.16] hover:bg-surface-3 hover:shadow-[0_12px_30px_-14px_rgba(0,0,0,0.9)]"
             >
-              <span className={`absolute right-2 top-1.5 text-[10px] font-semibold tabular-nums ${n > ROSTER_LIMIT ? 'text-red-300' : 'text-neutral-500'}`}>{n}</span>
+              <span className={`absolute right-2 top-1.5 text-[11px] font-semibold tabular-nums ${n > ROSTER_LIMIT ? 'text-red-300' : 'text-neutral-500'}`}>{n}</span>
               {logo ? (
                 <span className="transition-transform duration-200 group-hover:scale-110"><TeamLogo team={logo} size="lg" /></span>
               ) : (
@@ -261,7 +261,7 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
       <section className="glass mt-6 overflow-hidden rounded-xl">
         <header className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-4 py-2.5">
           <span className="text-xs font-semibold text-neutral-100">Start from a save <span className="ml-1 font-normal text-muted">· Madden 27 saves folder</span></span>
-          <span className="min-w-0 truncate text-[10.5px] text-muted" title={state?.dir}>{state?.dir ?? ''}</span>
+          <span className="min-w-0 truncate text-[11px] text-muted" title={state?.dir}>{state?.dir ?? ''}</span>
         </header>
         <div className="max-h-[360px] overflow-auto">
           {!state && !err && (

@@ -152,7 +152,7 @@ export function MenuBar({
             <div role="menu" className="glass-strong absolute left-0 top-full z-50 mt-1 min-w-[280px] animate-pop origin-top-left overflow-hidden whitespace-nowrap rounded-xl py-1.5">
               {m.items.map((it, i) => {
                 if (it.kind === 'sep') return <div key={i} className="my-1 border-t border-white/[0.06]" />;
-                if (it.kind === 'label') return <div key={i} className="px-4 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{it.label}</div>;
+                if (it.kind === 'label') return <div key={i} className="px-4 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{it.label}</div>;
                 return (
                   <button
                     key={i}
@@ -163,7 +163,7 @@ export function MenuBar({
                   >
                     <span className="w-3 text-primary-light">{it.checked ? '✓' : ''}</span>
                     <span className="flex-1">{it.label}</span>
-                    {it.hint && <span className="text-[10px] text-muted">{it.hint}</span>}
+                    {it.hint && <span className="text-[11px] text-muted">{it.hint}</span>}
                   </button>
                 );
               })}

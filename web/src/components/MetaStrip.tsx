@@ -152,7 +152,7 @@ export function MetaStrip({
       <span className="flex items-center gap-3 text-[11px] text-muted" title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — turn on Spoilers to reveal'}>
         {([3, 2, 1] as const).map((d) => (
           <span key={d} className="flex items-center gap-1">
-            <DevBadge dev={d} hidden={!spoilers} />
+            <DevBadge dev={d} />
             <b className="font-display text-[13px] font-bold tabular-nums text-neutral-200">{spoilers ? dev[d] : '?'}</b>
           </span>
         ))}

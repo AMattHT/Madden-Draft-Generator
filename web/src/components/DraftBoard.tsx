@@ -17,14 +17,14 @@ const Tile = memo(function Tile({ r, active, spoilers, onOpen, i }: { r: Row; ac
           : 'border-white/[0.05] bg-white/[0.025] hover:border-white/[0.14] hover:bg-white/[0.06]'
       }`}
     >
-      <span className="w-6 shrink-0 text-right text-[10px] font-bold tabular-nums text-neutral-500">{r.supplemental ? 'S' : r.pick}</span>
+      <span className="w-6 shrink-0 text-right text-[11px] font-bold tabular-nums text-neutral-500">{r.supplemental ? 'S' : r.pick}</span>
       <Portrait src={displayPortrait(r)} fallback={r.portrait} size="sm" />
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className="truncate text-[12.5px] font-semibold text-neutral-100">{r.firstName} {r.lastName}</span>
+          <span className="truncate text-[13px] font-semibold text-neutral-100">{r.firstName} {r.lastName}</span>
           {r.edited && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" title="edited" />}
         </span>
-        <span className="mt-0.5 flex items-center gap-1.5 text-[10px] text-neutral-400">
+        <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-neutral-400">
           <TeamLogo team={r.team} size="sm" />
           <span className="font-semibold text-neutral-300">{r.position}</span>
           <span className="truncate">{r.college || ''}</span>
@@ -75,10 +75,10 @@ export function DraftBoard({
           return (
             <section key={round} className="glass flex w-[272px] shrink-0 flex-col rounded-xl">
               <header className="accent-line flex items-center justify-between rounded-t-xl border-b border-white/[0.06] px-3 py-2">
-                <span className="font-display text-xs font-bold uppercase tracking-[0.14em] text-neutral-200">
+                <span className="font-display text-xs font-bold uppercase tracking-[0.12em] text-neutral-200">
                   {round ? `Round ${round}` : 'Unrounded'}
                 </span>
-                <span className="text-[10px] tabular-nums text-muted">
+                <span className="text-[11px] tabular-nums text-muted">
                   {list.length} pick{list.length === 1 ? '' : 's'}
                   {revealed > 0 && <span className="ml-1.5 text-success-light" title="80+ overall">· {revealed} ★</span>}
                 </span>

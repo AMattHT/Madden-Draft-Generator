@@ -36,7 +36,7 @@ function TraitCard({ t, onRemove }: { t: PersonaTrait; onRemove?: () => void }) 
       )}
       <img src={dnaIcon(t)} alt="" className="h-14 w-14 rounded-xl object-contain" loading="lazy" />
       <div className="text-[11px] font-semibold leading-tight text-legend-light">{traitLabel(t)}</div>
-      {t.description && <div className="line-clamp-2 text-[10px] leading-snug text-neutral-400">{t.description}</div>}
+      {t.description && <div className="line-clamp-2 text-[11px] leading-snug text-neutral-400">{t.description}</div>}
     </div>
   );
 }
@@ -91,7 +91,7 @@ function PersonaSection({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
           Mindset focus <span className="font-medium normal-case tracking-normal text-muted">· one of four · separate from the traits</span>
         </div>
         {focusEdited && generatedFocusId != null && (
@@ -112,13 +112,13 @@ function PersonaSection({
               className={`flex min-h-[76px] flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left transition-colors ${on ? 'border-legend/50 bg-legend/10' : 'border-border hover:border-legend/40 hover:bg-white/[0.06]'}`}
             >
               <span className={`text-[11px] font-semibold uppercase tracking-wide ${on ? 'text-legend-light' : 'text-neutral-200'}`}>{f.label}</span>
-              {f.description && <span className="line-clamp-3 text-[10px] leading-snug text-neutral-400">{f.description}</span>}
+              {f.description && <span className="line-clamp-3 text-[11px] leading-snug text-neutral-400">{f.description}</span>}
             </button>
           );
         })}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.05] pt-3">
-        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
           Persona DNA <span className="font-medium normal-case tracking-normal text-muted">· {ids.length}/5 slots · written into the M27 export</span>
         </div>
         <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ function PersonaSection({
           <button
             key={`empty-${i}`}
             onClick={() => setAdding(true)}
-            className="grid min-h-[104px] place-items-center rounded-lg border border-dashed border-border text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-legend/40 hover:text-neutral-300"
+            className="grid min-h-[104px] place-items-center rounded-lg border border-dashed border-border text-[11px] uppercase tracking-wider text-muted transition-colors hover:border-legend/40 hover:text-neutral-300"
           >
             empty slot
           </button>
@@ -174,8 +174,8 @@ function PersonaSection({
                   className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-center transition-colors ${on ? 'border-legend/40 bg-legend/10 opacity-50' : 'border-border hover:border-legend/40 hover:bg-white/[0.06]'} disabled:cursor-default`}
                 >
                   <img src={dnaIcon(t)} alt="" className="h-12 w-12 rounded-xl object-contain" loading="lazy" />
-                  <span className="text-[10px] font-medium leading-tight text-neutral-200">{traitLabel(t)}</span>
-                  {t.description && <span className="line-clamp-2 text-[9px] leading-snug text-muted">{t.description}</span>}
+                  <span className="text-[11px] font-medium leading-tight text-neutral-200">{traitLabel(t)}</span>
+                  {t.description && <span className="line-clamp-2 text-[11px] leading-snug text-muted">{t.description}</span>}
                 </button>
               );
             })}
@@ -450,7 +450,7 @@ export function ProfileModal({
               <RatingChip ovr={gameView?.overall ?? overall} size="sm" hidden={!spoilers} />
               {gameView && gameView.archetype != null && gameView.archetype !== archetype && (
                 <span
-                  className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] text-warning"
+                  className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[11px] text-warning"
                   title="Madden labels a prospect with whichever of its archetypes scores his attributes highest."
                 >
                   as {archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}
@@ -462,7 +462,7 @@ export function ProfileModal({
                   title={row.twoWay.source === 'era'
                     ? `Single-platoon era (through 1949): every player went both ways, so his ${row.twoWay.roles.join(' / ')} ratings are floored a step below his overall.`
                     : `${row.twoWay.note ?? 'Two-way player'} — the ${row.twoWay.roles.join(' / ')} ratings are floored near his overall so the depth chart can play him there.`}
-                  className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[10px] text-legend-light"
+                  className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[11px] text-legend-light"
                 >
                   also {row.twoWay.roles.join(' · ')}
                 </span>
@@ -470,7 +470,7 @@ export function ProfileModal({
               {row.supplemental && (
                 <span
                   title={`Selected in the ${row.draftYear} NFL supplemental draft, round ${row.supplemental.round}${row.supplemental.team ? ` by the ${row.supplemental.team.name}` : ''}. A supplemental pick has no overall pick number; the club gave up that round's pick the next year. He is placed after the round's regular picks.`}
-                  className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[10px] text-legend-light"
+                  className="rounded border border-legend/40 bg-legend/10 px-1.5 py-0.5 text-[11px] text-legend-light"
                 >
                   Supplemental
                 </span>
@@ -478,7 +478,7 @@ export function ProfileModal({
               {row.frontSeven && row.frontSeven.role && (
                 <span
                   title={frontSevenTitle(row.frontSeven)}
-                  className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-neutral-400"
+                  className="rounded border border-border px-1.5 py-0.5 text-[11px] uppercase tracking-wider text-neutral-400"
                 >
                   {row.frontSeven.role === 'EDGE' ? 'edge' : 'off-ball'} · {row.frontSeven.reason}
                 </span>
@@ -537,7 +537,7 @@ export function ProfileModal({
               <button
                 key={label}
                 onClick={() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="rounded-md px-2 py-1 text-[10.5px] font-semibold text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
+                className="rounded-md px-2 py-1 text-[11px] font-semibold text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
               >
                 {label}
               </button>
@@ -585,13 +585,13 @@ export function ProfileModal({
             ];
             return (
               <div className="border-b border-white/[0.06] px-5 py-3">
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
                   NFL Combine <span className="text-muted">· drives speed / strength / jump / agility</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                   {metrics.map(([label, val, unit]) => (
                     <div key={label} className="rounded-lg bg-white/[0.04] px-1.5 py-1.5 text-center ring-1 ring-white/[0.05]">
-                      <div className="text-[9px] uppercase tracking-wide text-muted">{label}</div>
+                      <div className="text-[11px] uppercase tracking-wide text-muted">{label}</div>
                       <div className="text-sm font-semibold tabular-nums text-neutral-100">
                         {val != null ? `${val}${unit}` : '—'}
                       </div>
@@ -661,7 +661,7 @@ export function ProfileModal({
         </div>
 
         <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
-          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Bio</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Bio</div>
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               First name
@@ -737,7 +737,7 @@ export function ProfileModal({
 
           <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
               Appearance <span className="font-medium normal-case tracking-normal text-muted">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
             <span className="inline-flex items-center gap-2">
@@ -779,7 +779,7 @@ export function ProfileModal({
 
         <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Equipment</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Equipment</div>
             <button
               onClick={() => setGearOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
@@ -816,7 +816,7 @@ export function ProfileModal({
         <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
             <div key={g.title}>
-              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{g.title}</div>
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{g.title}</div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {g.keys.map((k) => (
                   <div key={k} className="flex items-center justify-between gap-2">

@@ -55,7 +55,7 @@ const Card = memo(function Card({
       <span className="relative flex items-center justify-between px-3.5 pt-3">
         <span className="flex items-center gap-2">
           <TeamLogo team={r.team} size="md" />
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">{r.team?.abbr ?? '—'}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">{r.team?.abbr ?? '—'}</span>
         </span>
         <span className="rounded-md bg-black/40 px-2 py-0.5 font-display text-[11px] font-bold tabular-nums text-neutral-300 ring-1 ring-white/[0.08]">
           {r.supplemental ? `S · Rd ${r.supplemental.round}` : `#${r.pick}`}
@@ -81,11 +81,11 @@ const Card = memo(function Card({
           {r.firstName} {r.lastName}
         </span>
         <span className="mt-1 flex items-center gap-2 text-[11px] text-neutral-400">
-          <span className="inline-flex h-5 items-center rounded bg-white/[0.06] px-1.5 text-[10px] font-bold text-neutral-200 ring-1 ring-white/[0.06]">{r.position}</span>
+          <span className="inline-flex h-5 items-center rounded bg-white/[0.06] px-1.5 text-[11px] font-bold text-neutral-200 ring-1 ring-white/[0.06]">{r.position}</span>
           <span className="truncate">{r.college || '—'}</span>
           <span className="ml-auto shrink-0"><DevBadge dev={r.devTrait} hidden={!spoilers} /></span>
         </span>
-        <span className="mt-1 block text-[10.5px] tabular-nums text-neutral-500">
+        <span className="mt-1 block text-[11px] tabular-nums text-neutral-500">
           {fmtHeight(r.heightInches)} · {r.weight || '—'} lb · age {r.age || '—'}{r.wav != null && spoilers ? ` · wAV ${r.wav}` : ''}
         </span>
       </span>
@@ -97,7 +97,7 @@ const Card = memo(function Card({
           const t = ovrTier(v);
           return (
             <span key={k} className="flex flex-col gap-0.5">
-              <span className="flex items-baseline justify-between text-[9.5px] font-semibold">
+              <span className="flex items-baseline justify-between text-[11px] font-semibold">
                 <span className="text-neutral-500">{label}</span>
                 <span className={`tabular-nums ${spoilers ? (t >= 4 ? 'text-gold' : t >= 3 ? 'text-success-light' : 'text-neutral-300') : 'text-neutral-600'}`}>{spoilers ? v : '?'}</span>
               </span>

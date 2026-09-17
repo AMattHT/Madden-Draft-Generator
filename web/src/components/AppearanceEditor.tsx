@@ -37,7 +37,7 @@ function ReferencePhoto({ chain }: { chain: string[] }) {
   const src = chain[i];
   if (!src) {
     return (
-      <div className="grid h-28 w-full place-items-center rounded-md border border-dashed border-border text-center text-[10px] leading-tight text-muted">
+      <div className="grid h-28 w-full place-items-center rounded-md border border-dashed border-border text-center text-[11px] leading-tight text-muted">
         No photo on file
       </div>
     );
@@ -185,7 +185,7 @@ export function AppearanceEditor({
             <div className="text-sm font-bold tracking-tight text-neutral-100">Appearance Builder</div>
             <div className="text-[11px] text-muted">
               {playerName}{' '}
-              <span className="ml-1 rounded bg-gold/20 px-1 text-[9px] font-semibold text-gold">
+              <span className="ml-1 rounded bg-gold/20 px-1 text-[11px] font-semibold text-gold">
                 {gameVersion === 'm27' ? 'M27' : 'M26'}
               </span>
             </div>
@@ -198,7 +198,7 @@ export function AppearanceEditor({
         <div className="flex min-h-0 flex-1">
           <div className="w-52 shrink-0 overflow-auto border-r border-border p-2">
             <div className="mb-2 border-b border-white/[0.06] pb-2">
-              <div className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">Reference photo</div>
+              <div className="px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">Reference photo</div>
               <ReferencePhoto chain={referencePhotos} />
             </div>
             {(
@@ -221,11 +221,11 @@ export function AppearanceEditor({
             {tab === 'generic' && (
               <div className="mt-2 space-y-0.5 border-t border-white/[0.06] pt-2">
                 <div className="flex items-center justify-between px-2.5 pb-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Skin tone</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">Skin tone</span>
                   {onToneFromPhoto && (
                     <button
                       onClick={() => setPhotoOpen((v) => !v)}
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${photoOpen ? 'bg-primary/20 text-primary-light' : 'text-primary hover:bg-primary/10'}`}
+                      className={`rounded px-1.5 py-0.5 text-[11px] font-medium ${photoOpen ? 'bg-primary/20 text-primary-light' : 'text-primary hover:bg-primary/10'}`}
                       title="Read the skin tone off a photo"
                     >
                       From photo…
@@ -243,8 +243,8 @@ export function AppearanceEditor({
                         tone === t ? 'bg-surface-3 text-neutral-100' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'
                       }`}
                     >
-                      <span>Tone {t}{currentTone === t && <span className="ml-1 text-[9px] text-muted">current</span>}{suggest?.tone === t && <span className="ml-1 text-[9px] text-success-light">photo</span>}</span>
-                      <span className="tabular-nums text-[10px] text-muted">{n}</span>
+                      <span>Tone {t}{currentTone === t && <span className="ml-1 text-[11px] text-muted">current</span>}{suggest?.tone === t && <span className="ml-1 text-[11px] text-success-light">photo</span>}</span>
+                      <span className="tabular-nums text-[11px] text-muted">{n}</span>
                     </button>
                   );
                 })}
@@ -354,7 +354,7 @@ export function AppearanceEditor({
                       }`}
                     >
                       <FaceThumb src={`/api/portrait/generic-head/${encodeURIComponent(code)}`} className="h-16 w-16 rounded" />
-                      <span className="line-clamp-2 w-full text-center text-[10px] leading-tight text-neutral-300">{humanizeGen(code)}</span>
+                      <span className="line-clamp-2 w-full text-center text-[11px] leading-tight text-neutral-300">{humanizeGen(code)}</span>
                     </button>
                   );
                 })}
@@ -378,7 +378,7 @@ export function AppearanceEditor({
                       }`}
                     >
                       <FaceThumb src={s.image} className="h-20 w-20 rounded" />
-                      <span className="line-clamp-2 w-full text-center text-[10px] font-medium leading-tight text-neutral-200">{s.name}</span>
+                      <span className="line-clamp-2 w-full text-center text-[11px] font-medium leading-tight text-neutral-200">{s.name}</span>
                     </button>
                   );
                 })}
@@ -409,7 +409,7 @@ export function AppearanceEditor({
         </div>
 
         <div className="flex items-center gap-3 border-t border-white/[0.06] px-4 py-2">
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">Wearing</span>
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted">Wearing</span>
           <div className="min-w-0 flex-1 truncate text-[11px] text-neutral-400">
             {usingScan ? (
               <>Scan <span className="text-neutral-200">{currentAsset}</span></>
@@ -425,7 +425,7 @@ export function AppearanceEditor({
           </div>
           <button
             onClick={resetGenerated}
-            className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 hover:bg-white/[0.06]"
+            className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[11px] font-medium text-neutral-300 hover:bg-white/[0.06]"
           >
             Reset to generated
           </button>

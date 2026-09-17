@@ -121,8 +121,8 @@ export function TopBar({
           <button onClick={onGoHome} title="Home" className="press flex items-center gap-3 rounded-xl pr-1 transition-opacity hover:opacity-85">
             <LogoMark />
             <div className="hidden text-left leading-tight sm:block">
-              <div className="font-display text-[13.5px] font-bold text-neutral-50">{productTitle(pinnedGame)}</div>
-              <div className="text-[10.5px] font-medium tracking-wide text-muted">{franchiseEnabled ? TAGLINE : 'Draft classes · Rosters'}</div>
+              <div className="font-display text-[13px] font-bold text-neutral-50">{productTitle(pinnedGame)}</div>
+              <div className="text-[11px] font-medium tracking-wide text-muted">{franchiseEnabled ? TAGLINE : 'Draft classes · Rosters'}</div>
             </div>
           </button>
           {draft && (

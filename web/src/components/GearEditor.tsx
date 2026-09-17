@@ -429,7 +429,7 @@ export function GearEditor({
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
           <div>
             <div className="text-sm font-bold tracking-tight text-neutral-100">Equipment Builder</div>
-            <div className="text-[11px] text-muted">{playerName} {gameVersion === 'm27' && <span className="ml-1 rounded bg-legend/20 px-1 text-[9px] text-legend-light">M27</span>}</div>
+            <div className="text-[11px] text-muted">{playerName} {gameVersion === 'm27' && <span className="ml-1 rounded bg-legend/20 px-1 text-[11px] text-legend-light">M27</span>}</div>
           </div>
           <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-white/[0.06] hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
@@ -454,7 +454,7 @@ export function GearEditor({
                   >
                     <span className="flex items-center gap-1.5">
                       {g.group}
-                      {n > 0 && <span className="rounded bg-primary/20 px-1 text-[9px] font-bold text-primary-light">{n}</span>}
+                      {n > 0 && <span className="rounded bg-primary/20 px-1 text-[11px] font-bold text-primary-light">{n}</span>}
                     </span>
                     <Icon path={ICONS.chevronDown} className={`h-3.5 w-3.5 transition-transform ${open ? '' : '-rotate-90'}`} />
                   </button>
@@ -499,7 +499,7 @@ export function GearEditor({
 
               {/* Helmet family + compat status */}
               {active === 'facemask' && helmetCompat && (
-                <div className="shrink-0 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[10px] text-neutral-300">
+                <div className="shrink-0 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-[11px] text-neutral-300">
                   Helmet family: <span className="font-semibold text-neutral-100">{compatLabel}</span>
                   {!showIncompatible && <span className="ml-1 text-primary-light">(compatible only)</span>}
                 </div>
@@ -518,7 +518,7 @@ export function GearEditor({
               {active === 'facemask' && helmetCompat && (
                 <button
                   onClick={() => setShowIncompatible(!showIncompatible)}
-                  className={`shrink-0 rounded-md px-2 py-1 text-[10px] transition-colors ${showIncompatible ? 'bg-amber-500/20 text-amber-300' : 'bg-surface-2 text-neutral-300 hover:text-neutral-100'}`}
+                  className={`shrink-0 rounded-md px-2 py-1 text-[11px] transition-colors ${showIncompatible ? 'bg-amber-500/20 text-amber-300' : 'bg-surface-2 text-neutral-300 hover:text-neutral-100'}`}
                   title="Toggle showing facemasks that may not match the current helmet"
                 >
                   {showIncompatible ? 'Showing all' : 'Compat only'}
@@ -550,9 +550,9 @@ export function GearEditor({
                       {auto && img ? (
                         <img src={img} alt="" className="h-14 w-14 rounded object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }} />
                       ) : (
-                        <span className="grid h-14 w-14 place-items-center rounded text-[10px] font-semibold uppercase text-muted">Auto</span>
+                        <span className="grid h-14 w-14 place-items-center rounded text-[11px] font-semibold uppercase text-muted">Auto</span>
                       )}
-                      <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-400" title={auto ? `Era default for ${year}: ${auto}` : 'Era default'}>
+                      <span className="line-clamp-2 text-center text-[11px] leading-tight text-neutral-400" title={auto ? `Era default for ${year}: ${auto}` : 'Era default'}>
                         {auto ? `Auto: ${opt?.label ?? auto.replace(/^Gear\w*?_/, '')}` : 'Era default'}
                       </span>
                     </>
@@ -569,9 +569,9 @@ export function GearEditor({
                   }`}
                 >
                   <GearThumb src={o.image} />
-                  <span className="line-clamp-2 text-center text-[10px] leading-tight text-neutral-300">{o.label}</span>
+                  <span className="line-clamp-2 text-center text-[11px] leading-tight text-neutral-300">{o.label}</span>
                   {o.compatibility && active === 'facemask' && (
-                    <span className="text-[8px] text-muted">{o.compatibility}</span>
+                    <span className="text-[11px] text-muted">{o.compatibility}</span>
                   )}
                 </button>
               ))}
@@ -585,7 +585,7 @@ export function GearEditor({
         {/* "Wearing" strip: every overridden slot as a clickable thumb + reset all. */}
         {Object.keys(gearPatch).length > 0 && (
           <div className="flex items-center gap-2 overflow-x-auto border-t border-white/[0.06] px-3 py-2">
-            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted">
               Wearing ({Object.keys(gearPatch).length})
             </span>
             {Object.entries(gearPatch).map(([slot, asset]) => {
@@ -602,7 +602,7 @@ export function GearEditor({
                   }`}
                 >
                   <GearThumb src={opt?.image} size="sm" />
-                  <span className="max-w-14 truncate text-[9px] text-neutral-400">{slotLabel}</span>
+                  <span className="max-w-14 truncate text-[11px] text-neutral-400">{slotLabel}</span>
                 </button>
               );
             })}
@@ -610,7 +610,7 @@ export function GearEditor({
               onClick={() => {
                 for (const slot of Object.keys(gearPatch)) onGearEdit(slot, '');
               }}
-              className="ml-auto shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
+              className="ml-auto shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[11px] font-medium text-neutral-300 transition-colors hover:bg-white/[0.06]"
               title="Clear every override — back to era-appropriate gear"
             >
               Reset all to era default

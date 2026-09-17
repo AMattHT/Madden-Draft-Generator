@@ -1,4 +1,4 @@
-import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import type { TeamInfo } from '../types';
 
 /* ------------------------------------------------------------------ */
@@ -68,7 +68,8 @@ export function IconButton({
   );
 }
 
-/** Segmented control: one sliding highlight behind the active option. */
+/** Segmented control: one sliding highlight behind the active option. The
+ *  highlight measures the active button, so options may be any width. */
 export function Segmented<T extends string>({
   value,
   options,
@@ -86,28 +87,40 @@ export function Segmented<T extends string>({
   label?: string;
   className?: string;
 }) {
-  const idx = Math.max(0, options.findIndex((o) => o.value === value));
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ left: number; width: number } | null>(null);
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const measure = () => {
+      const el = root.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
+      if (el) setBox({ left: el.offsetLeft, width: el.offsetWidth });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [value, options.length]);
   const h = size === 'xs' ? 'h-7' : 'h-8';
   const pad = size === 'xs' ? 'px-2.5 text-[11px]' : 'px-3 text-xs';
   return (
     <div
+      ref={rootRef}
       role="group"
       aria-label={label}
       className={`relative inline-flex ${h} shrink-0 items-stretch rounded-lg border border-white/[0.06] bg-black/30 p-0.5 ${className}`}
     >
-      <span
-        aria-hidden
-        className={`absolute bottom-0.5 top-0.5 rounded-md transition-[left,width] duration-300 ${
-          accent === 'gold'
-            ? 'bg-gold shadow-[0_2px_10px_rgba(245,197,24,0.35)]'
-            : 'bg-primary shadow-[0_2px_10px_rgba(47,107,255,0.4)]'
-        }`}
-        style={{
-          left: `calc(2px + ${idx} * (100% - 4px) / ${options.length})`,
-          width: `calc((100% - 4px) / ${options.length})`,
-          transitionTimingFunction: 'var(--ease-out-expo)',
-        }}
-      />
+      {box && (
+        <span
+          aria-hidden
+          className={`absolute bottom-0.5 top-0.5 rounded-md transition-[left,width] duration-300 ${
+            accent === 'gold'
+              ? 'bg-gold shadow-[0_2px_10px_rgba(245,197,24,0.35)]'
+              : 'bg-primary shadow-[0_2px_10px_rgba(47,107,255,0.4)]'
+          }`}
+          style={{ left: box.left, width: box.width, transitionTimingFunction: 'var(--ease-out-expo)' }}
+        />
+      )}
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -118,7 +131,7 @@ export function Segmented<T extends string>({
             title={o.title}
             aria-pressed={on}
             onClick={() => onChange(o.value)}
-            className={`relative z-10 inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-semibold transition-colors duration-200 disabled:opacity-40 ${pad} ${
+            className={`relative z-10 inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md font-semibold transition-colors duration-200 disabled:opacity-40 ${pad} ${
               on ? (accent === 'gold' ? 'text-black' : 'text-white') : 'text-neutral-400 hover:text-neutral-100'
             }`}
           >
@@ -156,7 +169,7 @@ export function Switch({
 /** Keyboard shortcut hint. */
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-neutral-400">
+    <kbd className="rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-sans text-[11px] font-semibold text-neutral-400">
       {children}
     </kbd>
   );
@@ -376,7 +389,7 @@ export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' |
   return (
     <span
       title={team.name}
-      className="inline-flex items-center rounded bg-white/[0.05] px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-neutral-400 ring-1 ring-white/[0.08]"
+      className="inline-flex items-center rounded bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-neutral-400 ring-1 ring-white/[0.08]"
     >
       {team.abbr}
     </span>
@@ -419,7 +432,7 @@ export function Pill({
 
 /** Section eyebrow: small caps label used above groups of controls. */
 export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`text-[10px] font-bold uppercase tracking-[0.14em] text-muted ${className}`}>{children}</div>;
+  return <div className={`text-[11px] font-bold uppercase tracking-[0.12em] text-muted ${className}`}>{children}</div>;
 }
 
 /* ------------------------------------------------------------------ */

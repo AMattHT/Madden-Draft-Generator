@@ -16,9 +16,9 @@ export const fmtM = (m: number) => `$${m.toFixed(1)}M`;
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{label}</span>
+      <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{label}</span>
       {children}
-      {hint && <span className="text-[10px] text-muted">{hint}</span>}
+      {hint && <span className="text-[11px] text-muted">{hint}</span>}
     </label>
   );
 }

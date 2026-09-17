@@ -78,13 +78,13 @@ export function YearPicker({
         aria-expanded={open}
         className="flex items-center gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] py-1.5 pl-3 pr-2.5 text-left transition-colors hover:bg-white/[0.07] focus:border-primary focus:outline-none"
       >
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Draft</span>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted">Draft</span>
         <span className="flex items-baseline gap-1.5">
           <span className="text-lg font-bold tabular-nums leading-none text-neutral-100">
             {selected ?? '—'}
           </span>
           {selectedMerge && (
-            <span className="rounded bg-info/20 px-1 text-[8px] font-bold leading-tight text-info">AFL</span>
+            <span className="rounded bg-info/20 px-1 text-[11px] font-bold leading-tight text-info">AFL</span>
           )}
         </span>
         <Icon
@@ -140,7 +140,7 @@ export function YearPicker({
             {!q && recent.length > 0 && (
               <section className="mb-1">
                 <div className="sticky top-0 z-10 border-b border-white/[0.05] bg-surface-1 px-4 py-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest text-muted">
                     Recent
                   </span>
                 </div>
@@ -166,11 +166,11 @@ export function YearPicker({
               return (
                 <section key={d} className="mb-1">
                   <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.05] bg-surface-1 px-4 py-1.5">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-muted">
                       {d}s
                     </span>
                     {cachedInDecade > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[9px] tabular-nums text-success-light">
+                      <span className="inline-flex items-center gap-1 text-[11px] tabular-nums text-success-light">
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         {cachedInDecade}
                       </span>
@@ -197,7 +197,7 @@ export function YearPicker({
                           <span className="text-[13px] font-semibold tabular-nums">{y}</span>
                           {merge && (
                             <span
-                              className={`absolute -right-0.5 -top-0.5 rounded px-1 text-[7px] font-bold leading-tight ${
+                              className={`absolute -right-0.5 -top-0.5 rounded px-1 text-[11px] font-bold leading-tight ${
                                 active ? 'bg-white/25 text-white' : 'bg-info/20 text-info'
                               }`}
                               title="AFL + NFL drafts merged"

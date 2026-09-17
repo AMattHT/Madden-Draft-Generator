@@ -52,7 +52,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
     <div className="glass rounded-xl px-4 py-3.5">
       <div className="flex flex-wrap items-start gap-x-7 gap-y-4">
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Source</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Source</span>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex shrink-0 items-center rounded-lg border border-white/[0.06] bg-black/30 p-0.5">
               <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
@@ -86,7 +86,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         </div>
 
         <div className="flex w-56 flex-col gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Class strength <span className="normal-case tracking-normal text-neutral-300">· {autoStrength ? 'Auto' : strengthLabel}</span></span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Class strength <span className="normal-case tracking-normal text-neutral-300">· {autoStrength ? 'Auto' : strengthLabel}</span></span>
           <input type="range" min={0.7} max={1.3} step={0.05} value={strength} disabled={autoStrength} onChange={(e) => setStrength(Number(e.target.value))} className="mt-1.5 w-full disabled:opacity-40" />
           <label className="flex items-center gap-2 text-[11px] text-neutral-300" title="Scale the curve by how good the class really was (top-32 caliber vs the 1970-2015 norm): 1983 tops out higher than 2013">
             <input type="checkbox" checked={autoStrength} onChange={(e) => setAutoStrength(e.target.checked)} className="accent-primary" />
@@ -95,13 +95,13 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         </div>
 
         <div className="flex w-56 flex-col gap-1.5" title="0 = the board scouts saw on draft day (the #1 pick leads, Brady is a 6th-rounder); 1 = how careers turned out. Dev traits always follow the outcome, so hidden gems keep their Superstar trait.">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Hindsight <span className="normal-case tracking-normal text-neutral-300">· {hindsightLabel}</span></span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Hindsight <span className="normal-case tracking-normal text-neutral-300">· {hindsightLabel}</span></span>
           <input type="range" min={0} max={1} step={0.1} value={hindsight} onChange={(e) => setHindsight(Number(e.target.value))} className="mt-1.5 w-full" />
-          <span className="flex justify-between text-[10px] text-muted"><span>Draft day</span><span>Career outcome</span></span>
+          <span className="flex justify-between text-[11px] text-muted"><span>Draft day</span><span>Career outcome</span></span>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Guaranteed studs</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Guaranteed studs</span>
           <input type="number" min={0} max={20} value={studs} onChange={(e) => setStuds(Math.max(0, Math.min(20, Number(e.target.value))))}
             className="h-8 w-20 rounded-lg border border-white/[0.07] bg-black/30 px-2.5 text-xs tabular-nums text-neutral-200 focus:border-primary focus:outline-none" />
           <label className="flex items-center gap-2 text-[11px] text-neutral-300" title="Force the first pick to an X-Factor">

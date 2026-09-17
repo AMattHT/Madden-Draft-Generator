@@ -24,7 +24,7 @@ function SavesList({ gameVersion, busy, onOpen }: { gameVersion: GameVersion; bu
     <section className="min-w-0 flex-1 rounded-lg border border-white/[0.07] bg-black/30">
       <header className="flex items-baseline justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
         <span className="text-xs font-semibold text-neutral-100">{label} Saves</span>
-        <span className="truncate text-[10px] text-muted" title={state?.dir}>{state?.dir ?? ''}</span>
+        <span className="truncate text-[11px] text-muted" title={state?.dir}>{state?.dir ?? ''}</span>
       </header>
       <div className="max-h-72 overflow-auto">
         {err && <div className="px-3 py-4 text-xs text-red-300">{err}</div>}
@@ -43,9 +43,9 @@ function SavesList({ gameVersion, busy, onOpen }: { gameVersion: GameVersion; bu
             >
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium text-neutral-100">{f.name}</span>
-                <span className="block text-[10px] text-muted">{fmtSize(f.sizeBytes)} · {fmtWhen(f.modified)}</span>
+                <span className="block text-[11px] text-muted">{fmtSize(f.sizeBytes)} · {fmtWhen(f.modified)}</span>
               </span>
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-primary">{busy === key ? 'Opening…' : 'Open'}</span>
+              <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-primary">{busy === key ? 'Opening…' : 'Open'}</span>
             </button>
           );
         })}

@@ -185,7 +185,7 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
             </div>
 
             <div className="mt-4 flex items-center gap-3 rounded-md border border-white/[0.05] bg-surface-0 p-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded text-[10px] font-bold" style={{ backgroundColor: primary, color: secondary }}>
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded text-[11px] font-bold" style={{ backgroundColor: primary, color: secondary }}>
                 {abbr || '—'}
               </span>
               <div className="text-sm">

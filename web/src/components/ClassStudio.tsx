@@ -201,7 +201,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
         {/* Right: the board */}
         <div className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-wrap items-center gap-1.5 border-b border-white/[0.06] px-4 py-2 text-[11px]">
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Draft board</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Draft board</span>
             {groupCounts.map(([g, n]) => (
               <span key={g} className="rounded bg-surface-2 px-1.5 py-0.5 text-neutral-300">{g} <b className="tabular-nums text-neutral-100">{n}</b></span>
             ))}
@@ -216,7 +216,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
               if (start >= draft.board.length && r > Math.floor(draft.board.length / ROUND)) return null; // rounds past the next open one stay folded
               return (
                 <div key={r} className="mb-2">
-                  <div className="sticky top-0 z-10 mb-0.5 bg-surface-0 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Round {r + 1}</div>
+                  <div className="sticky top-0 z-10 mb-0.5 bg-surface-0 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">Round {r + 1}</div>
                   {Array.from({ length: end - start }, (_, k) => {
                     const i = start + k;
                     const e = draft.board[i];
@@ -249,7 +249,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
                           <>
                             <span className="min-w-0 flex-1 truncate text-neutral-100">
                               {custom.firstName} {custom.lastName} <span className="text-xs text-muted">{custom.position} · {ftIn(custom.heightInches)} {custom.weight} · {custom.college || 'no college'}</span>
-                              <span className="ml-1.5 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold">custom</span>
+                              <span className="ml-1.5 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold">custom</span>
                             </span>
                             <span className="tabular-nums text-xs text-neutral-400" title="Overall">{custom.overall}</span>
                             <button onClick={() => setDrawer({ player: custom, index: i })} className="text-xs text-muted hover:text-neutral-200">Edit</button>
@@ -316,7 +316,7 @@ function CustomPlayerDrawer({ player, isNew, archetypes, colleges, onCancel, onS
   const opts = archetypes[p.position] ?? [];
   const valid = p.firstName.trim() && p.lastName.trim() && p.overall >= 40 && p.overall <= 99 && p.heightInches >= 60 && p.heightInches <= 84 && p.weight >= 140 && p.weight <= 400 && p.age >= 18 && p.age <= 45;
   const field = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
-  const label = 'text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
+  const label = 'text-[11px] font-semibold uppercase tracking-wide text-neutral-400';
   const feet = Math.floor(p.heightInches / 12), inches = p.heightInches % 12;
 
   return (

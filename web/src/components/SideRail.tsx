@@ -21,7 +21,7 @@ function RailArt({ view, path, active }: { view: AppView; path: string; active: 
       src={ART[view]}
       alt=""
       onError={() => setNoArt(true)}
-      className={`h-7 w-7 object-contain transition-all duration-200 ${active ? 'opacity-100 drop-shadow-[0_0_10px_rgba(111,155,255,0.55)]' : 'opacity-55 grayscale-[35%] group-hover:opacity-90 group-hover:grayscale-0'}`}
+      className={`h-8 w-8 object-contain transition-all duration-200 ${active ? 'opacity-100 drop-shadow-[0_0_10px_rgba(111,155,255,0.55)]' : 'opacity-75 group-hover:opacity-100'}`}
     />
   );
 }
@@ -49,7 +49,7 @@ export function SideRail({ view, onSetView, franchiseEnabled }: { view: AppView;
             onClick={() => onSetView(e.view)}
             aria-current={active ? 'page' : undefined}
             title={e.label}
-            className={`press group relative mx-2 my-0.5 flex flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold leading-tight transition-all duration-200 ${
+            className={`press group relative mx-2 my-0.5 flex flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold leading-tight transition-all duration-200 ${
               collapsed ? 'h-12' : 'h-12 lg:h-[64px]'
             } ${active ? 'bg-primary/12 text-primary-light' : 'text-neutral-500 hover:bg-white/[0.05] hover:text-neutral-100'}`}
           >

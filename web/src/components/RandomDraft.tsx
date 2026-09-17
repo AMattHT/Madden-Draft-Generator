@@ -63,7 +63,7 @@ export function RandomDraft({
 
       {/* Year range */}
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-neutral-300">
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Range</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Range</span>
         <select value={from} onChange={(e) => onSetRange(Number(e.target.value), Math.max(Number(e.target.value), to))} className={selectCls}>
           {sorted.map((y) => (
             <option key={y} value={y}>{y}</option>
@@ -111,7 +111,7 @@ export function RandomDraft({
       {usedList.length > 0 && (
         <div className="mt-4 border-t border-white/[0.05] pt-3">
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Used ({usedList.length})</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Used ({usedList.length})</span>
             <button onClick={onClear} className="text-[11px] text-muted hover:text-red-300">
               Reset — make all pickable again
             </button>

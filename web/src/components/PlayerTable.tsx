@@ -99,7 +99,7 @@ function SortTh({
       >
         {children}
         {on && (
-          <span aria-hidden className="text-[8px]">
+          <span aria-hidden className="text-[11px]">
             {desc ? '▼' : '▲'}
           </span>
         )}
@@ -180,7 +180,7 @@ const BoardRow = memo(function BoardRow({
           <span className="inline-flex items-center gap-1.5">
             {r.edited && <span className="h-1.5 w-1.5 rounded-full bg-gold shadow-[0_0_6px_rgba(245,197,24,0.8)]" title="edited" />}
             <span className="truncate">{r.firstName} {r.lastName}</span>
-            {r.supplemental && <span className="rounded border border-legend/40 px-1 text-[9px] uppercase tracking-wider text-legend-light" title={`Supplemental draft pick, round ${r.supplemental.round}`}>S</span>}
+            {r.supplemental && <span className="rounded border border-legend/40 px-1 text-[11px] uppercase tracking-wider text-legend-light" title={`Supplemental draft pick, round ${r.supplemental.round}`}>S</span>}
           </span>
         </span>
       </td>
@@ -206,7 +206,7 @@ const BoardRow = memo(function BoardRow({
             )}
           </span>
           <span className="w-8 text-right text-xs tabular-nums text-neutral-300">{spoilers ? (r.wav ?? '—') : '?'}</span>
-          <span className={`w-5 text-left text-[10px] font-semibold ${spoilers ? tag.cls : 'text-muted'}`} title={spoilers ? tag.title : undefined}>
+          <span className={`w-5 text-left text-[11px] font-semibold ${spoilers ? tag.cls : 'text-muted'}`} title={spoilers ? tag.title : undefined}>
             {spoilers ? tag.label : ''}
           </span>
         </div>
@@ -220,7 +220,7 @@ const BoardRow = memo(function BoardRow({
             {keyAttrsForPosition(r.positionId).map(([k, label]) => {
               const v = r.ratings?.[k];
               return (
-                <span key={k} className="inline-flex h-5 items-center gap-1 rounded bg-black/30 px-1.5 text-[10px] ring-1 ring-white/[0.05]" title={k}>
+                <span key={k} className="inline-flex h-5 items-center gap-1 rounded bg-black/30 px-1.5 text-[11px] ring-1 ring-white/[0.05]" title={k}>
                   <span className="font-semibold text-neutral-500">{label}</span>
                   <span className={`tabular-nums font-semibold ${spoilers && v != null ? attrTone(v) : 'text-neutral-600'}`}>{spoilers ? (v ?? '—') : '?'}</span>
                 </span>
@@ -248,7 +248,7 @@ function RoundBand({ round, count, elite, xf, spoilers }: { round: number | null
   return (
     <tr style={{ height: ROW_H }} className="bg-primary/[0.07]">
       <td colSpan={99} className="px-3">
-        <span className="flex items-center gap-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-primary-light">
+        <span className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light">
           <span>{round ? `Round ${round}` : 'Unrounded'}</span>
           <span className="font-semibold tracking-wide text-neutral-500">{count} pick{count === 1 ? '' : 's'}</span>
           {spoilers && elite > 0 && <span className="font-semibold tracking-wide text-success-light">{elite} rated 80+</span>}
@@ -415,7 +415,7 @@ export function PlayerTable({
   }, [spoilers]);
   useEffect(() => { prevSpoilers.current = spoilers; }, [spoilers]);
 
-  const th = 'h-10 px-3 text-[10px] font-bold uppercase tracking-[0.12em]';
+  const th = 'h-10 px-3 text-[11px] font-bold uppercase tracking-[0.12em]';
   const minWidth = 760 + (signature ? 340 : 0) + cols.length * 46;
 
   return (

@@ -26,10 +26,10 @@ const Tile = memo(function Tile({ r, active, dim, spoilers, onOpen, i }: { r: Ro
       <Portrait src={displayPortrait(r)} fallback={r.portrait} size="md" />
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5 pr-6">
-          <span className="truncate text-[12.5px] font-bold text-neutral-50">{r.firstName} {r.lastName}</span>
+          <span className="truncate text-[13px] font-bold text-neutral-50">{r.firstName} {r.lastName}</span>
           {r.edited && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-gold" title="edited" />}
         </span>
-        <span className="mt-1 flex items-center gap-1.5 text-[10.5px] text-neutral-400">
+        <span className="mt-1 flex items-center gap-1.5 text-[11px] text-neutral-400">
           <TeamLogo team={r.team} size="sm" />
           <span className="font-semibold text-neutral-300">{r.position}</span>
           <span className="truncate">{r.college || ''}</span>
@@ -84,7 +84,7 @@ export function WallBoard({
         const elite = spoilers ? list.filter((r) => r.overall >= 80).length : 0;
         return (
           <section key={round ?? 'none'} className="mb-4">
-            <header className="mb-2 flex items-center gap-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-neutral-300">
+            <header className="mb-2 flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.12em] text-neutral-300">
               <span>{round ? `Round ${round}` : 'Unrounded'}</span>
               <span className="font-semibold tracking-wide text-neutral-500">
                 {pos === 'ALL' ? `${list.length} picks` : `${shown} of ${list.length}`}

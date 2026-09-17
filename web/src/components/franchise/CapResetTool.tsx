@@ -67,7 +67,7 @@ export function CapResetTool({ save, onWrote }: { save: string; onWrote?: () => 
         <div className="mt-4 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
           <label className="flex items-center gap-2 text-sm text-amber-200">
             <input type="checkbox" checked={lowerSalaries} onChange={(e) => setLowerSalaries(e.target.checked)} />
-            Lower player salaries <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase">Experimental</span>
+            Lower player salaries <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[11px] font-semibold uppercase">Experimental</span>
           </label>
           {lowerSalaries && (
             <div className="mt-2">

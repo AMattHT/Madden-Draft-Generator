@@ -82,7 +82,7 @@ export function HistoricSeasonTool({ save, gameVersion, onWrote }: { save: strin
               <p className="mt-1 text-xs text-muted">{preview.pack.teams} clubs in {preview.year}, mapped to today's franchises. {preview.parked.length} modern clubs have no {preview.year} ancestor and would be parked.</p>
               <div className="mt-3 max-h-72 overflow-auto rounded-md border border-white/[0.07] bg-black/30">
                 <table className="w-full text-xs">
-                  <thead className="sticky top-0 bg-surface-2 text-[10px] uppercase tracking-wide text-neutral-400">
+                  <thead className="sticky top-0 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400">
                     <tr><th className="px-2 py-1.5 text-left font-semibold">{preview.year} club</th><th className="px-2 py-1.5 text-left font-semibold">Division</th><th className="px-2 py-1.5 text-left font-semibold">In the save</th></tr>
                   </thead>
                   <tbody>
@@ -130,7 +130,7 @@ export function HistoricSeasonTool({ save, gameVersion, onWrote }: { save: strin
                       <td className="py-1 pr-2 text-neutral-300">{r.label}</td>
                       <td className="py-1 pr-2 tabular-nums text-neutral-100">{r.wanted}</td>
                       <td className="py-1 pr-2 tabular-nums text-neutral-400">{r.current}</td>
-                      <td className="py-1 text-right"><span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${statusCls[r.status]}`}>{statusLabel[r.status]}</span></td>
+                      <td className="py-1 text-right"><span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${statusCls[r.status]}`}>{statusLabel[r.status]}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -149,7 +149,7 @@ export function HistoricSeasonTool({ save, gameVersion, onWrote }: { save: strin
                       {seeds.map((s) => (
                         <li key={s.team} className="flex items-center justify-between gap-2">
                           <span><span className="tabular-nums text-muted">{s.seed}.</span> <span className="text-neutral-100">{s.team}</span> <span className="text-muted">{s.record}</span></span>
-                          <span className="text-[10px] uppercase tracking-wide text-muted">{s.via === 'division' ? s.division.replace(/^(AFC|NFC) /, '') : 'wild card'}{s.bye ? ' · bye' : ''}</span>
+                          <span className="text-[11px] uppercase tracking-wide text-muted">{s.via === 'division' ? s.division.replace(/^(AFC|NFC) /, '') : 'wild card'}{s.bye ? ' · bye' : ''}</span>
                         </li>
                       ))}
                     </ol>

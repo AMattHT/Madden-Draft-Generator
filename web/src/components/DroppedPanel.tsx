@@ -46,7 +46,7 @@ export function DroppedPanel({
     );
   }, [dropped, q, sort]);
 
-  const th = 'px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
+  const th = 'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-neutral-400';
   const sortBtn = (k: typeof sort, label: string) => (
     <button onClick={() => setSort(k)} className={`${th} ${sort === k ? 'text-neutral-100' : 'hover:text-neutral-200'}`}>{label}{sort === k ? ' ▾' : ''}</button>
   );

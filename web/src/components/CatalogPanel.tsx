@@ -91,7 +91,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   useEffect(() => { onListChange?.(list.map((p) => p.key)); }, [list, onListChange]);
 
   const sel = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-xs text-neutral-200 focus:border-primary focus:outline-none';
-  const th = 'px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
+  const th = 'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-neutral-400';
   const sortBtn = (k: SortKey, label: string) => (
     <button onClick={() => setSort(k)} className={`${th} ${sort === k ? 'text-neutral-100' : 'hover:text-neutral-200'}`}>{label}{sort === k ? ' ▾' : ''}</button>
   );
@@ -141,7 +141,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                 <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
                 <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
                   {p.first} {p.last}
-                  {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
+                  {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                 </span>
                 <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.mpos}</span>
                 <span className="inline-flex w-6 justify-center" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>{p.team && <TeamLogo team={p.team} size="sm" />}</span>
@@ -217,12 +217,12 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                       <span className="inline-flex items-center gap-2">
                         <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
                         {p.first} {p.last}
-                        {p.hof && <span className="ml-0.5 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
+                        {p.hof && <span className="ml-0.5 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                       </span>
                     </td>
                     <td className="px-2 py-1.5 text-neutral-300">{p.mpos}</td>
                     <td className="px-2 py-1.5 tabular-nums text-neutral-300">
-                      {p.year}{p.league !== 'NFL' ? <span className="ml-1 text-[10px] text-muted">{p.league}</span> : null}
+                      {p.year}{p.league !== 'NFL' ? <span className="ml-1 text-[11px] text-muted">{p.league}</span> : null}
                     </td>
                     <td className="px-2 py-1.5 text-neutral-300">{p.round != null ? `Rd ${p.round}${p.pick != null ? `, #${p.pick}` : ''}` : 'Undrafted'}</td>
                     <td className="hidden px-2 py-1.5 text-neutral-400 2xl:table-cell">{p.college}</td>

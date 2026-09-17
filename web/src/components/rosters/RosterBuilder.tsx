@@ -27,8 +27,8 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }:
       <Portrait src={p.portrait} size="xs" />
       <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
         {p.edited && <span className="mr-1 text-gold" title="edited">●</span>}{p.firstName} {p.lastName}
-        <span className="ml-1 text-[10px] text-muted">#{p.jersey}</span>
-        {p.added && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Added from the player pool">added</span>}
+        <span className="ml-1 text-[11px] text-muted">#{p.jersey}</span>
+        {p.added && <span className="ml-1 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold" title="Added from the player pool">added</span>}
       </span>
       <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.position}</span>
       <RatingChip ovr={p.overall} size="sm" />
