@@ -29,8 +29,8 @@ test('only a Madden 27 FBCHUNKS container with a zlib payload is a roster', () =
   assert.equal(RosterFileService.isRoster(Buffer.from('CAREERDRAFT')), false);
 });
 
-test('the shipped roster parses: teams, players, positions, ratings and faces', skipWithoutRoster, () => {
-  const data = RosterFileService.parse(fs.readFileSync(OFFICIAL), 'ROSTER-Official');
+test('the shipped roster parses: teams, players, positions, ratings and faces', skipWithoutRoster, async () => {
+  const data = await RosterFileService.parse(fs.readFileSync(OFFICIAL), 'ROSTER-Official');
   assert.ok(data.players.length >= 2500 && data.players.length <= 3500, `players: ${data.players.length}`);
   assert.equal(data.teamCount, 32);
   const abbrs = new Set(data.teams.map((t) => t.abbr));
@@ -65,9 +65,23 @@ test('the shipped roster parses: teams, players, positions, ratings and faces', 
   assert.ok(Math.min(...weights) >= 150 && Math.max(...weights) <= 450, `weights are pounds (Desmond Watson is 415) (${Math.min(...weights)}-${Math.max(...weights)})`);
 });
 
-test('a roster opened by name is kept and found again by id', skipWithoutRoster, () => {
-  const opened = RosterFileService.openFromSaves('ROSTER-Official');
-  assert.equal(RosterFileService.get(opened.id)?.count, opened.count);
-  assert.throws(() => RosterFileService.openFromSaves('../ROSTER-Official'), /not a roster file name/);
-  assert.equal(RosterFileService.get('0123456789abcdef'), null);
+test('a roster opened by name is kept and found again by id', skipWithoutRoster, async () => {
+  const opened = await RosterFileService.openFromSaves('ROSTER-Official');
+  assert.equal((await RosterFileService.get(opened.id))?.count, opened.count);
+  await assert.rejects(RosterFileService.openFromSaves('../ROSTER-Official'), /not a roster file name/);
+  assert.equal(await RosterFileService.get('0123456789abcdef'), null);
+});
+
+test('openBase exposes the parsed file, the free-agent team and an output name', skipWithoutRoster, async () => {
+  const base = await RosterFileService.openBase('ROSTER-Official');
+  assert.equal(base.name, 'ROSTER-Official');
+  assert.equal(base.header.length, 0x4a);
+  assert.equal(base.tdb2.PLAY.records.length, base.players.length);
+  assert.equal(base.freeAgentTeamId, base.teams.find((t) => /free/i.test(t.name))!.id);
+  assert.ok(base.players.every((p) => p.teamId === base.freeAgentTeamId ? p.team === null : p.team !== null));
+  const out = RosterFileService.write(base.tdb2, base.header);
+  assert.equal(out.length, 6_291_530);
+  assert.equal(RosterFileService.outputNameFor('My 85 Bears!'), 'ROSTER-MY85BEARS');
+  assert.equal(RosterFileService.outputNameFor(''), 'ROSTER-CUSTOM');
+  assert.equal(RosterFileService.outputNameFor('a'.repeat(40)), 'ROSTER-' + 'A'.repeat(16));
 });
