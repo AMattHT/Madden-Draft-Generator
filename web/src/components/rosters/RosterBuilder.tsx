@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { RosterData, RosterDoc } from '../../types';
-import { docCounts, isDocEmpty, viewPlayers, type ViewPlayer } from '../../rosterDoc';
+import { docCounts, isDocEmpty, viewPlayers, withMove, type ViewPlayer } from '../../rosterDoc';
 import { groupForId } from '../../constants';
 import { DevBadge, Icon, ICONS, Portrait, RatingChip } from '../ui';
+import { TeamPanel } from './TeamPanel';
 
 const GROUPS: [string, string][] = [
   ['ALL', 'All positions'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['OL', 'OL'],
@@ -48,8 +49,11 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const [group, setGroup] = useState('ALL');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'ovr' | 'name' | 'age' | 'pos'>('ovr');
+  const [selectedTeam, setSelectedTeam] = useState(() => data.teams.find((t) => t.id !== data.freeAgentTeamId)?.id ?? data.freeAgentTeamId);
 
   const players = useMemo(() => viewPlayers(doc, data), [doc, data]);
+  const move = (pgid: number, teamId: number) => { if (!readOnly) onChange(withMove(doc, pgid, teamId, data)); };
+  const dragStart = (pgid: number) => (e: React.DragEvent) => e.dataTransfer.setData('text/plain', String(pgid));
   const counts = docCounts(doc, data);
   const teams = useMemo(() => data.teams.filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.city.localeCompare(b.city)), [data]);
   const rows = useMemo(() => {
@@ -118,11 +122,11 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
             <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length}</span> of {data.count}</span>
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
-            {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} />)}
+            {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
             {rows.length > 1500 && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500 of {rows.length}. Narrow by team or position.</div>}
           </div>
         </section>
-        <section className="flex min-h-0 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted">Teams</section>
+        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onEdit={() => {}} readOnly={readOnly} />
       </div>
     </div>
   );
