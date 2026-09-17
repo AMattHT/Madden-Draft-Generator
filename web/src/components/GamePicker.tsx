@@ -4,18 +4,20 @@ import { NAME } from '../brand';
 import { LogoMark } from './TopBar';
 import { Icon, ICONS, Switch } from './ui';
 
-const GAMES: { value: GameVersion; title: string; blurb: string; points: string[] }[] = [
+const GAMES: { value: GameVersion; title: string; cover: string; blurb: string; points: string[] }[] = [
   {
     value: 'm27',
-    title: 'Madden 27',
+    title: 'Madden NFL 27',
+    cover: '/art/cover-m27.webp',
     blurb: 'The current game. Draft classes with persona DNA, plus roster building.',
-    points: ['Draft classes (5876-byte format)', 'Persona DNA and mindset focus', 'Rosters: open, edit and export ROSTER saves'],
+    points: ['Draft classes', 'Persona DNA and mindset focus', 'Open, edit and export ROSTER saves'],
   },
   {
     value: 'm26',
-    title: 'Madden 26',
+    title: 'Madden NFL 26',
+    cover: '/art/cover-m26.webp',
     blurb: 'Last year’s game. Draft classes only.',
-    points: ['Draft classes (4296-byte format)', 'Every year 1936 – 2026', 'No roster editing'],
+    points: ['Draft classes', 'Every year 1936 – 2026', 'No roster editing'],
   },
 ];
 
@@ -33,7 +35,7 @@ export function GamePicker({ current, onPick, onDismiss }: {
   const [remember, setRemember] = useState(true);
   return (
     <div className="fixed inset-0 z-[60] flex animate-fade-in items-center justify-center bg-surface-0/90 p-6 backdrop-blur-md" role="dialog" aria-modal="true" aria-label="Choose your game">
-      <div className="glass-strong w-full max-w-3xl animate-pop rounded-2xl p-8">
+      <div className="glass-strong w-full max-w-4xl animate-pop rounded-2xl p-8">
         <div className="flex items-start gap-4">
           <LogoMark size="lg" />
           <div className="min-w-0 flex-1">
@@ -56,26 +58,36 @@ export function GamePicker({ current, onPick, onDismiss }: {
               <button
                 key={g.value}
                 onClick={() => onPick(g.value, remember)}
-                className={`press group flex flex-col rounded-xl border p-5 text-left transition-all duration-200 hover:-translate-y-0.5 ${
-                  on ? 'border-primary/60 bg-primary/10 shadow-[0_0_0_1px_rgba(47,107,255,0.35),0_20px_40px_-20px_rgba(47,107,255,0.6)]' : 'border-white/[0.08] bg-white/[0.02] hover:border-primary/50 hover:bg-primary/[0.06]'
+                className={`press group relative flex overflow-hidden rounded-xl border text-left transition-all duration-200 hover:-translate-y-0.5 ${
+                  on ? 'border-primary/60 shadow-[0_0_0_1px_rgba(47,107,255,0.35),0_24px_48px_-20px_rgba(47,107,255,0.6)]' : 'border-white/[0.08] hover:border-primary/50 hover:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.9)]'
                 }`}
               >
-                <span className="flex items-center justify-between">
-                  <span className="font-display text-[22px] font-extrabold text-neutral-50">{g.title}</span>
-                  {on && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary-light ring-1 ring-primary/30">Current</span>}
-                </span>
-                <span className="mt-1.5 text-[13px] text-neutral-400">{g.blurb}</span>
-                <ul className="mt-4 flex flex-col gap-1.5 text-[13px] text-neutral-300">
-                  {g.points.map((p) => (
-                    <li key={p} className="flex items-start gap-2">
-                      <Icon path={ICONS.check} className="mt-[3px] h-3.5 w-3.5 shrink-0 text-primary-light" strokeWidth={2.4} />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-                <span className="mt-5 inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary-light">
-                  Use {g.title}
-                  <Icon path={ICONS.arrowRight} className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.2} />
+                {/* The cover, bled across the whole card as its ground, then again crisp on the left. */}
+                <span aria-hidden className="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl saturate-150 transition-opacity duration-300 group-hover:opacity-60" style={{ backgroundImage: `url(${g.cover})` }} />
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-r from-surface-0/40 via-surface-0/80 to-surface-0/90" />
+                <img
+                  src={g.cover}
+                  alt={`${g.title} cover`}
+                  className="relative m-4 h-[204px] w-[150px] shrink-0 rounded-lg object-cover shadow-[0_16px_40px_-12px_rgba(0,0,0,0.9)] ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+                <span className="relative flex min-w-0 flex-1 flex-col py-4 pr-4">
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="font-display text-[20px] font-extrabold text-neutral-50">{g.title}</span>
+                    {on && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary-light ring-1 ring-primary/30">Current</span>}
+                  </span>
+                  <span className="mt-1 text-[13px] text-neutral-300">{g.blurb}</span>
+                  <ul className="mt-3 flex flex-col gap-1.5 text-[13px] text-neutral-200">
+                    {g.points.map((p) => (
+                      <li key={p} className="flex items-start gap-2">
+                        <Icon path={ICONS.check} className="mt-[3px] h-3.5 w-3.5 shrink-0 text-primary-light" strokeWidth={2.4} />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-[13px] font-semibold text-primary-light">
+                    Use {g.title}
+                    <Icon path={ICONS.arrowRight} className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={2.2} />
+                  </span>
                 </span>
               </button>
             );
