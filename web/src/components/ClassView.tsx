@@ -14,6 +14,7 @@ import { PlayerTable, ATTR_COLUMNS, SPOILER_SORTS } from './PlayerTable';
 import { PlayerCards } from './PlayerCards';
 import { DraftBoard } from './DraftBoard';
 import { WallBoard } from './WallBoard';
+import { BigBoard } from './BigBoard';
 import { ProfileModal } from './ProfileModal';
 import { Pill, Icon, ICONS, Button, Kbd } from './ui';
 
@@ -426,6 +427,7 @@ export function ClassView({
                 </div>
               </div>
             )}
+            {view === 'big' && <BigBoard rows={rows} all={effRows} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
             {view === 'cards' && <PlayerCards rows={rows} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
             {view === 'wall' && <WallBoard rows={searched} pos={pos} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
             {view === 'board' && <DraftBoard rows={rows} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}

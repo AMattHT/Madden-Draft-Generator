@@ -1,9 +1,9 @@
 import { Icon, ICONS, Segmented, Switch } from './ui';
 
-export type BoardView = 'table' | 'desk' | 'cards' | 'wall' | 'board';
+export type BoardView = 'table' | 'desk' | 'big' | 'cards' | 'wall' | 'board';
 export type ColumnPreset = 'core' | 'physical' | 'position' | 'all';
 
-export const BOARD_VIEWS: readonly BoardView[] = ['table', 'desk', 'cards', 'wall', 'board'];
+export const BOARD_VIEWS: readonly BoardView[] = ['table', 'desk', 'big', 'cards', 'wall', 'board'];
 
 /** Board controls: search, position, sort, the spoilers switch, the view set
  *  (table / scout desk / cards / wall / rounds) and, on the table, which
@@ -147,8 +147,9 @@ export function Toolbar({
           options={[
             { value: 'table', label: <Icon path={ICONS.table} className="h-3.5 w-3.5" />, title: 'Table' },
             { value: 'desk', label: <Icon path={ICONS.desk} className="h-3.5 w-3.5" />, title: 'Scout desk: the list with the editor docked beside it' },
+            { value: 'big', label: <Icon path={ICONS.ranked} className="h-3.5 w-3.5" />, title: 'Big board: every prospect ranked by value, with tiers and position ranks' },
             { value: 'cards', label: <Icon path={ICONS.idCard} className="h-3.5 w-3.5" />, title: 'Cards' },
-            { value: 'wall', label: <Icon path={ICONS.wall} className="h-3.5 w-3.5" />, title: 'Big board: every pick as a tile, round by round' },
+            { value: 'wall', label: <Icon path={ICONS.wall} className="h-3.5 w-3.5" />, title: 'Wall: every pick as a tile, round by round' },
             { value: 'board', label: <Icon path={ICONS.kanban} className="h-3.5 w-3.5" />, title: 'Round columns' },
           ]}
         />
