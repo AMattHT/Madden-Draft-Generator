@@ -27,7 +27,7 @@ function normalizeGearEdits(gear: GearEdits): GearEdits {
   return Object.fromEntries(Object.entries(gear).map(([id, patch]) => [Number(id), normalizeGearPatch(patch)]));
 }
 
-export type AppView = 'home' | 'draft' | 'franchise';
+export type AppView = 'home' | 'draft' | 'franchise' | 'rosters';
 
 /** Draft-class generation modifiers (custom classes). */
 export interface DraftOpts {

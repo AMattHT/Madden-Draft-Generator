@@ -1,4 +1,4 @@
-import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto, SaveFileInfo } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, GearOption, LikenessStats, GameVersion, FaceScan, CatalogPlayer, BoardEntry, TeamFranchise, LikenessOverride, ToneFromPhoto, SaveFileInfo, RosterData, RosterDoc, RosterBuildResult } from './types';
 
 /** Generation options every class request carries (see App.DraftOpts). */
 export interface ClassRequestOpts {
@@ -423,6 +423,13 @@ export const api = {
   franchises: async (): Promise<TeamFranchise[]> => (await jget<{ franchises: TeamFranchise[] }>('/api/draft/franchises')).franchises,
 
   /** Open an existing draft class (.mdc) from a Saves folder or a file the browser read. */
+  /** Madden 27 ROSTER saves (Rosters view): list, open, reopen, build. */
+  rosterSaves: () => jget<{ gameVersion: 'm27'; dir: string; files: SaveFileInfo[] }>('/api/roster/saves'),
+  rosterOpenSaved: (name: string) => jsend<RosterData>('POST', '/api/roster/open', { name }),
+  rosterOpenFile: (name: string, dataBase64: string) => jsend<RosterData>('POST', '/api/roster/open', { name, dataBase64 }),
+  rosterGet: (id: string) => jget<RosterData>(`/api/roster/${encodeURIComponent(id)}`),
+  rosterBuild: (body: { baseName?: string; baseId?: string; name: string; moves: RosterDoc['moves']; edits: RosterDoc['edits'] }) =>
+    jsend<RosterBuildResult>('POST', '/api/roster/build', body),
   openSavesList: (gameVersion: GameVersion) => jget<{ gameVersion: GameVersion; dir: string; files: SaveFileInfo[] }>(`/api/open/saves?gameVersion=${gameVersion}`),
   openFromSaves: (gameVersion: GameVersion, name: string) => jsend<GeneratedClass>('POST', '/api/open/saves', { gameVersion, name }),
   openFile: (name: string, dataBase64: string) => jsend<GeneratedClass>('POST', '/api/open/file', { name, dataBase64 }),

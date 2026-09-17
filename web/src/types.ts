@@ -217,3 +217,63 @@ export interface DroppedPlayer {
   wav: number | null;
   score: number;
 }
+
+/** A Madden 27 ROSTER save as the server reads it. */
+export interface RosterTeam { id: number; name: string; city: string; abbr: string }
+export interface RosterPlayer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  position: string;
+  positionId: number;
+  teamId: number;
+  team: string | null;
+  teamName: string | null;
+  overall: number;
+  age: number;
+  heightInches: number;
+  weight: number;
+  jersey: number;
+  yearsPro: number;
+  devTrait: number;
+  archetype: string | null;
+  college: string | null;
+  hometown: string | null;
+  draftRound: number | null;
+  draftPick: number | null;
+  assetName: string | null;
+  portrait: string | null;
+  ratings: Record<string, number>;
+  visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
+}
+export interface RosterData {
+  id: string;
+  name: string;
+  gameVersion: 'm27';
+  openedAt: number;
+  count: number;
+  teamCount: number;
+  freeAgentTeamId: number;
+  crc: number;
+  sizeBytes: number;
+  teams: RosterTeam[];
+  players: RosterPlayer[];
+}
+
+/** A roster the user is building: deltas against a base ROSTER file. */
+export interface RosterDoc {
+  id: string;
+  name: string;
+  /** fromSaves: the base was picked from the saves folder (export can name it); false for a browsed file (export uses openedId). */
+  base: { fileName: string; openedId: string; sizeBytes: number; crc: number; fromSaves: boolean };
+  moves: Record<number, number>;
+  adds: { tempId: string; key: string; teamId: number; jersey?: number }[];
+  edits: Record<string, import('./api').PlayerFieldEdit>;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface RosterBuildResult {
+  moved: number; cut: number; edited: number; skipped: string[];
+  input: string; output: string; outputPath: string;
+}

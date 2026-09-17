@@ -1,5 +1,5 @@
 import { get, set, keys, del } from 'idb-keyval';
-import type { GeneratedClass, ClassEdits, GearEdits, CustomClass } from './types';
+import type { GeneratedClass, ClassEdits, GearEdits, CustomClass, RosterDoc } from './types';
 
 /** Persisted board view state per class. */
 export interface TableFilters {
@@ -92,6 +92,21 @@ export const cache = {
   },
   customSet: (c: CustomClass) => set(`custom:${c.id}`, c),
   customDel: (id: string) => del(`custom:${id}`),
+
+  // Rosters being built: one document per roster under roster:<id>.
+  async rosterList(): Promise<RosterDoc[]> {
+    const all = (await keys()) as string[];
+    const out: RosterDoc[] = [];
+    for (const k of all) {
+      if (!/^roster:/.test(String(k))) continue;
+      const d = await get<RosterDoc>(k);
+      if (d) out.push(d);
+    }
+    return out.sort((a, b) => b.updatedAt - a.updatedAt);
+  },
+  rosterGet: (id: string) => get<RosterDoc>(`roster:${id}`),
+  rosterSet: (d: RosterDoc) => set(`roster:${d.id}`, d),
+  rosterDel: (id: string) => del(`roster:${id}`),
 
   // Recently viewed draft years (most recent first, capped), for the year picker.
   recentYearsGet: (): Promise<number[]> => get<number[]>('recentDraftYears').then((a) => a ?? []),
