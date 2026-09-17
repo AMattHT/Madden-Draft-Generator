@@ -171,7 +171,7 @@ const BoardRow = memo(function BoardRow({
       </td>
       <td className="px-2">
         <span className="flex items-center justify-center">
-          <TeamLogo team={r.team} size="sm" />
+          <TeamLogo team={r.team} size="md" />
         </span>
       </td>
       <td className="px-3 font-medium text-neutral-100">

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { GeneratedClass, PlayerRow } from '../types';
 import { PositionBreakdown } from './PositionBreakdown';
-import { Icon, ICONS } from './ui';
+import { DevBadge, Icon, ICONS } from './ui';
 
 const TIERS = [
   { c: 'bg-gold', t: '90+', d: 'HOF / elite' },
@@ -137,7 +137,8 @@ export function MetaStrip({
   const supplemental = data.rows.filter((r) => r.supplemental).length;
 
   return (
-    <div className="glass flex flex-wrap items-center gap-x-3.5 gap-y-2 rounded-xl px-3.5 py-2">
+    <div className="glass rounded-xl px-3.5 py-2">
+      <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2">
       <Stat value={<Counter value={data.count} />} label="prospects" />
       <Sep />
       {/* The class average and its dev-trait counts describe how strong the class
@@ -148,15 +149,11 @@ export function MetaStrip({
         title={spoilers ? `Top rated: ${ovrMax}` : 'Hidden — turn on Spoilers to reveal'}
       />
       <Sep />
-      <span className="flex items-center gap-2.5 text-[11px] text-muted" title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — turn on Spoilers to reveal'}>
-        {[
-          ['bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]', dev[3], 'X-Factor'],
-          ['bg-gold shadow-[0_0_6px_rgba(245,197,24,0.7)]', dev[2], 'Superstar'],
-          ['bg-slate-300', dev[1], 'Star'],
-        ].map(([c, n, l]) => (
-          <span key={l as string} className="flex items-center gap-1.5" title={l as string}>
-            <span className={`h-2 w-2 rounded-full ${c}`} />
-            <b className="tabular-nums text-neutral-200">{spoilers ? (n as number) : '?'}</b>
+      <span className="flex items-center gap-3 text-[11px] text-muted" title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — turn on Spoilers to reveal'}>
+        {([3, 2, 1] as const).map((d) => (
+          <span key={d} className="flex items-center gap-1">
+            <DevBadge dev={d} hidden={!spoilers} />
+            <b className="font-display text-[13px] font-bold tabular-nums text-neutral-200">{spoilers ? dev[d] : '?'}</b>
           </span>
         ))}
       </span>
@@ -190,9 +187,11 @@ export function MetaStrip({
           </button>
         </>
       )}
-      <span className="hidden h-4 w-px bg-white/[0.07] sm:block" />
-      <PositionBreakdown rows={rows} active={pos} onPick={onPickPos} compact />
-      <TierKey />
+      </div>
+      <div className="mt-2 flex items-center gap-2 border-t border-white/[0.06] pt-2">
+        <PositionBreakdown rows={rows} active={pos} onPick={onPickPos} compact />
+        <TierKey />
+      </div>
     </div>
   );
 }

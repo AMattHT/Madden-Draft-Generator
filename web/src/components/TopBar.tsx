@@ -153,10 +153,7 @@ export function TopBar({
           {draft && <GameToggle gameVersion={gameVersion} onSetGameVersion={onSetGameVersion} pinned={pinnedGame} />}
           {draft && showLeague && <Segmented label="League" value={league} onChange={onSetLeague} options={LEAGUES} />}
           {draft && (
-            <div className="flex items-center gap-2">
-              <span className="hidden text-[10px] font-bold uppercase tracking-[0.14em] text-muted md:inline">Lens</span>
-              <Segmented label="Rating lens" value={mode} onChange={onSetMode} options={LENS} />
-            </div>
+            <Segmented label="Rating lens" value={mode} onChange={onSetMode} options={LENS} />
           )}
         </div>
       </div>

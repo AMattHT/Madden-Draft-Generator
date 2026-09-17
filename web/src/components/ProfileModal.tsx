@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PlayerRow, GearOption, FrontSevenInfo } from '../types';
 import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait, type PersonaFocusOption } from '../api';
 import { POS_NAMES, DEV_NAMES, ATTR_GROUPS, humanize, fmtHeight, keyAttrsForPosition, tierColor } from '../constants';
-import { RatingChip, DevBadge, Icon, ICONS, Pill } from './ui';
+import { RatingChip, DevBadge, Icon, ICONS, Pill, Button } from './ui';
 import { RadarChart } from './RadarChart';
 import { GearEditor, SLOT_LABELS } from './GearEditor';
 import { AppearanceEditor } from './AppearanceEditor';
@@ -225,6 +225,7 @@ export function ProfileModal({
   mode = 'draft',
   footer,
   variant = 'modal',
+  onReveal,
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
@@ -248,6 +249,8 @@ export function ProfileModal({
   footer?: string;
   /** 'pane': docked beside the board (the scout desk) - no backdrop, no close, no focus grab. */
   variant?: 'modal' | 'pane';
+  /** Flip Spoilers on from inside the editor (the blind-scouting strip's Reveal button). */
+  onReveal?: () => void;
 }) {
   const roster = mode === 'roster';
   const pane = variant === 'pane';
@@ -438,7 +441,7 @@ export function ProfileModal({
               </span>
             )}
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 pr-20">
             <div className="relative font-display text-xl font-extrabold leading-tight">
               {effStr('firstName', row.firstName)} {effStr('lastName', row.lastName)}
             </div>
@@ -453,8 +456,7 @@ export function ProfileModal({
                   as {archOpts.find((o) => o.id === gameView.archetype)?.name ?? `#${gameView.archetype}`}
                 </span>
               )}
-              <DevBadge dev={dev} size="lg" hidden={!spoilers} />
-              {archName && <span className="text-xs text-muted">{archName}</span>}
+              <DevBadge dev={dev} hidden={!spoilers} />
               {row.twoWay && row.twoWay.roles.length > 0 && (
                 <span
                   title={row.twoWay.source === 'era'
@@ -483,12 +485,12 @@ export function ProfileModal({
               )}
             </div>
             <div className="mt-1.5 text-xs text-muted">
-              {row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
+              {archName ? <span className="text-neutral-300">{archName} · </span> : null}{row.college || '—'} · {fmtHeight(row.heightInches)} · {row.weight || '—'} lb · age {row.age || '—'}
               {roster ? '' : row.supplemental ? ` · Supplemental Rd ${row.supplemental.round}` : row.round ? ` · Rd ${row.round}` : ''} {!roster && row.wav != null ? `· wAV ${row.wav}` : ''}
             </div>
           </div>
           {onNavigate && (
-            <div className="flex shrink-0 items-center gap-0.5 self-center">
+            <div className="absolute right-12 top-3 flex items-center gap-0.5">
               <button
                 onClick={() => onNavigate(-1)}
                 disabled={!canPrev}
@@ -512,7 +514,7 @@ export function ProfileModal({
           {!pane && (
           <button
             onClick={onClose}
-            className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
+            className="absolute right-4 top-3 rounded-md p-1 text-muted transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
             aria-label="Close"
           >
             <Icon path={ICONS.close} className="h-5 w-5" />
@@ -520,7 +522,7 @@ export function ProfileModal({
           )}
           </div>
           {/* Section jump-nav — the profile is a long scroll. */}
-          <div className="flex items-center gap-1 overflow-x-auto px-5 pb-2 pt-1">
+          <div className="flex flex-wrap items-center gap-0.5 px-5 pb-2 pt-1">
             {(
               [
                 ...(roster ? [] : ([['Scouting', scoutingRef]] as const)),
@@ -535,7 +537,7 @@ export function ProfileModal({
               <button
                 key={label}
                 onClick={() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
+                className="rounded-md px-2 py-1 text-[10.5px] font-semibold text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
               >
                 {label}
               </button>
@@ -556,8 +558,16 @@ export function ProfileModal({
             </>
           ) : (
             // The chart's outline is the ratings, so plotting it would leak them.
-            <div className="grid h-[240px] place-items-center rounded-lg border border-dashed border-border text-sm text-muted">
-              Signature {posName} attributes hidden — tick Spoilers to reveal
+            <div className="flex h-[72px] items-center justify-between gap-3 rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-4">
+              <span className="flex items-center gap-2.5 text-xs text-muted">
+                <Icon path={ICONS.eyeOff} className="h-4 w-4 shrink-0" />
+                <span>Signature {posName} ratings are hidden while you scout blind.</span>
+              </span>
+              {onReveal && (
+                <Button size="xs" onClick={onReveal} title="Turn Spoilers on for the whole board">
+                  <Icon path={ICONS.eye} className="h-3.5 w-3.5" /> Reveal
+                </Button>
+              )}
             </div>
           )}
         </div>

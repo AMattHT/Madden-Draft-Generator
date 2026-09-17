@@ -314,7 +314,8 @@ export function Portrait({
 }) {
   const chain = [src, fallback].filter((u, i, a): u is string => !!u && a.indexOf(u) === i);
   const [broken, setBroken] = useState(0);
-  useEffect(() => setBroken(0), [src, fallback]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => { setBroken(0); setLoaded(false); }, [src, fallback]);
   const dim =
     size === 'fill'
       ? 'h-full w-full'
@@ -337,8 +338,9 @@ export function Portrait({
         alt=""
         loading="lazy"
         decoding="async"
+        onLoad={() => setLoaded(true)}
         onError={() => setBroken((b) => b + 1)}
-        className={`${dim} ${radius} shrink-0 bg-surface-2 object-cover ${size === 'fill' ? '' : 'ring-1 ring-white/[0.08]'} ${className}`}
+        className={`${dim} ${radius} shrink-0 bg-surface-2 object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'} ${size === 'fill' ? '' : 'ring-1 ring-white/[0.08]'} ${className}`}
       />
     );
   }
@@ -367,7 +369,7 @@ export function TeamLogo({ team, size = 'md' }: { team?: TeamInfo; size?: 'sm' |
         loading="lazy"
         decoding="async"
         onError={() => setBroken(true)}
-        className={`${dim} shrink-0 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]`}
+        className={`${dim} shrink-0 object-contain`}
       />
     );
   }

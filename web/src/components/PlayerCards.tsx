@@ -91,7 +91,7 @@ const Card = memo(function Card({
       </span>
 
       {/* Signature ratings as tiny bars. */}
-      <span className="relative mt-auto grid grid-cols-3 gap-x-3 gap-y-1.5 px-3.5 pb-3.5">
+      <span className="relative mt-auto grid grid-cols-3 gap-x-3 gap-y-2 px-3.5 pb-4">
         {sig.map(([k, label]) => {
           const v = r.ratings?.[k] ?? 0;
           const t = ovrTier(v);

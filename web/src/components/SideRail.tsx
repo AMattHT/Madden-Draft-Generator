@@ -56,7 +56,7 @@ export function SideRail({ view, onSetView, franchiseEnabled }: { view: AppView;
             {/* Lit edge on the active tile. */}
             <span aria-hidden className={`absolute -left-2 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-primary-light shadow-[0_0_10px_rgba(111,155,255,0.9)] transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} />
             <RailArt view={e.view} path={e.icon} active={active} />
-            <span className={`text-center ${collapsed ? 'hidden' : 'hidden lg:block'}`}>{e.label}</span>
+            <span className={`text-center ${collapsed ? 'hidden' : 'hidden lg:block'}`}>{e.view === 'draft' ? 'Classes' : e.label}</span>
           </button>
         );
       })}

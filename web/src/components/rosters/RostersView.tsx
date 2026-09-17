@@ -31,7 +31,7 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
       const data = await api.rosterOpenSaved('ROSTER-Official');
       setOpen({ data, doc: newRosterDoc(data, true, true), readOnly: false, notice: null });
     } catch (e) {
-      setErr(`Could not open the game's roster to start from: ${(e as Error).message}`);
+      setErr(`Save a roster in Madden 27 first, or browse for a ROSTER file: the game's own ROSTER-Official is not in the saves folder yet (${(e as Error).message}).`);
     } finally {
       setLoading(null);
     }
@@ -84,9 +84,7 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
         {gameVersion !== 'm27' && (
           <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">Rosters are Madden 27 files. Madden 26 rosters are not supported yet.</div>
         )}
-        {err && <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-red-200">{err}</div>}
-        {loading && <div className="mx-auto mt-2 w-[960px] max-w-full text-xs text-muted">Opening…</div>}
-        <RosterPicker savedDocs={saved} onOpenBase={openBase} onOpenDoc={openDoc} onDeleteDoc={del} onNew={openFresh} />
+        <RosterPicker savedDocs={saved} onOpenBase={openBase} onOpenDoc={openDoc} onDeleteDoc={del} onNew={openFresh} notice={err} opening={loading != null} />
       </div>
     );
   }

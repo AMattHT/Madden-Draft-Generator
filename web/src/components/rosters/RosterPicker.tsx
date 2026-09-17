@@ -122,7 +122,7 @@ function TeamStage({ data, fromSaves, onBack, onOpen }: {
 }
 
 /** First screen of the Rosters area: the rosters you have going, the saves folder, and a browsed file. */
-export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, onNew }: {
+export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, onNew, notice, opening = false }: {
   savedDocs: RosterDoc[];
   /** teamId: the club to open the builder on (ALL_TEAMS for the whole file). */
   onOpenBase: (data: RosterData, fromSaves: boolean, teamId?: number) => void;
@@ -130,6 +130,10 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
   onDeleteDoc: (id: string) => void;
   /** Start a roster from scratch: empty teams, filled from the pool. Omitted while re-picking a base. */
   onNew?: () => void;
+  /** A message from the owner (an open that failed), shown under the header. */
+  notice?: string | null;
+  /** The owner is opening something (a saved roster, the game's file). */
+  opening?: boolean;
 }) {
   const [state, setState] = useState<{ dir: string; files: SaveFileInfo[] } | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -161,6 +165,10 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
   const order: Record<Kind, number> = { game: 0, other: 1, ours: 2 };
   const files = state ? [...state.files].sort((a, b) => order[kindOf(a)] - order[kindOf(b)] || b.modified - a.modified) : [];
   const recent = useMemo(() => [...savedDocs].sort((a, b) => b.updatedAt - a.updatedAt), [savedDocs]);
+  // A roster from scratch borrows the game's own file as its container.
+  const hasOfficial = !state || state.files.some((f) => f.name === 'ROSTER-Official');
+  const shown = err ?? notice;
+  const anyBusy = !!busy || opening;
 
   if (stage) return <TeamStage data={stage.data} fromSaves={stage.fromSaves} onBack={() => setStage(null)} onOpen={(teamId) => onOpenBase(stage.data, stage.fromSaves, teamId)} />;
 
@@ -179,19 +187,19 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
             {busy === 'file' ? 'Opening…' : 'Browse for a file'}
           </Button>
           {onNew && (
-            <Button tone="primary" onClick={onNew} disabled={!!busy} title="Empty teams, filled from the player pool">
+            <Button tone="primary" onClick={onNew} disabled={anyBusy || !hasOfficial} title={hasOfficial ? 'Empty teams, filled from the player pool' : "Needs the game's ROSTER-Official in the saves folder: save a roster in Madden 27 once"}>
               <Icon path={ICONS.plus} className="h-3.5 w-3.5" strokeWidth={2.4} />
-              {busy === 'new' ? 'Opening…' : 'New roster'}
+              {opening ? 'Opening…' : 'New roster'}
             </Button>
           )}
           <input ref={fileRef} type="file" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = ''; }} />
         </div>
       </header>
 
-      {err && (
+      {shown && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-red-200">
           <Icon path={ICONS.warning} className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-          <span>{err}</span>
+          <span>{shown}</span>
         </div>
       )}
 
@@ -236,12 +244,13 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
             {onNew && (
               <button
                 onClick={onNew}
-                disabled={!!busy}
+                disabled={anyBusy || !hasOfficial}
+                title={hasOfficial ? undefined : "Needs the game's ROSTER-Official in the saves folder: save a roster in Madden 27 once"}
                 style={{ ['--i' as string]: recent.length }}
                 className="press flex min-h-[124px] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/[0.14] bg-transparent text-center transition-all duration-200 hover:border-primary/60 hover:bg-primary/[0.06] disabled:opacity-50"
               >
                 <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-primary-light"><Icon path={ICONS.plus} className="h-4 w-4" strokeWidth={2.4} /> New roster</span>
-                <span className="text-[11px] text-muted">Empty teams, filled from the pool</span>
+                <span className="text-[11px] text-muted">{hasOfficial ? 'Empty teams, filled from the pool' : "Needs the game's roster file first"}</span>
               </button>
             )}
           </div>

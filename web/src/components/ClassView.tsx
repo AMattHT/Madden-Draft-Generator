@@ -295,6 +295,7 @@ export function ClassView({
     onGearEdit: (slot: string, asset: string) => onGearEdit(selectedRow.id, slot, asset),
     onReset: () => onResetPlayer(selectedRow.id),
     onClose: () => setSelectedId(null),
+    onReveal: () => setSpoilers(true),
     onNavigate: navigatePlayer,
     canPrev: selectedIndex > 0,
     canNext: selectedIndex >= 0 && selectedIndex < rows.length - 1,

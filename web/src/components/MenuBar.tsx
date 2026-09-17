@@ -136,7 +136,7 @@ export function MenuBar({
   ];
 
   return (
-    <div ref={rootRef} className="relative z-40 flex h-7 shrink-0 select-none items-stretch border-b border-white/[0.05] bg-surface-0/80 px-2 text-xs text-neutral-400 backdrop-blur-md">
+    <div ref={rootRef} className="relative z-40 flex h-6 shrink-0 select-none items-stretch bg-surface-1/70 px-2 text-[11px] text-neutral-400 backdrop-blur-md">
       {menus.map((m) => (
         <div key={m.id} className="relative flex">
           <button
@@ -144,7 +144,7 @@ export function MenuBar({
             onMouseEnter={() => { if (open && open !== m.id) setOpen(m.id); }}
             aria-haspopup="menu"
             aria-expanded={open === m.id}
-            className={`my-1 rounded-md px-2.5 font-medium transition-colors ${open === m.id ? 'bg-white/[0.08] text-neutral-50' : 'hover:bg-white/[0.05] hover:text-neutral-100'}`}
+            className={`my-0.5 rounded-md px-2.5 font-medium transition-colors ${open === m.id ? 'bg-white/[0.08] text-neutral-50' : 'hover:bg-white/[0.05] hover:text-neutral-100'}`}
           >
             {m.label}
           </button>
