@@ -87,7 +87,7 @@ export function FaTrimTool({ save, onWrote }: { save: string; onWrote?: () => vo
                 </thead>
                 <tbody>
                   {result.victims.map((v, i) => (
-                    <tr key={i} className="border-t border-border/50">
+                    <tr key={i} className="border-t border-white/[0.05]">
                       <td className="px-2 py-1 text-neutral-100">{v.name}</td>
                       <td className="px-2 py-1 text-neutral-300">{v.position}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{v.overall}</td>

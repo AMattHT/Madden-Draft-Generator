@@ -90,7 +90,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
 
   useEffect(() => { onListChange?.(list.map((p) => p.key)); }, [list, onListChange]);
 
-  const sel = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 focus:border-primary focus:outline-none';
+  const sel = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-xs text-neutral-200 focus:border-primary focus:outline-none';
   const th = 'px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
   const sortBtn = (k: SortKey, label: string) => (
     <button onClick={() => setSort(k)} className={`${th} ${sort === k ? 'text-neutral-100' : 'hover:text-neutral-200'}`}>{label}{sort === k ? ' ▾' : ''}</button>
@@ -99,7 +99,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   if (compact) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-3 py-2">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${sel} w-44`} />
           <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel} title="Madden position">
             <option value="ALL">All positions</option>
@@ -137,13 +137,13 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           render={(p) => {
             const st = status(p.key);
             return (
-              <div className={`flex h-10 items-center gap-2.5 border-b border-border/60 px-3 text-sm ${st ? 'bg-success/5' : 'hover:bg-surface-2/70'}`}>
+              <div className={`flex h-10 items-center gap-2.5 border-b border-white/[0.05] px-3 text-sm ${st ? 'bg-success/5' : 'hover:bg-white/[0.035]'}`}>
                 <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
                 <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
                   {p.first} {p.last}
                   {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                 </span>
-                <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{p.mpos}</span>
+                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.mpos}</span>
                 <span className="inline-flex w-6 justify-center" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>{p.team && <TeamLogo team={p.team} size="sm" />}</span>
                 <span className="w-20 text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
                 <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score: his overall when added">{p.cal}</span>
@@ -163,7 +163,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-4 py-2">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${sel} w-48`} />
         <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel}>
           <option value="ALL">All positions</option>
@@ -212,7 +212,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
               {list.slice(0, SHOW_MAX).map((p) => {
                 const st = status(p.key);
                 return (
-                  <tr key={p.key} className={`border-t border-border/50 ${st ? 'bg-success/5' : 'hover:bg-surface-2/50'}`}>
+                  <tr key={p.key} className={`border-t border-white/[0.05] ${st ? 'bg-success/5' : 'hover:bg-white/[0.06]/50'}`}>
                     <td className="whitespace-nowrap px-2 py-1 text-neutral-100">
                       <span className="inline-flex items-center gap-2">
                         <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
@@ -244,7 +244,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           </table>
         )}
         {catalog && list.length > SHOW_MAX && (
-          <div className="border-t border-border px-4 py-2 text-center text-xs text-muted">
+          <div className="border-t border-white/[0.06] px-4 py-2 text-center text-xs text-muted">
             Showing {SHOW_MAX} of {list.length.toLocaleString()} — narrow the search or filters to see the rest.
           </div>
         )}

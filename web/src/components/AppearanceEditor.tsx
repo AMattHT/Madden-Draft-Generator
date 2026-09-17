@@ -180,7 +180,7 @@ export function AppearanceEditor({
         className="flex h-[80vh] w-[940px] max-w-full flex-col overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-2xl outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
           <div>
             <div className="text-sm font-bold tracking-tight text-neutral-100">Appearance Builder</div>
             <div className="text-[11px] text-muted">
@@ -190,14 +190,14 @@ export function AppearanceEditor({
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-surface-2 hover:text-neutral-200" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1 text-muted hover:bg-white/[0.06] hover:text-neutral-200" aria-label="Close">
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
         </div>
 
         <div className="flex min-h-0 flex-1">
           <div className="w-52 shrink-0 overflow-auto border-r border-border p-2">
-            <div className="mb-2 border-b border-border pb-2">
+            <div className="mb-2 border-b border-white/[0.06] pb-2">
               <div className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-muted">Reference photo</div>
               <ReferencePhoto chain={referencePhotos} />
             </div>
@@ -212,14 +212,14 @@ export function AppearanceEditor({
                 key={id}
                 onClick={() => { setTab(id); setQuery(''); }}
                 className={`mb-0.5 flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs font-medium transition-colors ${
-                  tab === id ? 'bg-primary text-white' : 'text-neutral-300 hover:bg-surface-2'
+                  tab === id ? 'bg-primary text-white' : 'text-neutral-300 hover:bg-white/[0.06]'
                 }`}
               >
                 {label}
               </button>
             ))}
             {tab === 'generic' && (
-              <div className="mt-2 space-y-0.5 border-t border-border pt-2">
+              <div className="mt-2 space-y-0.5 border-t border-white/[0.06] pt-2">
                 <div className="flex items-center justify-between px-2.5 pb-1">
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-muted">Skin tone</span>
                   {onToneFromPhoto && (
@@ -240,7 +240,7 @@ export function AppearanceEditor({
                       key={t}
                       onClick={() => { setTone(t); setQuery(''); }}
                       className={`flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs ${
-                        tone === t ? 'bg-surface-3 text-neutral-100' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
+                        tone === t ? 'bg-surface-3 text-neutral-100' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'
                       }`}
                     >
                       <span>Tone {t}{currentTone === t && <span className="ml-1 text-[9px] text-muted">current</span>}{suggest?.tone === t && <span className="ml-1 text-[9px] text-success-light">photo</span>}</span>
@@ -263,7 +263,7 @@ export function AppearanceEditor({
 
           <div className="flex min-h-0 flex-1 flex-col">
             {tab !== 'body' && (
-              <div className="flex items-center gap-2 border-b border-border p-3">
+              <div className="flex items-center gap-2 border-b border-white/[0.06] p-3">
                 <div className="relative flex-1">
                   <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                     <Icon path={ICONS.search} className="h-4 w-4" />
@@ -272,21 +272,21 @@ export function AppearanceEditor({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={tab === 'scans' ? `Search ${scanLabel.toLowerCase()}…` : `Search tone ${tone} heads…`}
-                    className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                    className="w-full rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
             )}
 
             {tab === 'generic' && photoOpen && onToneFromPhoto && (
-              <div className="border-b border-border bg-surface-2/40 px-3 py-2.5">
+              <div className="border-b border-white/[0.06] bg-surface-2/40 px-3 py-2.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={photoUrl}
                     onChange={(e) => setPhotoUrl(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && photoUrl.trim()) readPhoto({ imageUrl: photoUrl.trim() }); }}
                     placeholder="Paste an image address (right-click a photo → Copy image address)"
-                    className="min-w-[240px] flex-1 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                    className="min-w-[240px] flex-1 rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-xs text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
                   />
                   <button
                     onClick={() => photoUrl.trim() && readPhoto({ imageUrl: photoUrl.trim() })}
@@ -298,7 +298,7 @@ export function AppearanceEditor({
                   <button
                     onClick={() => fileRef.current?.click()}
                     disabled={photoBusy}
-                    className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-2 disabled:opacity-50"
+                    className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.06] disabled:opacity-50"
                   >
                     Upload…
                   </button>
@@ -307,7 +307,7 @@ export function AppearanceEditor({
                     <button
                       onClick={() => readPhoto({ imageUrl: referencePhotos[0].startsWith('/api/image?url=') ? decodeURIComponent(referencePhotos[0].slice('/api/image?url='.length)) : new URL(referencePhotos[0], window.location.origin).toString() })}
                       disabled={photoBusy}
-                      className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-2 disabled:opacity-50"
+                      className="rounded-md border border-border-strong px-2.5 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.06] disabled:opacity-50"
                       title="Use the reference photo on the left"
                     >
                       Use reference
@@ -350,7 +350,7 @@ export function AppearanceEditor({
                       onClick={() => pickGeneric(code)}
                       title={code}
                       className={`flex flex-col items-center gap-1 overflow-hidden rounded-lg border p-1.5 transition-colors ${
-                        on ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
+                        on ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-white/[0.06]'
                       }`}
                     >
                       <FaceThumb src={`/api/portrait/generic-head/${encodeURIComponent(code)}`} className="h-16 w-16 rounded" />
@@ -374,7 +374,7 @@ export function AppearanceEditor({
                       onClick={() => pickScan(s.asset)}
                       title={`${s.name} — ${s.asset}`}
                       className={`flex flex-col items-center gap-1 overflow-hidden rounded-lg border p-1.5 transition-colors ${
-                        on ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-surface-2'
+                        on ? 'border-primary bg-primary/10' : 'border-border hover:border-border-strong hover:bg-white/[0.06]'
                       }`}
                     >
                       <FaceThumb src={s.image} className="h-20 w-20 rounded" />
@@ -397,7 +397,7 @@ export function AppearanceEditor({
                     key={b}
                     onClick={() => onEdit('bodyType', b)}
                     className={`flex h-28 flex-col items-center justify-center gap-1 rounded-lg border text-sm font-semibold transition-colors ${
-                      currentBody === b ? 'border-primary bg-primary/10 text-neutral-100' : 'border-border text-neutral-300 hover:border-border-strong hover:bg-surface-2'
+                      currentBody === b ? 'border-primary bg-primary/10 text-neutral-100' : 'border-border text-neutral-300 hover:border-border-strong hover:bg-white/[0.06]'
                     }`}
                   >
                     {b}
@@ -408,7 +408,7 @@ export function AppearanceEditor({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 border-t border-border px-4 py-2">
+        <div className="flex items-center gap-3 border-t border-white/[0.06] px-4 py-2">
           <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted">Wearing</span>
           <div className="min-w-0 flex-1 truncate text-[11px] text-neutral-400">
             {usingScan ? (
@@ -425,11 +425,11 @@ export function AppearanceEditor({
           </div>
           <button
             onClick={resetGenerated}
-            className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 hover:bg-surface-2"
+            className="shrink-0 rounded-md border border-border-strong px-2.5 py-1 text-[10px] font-medium text-neutral-300 hover:bg-white/[0.06]"
           >
             Reset to generated
           </button>
-          <button onClick={onClose} className="shrink-0 rounded-md bg-surface-2 px-3 py-1.5 text-[11px] font-medium text-neutral-200 hover:bg-surface-3">
+          <button onClick={onClose} className="shrink-0 rounded-md bg-surface-2 px-3 py-1.5 text-[11px] font-medium text-neutral-200 hover:bg-white/[0.07]">
             Done
           </button>
         </div>

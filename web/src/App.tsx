@@ -16,6 +16,8 @@ import { schedulePrewarm, cancelPrewarm } from './prewarm';
 import { UpdateBanner } from './components/UpdateBanner';
 import { WhatsNew, useWhatsNew } from './components/WhatsNew';
 import { Icon, ICONS } from './components/ui';
+import { BoardSkeleton, EmptyBoard } from './components/BoardStates';
+import { productTitle } from './brand';
 import type { ClassEdits, CustomClass, GearEdits, GeneratedClass, GameVersion } from './types';
 
 /** Gear edits saved before the thigh slot was merged carry thighLeft/thighRight;
@@ -537,7 +539,7 @@ export default function App() {
         if (pinned) {
           setPinnedGame(pinned);
           setGameVersion(pinned);
-          document.title = pinned === 'm26' ? 'Madden 26 Draft Class Generator' : 'Madden 27 Draft Class Generator';
+          document.title = productTitle(pinned);
           document.querySelector('link[rel="icon"]')?.setAttribute('href', `/icons/${pinned}.svg`);
         }
         setFranchiseEnabled(cfg.franchise);
@@ -589,6 +591,7 @@ export default function App() {
         league={selected != null ? effLeague(selected) : 'NFL'}
         onSetLeague={changeLeague}
         connected={connected && !error}
+        busy={busy}
         years={years}
         selected={selected}
         onSelectYear={(y) => {
@@ -610,7 +613,7 @@ export default function App() {
         <SideRail view={view} onSetView={setView} franchiseEnabled={franchiseEnabled} />
         <main className="min-w-0 flex-1">
           {view === 'rosters' && <RostersView gameVersion={gameVersion} />}
-          {view === 'home' && <HomePage onSelect={setView} franchiseEnabled={franchiseEnabled} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
+          {view === 'home' && <HomePage onSelect={setView} franchiseEnabled={franchiseEnabled} title={productTitle(pinnedGame)} />}
           {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}
@@ -628,8 +631,11 @@ export default function App() {
           {view === 'draft' && (
             <>
           {error && (
-            <div className="m-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-red-200">
-              <div className="font-semibold text-red-100">Couldn’t load the draft class</div>
+            <div className="m-6 animate-rise rounded-xl border border-danger/40 bg-danger/10 px-5 py-4 text-sm text-red-200">
+              <div className="flex items-center gap-2 font-semibold text-red-100">
+                <Icon path={ICONS.warning} className="h-4 w-4" />
+                Couldn’t load the draft class
+              </div>
               <div className="mt-1 text-red-200/90">{error}</div>
               <div className="mt-2 text-xs text-red-300/70">
                 Is the backend running on <code className="rounded bg-black/30 px-1">localhost:5174</code>? Start it with{' '}
@@ -637,21 +643,7 @@ export default function App() {
               </div>
             </div>
           )}
-          {!data && !error && (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-muted">
-              {busy ? (
-                <>
-                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-700 border-t-primary" />
-                  <span className="text-sm">Pulling draft class…</span>
-                </>
-              ) : (
-                <>
-                  <Icon path={ICONS.board} className="h-10 w-10 opacity-30" />
-                  <span className="text-sm">Pick a draft year to build a class</span>
-                </>
-              )}
-            </div>
-          )}
+          {!data && !error && (busy ? <BoardSkeleton /> : <EmptyBoard />)}
           {data && (
             <ClassView
               data={data}

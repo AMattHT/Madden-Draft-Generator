@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { GeneratedClass, PlayerRow } from '../types';
 import { PositionBreakdown } from './PositionBreakdown';
+import { Icon, ICONS } from './ui';
 
 const TIERS = [
   { c: 'bg-gold', t: '90+', d: 'HOF / elite' },
@@ -10,7 +11,7 @@ const TIERS = [
   { c: 'bg-neutral-700', t: '<60', d: 'fringe' },
 ];
 
-/** OVR tier key as an on-demand popover (was a permanent card eating board space). */
+/** OVR tier key as an on-demand popover. */
 function TierKey() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -34,12 +35,12 @@ function TierKey() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         title="OVR tier key + how ratings work"
-        className="grid h-6 w-6 place-items-center rounded-full border border-border-strong text-[11px] font-bold text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-200"
+        className="grid h-7 w-7 place-items-center rounded-full border border-white/[0.08] text-muted transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
       >
-        ?
+        <Icon path={ICONS.info} className="h-4 w-4" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border border-border-strong bg-surface-1 p-3.5 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
+        <div className="glass-strong absolute right-0 top-full z-50 mt-2 w-80 animate-pop rounded-xl p-3.5">
           <div className="flex flex-col gap-1.5">
             {TIERS.map((i) => (
               <div key={i.t} className="flex items-center gap-2">
@@ -51,11 +52,11 @@ function TierKey() {
               </div>
             ))}
           </div>
-          <p className="mt-2.5 border-t border-border pt-2.5 text-[11px] leading-relaxed text-neutral-400">
+          <p className="mt-2.5 border-t border-white/[0.06] pt-2.5 text-[11px] leading-relaxed text-neutral-400">
             Ratings derive from each player's career <b className="text-neutral-300">weighted Approximate Value</b> —
             near-zero wAV ⇒ a bust, Hall-of-Fame wAV ⇒ a superstar. wAV tag:{' '}
             <span className="text-info">A</span> actual · <span className="text-neutral-400">P</span> predicted ·{' '}
-            <span className="text-gold">EA</span> official 2026 rookie rating.
+            <span className="text-gold">EA</span> official rookie rating.
           </p>
         </div>
       )}
@@ -63,10 +64,45 @@ function TierKey() {
   );
 }
 
+/** A number that counts up to its value when it changes, so a rebuild reads
+ *  as movement. Falls back to the plain value for hidden ('?') stats. */
+function Counter({ value }: { value: number }) {
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = from.current;
+    const end = value;
+    if (start === end) return;
+    const t0 = performance.now();
+    const dur = 480;
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      setShown(Math.round(start + (end - start) * e));
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else from.current = end;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <>{shown}</>;
+}
+
+function Stat({ value, label, title, tone = 'neutral' }: { value: ReactNode; label: ReactNode; title?: string; tone?: 'neutral' | 'gold' | 'warning' }) {
+  const v = tone === 'gold' ? 'text-gold' : tone === 'warning' ? 'text-warning' : 'text-neutral-50';
+  return (
+    <span className="flex items-baseline gap-1.5 text-[11px] text-muted" title={title}>
+      <b className={`font-display text-[15px] font-bold tabular-nums ${v}`}>{value}</b> {label}
+    </span>
+  );
+}
+
+const Sep = () => <span className="h-4 w-px bg-white/[0.07]" />;
+
 /**
  * One slim meta strip under the class header: class stats inline + position-group
- * filter chips + the tier key. Replaces the old StatsBar / PositionBreakdown /
- * WavLegend stack so the board itself starts near the top of the viewport.
+ * filter chips + the tier key, so the board itself starts near the top of the viewport.
  */
 export function MetaStrip({
   data,
@@ -98,63 +134,63 @@ export function MetaStrip({
   // Generated fillers have no identity to verify, so they sit outside the count.
   const realFaces = data.rows.filter((r) => r.toneSource != null || r.face === 'asset');
   const verified = realFaces.filter((r) => r.face === 'asset' || r.likenessFixed || (r.toneSource !== 'prior' && r.toneSource !== 'csv')).length;
+  const supplemental = data.rows.filter((r) => r.supplemental).length;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-border bg-surface-1 px-3 py-2">
-      <span className="flex items-baseline gap-1.5 text-xs text-neutral-400">
-        <b className="tabular-nums text-sm text-neutral-100">{data.count}</b> prospects
-      </span>
-      <span className="h-4 w-px bg-border" />
+    <div className="glass flex flex-wrap items-center gap-x-3.5 gap-y-2 rounded-xl px-3.5 py-2">
+      <Stat value={<Counter value={data.count} />} label="prospects" />
+      <Sep />
       {/* The class average and its dev-trait counts describe how strong the class
-          is, which is the whole thing blind scouting is meant to withhold. The
-          "top rated" tooltip leaked it too. Dot colours track the badges. */}
-      <span
-        className="flex items-baseline gap-1.5 text-xs text-neutral-400"
-        title={spoilers ? `Top rated: ${ovrMax}` : 'Hidden — tick Spoilers to reveal'}
-      >
-        avg OVR <b className="tabular-nums text-sm text-neutral-100">{spoilers ? avg : '?'}</b>
-      </span>
-      <span className="h-4 w-px bg-border" />
-      <span
-        className="flex items-center gap-2 text-[11px] text-neutral-400"
-        title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — tick Spoilers to reveal'}
-      >
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[3] : '?'}</b></span>
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-gold" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[2] : '?'}</b></span>
-        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /><b className="tabular-nums text-neutral-200">{spoilers ? dev[1] : '?'}</b></span>
-      </span>
-      <span className="h-4 w-px bg-border" />
-      <span className="text-[11px] text-neutral-400" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`}>
-        <b className="tabular-nums text-neutral-200">{data.likeness.asset}</b> real faces
-      </span>
-      {data.source !== 'file' && <span className="h-4 w-px bg-border" />}
-      {data.source !== 'file' && <span
-        className="text-[11px] text-neutral-400"
-        title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, or a curated record). Open a player to check the rest.`}
-      >
-        <b className="tabular-nums text-neutral-200">{verified}</b>/{data.rows.length} faces verified
-      </span>}
-      {data.rows.some((r) => r.supplemental) && (
-        <>
-          <span className="h-4 w-px bg-border" />
-          <span className="text-[11px] text-neutral-400" title="Supplemental-draft selections: each sits after his round's regular picks and is marked S in the table.">
-            <b className="tabular-nums text-neutral-200">{data.rows.filter((r) => r.supplemental).length}</b> supplemental
+          is, which is the whole thing blind scouting is meant to withhold. */}
+      <Stat
+        value={spoilers ? <Counter value={avg} /> : '?'}
+        label="avg OVR"
+        title={spoilers ? `Top rated: ${ovrMax}` : 'Hidden — turn on Spoilers to reveal'}
+      />
+      <Sep />
+      <span className="flex items-center gap-2.5 text-[11px] text-muted" title={spoilers ? 'Dev traits: X-Factor / Superstar / Star' : 'Hidden — turn on Spoilers to reveal'}>
+        {[
+          ['bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]', dev[3], 'X-Factor'],
+          ['bg-gold shadow-[0_0_6px_rgba(245,197,24,0.7)]', dev[2], 'Superstar'],
+          ['bg-slate-300', dev[1], 'Star'],
+        ].map(([c, n, l]) => (
+          <span key={l as string} className="flex items-center gap-1.5" title={l as string}>
+            <span className={`h-2 w-2 rounded-full ${c}`} />
+            <b className="tabular-nums text-neutral-200">{spoilers ? (n as number) : '?'}</b>
           </span>
+        ))}
+      </span>
+      <Sep />
+      <Stat value={data.likeness.asset} label="real faces" title={`${data.likeness.withPortrait} real portraits · ${data.likeness.customPortrait} custom-photo eligible`} />
+      {data.source !== 'file' && (
+        <>
+          <Sep />
+          <Stat
+            value={<>{verified}<span className="text-xs font-medium text-muted">/{data.rows.length}</span></>}
+            label="faces verified"
+            title={`${verified} of ${data.rows.length} faces rest on evidence (a real scan, a portrait or photo reading, or a curated record). Open a player to check the rest.`}
+          />
+        </>
+      )}
+      {supplemental > 0 && (
+        <>
+          <Sep />
+          <Stat value={supplemental} label="supplemental" title="Supplemental-draft selections: each sits after his round's regular picks and is marked S in the table." />
         </>
       )}
       {data.dropped && data.dropped.length > 0 && (
         <>
-          <span className="h-4 w-px bg-border" />
+          <Sep />
           <button
             onClick={onShowDropped}
-            className="rounded border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[11px] text-warning transition-colors hover:bg-warning/20"
+            className="press inline-flex h-6 items-center gap-1.5 rounded-md border border-warning/40 bg-warning/10 px-2 text-[11px] font-medium text-warning transition-colors hover:bg-warning/20"
             title={`The class holds 402; ${data.dropped.length} players did not fit. Click to see them and pull any back in.`}
           >
             <b className="tabular-nums">{data.dropped.length}</b> didn't fit{data.included && data.included.length > 0 ? ` · ${data.included.length} included` : ''}
           </button>
         </>
       )}
-      <span className="hidden h-4 w-px bg-border sm:block" />
+      <span className="hidden h-4 w-px bg-white/[0.07] sm:block" />
       <PositionBreakdown rows={rows} active={pos} onPick={onPickPos} compact />
       <TierKey />
     </div>

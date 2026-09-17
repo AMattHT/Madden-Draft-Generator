@@ -2,13 +2,15 @@
 
 @theme {
   /* Layered dark surfaces — cool, slightly blue-black so the board reads as a
-     broadcast console, not flat charcoal. */
-  --color-surface-0: #0a0b0d;
-  --color-surface-1: #121317;
-  --color-surface-2: #191b20;
-  --color-surface-3: #21242b;
-  --color-border: #262931;
-  --color-border-strong: #363a44;
+     broadcast console, not flat charcoal. Same family as before, one notch
+     deeper at the base so the glass layers above have room to separate. */
+  --color-surface-0: #08090c;
+  --color-surface-1: #0f1014;
+  --color-surface-2: #16181d;
+  --color-surface-3: #1e2127;
+  --color-surface-4: #262a32;
+  --color-border: #1f2229;
+  --color-border-strong: #2c3039;
 
   --color-primary: #2f6bff;
   --color-primary-light: #6f9bff;
@@ -20,6 +22,7 @@
   --color-legend: #8b5cf6;
   --color-legend-light: #a78bfa;
   --color-gold: #f5c518;
+  --color-gold-light: #ffd95a;
   --color-pink: #ec4899;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
@@ -27,8 +30,17 @@
   --color-ink: #edeef1;
   --color-muted: #9aa0ac;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', ui-sans-serif, system-ui, -apple-system,
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', ui-sans-serif, system-ui,
+    -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --shadow-pop: 0 20px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 0 1px rgba(47, 107, 255, 0.35), 0 8px 30px -8px rgba(47, 107, 255, 0.55);
+  --shadow-gold: 0 0 0 1px rgba(245, 197, 24, 0.35), 0 8px 30px -8px rgba(245, 197, 24, 0.45);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 html,
@@ -42,20 +54,30 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* Subtle top-anchored glow gives the dark shell depth without a flat wash. */
+  overflow: hidden;
+  /* Two soft light sources — a cool blue one top-left (the stadium lights) and a
+     faint warm one bottom-right — over the base so the shell has depth. */
   background:
-    radial-gradient(120% 80% at 50% -10%, #14161c 0%, rgba(20, 22, 28, 0) 60%),
+    radial-gradient(90% 60% at 8% -10%, rgba(47, 107, 255, 0.16) 0%, rgba(47, 107, 255, 0) 60%),
+    radial-gradient(60% 50% at 100% 110%, rgba(245, 197, 24, 0.05) 0%, rgba(245, 197, 24, 0) 60%),
     var(--color-surface-0);
   background-attachment: fixed;
 }
 * {
   box-sizing: border-box;
 }
+button {
+  font: inherit;
+}
 
 /* Numeric data reads as a column — tabular figures everywhere they appear. */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
+}
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 ::selection {
@@ -68,34 +90,185 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c3038;
-  border: 2px solid transparent;
+  background: #2a2e37;
+  border: 3px solid transparent;
   background-clip: padding-box;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3a3f49;
+  background: #3a3f4a;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-corner {
   background: transparent;
 }
 
 :focus-visible {
   outline: 2px solid var(--color-primary-light);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
+/* ---------- Surfaces ---------- */
+@layer utilities {
+  /* Frosted panel: translucent surface + blur, hairline edge lit from above. */
+  .glass {
+    background: color-mix(in srgb, var(--color-surface-1) 78%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .glass-strong {
+    background: color-mix(in srgb, var(--color-surface-1) 92%, transparent);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-pop);
+  }
+  .hairline {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .hairline-t {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .hairline-b {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  /* A one-pixel accent line that fades at both ends — panel tops, active tabs. */
+  .accent-line {
+    position: relative;
+  }
+  .accent-line::before {
+    content: '';
+    position: absolute;
+    inset: 0 12% auto 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(111, 155, 255, 0.7), transparent);
+    pointer-events: none;
+  }
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #ffffff 0%, #9dbaff 45%, #6f9bff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #fff4c2 0%, #f5c518 55%, #d9a300 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .glow-primary {
+    box-shadow: var(--shadow-glow);
+  }
+  .glow-gold {
+    box-shadow: var(--shadow-gold);
+  }
+  /* Faint film grain so large dark areas do not band. Pure CSS, no asset. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay;
+  }
+  /* Field grid — the home hero and empty states sit on a faint yard-line mesh. */
+  .field-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(70% 70% at 50% 40%, #000 30%, transparent 100%);
+    -webkit-mask-image: radial-gradient(70% 70% at 50% 40%, #000 30%, transparent 100%);
+  }
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-surface-2);
+    border-radius: 6px;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  /* Cheap layout isolation for big lists: the browser can skip off-screen work. */
+  .contain-strict {
+    contain: strict;
+  }
+  .contain-paint {
+    contain: paint;
+  }
+}
+
+/* ---------- Motion ---------- */
 @layer utilities {
   .animate-fade-in {
-    animation: fade-in 0.16s ease-out both;
+    animation: fade-in 0.18s ease-out both;
   }
   .animate-slide-in-right {
-    animation: slide-in-right 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slide-in-right 0.32s var(--ease-out-expo) both;
   }
   .animate-rise {
-    animation: rise 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: rise 0.28s var(--ease-out-expo) both;
+  }
+  .animate-pop {
+    animation: pop 0.26s var(--ease-spring) both;
+  }
+  .animate-view {
+    animation: view-in 0.34s var(--ease-out-expo) both;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-spin-slow {
+    animation: spin 2.4s linear infinite;
+  }
+  .animate-flip {
+    animation: flip-reveal 0.42s var(--ease-out-expo) both;
+    transform-style: preserve-3d;
+  }
+  .animate-glow-pulse {
+    animation: glow-pulse 2.2s ease-in-out infinite;
+  }
+  /* Stagger: children rise in sequence. Capped at 24 so a long list does not
+     keep animating off-screen; rows past that appear at once. */
+  .stagger > * {
+    animation: rise 0.36s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 22ms);
+  }
+  .hover-lift {
+    transition:
+      transform 0.28s var(--ease-out-expo),
+      box-shadow 0.28s var(--ease-out-expo),
+      border-color 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  .press:active {
+    transform: translateY(0.5px) scale(0.985);
   }
 }
 
@@ -119,7 +292,7 @@ body {
 }
 @keyframes rise {
   from {
-    transform: translateY(7px);
+    transform: translateY(8px);
     opacity: 0;
   }
   to {
@@ -127,9 +300,178 @@ body {
     opacity: 1;
   }
 }
+@keyframes view-in {
+  from {
+    transform: translateY(6px) scale(0.995);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes flip-reveal {
+  from {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateX(0);
+    opacity: 1;
+  }
+}
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(47, 107, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(47, 107, 255, 0);
+  }
+}
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
-/* The update toast slides in from the corner it sits in. Reused keyframe; the
-   reduced-motion block below already flattens it to a plain appearance. */
+/* Indeterminate loading bar that sits under the top bar while a class pulls. */
+.progress-bar {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(47, 107, 255, 0.12);
+}
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 33%;
+  background: linear-gradient(90deg, transparent, var(--color-primary-light), transparent);
+  animation: progress-slide 1.2s var(--ease-out-expo) infinite;
+}
+
+/* ---------- Controls ---------- */
+/* Toggle switch (the spoilers control): a track with a sliding thumb. */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-surface-4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #cfd3db;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.26s var(--ease-spring),
+    background 0.22s ease;
+}
+input:checked + .switch {
+  background: var(--color-primary);
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 12px rgba(47, 107, 255, 0.45);
+}
+input:checked + .switch::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+input:focus-visible + .switch {
+  outline: 2px solid var(--color-primary-light);
+  outline-offset: 2px;
+}
+
+/* Native range inputs, tuned to the palette. */
+input[type='range'] {
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-surface-4);
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(47, 107, 255, 0.18);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+input[type='range']:disabled::-webkit-slider-thumb {
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa0ac' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 26px !important;
+}
+select option {
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+/* Data table rows: paint isolation keeps a 400-row repaint cheap. */
+.board-row {
+  contain: layout paint style;
+}
+
+/* The update toast slides in from the corner it sits in. */
 .update-toast {
   animation: slide-in-right 220ms ease-out;
 }

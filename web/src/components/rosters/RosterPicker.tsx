@@ -4,7 +4,7 @@ import type { RosterData, RosterDoc, SaveFileInfo } from '../../types';
 
 const fmtSize = (b: number) => (b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`);
 const fmtWhen = (t: number) => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric' });
-const btn = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
+const btn = 'rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.07] disabled:opacity-50';
 
 /** Empty state of the Rosters view: a base file from the saves folder or elsewhere, or a roster saved earlier. */
 export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, onNew }: {
@@ -54,8 +54,8 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
             </button>
           )}
         </div>
-        <div className="mt-4 rounded-lg border border-border bg-surface-0">
-          <header className="flex items-baseline justify-between gap-2 border-b border-border px-3 py-2">
+        <div className="mt-4 rounded-lg border border-white/[0.07] bg-black/30">
+          <header className="flex items-baseline justify-between gap-2 border-b border-white/[0.06] px-3 py-2">
             <span className="text-xs font-semibold text-neutral-100">Madden 27 saves</span>
             <span className="truncate text-[10px] text-muted" title={state?.dir}>{state?.dir ?? ''}</span>
           </header>
@@ -64,7 +64,7 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
             {state?.files.length === 0 && <div className="px-3 py-5 text-center text-xs text-muted">No ROSTER files in this folder. Browse for one below.</div>}
             {state && [...state.files].sort((a, b) => Number(ours(a)) - Number(ours(b)) || b.modified - a.modified).map((f) => (
               <button key={f.name} onClick={() => run(f.name, true, () => api.rosterOpenSaved(f.name))} disabled={!!busy}
-                className="flex w-full items-center justify-between gap-3 border-b border-border/60 px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-surface-2 disabled:opacity-50">
+                className="flex w-full items-center justify-between gap-3 border-b border-white/[0.05] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-white/[0.06] disabled:opacity-50">
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-neutral-100">{f.name}</span>
                   <span className="block text-[10px] text-muted">{fmtSize(f.sizeBytes)} · {fmtWhen(f.modified)}{ours(f) ? ' · written by this app' : ''}</span>
@@ -87,7 +87,7 @@ export function RosterPicker({ savedDocs, onOpenBase, onOpenDoc, onDeleteDoc, on
         <div className="mt-3 flex flex-col gap-1.5">
           {savedDocs.length === 0 && <div className="rounded-lg border border-dashed border-border px-3 py-5 text-center text-xs text-muted">Nothing saved yet</div>}
           {savedDocs.map((d) => (
-            <div key={d.id} className="flex items-center gap-2 rounded-lg border border-border bg-surface-0 px-3 py-2">
+            <div key={d.id} className="flex items-center gap-2 rounded-lg border border-white/[0.07] bg-black/30 px-3 py-2">
               <button onClick={() => onOpenDoc(d)} className="min-w-0 flex-1 text-left">
                 <span className="block truncate text-sm font-medium text-neutral-100">{d.name || 'Untitled roster'}</span>
                 <span className="block truncate text-[10px] text-muted">{d.fresh ? 'from scratch' : `from ${d.base.fileName}`} · {fmtWhen(d.updatedAt)}</span>

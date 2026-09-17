@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type MutableRefObject } from 'react';
 import type { AppView } from '../App';
 import type { GameVersion } from '../types';
 import type { EditTools, ExportActions } from './ExportMenu';
+import { NAME } from '../brand';
 
 type Mode = 'madden' | 'retro' | 'launch';
 
@@ -129,13 +130,13 @@ export function MenuBar({
         { kind: 'item', label: 'Releases on GitHub', onSelect: external(RELEASES_URL) },
         { kind: 'item', label: 'Report an issue', onSelect: external(ISSUES_URL) },
         { kind: 'sep' },
-        { kind: 'label', label: version ? `Madden Draft Toolkit ${version}` : 'Madden Draft Toolkit' },
+        { kind: 'label', label: version ? `${NAME} ${version}` : NAME },
       ],
     },
   ];
 
   return (
-    <div ref={rootRef} className="relative z-40 flex h-7 shrink-0 items-stretch border-b border-border bg-surface-1 px-2 text-xs text-neutral-300 select-none">
+    <div ref={rootRef} className="relative z-40 flex h-7 shrink-0 select-none items-stretch border-b border-white/[0.05] bg-surface-0/80 px-2 text-xs text-neutral-400 backdrop-blur-md">
       {menus.map((m) => (
         <div key={m.id} className="relative flex">
           <button
@@ -143,22 +144,22 @@ export function MenuBar({
             onMouseEnter={() => { if (open && open !== m.id) setOpen(m.id); }}
             aria-haspopup="menu"
             aria-expanded={open === m.id}
-            className={`px-2.5 transition-colors ${open === m.id ? 'bg-surface-3 text-neutral-100' : 'hover:bg-surface-2 hover:text-neutral-100'}`}
+            className={`my-1 rounded-md px-2.5 font-medium transition-colors ${open === m.id ? 'bg-white/[0.08] text-neutral-50' : 'hover:bg-white/[0.05] hover:text-neutral-100'}`}
           >
             {m.label}
           </button>
           {open === m.id && (
-            <div role="menu" className="absolute left-0 top-full z-50 mt-px min-w-[280px] whitespace-nowrap overflow-hidden rounded-b-md border border-border-strong bg-surface-1 py-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
+            <div role="menu" className="glass-strong absolute left-0 top-full z-50 mt-1 min-w-[280px] animate-pop origin-top-left overflow-hidden whitespace-nowrap rounded-xl py-1.5">
               {m.items.map((it, i) => {
-                if (it.kind === 'sep') return <div key={i} className="my-1 border-t border-border" />;
-                if (it.kind === 'label') return <div key={i} className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">{it.label}</div>;
+                if (it.kind === 'sep') return <div key={i} className="my-1 border-t border-white/[0.06]" />;
+                if (it.kind === 'label') return <div key={i} className="px-4 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{it.label}</div>;
                 return (
                   <button
                     key={i}
                     role="menuitem"
                     disabled={it.disabled}
                     onClick={() => { setOpen(null); it.onSelect(); }}
-                    className="flex w-full items-center gap-3 px-3 py-1.5 text-left text-xs text-neutral-200 transition-colors hover:bg-surface-2 disabled:opacity-40 disabled:hover:bg-transparent"
+                    className="mx-1.5 flex w-[calc(100%-12px)] items-center gap-3 rounded-md px-2.5 py-1.5 text-left text-xs text-neutral-200 transition-colors hover:bg-white/[0.06] disabled:opacity-40 disabled:hover:bg-transparent"
                   >
                     <span className="w-3 text-primary-light">{it.checked ? '✓' : ''}</span>
                     <span className="flex-1">{it.label}</span>

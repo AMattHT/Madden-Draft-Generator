@@ -29,14 +29,7 @@ export function PositionBreakdown({
   const groups = POS_GROUP_ORDER.filter((g) => counts[g]);
 
   return (
-    <div
-      className={
-        compact
-          ? 'flex flex-wrap items-center gap-1.5'
-          : 'flex flex-wrap items-center gap-1.5 rounded-lg border border-border bg-surface-1 px-3 py-2.5'
-      }
-    >
-      <span className="mr-1 text-[11px] font-medium uppercase tracking-wider text-muted">Positions</span>
+    <div className={compact ? 'flex flex-wrap items-center gap-1' : 'glass flex flex-wrap items-center gap-1 rounded-xl px-3 py-2.5'}>
       {groups.map((g) => {
         const on = active === g;
         return (
@@ -44,12 +37,14 @@ export function PositionBreakdown({
             key={g}
             onClick={() => onPick(on ? 'ALL' : g)}
             title={`${counts[g]} ${g} — click to ${on ? 'clear filter' : 'filter'}`}
-            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
-              on ? 'bg-primary text-white' : 'bg-surface-2 text-neutral-300 hover:bg-surface-3 hover:text-neutral-100'
+            className={`press inline-flex h-6 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold transition-all duration-150 ${
+              on
+                ? 'bg-primary text-white shadow-[0_2px_10px_rgba(47,107,255,0.4)]'
+                : 'text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-100'
             }`}
           >
             <span>{g}</span>
-            <span className={`tabular-nums ${on ? 'text-white/80' : 'text-muted'}`}>{counts[g]}</span>
+            <span className={`tabular-nums ${on ? 'text-white/80' : 'text-neutral-600'}`}>{counts[g]}</span>
           </button>
         );
       })}

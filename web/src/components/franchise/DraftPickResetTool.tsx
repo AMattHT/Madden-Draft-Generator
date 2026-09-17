@@ -70,7 +70,7 @@ export function DraftPickResetTool({ save, onWrote }: { save: string; onWrote?: 
                 </thead>
                 <tbody>
                   {result.restores.map((p, i) => (
-                    <tr key={i} className="border-t border-border/50">
+                    <tr key={i} className="border-t border-white/[0.05]">
                       <td className="px-2 py-1 text-neutral-300">{yearOffsetLabel(p.yearOffset)}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{p.round}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{p.pickNumber || '—'}</td>

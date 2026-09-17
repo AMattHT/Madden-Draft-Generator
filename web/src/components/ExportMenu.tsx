@@ -233,7 +233,7 @@ export function ExportMenu({
         onClick={saveToSaves}
         disabled={!!busy}
         title={isFile ? 'Write the edited class back into the Madden Saves folder under its own name; the previous file is kept as .bak' : `Write the class into your Madden ${gameVersion === 'm27' ? '27' : '26'} Saves folder, ready for Franchise → Choose Draft Class`}
-        className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-white shadow-[0_2px_10px_rgba(47,107,255,0.3)] transition-colors hover:bg-primary-light disabled:opacity-50"
+        className="press inline-flex h-8 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold text-white shadow-[0_2px_12px_rgba(47,107,255,0.4),inset_0_1px_0_rgba(255,255,255,0.18)] transition-all hover:bg-primary-light hover:shadow-[0_4px_18px_rgba(47,107,255,0.55),inset_0_1px_0_rgba(255,255,255,0.18)] disabled:opacity-50"
       >
         <Icon path={ICONS.download} className="h-3.5 w-3.5" />
         {busy === 'saves' ? 'Saving…' : busy === 'mdc' ? 'Exporting…' : busy === 'portraits' ? 'Downloading…' : busy === 'fullpack' ? 'Writing pack…' : 'Save to Madden'}
@@ -243,8 +243,8 @@ export function ExportMenu({
       {msg && (
         <div
           role="status"
-          className={`fixed bottom-5 right-5 z-50 max-w-md animate-rise rounded-lg border px-4 py-3 text-xs leading-relaxed shadow-2xl ${
-            msg.ok ? 'border-success/40 bg-surface-1 text-success-light' : 'border-danger/40 bg-surface-1 text-red-300'
+          className={`glass-strong fixed bottom-5 right-5 z-50 max-w-md animate-rise rounded-xl border px-4 py-3 text-xs leading-relaxed ${
+            msg.ok ? 'border-success/40 text-success-light' : 'border-danger/40 text-red-300'
           }`}
         >
           <div className="flex items-start gap-3">

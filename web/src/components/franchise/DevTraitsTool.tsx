@@ -68,7 +68,7 @@ export function DevTraitsTool({ save, onWrote }: { save: string; onWrote?: () =>
           </div>
           <div className="mt-2 grid grid-cols-4 gap-2 text-center">
             {(['XFactor', 'Superstar', 'Star', 'Normal'] as const).map((t) => (
-              <div key={t} className="rounded-md border border-border/60 bg-surface-0 px-2 py-1.5">
+              <div key={t} className="rounded-md border border-white/[0.05] bg-surface-0 px-2 py-1.5">
                 <div className="text-[10px] uppercase tracking-wide text-muted">{t}</div>
                 <div className="tabular-nums">
                   <span className="text-muted">{result.before[t]}</span>
@@ -91,7 +91,7 @@ export function DevTraitsTool({ save, onWrote }: { save: string; onWrote?: () =>
                 </thead>
                 <tbody>
                   {result.notable.map((u, i) => (
-                    <tr key={i} className="border-t border-border/50">
+                    <tr key={i} className="border-t border-white/[0.05]">
                       <td className="px-2 py-1 text-neutral-100">{u.name} <span className="text-muted">· {u.team}</span></td>
                       <td className="px-2 py-1 text-neutral-300">{u.position}</td>
                       <td className="px-2 py-1 text-right tabular-nums">{u.overall}</td>

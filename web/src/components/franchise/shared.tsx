@@ -4,19 +4,19 @@ import type { ReactNode } from 'react';
  *  looks consistent and no single file carries all the styling. */
 
 export const inputCls =
-  'w-full rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
-export const cardCls = 'rounded-lg border border-border bg-surface-1 p-4';
+  'w-full rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+export const cardCls = 'glass rounded-xl p-4';
 export const btnPrimary =
   'inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:opacity-50';
 export const btnGhost =
-  'inline-flex items-center gap-2 rounded-md border border-border bg-surface-0 px-4 py-2 text-sm font-semibold text-neutral-200 transition-colors hover:border-primary disabled:opacity-50';
+  'inline-flex items-center gap-2 rounded-md border border-white/[0.07] bg-black/30 px-4 py-2 text-sm font-semibold text-neutral-200 transition-colors hover:border-primary disabled:opacity-50';
 
 export const fmtM = (m: number) => `$${m.toFixed(1)}M`;
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-medium uppercase tracking-wider text-muted">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{label}</span>
       {children}
       {hint && <span className="text-[10px] text-muted">{hint}</span>}
     </label>

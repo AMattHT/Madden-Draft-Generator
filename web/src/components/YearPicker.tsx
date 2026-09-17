@@ -76,7 +76,7 @@ export function YearPicker({
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-2.5 rounded-lg border border-border-strong bg-surface-2 py-1.5 pl-3 pr-2.5 text-left transition-colors hover:bg-surface-3 focus:border-primary focus:outline-none"
+        className="flex items-center gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.03] py-1.5 pl-3 pr-2.5 text-left transition-colors hover:bg-white/[0.07] focus:border-primary focus:outline-none"
       >
         <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">Draft</span>
         <span className="flex items-baseline gap-1.5">
@@ -94,8 +94,8 @@ export function YearPicker({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-[22rem] overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
-          <div className="border-b border-border p-3">
+        <div className="absolute left-0 top-full z-50 mt-2 w-[22rem] overflow-hidden glass-strong animate-pop rounded-xl">
+          <div className="border-b border-white/[0.06] p-3">
             <div className="mb-2 flex items-baseline justify-between">
               <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-400">
                 Choose a draft year
@@ -117,7 +117,7 @@ export function YearPicker({
                 }}
                 inputMode="numeric"
                 placeholder="Jump to year…"
-                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm tabular-nums text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                className="w-full rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-7 text-sm tabular-nums text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
               />
               {query && (
                 <button
@@ -139,7 +139,7 @@ export function YearPicker({
             )}
             {!q && recent.length > 0 && (
               <section className="mb-1">
-                <div className="sticky top-0 z-10 border-b border-border/60 bg-surface-1 px-4 py-1.5">
+                <div className="sticky top-0 z-10 border-b border-white/[0.05] bg-surface-1 px-4 py-1.5">
                   <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
                     Recent
                   </span>
@@ -152,7 +152,7 @@ export function YearPicker({
                       className={`flex h-9 items-center justify-center rounded-md border px-3 text-center text-[13px] font-semibold tabular-nums transition-all duration-150 ${
                         selected === y
                           ? 'border-primary bg-primary text-white'
-                          : 'border-border-strong bg-surface-2 text-neutral-200 hover:border-primary/50 hover:bg-surface-3'
+                          : 'border-white/[0.08] bg-white/[0.03] text-neutral-200 hover:border-primary/50 hover:bg-white/[0.07]'
                       }`}
                     >
                       {y}
@@ -165,7 +165,7 @@ export function YearPicker({
               const cachedInDecade = ys.filter((y) => cached.has(y)).length;
               return (
                 <section key={d} className="mb-1">
-                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-surface-1 px-4 py-1.5">
+                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.05] bg-surface-1 px-4 py-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-widest text-muted">
                       {d}s
                     </span>
@@ -190,8 +190,8 @@ export function YearPicker({
                             active
                               ? 'border-primary bg-primary text-white shadow-[0_2px_12px_rgba(47,107,255,0.35)]'
                               : isCached
-                                ? 'border-border-strong bg-surface-2 text-neutral-200 hover:border-primary/50 hover:bg-surface-3'
-                                : 'border-transparent text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'
+                                ? 'border-white/[0.08] bg-white/[0.03] text-neutral-200 hover:border-primary/50 hover:bg-white/[0.07]'
+                                : 'border-transparent text-neutral-400 hover:bg-white/[0.06] hover:text-neutral-200'
                           }`}
                         >
                           <span className="text-[13px] font-semibold tabular-nums">{y}</span>

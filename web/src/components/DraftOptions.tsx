@@ -49,12 +49,12 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
     `rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${active ? 'bg-primary text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'}`;
 
   return (
-    <div className="rounded-lg border border-border bg-surface-1 p-4">
+    <div className="glass rounded-xl p-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Source</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Source</span>
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5">
+            <div className="flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
               <button className={seg(source === 'year')} onClick={() => setSource('year')}>This year</button>
               <button className={seg(source === 'decade')} onClick={() => setSource('decade')}>By decade</button>
               <button className={seg(source === 'alltime')} onClick={() => setSource('alltime')}>All-Time</button>
@@ -64,7 +64,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
               <div className="flex items-center gap-2">
                 {teamInfo?.logo && <img src={teamInfo.logo} alt="" className="h-6 w-6 object-contain" />}
                 <select value={team ?? ''} onChange={(e) => setTeam(e.target.value || undefined)}
-                  className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none">
+                  className="rounded-md border border-white/[0.07] bg-black/30 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none">
                   <option value="">Choose a franchise…</option>
                   {franchises.map((f) => <option key={f.key} value={f.key}>{f.name}</option>)}
                 </select>
@@ -78,7 +78,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
             )}
             {source === 'decade' && (
               <select value={decade} onChange={(e) => setDecade(Number(e.target.value))}
-                className="rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none">
+                className="rounded-md border border-white/[0.07] bg-black/30 px-2 py-1.5 text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none">
                 {decades.map((d) => <option key={d} value={d}>{d}s</option>)}
               </select>
             )}
@@ -86,7 +86,7 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Class strength — <span className="text-neutral-300">{autoStrength ? 'Auto' : strengthLabel}</span></span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Class strength — <span className="text-neutral-300">{autoStrength ? 'Auto' : strengthLabel}</span></span>
           <input type="range" min={0.7} max={1.3} step={0.05} value={strength} disabled={autoStrength} onChange={(e) => setStrength(Number(e.target.value))} className="w-full accent-primary disabled:opacity-40" />
           <label className="flex items-center gap-2 text-xs text-neutral-300" title="Scale the curve by how good the class really was (top-32 caliber vs the 1970-2015 norm): 1983 tops out higher than 2013">
             <input type="checkbox" checked={autoStrength} onChange={(e) => setAutoStrength(e.target.checked)} />
@@ -95,14 +95,14 @@ export function DraftOptions({ opts, decades, busy, onApply, customClasses = [],
         </div>
 
         <div className="flex flex-col gap-1.5" title="0 = the board scouts saw on draft day (the #1 pick leads, Brady is a 6th-rounder); 1 = how careers turned out. Dev traits always follow the outcome, so hidden gems keep their Superstar trait.">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Hindsight — <span className="text-neutral-300">{hindsightLabel}</span></span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Hindsight — <span className="text-neutral-300">{hindsightLabel}</span></span>
           <input type="range" min={0} max={1} step={0.1} value={hindsight} onChange={(e) => setHindsight(Number(e.target.value))} className="w-full accent-primary" />
         </div>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-muted">Guaranteed studs</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Guaranteed studs</span>
           <input type="number" min={0} max={20} value={studs} onChange={(e) => setStuds(Math.max(0, Math.min(20, Number(e.target.value))))}
-            className="w-24 rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none" />
+            className="w-24 rounded-md border border-white/[0.07] bg-black/30 px-2.5 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none" />
         </label>
 
         <label className="flex items-end gap-2 pb-1.5 text-sm text-neutral-200">

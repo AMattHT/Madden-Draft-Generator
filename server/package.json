@@ -41,5 +41,9 @@
     "fflate": "^0.8.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "sharp@0.34.5": true
   }
 }

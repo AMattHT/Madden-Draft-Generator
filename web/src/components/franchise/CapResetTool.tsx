@@ -104,7 +104,7 @@ export function CapResetTool({ save, onWrote }: { save: string; onWrote?: () => 
               </thead>
               <tbody>
                 {result.teams.map((t) => (
-                  <tr key={t.name} className="border-t border-border/50">
+                  <tr key={t.name} className="border-t border-white/[0.05]">
                     <td className="px-3 py-1.5 font-medium text-neutral-100">{t.name}</td>
                     <td className="px-3 py-1.5 text-right tabular-nums">
                       <span className="text-muted">{fmtM(t.before.deadMoneyM)}</span>

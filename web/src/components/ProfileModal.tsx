@@ -91,7 +91,7 @@ function PersonaSection({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
           Mindset focus <span className="font-medium normal-case tracking-normal text-muted">· one of four · separate from the traits</span>
         </div>
         {focusEdited && generatedFocusId != null && (
@@ -109,7 +109,7 @@ function PersonaSection({
               onClick={() => { if (f.id >= 0) onEdit('focus', String(f.id)); }}
               aria-pressed={on}
               title={f.description ?? f.label}
-              className={`flex min-h-[76px] flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left transition-colors ${on ? 'border-legend/50 bg-legend/10' : 'border-border hover:border-legend/40 hover:bg-surface-2'}`}
+              className={`flex min-h-[76px] flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left transition-colors ${on ? 'border-legend/50 bg-legend/10' : 'border-border hover:border-legend/40 hover:bg-white/[0.06]'}`}
             >
               <span className={`text-[11px] font-semibold uppercase tracking-wide ${on ? 'text-legend-light' : 'text-neutral-200'}`}>{f.label}</span>
               {f.description && <span className="line-clamp-3 text-[10px] leading-snug text-neutral-400">{f.description}</span>}
@@ -117,8 +117,8 @@ function PersonaSection({
           );
         })}
       </div>
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border/60 pt-3">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.05] pt-3">
+        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
           Persona DNA <span className="font-medium normal-case tracking-normal text-muted">· {ids.length}/5 slots · written into the M27 export</span>
         </div>
         <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ function PersonaSection({
             onClick={() => setAdding((v) => !v)}
             disabled={ids.length >= 5 && !adding}
             title={ids.length >= 5 ? 'All five slots are used — remove a trait to add another' : 'Browse every trait with its picture'}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {adding ? 'Close' : '+ Add trait'}
           </button>
@@ -171,7 +171,7 @@ function PersonaSection({
                   disabled={on || ids.length >= 5}
                   onClick={() => { const next = [...ids, t.id]; apply(next); if (next.length >= 5) setAdding(false); }}
                   title={t.description ?? traitLabel(t)}
-                  className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-center transition-colors ${on ? 'border-legend/40 bg-legend/10 opacity-50' : 'border-border hover:border-legend/40 hover:bg-surface-2'} disabled:cursor-default`}
+                  className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-center transition-colors ${on ? 'border-legend/40 bg-legend/10 opacity-50' : 'border-border hover:border-legend/40 hover:bg-white/[0.06]'} disabled:cursor-default`}
                 >
                   <img src={dnaIcon(t)} alt="" className="h-12 w-12 rounded-xl object-contain" loading="lazy" />
                   <span className="text-[10px] font-medium leading-tight text-neutral-200">{traitLabel(t)}</span>
@@ -369,7 +369,7 @@ export function ProfileModal({
   }
   const archName = archOpts.find((o) => o.id === archetype)?.name ?? row.archetypeName;
 
-  const field = 'rounded-md border border-border bg-surface-0 px-1.5 py-1 text-sm focus:border-primary focus:outline-none';
+  const field = 'rounded-md border border-white/[0.07] bg-black/30 px-1.5 py-1 text-sm focus:border-primary focus:outline-none';
   // Face (generic head) picker: pool for the chosen skin tone; PEPS drives the write.
   const facePool = heads[String(faceTone)] ?? [];
   const curFace = effStr('genericHeadName', row.genericHead ?? '');
@@ -380,7 +380,7 @@ export function ProfileModal({
     if (!facePool.length) return;
     onEdit('genericHeadName', facePool[((i % facePool.length) + facePool.length) % facePool.length]);
   };
-  const faceBtn = 'rounded-md border border-border-strong bg-surface-2 px-2 py-1 text-xs text-neutral-200 transition-colors hover:bg-surface-3 disabled:opacity-40';
+  const faceBtn = 'rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs text-neutral-200 transition-colors hover:bg-white/[0.07] disabled:opacity-40';
   const num = (key: string) => {
     const v = eff(key);
     if (!spoilers)
@@ -407,19 +407,19 @@ export function ProfileModal({
 
   return (
     <>
-    <div className="fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/60 backdrop-blur-[2px]" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/65 backdrop-blur-[3px]" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`${row.firstName} ${row.lastName} profile`}
         tabIndex={-1}
         ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
-        className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-border-strong bg-surface-1 shadow-2xl outline-none"
+        className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.08] bg-surface-1 shadow-[-24px_0_60px_rgba(0,0,0,0.6)] outline-none"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 border-b border-border bg-surface-1/95 backdrop-blur-sm">
-          <div className="flex items-start gap-4 px-5 pt-4">
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-2 ring-1 ring-black/20">
+        <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1/90 backdrop-blur-md">
+          <div className="relative flex items-start gap-4 px-5 pt-4"><span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/[0.12] to-transparent" />
+          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/[0.1] bg-surface-2 shadow-[0_10px_28px_rgba(0,0,0,0.55)]">
             {imgSrc ? (
               <img
                 key={imgSrc}
@@ -435,11 +435,11 @@ export function ProfileModal({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-lg font-bold leading-tight tracking-tight">
+            <div className="relative font-display text-xl font-extrabold leading-tight">
               {effStr('firstName', row.firstName)} {effStr('lastName', row.lastName)}
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{posName}</span>
+              <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{posName}</span>
               <RatingChip ovr={gameView?.overall ?? overall} size="sm" hidden={!spoilers} />
               {gameView && gameView.archetype != null && gameView.archetype !== archetype && (
                 <span
@@ -490,7 +490,7 @@ export function ProfileModal({
                 disabled={!canPrev}
                 title={roster ? 'Previous player (←)' : 'Previous player on the board (←)'}
                 aria-label="Previous player"
-                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
+                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100 disabled:opacity-30"
               >
                 <Icon path={ICONS.chevronDown} className="h-4 w-4 rotate-90" />
               </button>
@@ -499,7 +499,7 @@ export function ProfileModal({
                 disabled={!canNext}
                 title={roster ? 'Next player (→)' : 'Next player on the board (→)'}
                 aria-label="Next player"
-                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100 disabled:opacity-30"
+                className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100 disabled:opacity-30"
               >
                 <Icon path={ICONS.chevronDown} className="h-4 w-4 -rotate-90" />
               </button>
@@ -507,7 +507,7 @@ export function ProfileModal({
           )}
           <button
             onClick={onClose}
-            className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-surface-2 hover:text-neutral-200"
+            className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
             aria-label="Close"
           >
             <Icon path={ICONS.close} className="h-5 w-5" />
@@ -529,7 +529,7 @@ export function ProfileModal({
               <button
                 key={label}
                 onClick={() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+                className="rounded-md px-2.5 py-1 text-[11px] font-semibold text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
               >
                 {label}
               </button>
@@ -537,7 +537,7 @@ export function ProfileModal({
           </div>
         </div>
 
-        <div ref={scoutingRef} className="scroll-mt-36 border-b border-border px-5 py-4">
+        <div ref={scoutingRef} className="scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           {spoilers ? (
             <>
               <RadarChart
@@ -568,13 +568,13 @@ export function ProfileModal({
               ['Shuttle', c.shuttle, 's'],
             ];
             return (
-              <div className="border-b border-border px-5 py-3">
-                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+              <div className="border-b border-white/[0.06] px-5 py-3">
+                <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
                   NFL Combine <span className="text-muted">· drives speed / strength / jump / agility</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
                   {metrics.map(([label, val, unit]) => (
-                    <div key={label} className="rounded-md bg-surface-2 px-1.5 py-1.5 text-center">
+                    <div key={label} className="rounded-lg bg-white/[0.04] px-1.5 py-1.5 text-center ring-1 ring-white/[0.05]">
                       <div className="text-[9px] uppercase tracking-wide text-muted">{label}</div>
                       <div className="text-sm font-semibold tabular-nums text-neutral-100">
                         {val != null ? `${val}${unit}` : '—'}
@@ -586,7 +586,7 @@ export function ProfileModal({
             );
           })()}
 
-        <div ref={ratingsRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
+        <div ref={ratingsRef} className="space-y-3 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               Position
@@ -644,8 +644,8 @@ export function ProfileModal({
           </label>
         </div>
 
-        <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-border px-5 py-4">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Bio</div>
+        <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
+          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Bio</div>
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               First name
@@ -719,9 +719,9 @@ export function ProfileModal({
           </div>
         </div>
 
-          <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
+          <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
               Appearance <span className="font-medium normal-case tracking-normal text-muted">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
             <span className="inline-flex items-center gap-2">
@@ -730,7 +730,7 @@ export function ProfileModal({
             ) : null}
             <button
               onClick={() => setAppearOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
             >
               <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit appearance
             </button>
@@ -761,12 +761,12 @@ export function ProfileModal({
           </div>
         </div>
 
-        <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
+        <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">Equipment</div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Equipment</div>
             <button
               onClick={() => setGearOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
             >
               <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit equipment
             </button>
@@ -792,7 +792,7 @@ export function ProfileModal({
         </div>
 
         {row.persona && (
-          <div ref={personaRef} className="space-y-2.5 scroll-mt-36 border-b border-border px-5 py-4">
+          <div ref={personaRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
             <PersonaSection generated={row.persona} generatedFocus={row.focus} patch={patch} onEdit={onEdit} />
           </div>
         )}
@@ -800,7 +800,7 @@ export function ProfileModal({
         <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
             <div key={g.title}>
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">{g.title}</div>
+              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">{g.title}</div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {g.keys.map((k) => (
                   <div key={k} className="flex items-center justify-between gap-2">
@@ -813,7 +813,7 @@ export function ProfileModal({
           ))}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
+        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-white/[0.06] bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
           <span className="text-[11px] text-muted">{footer ?? 'Edits save automatically & apply to the .mdc export.'}</span>
           <button
             onClick={() => {
@@ -828,7 +828,7 @@ export function ProfileModal({
             className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 ${
               confirmReset
                 ? 'border-danger/60 bg-danger/15 text-red-200 hover:bg-danger/25'
-                : 'border-border-strong text-neutral-300 hover:bg-surface-2'
+                : 'border-border-strong text-neutral-300 hover:bg-white/[0.06]'
             }`}
           >
             {confirmReset ? 'Confirm reset?' : 'Reset player'}

@@ -44,7 +44,7 @@ function render(md: string) {
     if (block.startsWith('## ')) {
       flush();
       out.push(
-        <h3 key={`h${out.length}`} className="mb-2 mt-6 border-b border-border pb-1 text-base font-bold text-gold first:mt-0">
+        <h3 key={`h${out.length}`} className="mb-2 mt-6 border-b border-white/[0.06] pb-1 text-base font-bold text-gold first:mt-0">
           {block.slice(3)}
         </h3>
       );
@@ -86,12 +86,12 @@ export function WhatsNew({ open, onClose }: { open: boolean; onClose: () => void
         className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-surface-1 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3.5">
+        <header className="flex shrink-0 items-center justify-between border-b border-white/[0.06] px-5 py-3.5">
           <div>
             <h2 className="text-lg font-bold tracking-tight">What's new</h2>
             {about?.version && <p className="text-[11px] text-muted">Version {about.version}</p>}
           </div>
-          <button onClick={onClose} className="rounded px-2 py-1 text-sm text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100">
+          <button onClick={onClose} className="rounded px-2 py-1 text-sm text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100">
             Close
           </button>
         </header>

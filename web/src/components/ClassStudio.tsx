@@ -115,13 +115,13 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
     return [...POS_GROUP_ORDER, '?'].filter((g) => m.has(g)).map((g) => [g, m.get(g)!] as const);
   }, [draft.board, byKey]);
 
-  const sel = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-xs text-neutral-200 focus:border-primary focus:outline-none';
+  const sel = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-xs text-neutral-200 focus:border-primary focus:outline-none';
   const rounds = Math.ceil(CAP / ROUND);
 
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in flex-col bg-surface-0" role="dialog" aria-modal="true" aria-label="Class Studio">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-border bg-surface-1 px-5 py-2.5">
+      <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.06] bg-surface-1 px-5 py-2.5">
         <div className="mr-2">
           <div className="text-sm font-bold tracking-tight text-neutral-100">Class Studio</div>
           <div className="text-[11px] text-muted">Pick anyone from {catalog ? catalog.length.toLocaleString() : '…'} players or make your own. The board is the draft order.</div>
@@ -154,7 +154,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
           <input type="checkbox" checked={fill} onChange={(e) => setFill(e.target.checked)} className="accent-primary" />
           Pad the class with generated prospects
         </label>
-        <button onClick={() => persist()} disabled={!draft.board.length} className="rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-40">Save</button>
+        <button onClick={() => persist()} disabled={!draft.board.length} className="rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.07] disabled:opacity-40">Save</button>
         <button
           onClick={async () => onGenerate(await persist(), fill)}
           disabled={!draft.board.length}
@@ -162,7 +162,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
         >
           <Icon path={ICONS.board} className="h-3.5 w-3.5" /> Generate
         </button>
-        <button onClick={onClose} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-surface-2" aria-label="Close">Close</button>
+        <button onClick={onClose} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-white/[0.06]" aria-label="Close">Close</button>
       </div>
 
       <div className="flex min-h-0 flex-1">
@@ -200,7 +200,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
 
         {/* Right: the board */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-border px-4 py-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-white/[0.06] px-4 py-2 text-[11px]">
             <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400">Draft board</span>
             {groupCounts.map(([g, n]) => (
               <span key={g} className="rounded bg-surface-2 px-1.5 py-0.5 text-neutral-300">{g} <b className="tabular-nums text-neutral-100">{n}</b></span>
@@ -315,18 +315,18 @@ function CustomPlayerDrawer({ player, isNew, archetypes, colleges, onCancel, onS
   const set = <K extends keyof CustomPlayer>(k: K, v: CustomPlayer[K]) => setP((x) => ({ ...x, [k]: v }));
   const opts = archetypes[p.position] ?? [];
   const valid = p.firstName.trim() && p.lastName.trim() && p.overall >= 40 && p.overall <= 99 && p.heightInches >= 60 && p.heightInches <= 84 && p.weight >= 140 && p.weight <= 400 && p.age >= 18 && p.age <= 45;
-  const field = 'rounded-md border border-border bg-surface-0 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+  const field = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1.5 text-sm text-neutral-200 focus:border-primary focus:outline-none';
   const label = 'text-[10px] font-semibold uppercase tracking-wide text-neutral-400';
   const feet = Math.floor(p.heightInches / 12), inches = p.heightInches % 12;
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-surface-1/95 backdrop-blur-sm" role="dialog" aria-label="Custom player">
-      <div className="flex items-center justify-between border-b border-border px-5 py-3">
+    <div className="absolute inset-0 z-20 flex flex-col bg-surface-1/90 backdrop-blur-md" role="dialog" aria-label="Custom player">
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3">
         <div>
           <div className="text-sm font-bold text-neutral-100">{isNew ? 'New custom player' : `Edit ${player.firstName} ${player.lastName}`}</div>
           <div className="text-[11px] text-muted">Set who he is and how good; the attributes are generated to match when the class is built, and you can tune them on his card afterwards.</div>
         </div>
-        <button onClick={onCancel} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-surface-2">Cancel</button>
+        <button onClick={onCancel} className="rounded-md border border-border px-2 py-1 text-xs text-neutral-300 hover:bg-white/[0.06]">Cancel</button>
       </div>
       <div className="grid max-w-3xl grid-cols-2 gap-x-5 gap-y-3 overflow-auto px-5 py-4 md:grid-cols-4">
         <label className="flex flex-col gap-1"><span className={label}>First name</span><input value={p.firstName} onChange={(e) => set('firstName', e.target.value)} maxLength={20} className={field} autoFocus /></label>
@@ -370,8 +370,8 @@ function CustomPlayerDrawer({ player, isNew, archetypes, colleges, onCancel, onS
           </div>
         </div>
       </div>
-      <div className="mt-auto flex items-center justify-end gap-2 border-t border-border px-5 py-3">
-        <button onClick={onCancel} className="rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3">Cancel</button>
+      <div className="mt-auto flex items-center justify-end gap-2 border-t border-white/[0.06] px-5 py-3">
+        <button onClick={onCancel} className="rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-white/[0.07]">Cancel</button>
         <button onClick={() => valid && onSave({ ...p, firstName: p.firstName.trim(), lastName: p.lastName.trim(), college: p.college.trim() })} disabled={!valid} className="rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-white hover:bg-primary-light disabled:opacity-40">
           {isNew ? 'Add to board' : 'Save changes'}
         </button>

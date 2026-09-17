@@ -43,13 +43,13 @@ export function TeamStrip({ data, players, logos, selectedTeam, onSelectTeam, on
   const tile = (id: number, label: string, title: string, n: number, over: boolean, logo?: TeamInfo) => (
     <button key={id} onClick={() => onSelectTeam(id)} onDragOver={allowDrop(id)} onDragLeave={() => setDragOver(null)} onDrop={drop(id)}
       title={title} aria-pressed={id === selectedTeam}
-      className={`flex w-14 flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors ${id === selectedTeam ? 'bg-primary/20 ring-1 ring-primary' : over ? 'bg-primary/10 ring-1 ring-primary/60' : 'hover:bg-surface-2'}`}>
+      className={`flex w-14 flex-col items-center gap-0.5 rounded-lg px-1 py-1.5 transition-colors ${id === selectedTeam ? 'bg-primary/20 ring-1 ring-primary' : over ? 'bg-primary/10 ring-1 ring-primary/60' : 'hover:bg-white/[0.06]'}`}>
       {logo ? <TeamLogo team={logo} size="lg" /> : <span className="grid h-9 w-9 place-items-center rounded-full bg-surface-2 text-[11px] font-bold text-neutral-300">{label}</span>}
       <span className={`text-[11px] font-semibold tabular-nums ${id !== fa && id !== ALL_TEAMS && n > ROSTER_LIMIT ? 'text-red-300' : id === selectedTeam ? 'text-neutral-100' : 'text-neutral-400'}`}>{n}</span>
     </button>
   );
   return (
-    <div className="flex flex-wrap items-start gap-0.5 border-b border-border px-4 py-2">
+    <div className="flex flex-wrap items-start gap-0.5 border-b border-white/[0.06] px-4 py-2">
       {tile(ALL_TEAMS, 'All', 'Every player', players.length, false)}
       {teams.map((t) => tile(t.id, t.abbr, `${t.city} ${t.name}`, counts.get(t.id) ?? 0, dragOver === t.id, logos.get(t.id)))}
       {tile(fa, 'FA', 'Free agents', counts.get(fa) ?? 0, dragOver === fa)}

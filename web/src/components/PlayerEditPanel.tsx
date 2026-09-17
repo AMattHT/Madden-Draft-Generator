@@ -7,7 +7,7 @@ import { Icon, ICONS } from './ui';
 
 const DEVS = ['Normal', 'Star', 'Superstar', 'XFactor'];
 const BODY_TYPES = ['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'];
-const inputCls = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+const inputCls = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-sm text-neutral-200 focus:border-primary focus:outline-none';
 
 export interface EditablePlayer {
   position: string;
@@ -63,7 +63,7 @@ export function PlayerEditPanel({ title, subtitle, positions, player, edit, onEd
 
   return (
     <>
-      <div className="sticky top-0 z-10 border-b border-border bg-surface-1 px-4 py-3">
+      <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1 px-4 py-3">
         <div className="flex items-baseline justify-between gap-2">
           <div className="text-base font-bold text-neutral-50">{title}</div>
           <div className="text-lg font-bold tabular-nums" style={{ color: tierColor(eff.overall) }}>{eff.overall}</div>
@@ -92,7 +92,7 @@ export function PlayerEditPanel({ title, subtitle, positions, player, edit, onEd
         </div>
 
         {/* Appearance: body type, generic head, gear (helmet/facemask/…) */}
-        <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
+        <div className="mt-3 space-y-2 border-t border-white/[0.05] pt-3">
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Body type</span>
               <select value={eff.bodyType} onChange={(ev) => onEdit({ bodyType: ev.target.value })} className={inputCls}>
@@ -104,14 +104,14 @@ export function PlayerEditPanel({ title, subtitle, positions, player, edit, onEd
                 <select value={headTone} onChange={(ev) => setHeadTone(Number(ev.target.value))} className={`${inputCls} px-1`} title="Skin tone">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((t) => <option key={t} value={t}>T{t}</option>)}
                 </select>
-                <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx - 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">‹</button>
+                <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx - 1)} disabled={!headPool.length} className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-1 text-xs text-neutral-200 hover:bg-white/[0.07] disabled:opacity-40">‹</button>
                 <span className="flex-1 text-center text-xs tabular-nums text-neutral-300">{headIdx >= 0 ? `${headIdx + 1}/${headPool.length}` : '—'}</span>
-                <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx + 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">›</button>
-                <button type="button" onClick={() => pickHead(Math.floor(Math.random() * headPool.length))} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-neutral-200 hover:bg-surface-3 disabled:opacity-40" title="Random"><Icon path={ICONS.shuffle} className="h-3 w-3" /></button>
+                <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx + 1)} disabled={!headPool.length} className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-1 text-xs text-neutral-200 hover:bg-white/[0.07] disabled:opacity-40">›</button>
+                <button type="button" onClick={() => pickHead(Math.floor(Math.random() * headPool.length))} disabled={!headPool.length} className="rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-1 text-neutral-200 hover:bg-white/[0.07] disabled:opacity-40" title="Random"><Icon path={ICONS.shuffle} className="h-3 w-3" /></button>
               </div>
             </div>
           </div>
-          <button type="button" onClick={() => setGearOpen(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3">
+          <button type="button" onClick={() => setGearOpen(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]">
             <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit gear
           </button>
           <div className="truncate text-[10px] text-muted">
@@ -128,7 +128,7 @@ export function PlayerEditPanel({ title, subtitle, positions, player, edit, onEd
                   <label key={k} className="flex items-center justify-between gap-2">
                     <span className="truncate text-xs text-neutral-400" title={humanize(k)}>{humanize(k)}</span>
                     <input type="number" min={0} max={99} value={eff.rating(k)} onChange={(ev) => editRating(k, Number(ev.target.value))}
-                      className="w-14 rounded border border-border bg-surface-0 px-1.5 py-0.5 text-right text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none" />
+                      className="w-14 rounded border border-white/[0.07] bg-black/30 px-1.5 py-0.5 text-right text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none" />
                   </label>
                 ))}
               </div>
