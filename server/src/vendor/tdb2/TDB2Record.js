@@ -109,6 +109,7 @@ class TDB2Record {
             copy._raw = record._raw ? Buffer.from(record._raw) : null;
             copy._value = record._value ? this.deepCopyRecord(record._value, cache, false) : null;
             copy._isChanged = record._isChanged;
+            copy._isDefaulted = record._isDefaulted;
             return copy;
         }
     

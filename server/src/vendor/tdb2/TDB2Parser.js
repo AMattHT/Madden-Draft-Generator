@@ -483,6 +483,10 @@ class TDB2Parser extends FileParser {
 
                     // It's not really changed since this is being done while reading
                     newField.isChanged = false;
+
+                    // Invented to fill the record; the game omits absent fields, so the
+                    // writer leaves it out unless someone sets a value.
+                    newField.isDefaulted = true;
                     
                     record.fields[fieldDef.name] = newField;
                 }

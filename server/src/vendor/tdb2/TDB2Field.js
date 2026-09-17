@@ -17,6 +17,7 @@ class TDB2Field {
         this._raw = null;
         this._value = null;
         this._isChanged = false;
+        this._isDefaulted = false;
     };
 
     get key() {
@@ -117,6 +118,14 @@ class TDB2Field {
 
     set isChanged(isChanged) {
         this._isChanged = isChanged;
+    };
+
+    get isDefaulted() {
+        return this._isDefaulted;
+    };
+
+    set isDefaulted(v) {
+        this._isDefaulted = v;
     };
 
     get rawKey() {

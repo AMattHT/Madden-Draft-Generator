@@ -57,3 +57,24 @@ test('serialize then parse gives back the same records', skipWithoutRoster, asyn
   assert.equal(b.TEAM.records.length, 33);
   assert.equal(b.BLOB.records[0].fields.BLBM.value.records.length, a.BLOB.records[0].fields.BLBM.value.records.length);
 });
+
+/** Offset of a table header (packed 4-char name + type byte 0x04) in a payload. */
+function tableOffset(payload: Buffer, name: string): number {
+  let v = 0;
+  for (const ch of name) v = (v << 6) | ((ch.charCodeAt(0) - 32) & 63);
+  const hdr = Buffer.from([(v >> 16) & 255, (v >> 8) & 255, v & 255, 4]);
+  const at = payload.indexOf(hdr);
+  if (at < 0) throw new Error(`table ${name} not found`);
+  return at;
+}
+
+test('an unedited roster writes back with the tables after the blob byte-identical', skipWithoutRoster, async () => {
+  const orig = payloadOf(OFFICIAL);
+  const out = serializeTdb2(await parseTdb2(orig));
+  const tailA = orig.subarray(tableOffset(orig, 'DCHT'));
+  const tailB = out.subarray(tableOffset(out, 'DCHT'));
+  assert.equal(tailB.length, tailA.length, 'tail length');
+  assert.ok(tailB.equals(tailA), 'DCHT..TEAM bytes identical');
+  const growth = Math.abs(out.length - orig.length) / orig.length;
+  assert.ok(growth < 0.005, `payload size within 0.5% (was ${(growth * 100).toFixed(2)}%)`);
+});

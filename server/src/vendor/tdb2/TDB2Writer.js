@@ -35,6 +35,7 @@ class TDB2Writer extends Readable {
                     
                     sortedFields.map((fieldKey) => {
                         const field = record.fields[fieldKey];
+                        if (field.isDefaulted && !field.isChanged) return;
                         // Write the field key
                         this.push(field.rawKey);
 
@@ -139,6 +140,7 @@ class TDB2Writer extends Readable {
 
         sortedFields.map((fieldKey) => {
             const field = record.fields[fieldKey];
+                        if (field.isDefaulted && !field.isChanged) return;
             decompressedBufs.push(field.rawKey);
 
             if (field.type === 1) {
