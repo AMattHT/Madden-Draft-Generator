@@ -7,10 +7,10 @@ const KEY = 'rail:collapsed';
 
 /** The generated rail art, one plate per area; the drawn stroke icon is the fallback. */
 const ART: Record<AppView, string> = {
-  home: '/art/nav-home.webp?v=3',
-  draft: '/art/nav-draft.webp?v=3',
-  rosters: '/art/nav-rosters.webp?v=3',
-  franchise: '/art/nav-franchise.webp?v=3',
+  home: '/art/nav-home.webp?v=5',
+  draft: '/art/nav-draft.webp?v=5',
+  rosters: '/art/nav-rosters.webp?v=5',
+  franchise: '/art/nav-franchise.webp?v=5',
 };
 
 function RailArt({ view, path, active }: { view: AppView; path: string; active: boolean }) {
