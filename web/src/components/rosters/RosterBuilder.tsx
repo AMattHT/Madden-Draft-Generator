@@ -9,6 +9,7 @@ import { DevBadge, Icon, ICONS, Portrait, RatingChip, TeamLogo } from '../ui';
 import { ProfileModal } from '../ProfileModal';
 import { CatalogPanel } from '../CatalogPanel';
 import { ALL_TEAMS, TeamPanel, TeamStrip } from './TeamPanel';
+import { pickTeams } from '../../teamMatch';
 
 export const selectCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
 export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
@@ -126,11 +127,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const remove = (tempId: string) => { if (!readOnly) onChange(withoutAdd(doc, tempId)); };
   // With a team selected, Add places the player there; on All, each row's Add asks which team.
   const addTarget = selectedTeam === ALL_TEAMS ? null : selectedTeam;
-  const addTeams = useMemo(() => {
-    if (addTarget != null) return undefined;
-    const fa = data.freeAgentTeamId;
-    return [...data.teams.filter((t) => t.id !== fa).sort((a, b) => a.abbr.localeCompare(b.abbr)).map((t) => ({ id: t.id, label: t.abbr })), { id: fa, label: 'Free agents' }];
-  }, [addTarget, data]);
+  const addTeams = useMemo(() => (addTarget == null ? pickTeams(data, logos) : undefined), [addTarget, data, logos]);
   const addFromPool = async (key: string, teamId?: number) => {
     const target = teamId ?? addTarget;
     if (readOnly || target == null) return;
@@ -260,7 +257,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
               <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>
           ) : (
-            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Add to… picks the team for each player, rated by career; edit anything afterwards.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
+            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Type a team in Add to… on each row (a city, nickname or abbreviation); rated by career, edit anything afterwards.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
           )}
         </div>
         {tab === 'roster' ? (

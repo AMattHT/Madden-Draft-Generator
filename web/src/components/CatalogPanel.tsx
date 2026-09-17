@@ -4,6 +4,8 @@ import { POS_GROUP_ORDER, POS_NAMES } from '../constants';
 import type { CatalogPlayer } from '../types';
 import { Portrait, TeamLogo } from './ui';
 import { VirtualList } from './VirtualList';
+import { TeamPicker } from './TeamPicker';
+import type { PickTeam } from '../teamMatch';
 
 /** Compact row height (h-10), shared with the windowed list. */
 const ROW_H = 40;
@@ -43,8 +45,8 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   compact?: boolean;
   /** Rows to leave out entirely (players already on the roster being built). */
   hidden?: (key: string) => boolean;
-  /** Compact rows only: when set, Add is a team picker (the caller has no team selected). */
-  addTeams?: { id: number; label: string }[];
+  /** Compact rows only: when set, Add is a typed team picker (the caller has no team selected). */
+  addTeams?: PickTeam[];
 }) {
   const [q, setQ] = useState('');
   const [grp, setGrp] = useState('ALL');
@@ -148,11 +150,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                 {st ? (
                   <span className="w-14 rounded-md border border-success/40 bg-success/10 px-1.5 py-0.5 text-center text-xs text-success" title={st.title}>{st.label}</span>
                 ) : addTeams ? (
-                  <select value="" disabled={addDisabled} onChange={(e) => { const v = Number(e.target.value); if (v) onAdd(p.key, v); }} title="Add to a team"
-                    className="w-20 rounded-md border border-primary/50 bg-primary/10 px-1 py-0.5 text-xs text-primary hover:bg-primary/20 focus:outline-none disabled:opacity-40">
-                    <option value="">Add to…</option>
-                    {addTeams.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
-                  </select>
+                  addDisabled ? <span className="w-24 text-center text-xs text-muted">Add to…</span> : <TeamPicker teams={addTeams} onPick={(id) => onAdd(p.key, id)} />
                 ) : (
                   <button onClick={() => onAdd(p.key)} disabled={addDisabled} className="w-14 rounded-md border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-xs text-primary hover:bg-primary/20 disabled:opacity-40">Add</button>
                 )}

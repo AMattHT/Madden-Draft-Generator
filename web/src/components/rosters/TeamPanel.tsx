@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import type { RosterData, TeamInfo } from '../../types';
 import { groupByPosition, type ViewPlayer } from '../../rosterDoc';
-import { PlayerRow, btnCls, selectCls } from './RosterBuilder';
+import { PlayerRow, btnCls } from './RosterBuilder';
+import { pickTeams } from '../../teamMatch';
+import { TeamPicker } from '../TeamPicker';
 import { TeamLogo } from '../ui';
 import { VirtualList } from '../VirtualList';
 
@@ -75,7 +77,7 @@ export function TeamPanel({ data, players, grouped, selectedTeam, onMove, onRemo
 }) {
   const [moving, setMoving] = useState<number | null>(null);
   const fa = data.freeAgentTeamId;
-  const teams = useMemo(() => data.teams.filter((t) => t.id !== fa).sort((a, b) => a.abbr.localeCompare(b.abbr)), [data, fa]);
+  const pickable = useMemo(() => pickTeams(data, logos), [data, logos]);
   const groups = useMemo(() => (grouped ? groupByPosition(players) : [{ position: '', players }]), [players, grouped]);
 
   const row = (p: ViewPlayer) => (
@@ -83,11 +85,7 @@ export function TeamPanel({ data, players, grouped, selectedTeam, onMove, onRemo
       trailing={
         <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           {moving === p.id ? (
-            <select autoFocus defaultValue="" onBlur={() => setMoving(null)} onChange={(e) => { const v = Number(e.target.value); setMoving(null); if (v) onMove(p.id, v); }} className={`${selectCls} px-1 py-0.5 text-xs`}>
-              <option value="">Move to…</option>
-              {teams.filter((t) => t.id !== p.teamId).map((t) => <option key={t.id} value={t.id}>{t.abbr}</option>)}
-              {p.teamId !== fa && <option value={fa}>Free agents</option>}
-            </select>
+            <TeamPicker autoFocus placeholder="Move to…" teams={pickable.filter((t) => t.id !== p.teamId)} onPick={(v) => { setMoving(null); onMove(p.id, v); }} onCancel={() => setMoving(null)} />
           ) : (
             <>
               <button disabled={readOnly} onClick={() => setMoving(p.id)} className={`${btnCls} px-2 py-0.5`}>Move to…</button>
