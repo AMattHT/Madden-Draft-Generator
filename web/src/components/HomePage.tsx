@@ -70,19 +70,23 @@ function ModePanel({
   );
 }
 
-export function HomePage({ onSelect, title = 'Madden Draft Toolkit' }: { onSelect: (v: AppView) => void; title?: string }) {
+const ROSTERS_ICON = 'M16 11a4 4 0 10-8 0 4 4 0 008 0zM4 21a8 8 0 0116 0';
+
+export function HomePage({ onSelect, franchiseEnabled, title = 'Madden Draft Toolkit' }: { onSelect: (v: AppView) => void; franchiseEnabled: boolean; title?: string }) {
   return (
-    <div className="mx-auto flex h-full w-full max-w-5xl flex-col justify-center px-6 py-10">
+    <div className={`mx-auto flex h-full w-full flex-col justify-center px-6 py-10 ${franchiseEnabled ? 'max-w-6xl' : 'max-w-5xl'}`}>
       <div className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight text-neutral-50 sm:text-4xl" style={{ textWrap: 'balance' }}>
           {title}
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          Generate historically-rated draft classes, or run cap and draft tools for your franchise. Choose where to start.
+          {franchiseEnabled
+            ? 'Generate historically-rated draft classes, build a custom roster, or run tools for your franchise. Choose where to start.'
+            : 'Generate historically-rated draft classes or build a custom roster. Choose where to start.'}
         </p>
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className={`mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 ${franchiseEnabled ? 'xl:grid-cols-3' : ''}`}>
         <ModePanel
           accent="blue"
           icon={DRAFT_ICON}
@@ -97,18 +101,32 @@ export function HomePage({ onSelect, title = 'Madden Draft Toolkit' }: { onSelec
           onClick={() => onSelect('draft')}
         />
         <ModePanel
-          accent="gold"
-          icon={FRANCHISE_ICON}
-          title="Franchise Tools"
-          tagline="Reset the cap and feed your franchise fresh draft classes."
+          accent="blue"
+          icon={ROSTERS_ICON}
+          title="Rosters"
+          tagline="Build a custom Madden 27 roster from any ROSTER save."
           features={[
-            'Salary-cap reset: clear dead money, open cap room',
-            'No-repeat random draft picker with year range',
-            'Reads your CAREER save directly',
-            'Always writes a safe new file — original untouched',
+            'Move, cut and sign players across all 32 teams',
+            'Edit ratings, positions, dev traits and gear',
+            'Exports a new ROSTER file; the base is never touched',
           ]}
-          onClick={() => onSelect('franchise')}
+          onClick={() => onSelect('rosters')}
         />
+        {franchiseEnabled && (
+          <ModePanel
+            accent="gold"
+            icon={FRANCHISE_ICON}
+            title="Franchise Tools"
+            tagline="Reset the cap and feed your franchise fresh draft classes."
+            features={[
+              'Salary-cap reset: clear dead money, open cap room',
+              'No-repeat random draft picker with year range',
+              'Reads your CAREER save directly',
+              'Always writes a safe new file — original untouched',
+            ]}
+            onClick={() => onSelect('franchise')}
+          />
+        )}
       </div>
     </div>
   );

@@ -105,6 +105,7 @@ export function MenuBar({
       label: 'View',
       items: [
         { kind: 'item', label: 'Draft classes', checked: view === 'draft', onSelect: () => onSetView('draft') },
+        { kind: 'item', label: 'Rosters', checked: view === 'rosters', onSelect: () => onSetView('rosters') },
         ...(franchiseEnabled ? [{ kind: 'item', label: 'Franchise tools', checked: view === 'franchise', onSelect: () => onSetView('franchise') } as Item] : []),
         // A per-game build (the Madden 26 or Madden 27 app) is locked to its game; only the dev build switches.
         ...(pinnedGame ? [] : [

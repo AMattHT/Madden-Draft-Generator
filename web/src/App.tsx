@@ -9,6 +9,8 @@ import { ClassView } from './components/ClassView';
 import { DroppedPanel } from './components/DroppedPanel';
 import { FranchiseView } from './components/franchise/FranchiseView';
 import { HomePage } from './components/HomePage';
+import { SideRail } from './components/SideRail';
+import { RostersView } from './components/rosters/RostersView';
 import { TopBar } from './components/TopBar';
 import { schedulePrewarm, cancelPrewarm } from './prewarm';
 import { UpdateBanner } from './components/UpdateBanner';
@@ -574,7 +576,7 @@ export default function App() {
       <TopBar
         view={view}
         onSetView={setView}
-        onGoHome={() => setView(franchiseEnabled ? 'home' : 'draft')}
+        onGoHome={() => setView('home')}
         onDrawRandom={drawRandomYear}
         canDraw={years.some((y) => !usedYears.has(y) && inRange(y))}
         mode={mode}
@@ -605,8 +607,10 @@ export default function App() {
         recentYears={recentYears}
       />
       <div className="flex min-h-0 flex-1">
+        <SideRail view={view} onSetView={setView} franchiseEnabled={franchiseEnabled} />
         <main className="min-w-0 flex-1">
-          {view === 'home' && franchiseEnabled && <HomePage onSelect={setView} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
+          {view === 'rosters' && <RostersView gameVersion={gameVersion} />}
+          {view === 'home' && <HomePage onSelect={setView} franchiseEnabled={franchiseEnabled} title={pinnedGame === 'm26' ? 'Madden 26 Toolkit' : pinnedGame === 'm27' ? 'Madden 27 Toolkit' : 'Madden Draft Toolkit'} />}
           {view === 'franchise' && franchiseEnabled && (
             <FranchiseView
               gameVersion={gameVersion}

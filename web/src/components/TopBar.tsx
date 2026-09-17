@@ -39,26 +39,6 @@ function GameToggle({ gameVersion, onSetGameVersion, pinned }: { gameVersion: Ga
   );
 }
 
-function ViewToggle({ view, onSetView }: { view: AppView; onSetView: (v: AppView) => void }) {
-  const opts: [AppView, string][] = [['draft', 'Draft'], ['franchise', 'Franchise']];
-  return (
-    <div className="flex items-center rounded-lg border border-border-strong bg-surface-2 p-0.5 text-xs font-medium">
-      {opts.map(([val, label]) => (
-        <button
-          key={val}
-          onClick={() => onSetView(val)}
-          aria-pressed={view === val}
-          className={`rounded-md px-3 py-1.5 transition-colors ${
-            view === val ? 'bg-primary text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200'
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function LogoMark() {
   return (
     <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-primary to-primary-dark shadow-[0_2px_10px_rgba(47,107,255,0.4)]">
@@ -182,15 +162,9 @@ export function TopBar({
             <div className="text-[13px] font-bold tracking-tight text-neutral-100">
               {pinnedGame === 'm26' ? 'Madden 26 Draft Class Generator' : pinnedGame === 'm27' ? 'Madden 27 Draft Class Generator' : 'Madden Draft Toolkit'}
             </div>
-            <div className="text-[11px] text-muted">{franchiseEnabled ? 'Draft classes · Franchise tools' : 'Historical draft classes · importable .mdc'}</div>
+            <div className="text-[11px] text-muted">{franchiseEnabled ? 'Draft classes · Rosters · Franchise tools' : 'Draft classes · Rosters'}</div>
           </div>
         </button>
-        {franchiseEnabled && (
-          <>
-            <div className="ml-1 h-6 w-px bg-border" />
-            <ViewToggle view={view} onSetView={onSetView} />
-          </>
-        )}
         {draft && (
           <>
             <YearPicker years={years} selected={selected} onSelect={onSelectYear} cached={cachedYears} recent={recentYears} />

@@ -4,6 +4,8 @@
 
 ### Features
 
+- Rosters: open a Madden 27 ROSTER save, move, cut and edit its players, and export it as a new roster file.
+- A left sidebar switches between Draft classes, Rosters and Franchise tools.
 - Historic season preview in the franchise tools (Madden 27): pick a past season and see its clubs,
   divisions, rules and playoff bracket against your save.
 - Arm a historic playoff format in a Madden 27 franchise: the era's field (for example 1975's eight
