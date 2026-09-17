@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import zlib from 'zlib';
 import { M27_SAVES_DIR } from '../../config/paths';
-import { parseTdb2, serializeTdb2, makeIntField, makeStringField, makeRecord, intOf, strOf, setInt, setStr } from '../Tdb2Engine';
+import { parseTdb2, serializeTdb2, makeIntField, makeStringField, makeRecord, intOf, strOf, setInt, setStr, cloneRecord } from '../Tdb2Engine';
 
 const OFFICIAL = path.join(M27_SAVES_DIR, 'ROSTER-Official');
 const skipWithoutRoster = { skip: fs.existsSync(OFFICIAL) ? false : 'no Madden 27 ROSTER-Official in the Saves folder' };
@@ -77,4 +77,24 @@ test('an unedited roster writes back with the tables after the blob byte-identic
   assert.ok(tailB.equals(tailA), 'DCHT..TEAM bytes identical');
   const growth = Math.abs(out.length - orig.length) / orig.length;
   assert.ok(growth < 0.005, `payload size within 0.5% (was ${(growth * 100).toFixed(2)}%)`);
+});
+
+test('cloneRecord copies fields and subtables so edits to the clone leave the source alone', skipWithoutRoster, async () => {
+  const file = await parseTdb2(payloadOf(OFFICIAL));
+  const src = file.PLAY.records[0];
+  const copy = cloneRecord(src);
+  assert.notEqual(copy, src);
+  assert.equal(intOf(copy, 'PGID'), intOf(src, 'PGID'));
+  setInt(copy, 'POVR', 12);
+  assert.notEqual(intOf(src, 'POVR'), 12, 'source untouched');
+  assert.equal(intOf(copy, 'POVR'), 12);
+  const blob = file.BLOB.records[0].fields.BLBM.value.records[0];
+  const b2 = cloneRecord(blob);
+  const pinsSrc = blob.fields.LOUT.value.records[1].fields.PINS.value;
+  const pinsCopy = b2.fields.LOUT.value.records[1].fields.PINS.value;
+  assert.notEqual(pinsCopy, pinsSrc);
+  assert.equal(pinsCopy.records.length, pinsSrc.records.length);
+  setStr(pinsCopy.records[0], 'ITAN', 'Changed_Thing');
+  assert.notEqual(strOf(pinsSrc.records[0], 'ITAN'), 'Changed_Thing');
+  assert.equal(b2.index, blob.index);
 });

@@ -6,6 +6,7 @@ const TDB2Parser = require('../vendor/tdb2/TDB2Parser');
 const TDB2Writer = require('../vendor/tdb2/TDB2Writer');
 const TDB2Field = require('../vendor/tdb2/TDB2Field');
 const TDB2Record = require('../vendor/tdb2/TDB2Record');
+const TDB2Table = require('../vendor/tdb2/TDB2Table');
 const utilService = require('../vendor/tdb2/utilService');
 
 export const FIELD_INT = 0;
@@ -37,6 +38,9 @@ export interface Tdb2Table {
   unknown2: number;
   records: Tdb2Record[];
   numEntries: number;
+  rawKey: Buffer;
+  numEntriesRaw: Buffer;
+  isSubTable: boolean;
   fieldDefinitions: { name: string; type: number }[];
   addRecord(rec: Tdb2Record): void;
   removeRecord(index: number): void;
@@ -97,6 +101,36 @@ export function intOf(rec: Tdb2Record, key: string, dflt = 0): number {
 export function strOf(rec: Tdb2Record, key: string): string {
   const f = rec.fields[key];
   return f && f.type === FIELD_STRING ? String(f.value) : '';
+}
+
+function cloneField(f: Tdb2Field): Tdb2Field {
+  const c = new TDB2Field();
+  c.key = f.key; c.type = f.type; c.rawKey = Buffer.from(f.rawKey);
+  c.length = f.length;
+  if (f.raw) c.raw = Buffer.from(f.raw);
+  if ((f.type === FIELD_SUBTABLE || f.type === FIELD_SUBTABLE_COMPRESSED) && f.value) c.value = cloneTable(f.value as Tdb2Table);
+  c.isChanged = f.isChanged;
+  c.isDefaulted = !!f.isDefaulted;
+  return c;
+}
+
+function cloneTable(t: Tdb2Table): Tdb2Table {
+  const c: Tdb2Table = new TDB2Table();
+  c.name = t.name; c.type = t.type; c.unknown1 = t.unknown1; c.unknown2 = t.unknown2;
+  c.rawKey = t.rawKey; c.numEntriesRaw = t.numEntriesRaw;
+  c.isSubTable = t.isSubTable;
+  c.fieldDefinitions = t.fieldDefinitions;
+  for (const r of t.records) c.records.push(cloneRecord(r));
+  return c;
+}
+
+/** A plain deep copy of a record (no parser Proxy), subtables and sub-record included. */
+export function cloneRecord(rec: Tdb2Record): Tdb2Record {
+  const c: Tdb2Record = new TDB2Record();
+  c.index = rec.index;
+  for (const [k, f] of Object.entries(rec.fields)) c.fields[k] = cloneField(f);
+  if (rec.subRecord) c.subRecord = cloneRecord(rec.subRecord);
+  return c;
 }
 
 /** Set an int field, creating it when the record lacks it. */
