@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { RosterFileService, PLAY_RATING_KEY, type BaseRoster } from './RosterFileService';
-import { intOf, strOf, setInt, setStr, makeIntField, makeStringField, makeRecord, type Tdb2Record, type Tdb2Table } from './Tdb2Engine';
+import { intOf, strOf, setInt, setStr, makeIntField, makeStringField, makeRecord, cloneRecord, type Tdb2Record, type Tdb2Table } from './Tdb2Engine';
 import { PositionMapper } from './PositionMapper';
 import { RATING_KEYS } from './AttributeModel';
 import { GEAR_SLOT_TYPES, waistConflict } from './GearOptionsService';
-import type { RosterBuildDoc, PlayerFieldEdit, ApplyCounts, RosterBuildResult } from '../types/roster';
+import { RosterAddService } from './RosterAddService';
+import type { RosterBuildDoc, PlayerFieldEdit, ApplyCounts, RosterBuildResult, AddedPlayer, GeneratedRosterPlayer } from '../types/roster';
 
 /** Loadout slotType (the app's names, as in the CharacterVisuals JSON) -> roster blob SLOT id.
  *  Tallied from every player's blob in ROSTER-Official on 2026-09-16. */
@@ -55,6 +56,102 @@ function setFacemask(pins: Tdb2Table, asset: string): void {
   const rec = pins.records.find((p) => !p.fields.SLOT && strOf(p, 'ITAN').startsWith('GearFaceMask_'));
   if (rec) setStr(rec, 'ITAN', asset);
   else pins.addRecord(makeRecord([makeStringField('ITAN', asset)]));
+}
+
+/** The base roster's median-overall player at the position, else the median of everyone. */
+function templateFor(base: BaseRoster, positionId: number): Tdb2Record {
+  const rows = base.tdb2.PLAY.records;
+  const same = rows.filter((r) => intOf(r, 'PPOS') === positionId);
+  const pool = (same.length ? same : rows).slice().sort((a, b) => intOf(a, 'POVR') - intOf(b, 'POVR'));
+  return pool[Math.floor(pool.length / 2)];
+}
+
+function cheapestContract(base: BaseRoster): Tdb2Record | undefined {
+  const rows = base.tdb2.PLCT.records.filter((r) => intOf(r, 'PCON') === 1);
+  return rows.slice().sort((a, b) => intOf(a, 'PSA0') - intOf(b, 'PSA0'))[0];
+}
+
+function nextId(base: BaseRoster): number {
+  return Math.max(0, ...base.tdb2.PLAY.records.map((r) => intOf(r, 'PGID'))) + 1;
+}
+
+/** Clone a template player's PLAY, PRSN, PLCT and blob rows for a pool player and write his
+ *  values. No depth-chart rows: the game rebuilds them on load. Returns the new PGID. */
+function addPlayer(base: BaseRoster, add: AddedPlayer, g: GeneratedRosterPlayer, skipped: string[]): number {
+  const template = templateFor(base, g.positionId);
+  const templateId = intOf(template, 'PGID');
+  const pgid = nextId(base);
+  const salaryRow = cheapestContract(base);
+  const salary = salaryRow ? intOf(salaryRow, 'PSA0') : 20;
+  const jersey = add.jersey ?? g.jersey;
+
+  const row = cloneRecord(template);
+  setInt(row, 'PGID', pgid); setInt(row, 'POID', pgid);
+  setStr(row, 'PFNA', g.firstName); setStr(row, 'PLNA', g.lastName);
+  setInt(row, 'TGID', add.teamId);
+  setInt(row, 'PPOS', g.positionId); setInt(row, 'PLTY', g.archetypeId);
+  setInt(row, 'POVR', g.overall); setInt(row, 'PROL', g.devTrait);
+  setInt(row, 'PAGE', g.age); setInt(row, 'PYRP', g.yearsPro); setInt(row, 'PYWT', 0);
+  setInt(row, 'PHGT', g.heightInches); setInt(row, 'PWGT', Math.max(0, g.weight - 160));
+  setInt(row, 'PJEN', jersey);
+  setInt(row, 'PCOL', g.collegeId); setStr(row, 'PHTN', g.hometown); setInt(row, 'PHSN', g.homeStateId);
+  setInt(row, 'PDRO', g.draftRound); setInt(row, 'PDPI', g.draftPick); setInt(row, 'PLDT', 0);
+  setStr(row, 'PEPS', g.assetName || g.genericHead);
+  setInt(row, 'PCMT', g.commentaryId);
+  setInt(row, 'PCSA', salary); setInt(row, 'PTSA', salary); setInt(row, 'PVTS', salary);
+  for (const k of RATING_KEYS) setInt(row, PLAY_RATING_KEY[k], g.ratings[k] ?? 0);
+  base.tdb2.PLAY.addRecord(row);
+
+  const prsnT = base.tdb2.PRSN.records.find((r) => intOf(r, 'PGID') === templateId) ?? base.tdb2.PRSN.records[0];
+  if (prsnT) {
+    const prsn = cloneRecord(prsnT);
+    setInt(prsn, 'PGID', pgid);
+    for (let i = 0; i < 8; i++) setInt(prsn, `DNA${i}`, g.personaDNA[i] ?? 0);
+    setInt(prsn, 'PRFC', g.focus);
+    base.tdb2.PRSN.addRecord(prsn);
+  } else skipped.push(`add: no persona template for ${g.key}`);
+
+  if (salaryRow) {
+    const plct = cloneRecord(salaryRow);
+    setInt(plct, 'PGID', pgid);
+    base.tdb2.PLCT.addRecord(plct);
+  } else skipped.push(`add: no contract template for ${g.key}`);
+
+  const blobs: Tdb2Table = base.tdb2.BLOB.records[0].fields.BLBM.value;
+  const blobT = blobs.records.find((r) => r.index === templateId) ?? blobs.records[0];
+  if (blobT) {
+    const blob = cloneRecord(blobT);
+    blob.index = pgid;
+    setInt(blob, 'CNID', pgid);
+    setStr(blob, 'ASNM', g.assetName);
+    setStr(blob, 'CFNM', g.firstName); setStr(blob, 'CLNM', g.lastName);
+    setInt(blob, 'CJNO', jersey);
+    setStr(blob, 'GENR', g.genericHead);
+    setInt(blob, 'SKNT', g.skinTone);
+    setInt(blob, 'HINC', g.heightInches); setInt(blob, 'WLBS', g.weight);
+    const { onField, body } = loadouts(blob);
+    if (body) setPin(body, BODY_SLOT, `${g.bodyType}_BodyType`);
+    if (onField) {
+      for (const [slot, asset] of Object.entries(g.gear)) {
+        if (!asset) continue;
+        if (slot === 'facemask') { setFacemask(onField, asset); continue; }
+        for (const t of GEAR_SLOT_TYPES[slot] ?? []) { const id = SLOT_ID[t]; if (id != null) setPin(onField, id, asset); }
+      }
+    }
+    blobs.addRecord(blob);
+  } else skipped.push(`add: no visuals template for ${g.key}`);
+
+  // The read model is what later moves and edits in this apply consult.
+  base.players.push({
+    id: pgid, firstName: g.firstName, lastName: g.lastName, position: g.position, positionId: g.positionId,
+    teamId: add.teamId, team: base.teams.find((t) => t.id === add.teamId)?.abbr ?? null, teamName: null,
+    overall: g.overall, age: g.age, heightInches: g.heightInches, weight: g.weight, jersey,
+    yearsPro: g.yearsPro, devTrait: g.devTrait, archetype: g.archetype, college: g.college, hometown: g.hometown,
+    draftRound: g.draftRound < 63 ? g.draftRound : null, draftPick: g.draftPick || null,
+    assetName: g.assetName || null, portrait: g.portrait, ratings: { ...g.ratings },
+    visuals: { bodyType: g.bodyType, genericHead: g.genericHead, helmet: g.gear.helmet ?? '', facemask: g.gear.facemask ?? '' },
+  });
+  return pgid;
 }
 
 function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: string[]): boolean {
@@ -112,10 +209,19 @@ function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: 
 }
 
 export const RosterBuildService = {
-  /** Apply a document's moves and edits to a parsed base roster, in place. */
-  apply(base: BaseRoster, doc: RosterBuildDoc): ApplyCounts {
+  /** Apply a document's moves, adds and edits to a parsed base roster, in place.
+   *  `generated` holds the rated pool players for the document's adds, by catalog key. */
+  apply(base: BaseRoster, doc: RosterBuildDoc, generated: Map<string, GeneratedRosterPlayer>): ApplyCounts {
     const counts: ApplyCounts = { moved: 0, cut: 0, edited: 0, added: 0, skipped: [] };
     const teamIds = new Set(base.teams.map((t) => t.id));
+    const idOfTemp = new Map<string, number>();
+    for (const add of doc.adds ?? []) {
+      const g = generated.get(add.key);
+      if (!g) { counts.skipped.push(`add: player ${add.key} could not be generated`); continue; }
+      if (!teamIds.has(add.teamId)) { counts.skipped.push(`add: team ${add.teamId} is not in the base roster`); continue; }
+      idOfTemp.set(add.tempId, addPlayer(base, add, g, counts.skipped));
+      counts.added++;
+    }
     for (const [idStr, teamId] of Object.entries(doc.moves ?? {})) {
       const pgid = Number(idStr);
       const row = playerRow(base, pgid);
@@ -129,7 +235,9 @@ export const RosterBuildService = {
       if (teamId === base.freeAgentTeamId) counts.cut++; else counts.moved++;
     }
     for (const [idStr, e] of Object.entries(doc.edits ?? {})) {
-      if (applyEdit(base, Number(idStr), e, counts.skipped)) counts.edited++;
+      const pgid = idOfTemp.get(idStr) ?? Number(idStr);
+      if (!Number.isFinite(pgid)) { counts.skipped.push(`edit: ${idStr} is not a player`); continue; }
+      if (applyEdit(base, pgid, e, counts.skipped)) counts.edited++;
     }
     return counts;
   },
@@ -142,7 +250,12 @@ export const RosterBuildService = {
     if (doc.baseName && output.toUpperCase() === String(doc.baseName).toUpperCase()) throw new Error('refusing to overwrite the base roster');
     const base = doc.baseName ? await RosterFileService.openBase(doc.baseName) : await RosterFileService.openOpened(String(doc.baseId));
     if (output.toUpperCase() === base.name.toUpperCase()) throw new Error('refusing to overwrite the base roster');
-    const counts = RosterBuildService.apply(base, doc);
+    const generated = new Map<string, GeneratedRosterPlayer>();
+    for (const add of doc.adds ?? []) {
+      if (generated.has(add.key)) continue;
+      try { generated.set(add.key, await RosterAddService.generate(add.key)); } catch { /* reported by apply as skipped */ }
+    }
+    const counts = RosterBuildService.apply(base, doc, generated);
     const buf = RosterFileService.write(base.tdb2, base.header);
     const outputPath = RosterFileService.savePath(output);
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });

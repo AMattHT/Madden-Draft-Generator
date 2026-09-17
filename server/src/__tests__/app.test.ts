@@ -67,3 +67,15 @@ test('POST /api/roster/build validates its body', async () => {
     server.close();
   }
 });
+
+test('POST /api/roster/preview-add validates its body', async () => {
+  const { default: roster } = await import('../routes/roster');
+  const app = express(); app.use(express.json()); app.use('/api', roster); attachErrorHandling(app);
+  const server = await new Promise<http.Server>((r) => { const s = app.listen(0, '127.0.0.1', () => r(s)); });
+  try {
+    const port = (server.address() as { port: number }).port;
+    const res = await post(port, '/api/roster/preview-add', {});
+    assert.equal(res.status, 400);
+    assert.match(JSON.parse(res.body).error, /key/);
+  } finally { server.close(); }
+});
