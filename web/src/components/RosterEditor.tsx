@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, type FranchisePlayer, type PlayerFieldEdit } from '../api';
 import type { GearOption } from '../types';
-import { ATTR_GROUPS, humanize, tierColor, POS_NAMES } from '../constants';
-import { GearEditor } from './GearEditor';
-import { Icon, ICONS } from './ui';
+import { tierColor } from '../constants';
+import { PlayerEditPanel } from './PlayerEditPanel';
 
 const POSITIONS = ['QB', 'HB', 'FB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT', 'LE', 'RE', 'DT', 'LOLB', 'MLB', 'ROLB', 'CB', 'FS', 'SS', 'K', 'P', 'LS'];
-const DEVS = ['Normal', 'Star', 'Superstar', 'XFactor'];
 const inputCls = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-sm text-neutral-200 focus:border-primary focus:outline-none';
 
 /** Per-player franchise roster editor. Uses the save chosen in the shared FranchiseView
@@ -27,9 +25,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
   const [applyErr, setApplyErr] = useState<string | null>(null);
 
   const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
-  const [gearOpen, setGearOpen] = useState(false);
   const [heads, setHeads] = useState<Record<string, string[]>>({});
-  const [headTone, setHeadTone] = useState(4);
 
   useEffect(() => {
     api.equipmentOptions(2025).then(setGearOpts).catch(() => {});
@@ -65,35 +61,18 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
     return list.sort((a, b) => b.overall - a.overall).slice(0, 250);
   }, [players, search, teamFilter]);
 
-  const editPlayer = (id: number, patch: PlayerFieldEdit) => setEdits((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
-  const editRating = (id: number, k: string, v: number) =>
-    setEdits((prev) => ({ ...prev, [id]: { ...prev[id], ratings: { ...(prev[id]?.ratings || {}), [k]: v } } }));
+  // Merge a patch into a player's edits; ratings and gear merge one level deep.
+  const editPlayer = (id: number, patch: PlayerFieldEdit) => setEdits((prev) => {
+    const cur = prev[id] ?? {};
+    const next: PlayerFieldEdit = { ...cur, ...patch };
+    if (patch.ratings) next.ratings = { ...(cur.ratings ?? {}), ...patch.ratings };
+    if (patch.gear) next.gear = { ...(cur.gear ?? {}), ...patch.gear };
+    return { ...prev, [id]: next };
+  });
 
   const sel = selectedId != null ? byId.get(selectedId) : null;
   const e = selectedId != null ? edits[selectedId] : undefined;
-  const eff = {
-    overall: e?.overall ?? sel?.overall ?? 0,
-    age: e?.age ?? sel?.age ?? 0,
-    dev: e?.dev ?? sel?.dev ?? 'Normal',
-    position: e?.position ?? sel?.position ?? '',
-    jersey: e?.jersey ?? sel?.jersey ?? 0,
-    bodyType: e?.bodyType ?? sel?.bodyType ?? 'Standard',
-    genericHead: e?.genericHead ?? sel?.genericHead ?? '',
-    rating: (k: string) => e?.ratings?.[k] ?? sel?.ratings[k] ?? 0,
-  };
   const editedCount = Object.keys(edits).length;
-
-  // Face (generic head) picker: pool for the chosen tone; edit stores the gen_ code.
-  useEffect(() => {
-    const m = (sel?.genericHead || '').match(/^gen_(\d+)/i);
-    setHeadTone(m ? parseInt(m[1], 10) : 4);
-  }, [selectedId, sel?.genericHead]);
-  const headPool = heads[String(headTone)] ?? [];
-  const headIdx = headPool.indexOf(eff.genericHead);
-  const pickHead = (i: number) => { if (headPool.length && sel) editPlayer(sel.id, { genericHead: headPool[((i % headPool.length) + headPool.length) % headPool.length] }); };
-  // Gear for the GearEditor: current helmet/facemask merged with any pending edits.
-  const gearPatch: Record<string, string> = { ...(sel ? { helmet: sel.helmet, facemask: sel.facemask } : {}), ...(e?.gear ?? {}) };
-  const editGear = (slot: string, asset: string) => { if (sel) editPlayer(sel.id, { gear: { ...(edits[sel.id]?.gear ?? {}), [slot]: asset } }); };
 
   async function apply() {
     if (!save || editedCount === 0) return;
@@ -194,93 +173,21 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
             {!sel ? (
               <div className="flex h-full items-center justify-center p-4 text-sm text-muted">Select a player to edit</div>
             ) : (
-              <>
-                <div className="sticky top-0 z-10 border-b border-border bg-surface-1 px-4 py-3">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <div className="text-base font-bold text-neutral-50">{sel.firstName} {sel.lastName}</div>
-                    <div className="text-lg font-bold tabular-nums" style={{ color: tierColor(eff.overall) }}>{eff.overall}</div>
-                  </div>
-                  <div className="text-xs text-muted">{sel.team || sel.status} · {sel.yearsPro} yrs pro</div>
-                </div>
-
-                <div className="p-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Overall</span>
-                      <input type="number" min={0} max={99} value={eff.overall} onChange={(ev) => editPlayer(sel.id, { overall: Number(ev.target.value) })} className={inputCls} /></label>
-                    <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Age</span>
-                      <input type="number" min={18} max={50} value={eff.age} onChange={(ev) => editPlayer(sel.id, { age: Number(ev.target.value) })} className={inputCls} /></label>
-                    <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Position</span>
-                      <select value={eff.position} onChange={(ev) => editPlayer(sel.id, { position: ev.target.value })} className={inputCls}>
-                        {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-                      </select></label>
-                    <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Dev trait</span>
-                      <select value={eff.dev} onChange={(ev) => editPlayer(sel.id, { dev: ev.target.value })} className={inputCls}>
-                        {DEVS.map((d) => <option key={d} value={d}>{d === 'XFactor' ? 'X-Factor' : d}</option>)}
-                      </select></label>
-                  </div>
-
-                  {/* Appearance: body type, generic head, gear (helmet/facemask/…) */}
-                  <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <label className="flex flex-col gap-1"><span className="text-[10px] uppercase tracking-wider text-muted">Body type</span>
-                        <select value={eff.bodyType} onChange={(ev) => editPlayer(sel.id, { bodyType: ev.target.value })} className={inputCls}>
-                          {['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'].map((b) => <option key={b} value={b}>{b}</option>)}
-                        </select></label>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] uppercase tracking-wider text-muted">Face (generic head)</span>
-                        <div className="flex items-center gap-1">
-                          <select value={headTone} onChange={(ev) => setHeadTone(Number(ev.target.value))} className={`${inputCls} px-1`} title="Skin tone">
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((t) => <option key={t} value={t}>T{t}</option>)}
-                          </select>
-                          <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx - 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">‹</button>
-                          <span className="flex-1 text-center text-xs tabular-nums text-neutral-300">{headIdx >= 0 ? `${headIdx + 1}/${headPool.length}` : '—'}</span>
-                          <button type="button" onClick={() => pickHead(headIdx < 0 ? 0 : headIdx + 1)} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-xs text-neutral-200 hover:bg-surface-3 disabled:opacity-40">›</button>
-                          <button type="button" onClick={() => pickHead(Math.floor(Math.random() * headPool.length))} disabled={!headPool.length} className="rounded border border-border-strong bg-surface-2 px-1.5 py-1 text-neutral-200 hover:bg-surface-3 disabled:opacity-40" title="Random"><Icon path={ICONS.shuffle} className="h-3 w-3" /></button>
-                        </div>
-                      </div>
-                    </div>
-                    <button type="button" onClick={() => setGearOpen(true)} className="flex w-full items-center justify-center gap-1.5 rounded-md border border-border-strong bg-surface-2 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition-colors hover:bg-surface-3">
-                      <Icon path={ICONS.image} className="h-3.5 w-3.5" /> Edit gear
-                    </button>
-                    <div className="truncate text-[10px] text-muted">
-                      Helmet: {gearOpts.helmet?.find((o) => o.value === gearPatch.helmet)?.label ?? gearPatch.helmet ?? '—'} · Facemask: {gearOpts.facemask?.find((o) => o.value === gearPatch.facemask)?.label ?? gearPatch.facemask ?? '—'}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-                    {ATTR_GROUPS.map((g) => (
-                      <div key={g.title}>
-                        <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted">{g.title}</div>
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                          {g.keys.filter((k) => sel.ratings[k] !== undefined).map((k) => (
-                            <label key={k} className="flex items-center justify-between gap-2">
-                              <span className="truncate text-xs text-neutral-400" title={humanize(k)}>{humanize(k)}</span>
-                              <input type="number" min={0} max={99} value={eff.rating(k)}
-                                onChange={(ev) => editRating(sel.id, k, Number(ev.target.value))}
-                                className="w-14 rounded border border-border bg-surface-0 px-1.5 py-0.5 text-right text-sm tabular-nums text-neutral-200 focus:border-primary focus:outline-none" />
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
+              <PlayerEditPanel
+                title={`${sel.firstName} ${sel.lastName}`}
+                subtitle={`${sel.team || sel.status} · ${sel.yearsPro} yrs pro`}
+                positions={POSITIONS}
+                player={{ position: sel.position, overall: sel.overall, age: sel.age, dev: sel.dev, jersey: sel.jersey, ratings: sel.ratings, bodyType: sel.bodyType, genericHead: sel.genericHead, helmet: sel.helmet, facemask: sel.facemask }}
+                edit={e}
+                onEdit={(patch) => editPlayer(sel.id, patch)}
+                heads={heads}
+                gearOpts={gearOpts}
+                gameVersion="m26"
+                year={2025}
+              />
             )}
           </div>
         </div>
-      )}
-
-      {gearOpen && sel && (
-        <GearEditor
-          playerName={`${sel.firstName} ${sel.lastName}`}
-          options={gearOpts}
-          gearPatch={gearPatch}
-          onGearEdit={editGear}
-          onClose={() => setGearOpen(false)}
-          year={2025}
-          positionId={Math.max(0, POS_NAMES.indexOf(String(sel.position || '')))}
-        />
       )}
     </div>
   );
