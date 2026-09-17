@@ -45,7 +45,7 @@ const OVERRIDES: Record<string, DbPos> = {
   'lesterhayes|1977': 'CB',
   'albertlewis|1983': 'CB',
   'barrywilburn|1985': 'CB',
-  'rodwoodson|1987': 'CB', // moved to safety at 32; a corner for the Hall
+  'rodwoodson|1987': 'FS', // a corner for the Hall, but the roster shows the free safety he finished as (user's call, 2026-09-17)
   'deionsanders|1989': 'CB',
   'aeneaswilliams|1991': 'CB',
   'troyvincent|1992': 'CB',

@@ -55,12 +55,12 @@ test('the Ravens start in 1996; the Browns keep Jim Brown', skipWithoutData, asy
   assert.ok(cle.has('Jim Brown'));
 });
 
-test('a franchise class keeps depth-chart and curated positions: Polamalu SS, Blount and Woodson CB', skipWithoutData, async () => {
+test('a franchise class keeps depth-chart and curated positions: Polamalu SS, Blount CB, Woodson FS', skipWithoutData, async () => {
   const { players } = await teamGreatsClass('PIT');
   const pos = (n: string) => players.find((p) => `${p.firstName} ${p.lastName}` === n)?.position;
   assert.equal(pos('Troy Polamalu'), 'SS');
   assert.equal(pos('Mel Blount'), 'CB');
-  assert.equal(pos('Rod Woodson'), 'CB');
+  assert.equal(pos('Rod Woodson'), 'FS'); // a corner for the Hall; the roster shows the free safety he finished as
 });
 
 test('a young franchise pads to a full class with generated prospects', skipWithoutData, async () => {

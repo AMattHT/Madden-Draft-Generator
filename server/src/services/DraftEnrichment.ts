@@ -18,6 +18,7 @@ import { LikenessOverrideService } from './LikenessOverrideService';
 import type { ToneSource } from '../types/player';
 import { BaselinePlayer, nflversePick } from '../types/player';
 import { SupplementalDraftService } from './SupplementalDraftService';
+import { positionLabelFor } from './PositionLabel';
 
 // The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
 const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
@@ -34,24 +35,14 @@ const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
  *  cross-year sources like All-Time Greats. Returns the original object unchanged if
  *  nothing was added, so the shared lookup cache is never mutated. */
 async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<BaselinePlayer> {
-  const curated = CuratedDbPositions.get(p.firstName, p.lastName, p.draftYear);
-  // Reclassify the generic linebacker bucket: 3-4 OLB pass rushers become edges
-  // (LEDG/REDG) and off-ball backers get a pinned SAM/MIKE/WILL where the career
-  // signals (sacks, interceptions, scheme, PFF) support it.
-  // A recorded role applies whatever the source label says (a pinned edge listed as DE).
-  const f7 = LB_BUCKET.test(p.position.trim()) || FrontSevenService.pinnedRole(p) ? FrontSevenService.resolve(p, e?.team?.abbr) : null;
-  // Pre-2001 defensive backs: no depth charts, so split corner vs safety by build.
-  const dbSplit = !curated && !e?.positionLabel && p.draftYear < 2001 ? PositionMapper.dbByBuild(p.position, p.weight, p.draftYear) : null;
-  // A depth-chart slot never moves a quarterback or a specialist to the line or
-  // the secondary (Hail-Mary and hands-team packages list QBs at LCB / WR).
-  const chartLabel = e?.positionLabel && /^(QB|K|P|LS)$/i.test(p.position.trim()) ? null : e?.positionLabel;
-  const label = curated ?? chartLabel ?? f7?.label ?? dbSplit ?? null;
-  // A slot that came from real data (curation or a depth chart) must survive the
-  // class-level cohort balancing.
-  const positionLocked = !!(curated || chartLabel || f7?.frontSeven?.lock);
-
+  // The position steps shared with the pool listing (PositionLabel.ts): curated DB
+  // entry, front-seven classifier, pre-2001 corner/safety split, heavy-end sack rule.
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
   const c = await CombineService.get(p.firstName, p.lastName, p.draftYear, p.draftPick);
+  const pos = positionLabelFor(p, e?.positionLabel, e?.team?.abbr, c?.weight ?? e?.weight ?? null);
+  const label = pos.label !== p.position ? pos.label : null;
+  const positionLocked = pos.locked;
+  const f7 = pos.frontSeven ? { frontSeven: pos.frontSeven } : null;
 
   const nv = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, nflversePick(p));
 
@@ -121,15 +112,6 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   }
   const out: BaselinePlayer = { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
   if (label) out.position = label;
-  // A 290+ lb end is an interior lineman in Madden terms (PositionMapper sends a
-  // heavy DE to DT) — unless he rushed like an edge. J.J. Watt (290, 20 sacks a
-  // season) is a RE/LE in the game, Cam Heyward (295, ~6) a DT. 'EDGE' bypasses
-  // the weight rule; 300+ stays interior whatever the production.
-  const endLabel = /^(DE|LE|RE|E|LDE|RDE|DEFENSIVEEND)$/i.test((out.position || '').trim());
-  if (endLabel && weight != null && weight >= 290 && weight < 300 && nv?.defSacks != null) {
-    const seasons = (out.seasonsStarted ?? nv.seasonsStarted ?? null) || (nv.games ? nv.games / 16 : null);
-    if (seasons && seasons >= 3 && nv.defSacks / seasons >= 7) out.position = 'EDGE';
-  }
   if (positionLocked) out.positionLocked = true;
   if (f7?.frontSeven) out.frontSeven = f7.frontSeven;
   if (c) out.combine = { forty: c.forty, bench: c.bench, vertical: c.vertical, broad: c.broad, cone: c.cone, shuttle: c.shuttle };

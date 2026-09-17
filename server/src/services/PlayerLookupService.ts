@@ -8,6 +8,7 @@ import { PositionMapper } from './PositionMapper';
 import { RatingService } from './RatingService';
 import { SupplementalDraftService } from './SupplementalDraftService';
 import { nflversePick } from '../types/player';
+import { positionLabelFor } from './PositionLabel';
 
 export interface PlayerSearchResult {
   firstName: string;
@@ -984,7 +985,10 @@ export const PlayerLookupService = {
     load();
     if (catalogCache) return catalogCache;
     catalogCache = [...byKey!.values()].map((p) => {
-      const posId = PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight);
+      // The same position steps the rating path applies, so the pool shows the slot
+      // a draft class would give him (Rod Woodson at FS, Julius Peppers at edge).
+      const pos = positionLabelFor(p);
+      const posId = PositionMapper.resolve(p.firstName, p.lastName, pos.label, pos.weight);
       return {
         key: p.key!, first: p.firstName, last: p.lastName, pos: p.position,
         mpos: PositionMapper.name(posId), grp: PositionMapper.groupFromId(posId),
