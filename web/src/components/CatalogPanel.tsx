@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { displayPortrait } from '../api';
-import { POS_GROUP_ORDER } from '../constants';
+import { POS_GROUP_ORDER, POS_NAMES } from '../constants';
 import type { CatalogPlayer } from '../types';
 import { Portrait } from './ui';
 
@@ -57,7 +57,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
     let r = compact
       ? (era === 'ALL' ? catalog : catalog.filter((p) => p.year >= Number(era) && p.year < Number(era) + 10))
       : catalog.filter((p) => p.year >= from && p.year <= to);
-    if (grp !== 'ALL') r = r.filter((p) => p.grp === grp);
+    if (grp !== 'ALL') r = r.filter((p) => (compact ? p.mpos === grp : p.grp === grp));
     if (league !== 'ALL') r = r.filter((p) => p.league === league);
     if (hof) r = r.filter((p) => p.hof);
     if (hidden) r = r.filter((p) => !hidden(p.key));
@@ -87,9 +87,9 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${sel} w-44`} />
-          <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel}>
+          <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel} title="Madden position">
             <option value="ALL">All positions</option>
-            {POS_GROUP_ORDER.map((g) => <option key={g} value={g}>{g}</option>)}
+            {POS_NAMES.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
           <select value={era} onChange={(e) => setEra(e.target.value)} className={sel} title="Draft decade">
             {ERAS.map((e) => <option key={e} value={e}>{e === 'ALL' ? 'All eras' : `${e}s`}</option>)}

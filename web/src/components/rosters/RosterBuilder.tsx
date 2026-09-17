@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, type ArchetypeOption, type PlayerFieldEdit } from '../../api';
 import type { CatalogPlayer, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc, RosterPlayer, TeamInfo } from '../../types';
-import { addId, docCounts, groupByPosition, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
+import { addId, docCounts, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
 import { rowFor, patchFor, editFromCard, type CardCtx } from '../../rosterCard';
 import { teamInfoMap } from '../../rosterTeams';
-import { groupForId } from '../../constants';
+import { POS_NAMES } from '../../constants';
 import { DevBadge, Icon, ICONS, Portrait, RatingChip, TeamLogo } from '../ui';
 import { ProfileModal } from '../ProfileModal';
 import { CatalogPanel } from '../CatalogPanel';
-import { TeamPanel, TeamStrip } from './TeamPanel';
+import { ALL_TEAMS, TeamPanel, TeamStrip } from './TeamPanel';
 
-const GROUPS: [string, string][] = [
-  ['ALL', 'All positions'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['OL', 'OL'],
-  ['EDGE', 'EDGE'], ['IDL', 'IDL'], ['LB', 'LB'], ['CB', 'CB'], ['S', 'S'], ['K', 'K'], ['P', 'P'],
-];
 export const selectCls = 'rounded-md border border-border bg-surface-0 px-2.5 py-1.5 text-sm text-neutral-300 focus:border-primary focus:outline-none';
 export const btnCls = 'rounded-md border border-border-strong bg-surface-2 px-3 py-1.5 text-xs font-medium text-neutral-200 hover:bg-surface-3 disabled:opacity-50';
+const LIST_MAX = 1500;
 const EMPTY_CTX: CardCtx = { traits: [], focus: [], colleges: [], archetypes: {} };
 
-/** One row of the left panel: a base-roster player with his current team. */
+/** One row of the list: a roster player with his team mark. */
 export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }: {
   p: ViewPlayer; selected?: boolean; onClick?: () => void; onDragStart?: (e: React.DragEvent) => void; trailing?: React.ReactNode;
   /** The team's logo mark; text when absent. */
@@ -58,14 +55,14 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const fresh = doc.fresh === true;
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [tab, setTab] = useState<'roster' | 'pool'>(fresh ? 'pool' : 'roster');
-  const [team, setTeam] = useState('ALL');
-  const [group, setGroup] = useState('ALL');
+  const [pos, setPos] = useState('ALL');
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'ovr' | 'name' | 'age' | 'pos'>('ovr');
-  const [selectedTeam, setSelectedTeam] = useState(() => data.teams.find((t) => t.id !== data.freeAgentTeamId)?.id ?? data.freeAgentTeamId);
+  const [sort, setSort] = useState<'pos' | 'ovr' | 'name' | 'age'>('pos');
+  // The strip's first team (alphabetical by abbreviation) starts selected.
+  const [selectedTeam, setSelectedTeam] = useState<number>(() => [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
 
   // The pool: the catalog loads when the tab first opens; each add is rated by the server
-  // once (a preview) and that preview is what the team panel and the card show.
+  // once (a preview) and that preview is what the list and the card show.
   const [catalog, setCatalog] = useState<CatalogPlayer[] | null>(null);
   const [catalogErr, setCatalogErr] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, GeneratedRosterPlayer>>({});
@@ -103,21 +100,23 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     return () => { alive = false; };
   }, [data.teams]);
   const isAdded = useCallback((key: string) => doc.adds.some((a) => a.key === key), [doc.adds]);
-  const teams = useMemo(() => data.teams.filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.city.localeCompare(b.city)), [data]);
-  const rows = useMemo(() => {
-    let r = players.filter((p) => !p.added);
-    if (team === 'FA') r = r.filter((p) => !p.team);
-    else if (team !== 'ALL') r = r.filter((p) => p.team === team);
-    if (group !== 'ALL') r = r.filter((p) => groupForId(p.positionId) === group);
+
+  // The one list: the selected team (or everyone), then position group, search and sort.
+  const teamOnly = selectedTeam !== ALL_TEAMS;
+  const filtered = useMemo(() => {
+    let r = teamOnly ? players.filter((p) => p.teamId === selectedTeam) : players;
+    if (pos !== 'ALL') r = r.filter((p) => p.position === pos);
     if (search.trim()) { const q = search.toLowerCase(); r = r.filter((p) => `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)); }
     return [...r].sort((a, b) => {
       if (sort === 'ovr') return b.overall - a.overall || a.lastName.localeCompare(b.lastName);
       if (sort === 'age') return a.age - b.age || b.overall - a.overall;
-      if (sort === 'pos') return a.positionId - b.positionId || b.overall - a.overall;
-      return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
+      if (sort === 'name') return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
+      return a.positionId - b.positionId || b.overall - a.overall;
     });
-  }, [players, team, group, search, sort]);
-  const teamRows = useMemo(() => groupByPosition(players.filter((p) => p.teamId === selectedTeam)).flatMap((g) => g.players), [players, selectedTeam]);
+  }, [players, selectedTeam, teamOnly, pos, search, sort]);
+  // The whole file is long; a team is never cut short.
+  const rows = useMemo(() => (teamOnly ? filtered : filtered.slice(0, LIST_MAX)), [filtered, teamOnly]);
+  const grouped = teamOnly && sort === 'pos';
 
   const move = (pgid: number, teamId: number) => {
     if (readOnly) return;
@@ -126,18 +125,14 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     else onChange(withMove(doc, pgid, teamId, data));
   };
   const remove = (tempId: string) => { if (!readOnly) onChange(withoutAdd(doc, tempId)); };
-  const dragStart = (pgid: number) => (e: React.DragEvent) => e.dataTransfer.setData('text/plain', String(pgid));
+  const addTarget = selectedTeam === ALL_TEAMS ? null : selectedTeam;
   const addFromPool = async (key: string) => {
-    if (readOnly) return;
+    if (readOnly || addTarget == null) return;
     const g = previews[key] ?? (await fetchPreview(key));
-    if (g) onChange(withAdd(doc, key, selectedTeam));
+    if (g) onChange(withAdd(doc, key, addTarget));
   };
-  const poolStatus = (key: string) => {
-    const a = doc.adds.find((x) => x.key === key);
-    if (!a) return adding.has(key) ? { label: 'Rating…' } : null;
-    const t = data.teams.find((x) => x.id === a.teamId);
-    return { label: a.teamId === data.freeAgentTeamId ? 'FA' : t?.abbr ?? '?', title: 'Added to this roster' };
-  };
+  const poolStatus = (key: string) => (adding.has(key) ? { label: 'Rating…' } : null);
+  const selectedName = selectedTeam === ALL_TEAMS ? 'every player' : selectedTeam === data.freeAgentTeamId ? 'free agency' : (() => { const t = data.teams.find((x) => x.id === selectedTeam); return t ? `${t.city} ${t.name}` : 'the selected team'; })();
 
   // The profile card: the draft editor's, fed by the adapter; lookups load once.
   const [ctx, setCtx] = useState<CardCtx>(EMPTY_CTX);
@@ -151,11 +146,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     return () => { alive = false; };
   }, []);
   const [editing, setEditing] = useState<number | null>(null);
-  const [navSource, setNavSource] = useState<'roster' | 'team'>('roster');
-  const openCard = (source: 'roster' | 'team') => (pgid: number) => { setNavSource(source); setEditing(pgid); };
-  const navRows = navSource === 'roster' ? rows : teamRows;
-  const navIndex = editing != null ? navRows.findIndex((p) => p.id === editing) : -1;
-  const navigatePlayer = (delta: number) => { const next = navRows[navIndex + delta]; if (next) setEditing(next.id); };
+  const navIndex = editing != null ? rows.findIndex((p) => p.id === editing) : -1;
+  const navigatePlayer = (delta: number) => { const next = rows[navIndex + delta]; if (next) setEditing(next.id); };
   const editingPlayer = editing != null ? players.find((p) => p.id === editing) ?? null : null;
   const editKey: number | string | null = editingPlayer ? (editingPlayer.added ? editingPlayer.tempId ?? null : editingPlayer.id) : null;
   const editingBase: RosterPlayer | null = (() => {
@@ -196,8 +188,10 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     const c = catalog?.find((p) => p.key === a.key);
     return `Could not rate ${c ? `${c.first} ${c.last}` : a.key} from the pool: ${previewErr[a.key]}. Remove him or try again.`;
   });
-  const tabCls = (on: boolean) => `rounded-t-md px-3 py-1.5 text-xs font-semibold transition-colors ${on ? 'bg-surface-2 text-neutral-100' : 'text-neutral-400 hover:text-neutral-200'}`;
-  const emptyText = fresh ? 'Nothing here yet. Add players from the Pool tab.' : 'Nobody here. Drag players in from the roster list.';
+  const tabCls = (on: boolean) => `rounded-md px-3 py-1 text-xs font-semibold transition-colors ${on ? 'bg-primary text-white' : 'text-neutral-400 hover:bg-surface-2 hover:text-neutral-200'}`;
+  const emptyText = fresh
+    ? 'Nothing here yet. Switch to the Pool and add players.'
+    : search.trim() || pos !== 'ALL' ? 'Nobody matches.' : 'Nobody here. Switch to the Pool, or drag players onto a team above.';
 
   return (
     <div className="flex h-full flex-col">
@@ -234,50 +228,40 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
       <TeamStrip data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} readOnly={readOnly} />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-6 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
-          <div className="flex items-center gap-1 border-b border-border px-2 pt-2">
+      <section className="mx-6 my-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border-strong bg-surface-0 p-0.5">
             <button onClick={() => setTab('roster')} aria-pressed={tab === 'roster'} className={tabCls(tab === 'roster')}>Roster</button>
             <button onClick={() => setTab('pool')} aria-pressed={tab === 'pool'} className={tabCls(tab === 'pool')}>Pool</button>
           </div>
           {tab === 'roster' ? (
             <>
-              <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"><Icon path={ICONS.search} className="h-4 w-4" /></span>
-                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players…" className="w-48 rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none" />
-                </div>
-                <select value={team} onChange={(e) => setTeam(e.target.value)} className={selectCls}>
-                  <option value="ALL">All teams</option>
-                  {teams.map((t) => <option key={t.id} value={t.abbr}>{t.city} {t.name}</option>)}
-                  <option value="FA">Free agents</option>
-                </select>
-                <select value={group} onChange={(e) => setGroup(e.target.value)} className={selectCls}>
-                  {GROUPS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-                <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className={selectCls}>
-                  <option value="ovr">Sort: Overall</option>
-                  <option value="name">Sort: Name</option>
-                  <option value="pos">Sort: Position</option>
-                  <option value="age">Sort: Age</option>
-                </select>
-                <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length}</span> of {fresh ? 0 : data.count}</span>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted"><Icon path={ICONS.search} className="h-4 w-4" /></span>
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players…" className="w-48 rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-3 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none" />
               </div>
-              <div className="min-h-0 flex-1 overflow-auto">
-                {rows.length === 0 && <div className="px-3 py-8 text-center text-xs text-muted">{fresh ? 'Nothing here yet. Add players from the Pool tab.' : 'Nobody matches.'}</div>}
-                {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} logo={logos.get(p.teamId)} onClick={() => openCard('roster')(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
-                {rows.length > 1500 && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500 of {rows.length}. Narrow by team or position.</div>}
-              </div>
+              <select value={pos} onChange={(e) => setPos(e.target.value)} className={selectCls} title="Madden position">
+                <option value="ALL">All positions</option>
+                {POS_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} className={selectCls}>
+                <option value="pos">Sort: Position</option>
+                <option value="ovr">Sort: Overall</option>
+                <option value="name">Sort: Name</option>
+                <option value="age">Sort: Age</option>
+              </select>
+              <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{filtered.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>
           ) : (
-            <>
-              <div className="border-b border-border px-3 py-1.5 text-[11px] text-muted">Rated by career, added to the selected team. Age is his draft age plus four; edit anything afterwards.</div>
-              <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly} />
-            </>
+            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Pick a team above to add players to it.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
           )}
-        </section>
-        <TeamPanel data={data} players={players} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={openCard('team')} readOnly={readOnly} emptyText={emptyText} />
-      </div>
+        </div>
+        {tab === 'roster' ? (
+          <TeamPanel data={data} players={rows} truncated={filtered.length > rows.length} grouped={grouped} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={setEditing} readOnly={readOnly} emptyText={emptyText} />
+        ) : (
+          <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly || addTarget == null} />
+        )}
+      </section>
 
       {editingPlayer && editingBase && editKey != null && (
         <ProfileModal
@@ -295,7 +279,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
           onClose={() => setEditing(null)}
           onNavigate={navigatePlayer}
           canPrev={navIndex > 0}
-          canNext={navIndex >= 0 && navIndex < navRows.length - 1}
+          canNext={navIndex >= 0 && navIndex < rows.length - 1}
         />
       )}
     </div>

@@ -95,6 +95,18 @@ empty is loaded in Madden 27; the user tries Play Now with the filled team again
 one. If the game refuses empty or short teams, the export warns on teams below the number
 the gate establishes, and the number is recorded here.
 
+## One table
+
+The builder is a single table in the draft view's style, not a roster list beside a team
+panel. The team strip across the top selects what the table shows: a team (its players
+grouped by position, with Move to…, Cut or Remove on each row and the card on click), All
+(every player, flat, the first 1,500), or free agents. A Roster | Pool switch on the table's
+toolbar flips the same table to the pool; Add places the player on the selected team and he
+disappears from the pool, and the switch goes back to the roster. Add is disabled while All
+is selected. Position filters in both views list every Madden position (QB, HB, FB, WR, TE,
+LT, LG, C, RG, RT, LEDG, REDG, DT, SAM, MIKE, WILL, CB, FS, SS, K, P, LS), not groups.
+Rows still drag onto the strip.
+
 ## Pool positions match the draft
 
 The pool listed players by a mapping of their raw draft label alone, so Rod Woodson stayed
