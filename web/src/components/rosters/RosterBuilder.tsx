@@ -57,7 +57,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const [tab, setTab] = useState<'roster' | 'pool'>(fresh ? 'pool' : 'roster');
   const [pos, setPos] = useState('ALL');
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState<'pos' | 'ovr' | 'name' | 'age'>('pos');
+  const [sort, setSort] = useState<'pos' | 'ovr' | 'name' | 'age' | 'team'>('pos');
   // The strip's first team (alphabetical by abbreviation) starts selected.
   const [selectedTeam, setSelectedTeam] = useState<number>(() => [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
 
@@ -110,6 +110,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     return [...r].sort((a, b) => {
       if (sort === 'ovr') return b.overall - a.overall || a.lastName.localeCompare(b.lastName);
       if (sort === 'age') return a.age - b.age || b.overall - a.overall;
+      // Free agents sort after every club.
+      if (sort === 'team') return (a.team ? 0 : 1) - (b.team ? 0 : 1) || (a.team ?? '').localeCompare(b.team ?? '') || a.positionId - b.positionId || b.overall - a.overall;
       if (sort === 'name') return a.lastName.localeCompare(b.lastName) || a.firstName.localeCompare(b.firstName);
       return a.positionId - b.positionId || b.overall - a.overall;
     });
@@ -256,6 +258,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
                 <option value="ovr">Sort: Overall</option>
                 <option value="name">Sort: Name</option>
                 <option value="age">Sort: Age</option>
+                <option value="team">Sort: Team</option>
               </select>
               <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{filtered.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>

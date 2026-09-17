@@ -5,7 +5,7 @@ import type { CatalogPlayer } from '../types';
 import { Portrait, TeamLogo } from './ui';
 
 const SHOW_MAX = 400;
-type SortKey = 'year' | 'name' | 'pos' | 'pick' | 'wav' | 'cal' | 'pb';
+type SortKey = 'year' | 'name' | 'pos' | 'pick' | 'wav' | 'cal' | 'pb' | 'team';
 
 /** The panel's headshot for a catalog row: the game portrait by id, else the
  *  retro-disc headshot by name, position and year (the app's usual chain). */
@@ -70,6 +70,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
       sort === 'year' ? b.year - a.year || pickNo(a) - pickNo(b)
       : sort === 'name' ? a.last.localeCompare(b.last) || a.first.localeCompare(b.first)
       : sort === 'pos' ? a.mpos.localeCompare(b.mpos) || b.cal - a.cal
+      : sort === 'team' ? (a.team ? 0 : 1) - (b.team ? 0 : 1) || (a.team?.abbr ?? '').localeCompare(b.team?.abbr ?? '') || b.cal - a.cal
       : sort === 'pick' ? pickNo(a) - pickNo(b) || b.year - a.year
       : sort === 'wav' ? (b.wav ?? -1) - (a.wav ?? -1)
       : sort === 'pb' ? b.pb - a.pb || b.cal - a.cal
@@ -101,10 +102,11 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
             <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="accent-primary" />HOF
           </label>
           <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={sel}>
-            <option value="cal">Sort: Career</option>
+            <option value="cal">Sort: Overall</option>
             <option value="name">Sort: Name</option>
-            <option value="year">Sort: Year</option>
             <option value="pos">Sort: Position</option>
+            <option value="team">Sort: Team</option>
+            <option value="year">Sort: Year</option>
           </select>
           <span className="ml-auto text-xs tabular-nums text-muted">{list.length.toLocaleString()} match</span>
         </div>
@@ -127,7 +129,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                 <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{p.mpos}</span>
                 <span className="inline-flex w-6 justify-center" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>{p.team && <TeamLogo team={p.team} size="sm" />}</span>
                 <span className="w-20 text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
-                <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score">{p.cal}</span>
+                <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score: his overall when added">{p.cal}</span>
                 {st ? (
                   <span className="w-14 rounded-md border border-success/40 bg-success/10 px-1.5 py-0.5 text-center text-xs text-success" title={st.title}>{st.label}</span>
                 ) : addTeams ? (

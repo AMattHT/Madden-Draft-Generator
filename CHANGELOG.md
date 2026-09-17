@@ -6,6 +6,7 @@
 
 - On the pool with All selected, each row's Add to… picks the team the player joins.
 - Pool rows show the club that drafted the player (nflverse from 1980, the draft tables before that; AFL picks have no source).
+- Sort by Team on the roster list and the pool; the pool's sort is labelled Overall since that career score is his overall when added.
 
 ## 1.4.1
 
