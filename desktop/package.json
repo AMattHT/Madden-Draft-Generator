@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
+    "bit-buffer": "^0.2.5",
     "cors": "^2.8.5",
     "electron-updater": "^6.8.9",
     "express": "^4.21.2",
@@ -27,6 +28,7 @@
     "madden-franchise": "^4.3.6",
     "papaparse": "^5.5.3",
     "sharp": "^0.34.4",
+    "stream-parser": "^0.3.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
