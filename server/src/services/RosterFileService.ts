@@ -56,6 +56,8 @@ export interface RosterPlayer {
   assetName: string | null;
   portrait: string | null; // /api/portrait/... when the face asset is in the catalog
   ratings: Record<string, number>;
+  /** From the player's visuals blob: body type (Standard…Lean), generic head, helmet and facemask assets; '' when absent. */
+  visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
 }
 
 export interface RosterInfo {
@@ -66,6 +68,9 @@ export interface RosterInfo {
   count: number;
   teamCount: number;
   freeAgentTeamId: number;
+  /** Identity of the file the roster came from, so a saved document can tell whether its base changed. */
+  crc: number;
+  sizeBytes: number;
 }
 
 export interface RosterData extends RosterInfo {
@@ -168,7 +173,28 @@ function freeAgentTeam(teams: RosterTeam[]): number {
   return fa.id;
 }
 
-function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: number): RosterPlayer | null {
+function visualsOf(blob: Tdb2Record | undefined): RosterPlayer['visuals'] {
+  const out = { bodyType: '', genericHead: '', helmet: '', facemask: '' };
+  if (!blob) return out;
+  out.genericHead = strOf(blob, 'GENR');
+  const louts: Tdb2Record[] = blob.fields.LOUT?.value?.records ?? [];
+  for (const l of louts) {
+    const pins: Tdb2Record[] = l.fields.PINS?.value?.records ?? [];
+    if (intOf(l, 'LDCT', -1) === 5) {
+      const body = pins.find((p) => intOf(p, 'SLOT', -1) === 129);
+      if (body) out.bodyType = strOf(body, 'ITAN').replace(/_BodyType$/, '');
+    } else if (intOf(l, 'LDTY', -1) === 1) {
+      for (const p of pins) {
+        const asset = strOf(p, 'ITAN');
+        if (intOf(p, 'SLOT', -1) === 106) out.helmet = asset;
+        else if (!p.fields.SLOT && asset.startsWith('GearFaceMask_')) out.facemask = asset;
+      }
+    }
+  }
+  return out;
+}
+
+function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: number, blob: Tdb2Record | undefined): RosterPlayer | null {
   const firstName = strOf(r, 'PFNA'), lastName = strOf(r, 'PLNA');
   if (!firstName && !lastName) return null;
   const ratings: Record<string, number> = {};
@@ -204,14 +230,16 @@ function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: num
     assetName: asset,
     portrait: portraitFor(asset),
     ratings,
+    visuals: visualsOf(blob),
   };
 }
 
 function buildPlayers(file: Tdb2File, teams: RosterTeam[], faId: number): RosterPlayer[] {
   const teamById = new Map(teams.map((t) => [t.id, t]));
+  const blobs = new Map<number, Tdb2Record>(file.BLOB.records[0].fields.BLBM.value.records.map((b: Tdb2Record) => [b.index, b]));
   const out: RosterPlayer[] = [];
   for (const r of file.PLAY.records) {
-    const p = buildPlayer(r, teamById, faId);
+    const p = buildPlayer(r, teamById, faId, blobs.get(intOf(r, 'PGID')));
     if (p) out.push(p);
   }
   return out;
@@ -267,6 +295,8 @@ async function build(buf: Buffer, name: string, id: string, openedAt: number): P
     count: base.players.length,
     teamCount: base.teams.filter((t) => t.id !== base.freeAgentTeamId).length,
     freeAgentTeamId: base.freeAgentTeamId,
+    crc: buf.readUInt32LE(0x1a),
+    sizeBytes: buf.length,
     teams: base.teams, players: base.players, buf: Buffer.from(buf),
   };
 }
@@ -329,6 +359,13 @@ export const RosterFileService = {
     const file = RosterFileService.savePath(name);
     if (!fs.existsSync(file)) throw new Error(`${name} is not in the Madden 27 Saves folder`);
     return parseBase(fs.readFileSync(file), name);
+  },
+
+  /** A base roster from the copy kept for an opened id (a browsed file that is not in the saves folder). */
+  async openOpened(id: string): Promise<BaseRoster> {
+    const e = entries.get(id) ?? (await restore(id));
+    if (!e) throw new Error('that roster is gone — open the file again');
+    return parseBase(e.buf, e.name);
   },
 
   /** The full 6,291,530-byte file for a parsed roster and its base header. */

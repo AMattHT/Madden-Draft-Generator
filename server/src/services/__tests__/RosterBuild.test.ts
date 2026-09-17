@@ -67,3 +67,9 @@ test('build refuses to overwrite the base or the official roster', skipWithoutRo
   await assert.rejects(RosterBuildService.build({ baseName: 'ROSTER-Official', name: 'Official' }), /official/i);
   await assert.rejects(RosterBuildService.build({ baseName: 'ROSTER-Nope', name: 'x' }), /not in the Madden 27 Saves folder/);
 });
+
+test('build accepts an opened roster id as the base', skipWithoutRoster, async () => {
+  const opened = await RosterFileService.openFromSaves('ROSTER-Official');
+  await assert.rejects(RosterBuildService.build({ baseId: opened.id, name: 'Official' }), /official/i);
+  await assert.rejects(RosterBuildService.build({ name: 'x' }), /baseName or baseId/);
+});

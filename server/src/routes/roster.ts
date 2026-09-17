@@ -8,10 +8,10 @@ const r = Router();
 /** Apply a roster document to a base ROSTER file and write ROSTER-<NAME>. */
 r.post('/roster/build', async (req, res) => {
   const b = (req.body ?? {}) as Partial<RosterBuildDoc>;
-  if (!b.baseName || typeof b.baseName !== 'string') return res.status(400).json({ error: 'baseName required' });
+  if ((!b.baseName || typeof b.baseName !== 'string') && (!b.baseId || typeof b.baseId !== 'string')) return res.status(400).json({ error: 'baseName or baseId required' });
   if (typeof b.name !== 'string') return res.status(400).json({ error: 'name required' });
   try {
-    return res.json(await RosterBuildService.build({ baseName: b.baseName, name: b.name, moves: b.moves ?? {}, edits: b.edits ?? {} }));
+    return res.json(await RosterBuildService.build({ baseName: b.baseName, baseId: b.baseId, name: b.name, moves: b.moves ?? {}, edits: b.edits ?? {} }));
   } catch (e) {
     return res.status(400).json({ error: (e as Error).message });
   }

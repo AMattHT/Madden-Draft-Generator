@@ -13,7 +13,8 @@ export interface PlayerFieldEdit {
 
 /** A roster document the server can apply: deltas against a base file. */
 export interface RosterBuildDoc {
-  baseName: string;                  // ROSTER-* file in the Madden 27 saves folder
+  baseName?: string;                 // ROSTER-* file in the Madden 27 saves folder, or
+  baseId?: string;                   // an opened roster id (a browsed file kept by the server)
   name: string;                      // roster name; the output is ROSTER-<NAME>
   moves?: Record<string, number>;    // PGID -> TGID (the free-agent team id cuts)
   edits?: Record<string, PlayerFieldEdit>; // PGID -> edits

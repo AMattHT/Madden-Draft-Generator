@@ -62,7 +62,7 @@ test('POST /api/roster/build validates its body', async () => {
     const port = (server.address() as { port: number }).port;
     const res = await post(port, '/api/roster/build', { name: 'x' });
     assert.equal(res.status, 400);
-    assert.match(JSON.parse(res.body).error, /baseName/);
+    assert.match(JSON.parse(res.body).error, /baseName or baseId/);
   } finally {
     server.close();
   }

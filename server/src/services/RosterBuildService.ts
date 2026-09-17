@@ -137,15 +137,17 @@ export const RosterBuildService = {
   /** Open the base, apply the document, write ROSTER-<NAME> next to it. */
   async build(doc: RosterBuildDoc): Promise<RosterBuildResult> {
     const output = RosterFileService.outputNameFor(doc.name);
+    if (!doc.baseName && !doc.baseId) throw new Error('baseName or baseId required');
     if (output.toUpperCase() === 'ROSTER-OFFICIAL') throw new Error('refusing to overwrite the official roster');
-    if (output.toUpperCase() === String(doc.baseName).toUpperCase()) throw new Error('refusing to overwrite the base roster');
-    const base = await RosterFileService.openBase(doc.baseName);
+    if (doc.baseName && output.toUpperCase() === String(doc.baseName).toUpperCase()) throw new Error('refusing to overwrite the base roster');
+    const base = doc.baseName ? await RosterFileService.openBase(doc.baseName) : await RosterFileService.openOpened(String(doc.baseId));
+    if (output.toUpperCase() === base.name.toUpperCase()) throw new Error('refusing to overwrite the base roster');
     const counts = RosterBuildService.apply(base, doc);
     const buf = RosterFileService.write(base.tdb2, base.header);
     const outputPath = RosterFileService.savePath(output);
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(`${outputPath}.tmp`, buf);
     fs.renameSync(`${outputPath}.tmp`, outputPath);
-    return { ...counts, input: doc.baseName, output, outputPath };
+    return { ...counts, input: base.name, output, outputPath };
   },
 };

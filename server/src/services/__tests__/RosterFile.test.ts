@@ -85,3 +85,24 @@ test('openBase exposes the parsed file, the free-agent team and an output name',
   assert.equal(RosterFileService.outputNameFor(''), 'ROSTER-CUSTOM');
   assert.equal(RosterFileService.outputNameFor('a'.repeat(40)), 'ROSTER-' + 'A'.repeat(16));
 });
+
+test('the read model carries the base checksum, size and each player visuals', skipWithoutRoster, async () => {
+  const buf = fs.readFileSync(OFFICIAL);
+  const data = await RosterFileService.parse(buf, 'ROSTER-Official');
+  assert.equal(data.sizeBytes, buf.length);
+  assert.equal(data.crc, buf.readUInt32LE(0x1a));
+  const geno = data.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
+  assert.equal(geno.visuals.bodyType, 'Standard');
+  assert.equal(geno.visuals.genericHead, 'gen_6_T_G_005');
+  assert.equal(geno.visuals.helmet, 'GearHelmet_Speed_Flex');
+  assert.equal(geno.visuals.facemask, 'GearFaceMask_SpeedFlex808');
+  assert.ok(data.players.every((p) => ['Standard', 'Thin', 'Muscular', 'Heavy', 'Lean', ''].includes(p.visuals.bodyType)));
+});
+
+test('an opened roster can be reopened as a base by id', skipWithoutRoster, async () => {
+  const opened = await RosterFileService.openFromSaves('ROSTER-Official');
+  const base = await RosterFileService.openOpened(opened.id);
+  assert.equal(base.name, 'ROSTER-Official');
+  assert.equal(base.players.length, opened.count);
+  await assert.rejects(RosterFileService.openOpened('0123456789abcdef'), /gone/);
+});
