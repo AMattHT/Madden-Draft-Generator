@@ -9,6 +9,7 @@ import { RatingService } from './RatingService';
 import { SupplementalDraftService } from './SupplementalDraftService';
 import { nflversePick } from '../types/player';
 import { positionLabelFor } from './PositionLabel';
+import type { TeamInfo } from './TeamService';
 
 export interface PlayerSearchResult {
   firstName: string;
@@ -147,6 +148,8 @@ export interface CatalogPlayer {
   wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
   /** Menu-portrait id, for the studio's headshots. */
   pid: number | null;
+  /** The club that drafted him, filled by the catalog route (TeamDraftService). */
+  team?: TeamInfo | null;
 }
 
 let byKey: Map<string, BaselinePlayer> | null = null;

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { displayPortrait } from '../api';
 import { POS_GROUP_ORDER, POS_NAMES } from '../constants';
 import type { CatalogPlayer } from '../types';
-import { Portrait } from './ui';
+import { Portrait, TeamLogo } from './ui';
 
 const SHOW_MAX = 400;
 type SortKey = 'year' | 'name' | 'pos' | 'pick' | 'wav' | 'cal' | 'pb';
@@ -125,6 +125,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                   {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[10px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                 </span>
                 <span className="rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-neutral-300">{p.mpos}</span>
+                <span className="inline-flex w-6 justify-center" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>{p.team && <TeamLogo team={p.team} size="sm" />}</span>
                 <span className="w-20 text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
                 <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score">{p.cal}</span>
                 {st ? (

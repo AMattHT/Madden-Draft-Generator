@@ -203,6 +203,8 @@ export interface CatalogPlayer {
   year: number; league: string; round: number | null; pick: number | null; college: string;
   wav: number | null; cal: number; hof: boolean; pb: number; ap1: number;
   pid: number | null;
+  /** The club that drafted him, when a source records it. */
+  team?: TeamInfo | null;
 }
 
 /** A player the 402-slot class could not hold; `idx` is the stable source index. */

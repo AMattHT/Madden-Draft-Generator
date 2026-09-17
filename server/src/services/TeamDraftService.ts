@@ -37,6 +37,7 @@ const ABBR_TO_FRANCHISE: Record<string, string> = {
 let listCache: FranchiseInfo[] | null = null;
 let byKeyCache: Map<string, FranchiseInfo> | null = null;
 let draftedCache: Promise<Map<string, BaselinePlayer[]>> | null = null;
+let draftTeamsCache: Promise<Map<string, { team: TeamInfo; player: BaselinePlayer }>> | null = null;
 
 function list(): FranchiseInfo[] {
   if (!listCache) {
@@ -68,6 +69,15 @@ export const TeamDraftService = {
     return ABBR_TO_FRANCHISE[a] ?? null;
   },
 
+  /** Player key -> the club that drafted him as of that season (nflverse 1980+,
+   *  the baked Wikipedia tables before that; AFL picks have no source). Built once. */
+  draftTeams(): Promise<Map<string, { team: TeamInfo; player: BaselinePlayer }>> {
+    if (!draftTeamsCache) {
+      draftTeamsCache = buildDraftTeams().catch((e) => { draftTeamsCache = null; throw e; });
+    }
+    return draftTeamsCache;
+  },
+
   /** Every drafted player in the lookup, grouped by the franchise that drafted
    *  him (nflverse 1980+, the baked Wikipedia tables before that). Built once. */
   draftedByFranchise(): Promise<Map<string, BaselinePlayer[]>> {
@@ -85,14 +95,8 @@ export const TeamDraftService = {
   },
 };
 
-async function buildDrafted(): Promise<Map<string, BaselinePlayer[]>> {
-  const out = new Map<string, BaselinePlayer[]>();
-  const add = (k: string | null, p: BaselinePlayer) => {
-    if (!k) return;
-    let l = out.get(k);
-    if (!l) out.set(k, (l = []));
-    l.push(p);
-  };
+async function buildDraftTeams(): Promise<Map<string, { team: TeamInfo; player: BaselinePlayer }>> {
+  const out = new Map<string, { team: TeamInfo; player: BaselinePlayer }>();
   for (const year of PlayerLookupService.years()) {
     const players = PlayerLookupService.byYear(year).filter((p) => p.draftRound != null || p.draftPick != null);
     if (!players.length) continue;
@@ -100,18 +104,33 @@ async function buildDrafted(): Promise<Map<string, BaselinePlayer[]>> {
       const enrich = await TeamService.byYear(year);
       const t2026 = !enrich.size && year === 2026 ? TeamService.teams2026() : null;
       for (const p of players) {
-        if (p.draftPick == null) continue;
+        if (p.draftPick == null || !p.key) continue;
         const t = enrich.get(p.draftPick)?.team ?? t2026?.get(p.draftPick);
-        if (t) add(TeamDraftService.franchiseOf(t, year), p);
+        if (t) out.set(p.key, { team: t, player: p });
       }
     } else {
+      // The baked tables are the NFL drafts; an AFL pick would only match a
+      // same-name NFL draftee (the 1960s double-drafts), so he stays unassigned.
       const map = await WikipediaTeamService.teamsByName(year);
       if (!map.size) continue;
       for (const p of players) {
+        if (!p.key || p.league !== 'NFL') continue;
         const t = WikipediaTeamService.teamFor(map, p.firstName, p.lastName, p.college);
-        if (t) add(TeamDraftService.franchiseOf(t, year), p);
+        if (t) out.set(p.key, { team: t, player: p });
       }
     }
+  }
+  return out;
+}
+
+async function buildDrafted(): Promise<Map<string, BaselinePlayer[]>> {
+  const out = new Map<string, BaselinePlayer[]>();
+  for (const { team, player } of (await TeamDraftService.draftTeams()).values()) {
+    const k = TeamDraftService.franchiseOf(team, player.draftYear);
+    if (!k) continue;
+    let l = out.get(k);
+    if (!l) out.set(k, (l = []));
+    l.push(player);
   }
   return out;
 }
