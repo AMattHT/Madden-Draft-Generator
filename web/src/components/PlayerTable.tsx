@@ -1,7 +1,7 @@
 import { displayPortrait } from '../api';
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import type { PlayerRow } from '../types';
-import { ATTR_COLUMNS, groupForId, keyAttrsForPosition } from '../constants';
+import { ATTR_COLUMNS, groupForId, keyAttrsForPosition, tierColor } from '../constants';
 import type { ColumnPreset } from './Toolbar';
 import { RatingChip, DevBadge, TeamLogo, Portrait } from './ui';
 
@@ -56,6 +56,9 @@ function wavTag(source: string): { label: string; cls: string; title: string } {
     return { label: 'EA', cls: 'text-gold', title: "EA's launch-day rating for this rookie (overall and attributes as shipped)" };
   return { label: 'P', cls: 'text-muted', title: 'predicted from draft slot / era' };
 }
+
+/** The round a pick belongs to on the board (supplemental picks sit in their own round). */
+export const roundOf = (r: PlayerRow): number | null => r.supplemental?.round ?? r.round ?? null;
 
 function SortTh({
   id,
@@ -118,6 +121,7 @@ const BoardRow = memo(function BoardRow({
   reveal,
   cols,
   signature,
+  ticker,
   maxWav,
   onActivate,
   onFocusRow,
@@ -132,6 +136,7 @@ const BoardRow = memo(function BoardRow({
   reveal: boolean;
   cols: AttrCol[];
   signature: boolean;
+  ticker: boolean;
   maxWav: number;
   onActivate: (id: number) => void;
   onFocusRow: (id: number) => void;
@@ -157,7 +162,13 @@ const BoardRow = memo(function BoardRow({
             : 'hover:bg-white/[0.035]'
       }`}
     >
-      <td className="px-3 text-right text-[11px] font-medium tabular-nums text-neutral-500">{r.pick}</td>
+      {/* Tier stripe: the eye finds the 80+ players before it reads a number. */}
+      <td className="w-[3px] p-0">
+        <i className="block h-10 w-[3px] transition-colors duration-300" style={{ background: spoilers ? tierColor(r.overall) : 'transparent' }} />
+      </td>
+      <td className={`pr-2 text-right tabular-nums ${ticker ? 'pl-2 font-display text-[13px] font-bold text-neutral-400' : 'pl-3 text-[11px] font-medium text-neutral-500'}`}>
+        {r.supplemental ? 'S' : r.pick}
+      </td>
       <td className="px-2">
         <span className="flex items-center justify-center">
           <TeamLogo team={r.team} size="sm" />
@@ -226,10 +237,29 @@ const BoardRow = memo(function BoardRow({
           </td>
         );
       })}
-    <td aria-hidden />
+      <td aria-hidden />
     </tr>
   );
 });
+
+/** A round band: sits between rounds when the board is grouped, same height as
+ *  a row so the virtual window stays a fixed grid. */
+function RoundBand({ round, count, elite, xf, spoilers }: { round: number | null; count: number; elite: number; xf: number; spoilers: boolean }) {
+  return (
+    <tr style={{ height: ROW_H }} className="bg-primary/[0.07]">
+      <td colSpan={99} className="px-3">
+        <span className="flex items-center gap-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-primary-light">
+          <span>{round ? `Round ${round}` : 'Unrounded'}</span>
+          <span className="font-semibold tracking-wide text-neutral-500">{count} pick{count === 1 ? '' : 's'}</span>
+          {spoilers && elite > 0 && <span className="font-semibold tracking-wide text-success-light">{elite} rated 80+</span>}
+          {spoilers && xf > 0 && <span className="font-semibold tracking-wide text-red-300">{xf} X-Factor{xf === 1 ? '' : 's'}</span>}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+type Item = { kind: 'row'; r: Row } | { kind: 'band'; key: string; round: number | null; count: number; elite: number; xf: number };
 
 export function PlayerTable({
   rows,
@@ -241,6 +271,8 @@ export function PlayerTable({
   spoilers = true,
   columns = 'core',
   pos = 'ALL',
+  groupRounds = false,
+  selectOnFocus = false,
 }: {
   rows: Row[];
   selectedId: number | null;
@@ -253,9 +285,41 @@ export function PlayerTable({
   columns?: ColumnPreset;
   /** The board's position filter, so the Position preset knows which group to show. */
   pos?: string;
+  /** Ticker mode: round bands between rounds (draft order only) and a numeral pick rail. */
+  groupRounds?: boolean;
+  /** Scout desk: moving the highlight with the arrow keys also selects the row. */
+  selectOnFocus?: boolean;
 }) {
   const maxWav = useMemo(() => Math.max(1, ...rows.map((r) => r.wav ?? 0)), [rows]);
   const { cols, signature } = useMemo(() => columnsFor(columns, pos, rows), [columns, pos, rows]);
+
+  /* ---- Items: rows, with round bands slotted in when grouped in draft order. ---- */
+  const inPickOrder = (sort ?? 'pick').replace(/^-/, '') === 'pick';
+  const ticker = groupRounds && inPickOrder;
+  const { items, indexOfRow } = useMemo(() => {
+    const idx = new Map<number, number>();
+    if (!ticker) {
+      rows.forEach((r, i) => idx.set(r.id, i));
+      return { items: rows.map((r): Item => ({ kind: 'row', r })), indexOfRow: idx };
+    }
+    const out: Item[] = [];
+    let i = 0;
+    while (i < rows.length) {
+      const round = roundOf(rows[i]);
+      let j = i;
+      let elite = 0;
+      let xf = 0;
+      while (j < rows.length && roundOf(rows[j]) === round) {
+        if (rows[j].overall >= 80) elite++;
+        if (rows[j].devTrait === 3) xf++;
+        j++;
+      }
+      out.push({ kind: 'band', key: `band-${round ?? 'none'}-${i}`, round, count: j - i, elite, xf });
+      for (let k = i; k < j; k++) { idx.set(rows[k].id, out.length); out.push({ kind: 'row', r: rows[k] }); }
+      i = j;
+    }
+    return { items: out, indexOfRow: idx };
+  }, [rows, ticker]);
 
   /* ---- Virtual window: only the rows in view (plus a margin) exist in the DOM. ---- */
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -273,15 +337,15 @@ export function PlayerTable({
   // A filter that shrinks the list leaves the scroll past its end: start over from the top.
   useEffect(() => {
     const el = scrollRef.current;
-    if (el && el.scrollTop > Math.max(0, rows.length * ROW_H - el.clientHeight)) { el.scrollTop = 0; setScrollTop(0); }
-  }, [rows.length]);
+    if (el && el.scrollTop > Math.max(0, items.length * ROW_H - el.clientHeight)) { el.scrollTop = 0; setScrollTop(0); }
+  }, [items.length]);
   const raf = useRef(0);
   const onScroll = useCallback(() => {
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => { if (scrollRef.current) setScrollTop(scrollRef.current.scrollTop); });
   }, []);
   const start = Math.max(0, Math.floor(scrollTop / ROW_H) - OVERSCAN);
-  const end = Math.min(rows.length, Math.ceil((scrollTop + height) / ROW_H) + OVERSCAN);
+  const end = Math.min(items.length, Math.ceil((scrollTop + height) / ROW_H) + OVERSCAN);
   const ensureVisible = useCallback((idx: number, center = false) => {
     const el = scrollRef.current;
     if (!el) return;
@@ -302,19 +366,20 @@ export function PlayerTable({
   }, []);
   const wasOpen = useRef(false);
   useEffect(() => {
+    if (selectOnFocus) return;
     if (selectedId == null && wasOpen.current && effActive != null) rowRefs.current.get(effActive)?.focus();
     wasOpen.current = selectedId != null;
-  }, [selectedId, effActive]);
+  }, [selectedId, effActive, selectOnFocus]);
 
   const moveActive = useCallback((from: number, delta: number) => {
     const idx = rows.findIndex((r) => r.id === from);
     const next = rows[idx + delta];
     if (!next) return;
     setActiveId(next.id);
-    ensureVisible(idx + delta);
+    ensureVisible(indexOfRow.get(next.id) ?? idx + delta);
     // The target row may not exist until the window re-renders around it.
     requestAnimationFrame(() => rowRefs.current.get(next.id)?.focus({ preventScroll: true }));
-  }, [rows, ensureVisible]);
+  }, [rows, ensureVisible, indexOfRow]);
   const onKey = useCallback((e: KeyboardEvent<HTMLTableRowElement>, id: number) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(id, 1); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); moveActive(id, -1); }
@@ -323,7 +388,7 @@ export function PlayerTable({
     else if (e.key === 'Enter') { e.preventDefault(); onRowClick(id); }
   }, [moveActive, onRowClick]);
   const onActivate = useCallback((id: number) => { setActiveId(id); onRowClick(id); }, [onRowClick]);
-  const onFocusRow = useCallback((id: number) => setActiveId(id), []);
+  const onFocusRow = useCallback((id: number) => { setActiveId(id); if (selectOnFocus) onRowClick(id); }, [selectOnFocus, onRowClick]);
 
   /* ---- Jump-to-player: scroll the searched row into the middle of the view. ---- */
   const focusId = useMemo(
@@ -332,8 +397,8 @@ export function PlayerTable({
   );
   useEffect(() => {
     if (focusId == null) return;
-    const idx = rows.findIndex((r) => r.id === focusId);
-    if (idx >= 0) ensureVisible(idx, true);
+    const idx = indexOfRow.get(focusId);
+    if (idx != null) ensureVisible(idx, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusId]);
 
@@ -358,6 +423,7 @@ export function PlayerTable({
       <table className="w-full border-separate border-spacing-0 text-sm" style={{ minWidth }}>
         <thead className="sticky top-0 z-10 text-neutral-500">
           <tr className="bg-surface-1/95 shadow-[0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+            <th className="w-[3px] p-0" aria-hidden />
             <SortTh id="pick" sort={sort} onSort={onSort} className={`${th} w-12 text-right`}>#</SortTh>
             <SortTh id="team" sort={sort} onSort={onSort} className={`${th} w-12 text-center`}>Team</SortTh>
             <SortTh id="name" sort={sort} onSort={onSort} className={`${th} w-60 text-left`}>Player</SortTh>
@@ -372,33 +438,38 @@ export function PlayerTable({
                 {c.label}
               </SortTh>
             ))}
-          <th aria-hidden className="w-auto" />
+            <th aria-hidden className="w-auto" />
           </tr>
         </thead>
         <tbody>
           {start > 0 && <tr aria-hidden style={{ height: start * ROW_H }}><td /></tr>}
-          {rows.slice(start, end).map((r) => (
-            <BoardRow
-              key={r.id}
-              r={r}
-              active={r.id === selectedId}
-              highlighted={r.id === effActive}
-              focused={r.id === focusId}
-              spoilers={spoilers}
-              reveal={reveal}
-              cols={cols}
-              signature={signature}
-              maxWav={maxWav}
-              onActivate={onActivate}
-              onFocusRow={onFocusRow}
-              onKey={onKey}
-              setRef={setRef}
-            />
-          ))}
-          {end < rows.length && <tr aria-hidden style={{ height: (rows.length - end) * ROW_H }}><td /></tr>}
+          {items.slice(start, end).map((it) =>
+            it.kind === 'band' ? (
+              <RoundBand key={it.key} round={it.round} count={it.count} elite={it.elite} xf={it.xf} spoilers={spoilers} />
+            ) : (
+              <BoardRow
+                key={it.r.id}
+                r={it.r}
+                active={it.r.id === selectedId}
+                highlighted={it.r.id === effActive}
+                focused={it.r.id === focusId}
+                spoilers={spoilers}
+                reveal={reveal}
+                cols={cols}
+                signature={signature}
+                ticker={ticker}
+                maxWav={maxWav}
+                onActivate={onActivate}
+                onFocusRow={onFocusRow}
+                onKey={onKey}
+                setRef={setRef}
+              />
+            )
+          )}
+          {end < items.length && <tr aria-hidden style={{ height: (items.length - end) * ROW_H }}><td /></tr>}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={9 + cols.length} className="px-3 py-16 text-center text-muted">
+              <td colSpan={10 + cols.length} className="px-3 py-16 text-center text-muted">
                 <div className="text-sm">No players match the current filter.</div>
               </td>
             </tr>

@@ -42,7 +42,7 @@ export function PlayerRow({ p, selected, onClick, onDragStart, trailing, logo }:
   );
 }
 
-export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, onClose, onRebase }: {
+export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, onClose, onRebase, initialTeam }: {
   data: RosterData;
   doc: RosterDoc;
   readOnly: boolean;
@@ -51,6 +51,8 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   onSave: (doc: RosterDoc) => Promise<void>;
   onClose: () => void;
   onRebase: () => void;
+  /** The club the builder opens on (ALL_TEAMS for the whole file); default: the first alphabetically. */
+  initialTeam?: number;
 }) {
   const fresh = doc.fresh === true;
   const [savedAt, setSavedAt] = useState<number | null>(null);
@@ -59,7 +61,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'pos' | 'ovr' | 'name' | 'age' | 'team'>('pos');
   // The strip's first team (alphabetical by abbreviation) starts selected.
-  const [selectedTeam, setSelectedTeam] = useState<number>(() => [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
+  const [selectedTeam, setSelectedTeam] = useState<number>(() => initialTeam ?? [...data.teams].filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.abbr.localeCompare(b.abbr))[0]?.id ?? ALL_TEAMS);
 
   // The pool: the catalog loads when the tab first opens; each add is rated by the server
   // once (a preview) and that preview is what the list and the card show.

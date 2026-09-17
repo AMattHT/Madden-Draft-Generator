@@ -1,10 +1,13 @@
 import { Icon, ICONS, Segmented, Switch } from './ui';
 
-export type BoardView = 'table' | 'cards' | 'board';
+export type BoardView = 'table' | 'desk' | 'cards' | 'wall' | 'board';
 export type ColumnPreset = 'core' | 'physical' | 'position' | 'all';
 
+export const BOARD_VIEWS: readonly BoardView[] = ['table', 'desk', 'cards', 'wall', 'board'];
+
 /** Board controls: search, position, sort, the spoilers switch, the view set
- *  (table / cards / draft board) and, on the table, which attribute columns show. */
+ *  (table / scout desk / cards / wall / rounds) and, on the table, which
+ *  attribute columns show and whether rounds are banded. */
 export function Toolbar({
   search,
   setSearch,
@@ -21,6 +24,8 @@ export function Toolbar({
   setView,
   columns,
   setColumns,
+  rounds,
+  setRounds,
 }: {
   search: string;
   setSearch: (s: string) => void;
@@ -37,9 +42,13 @@ export function Toolbar({
   setView: (v: BoardView) => void;
   columns: ColumnPreset;
   setColumns: (c: ColumnPreset) => void;
+  rounds: boolean;
+  setRounds: (b: boolean) => void;
 }) {
   const select =
     'h-8 rounded-lg border border-white/[0.07] bg-black/30 pl-2.5 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] focus:border-primary focus:outline-none';
+  const tabular = view === 'table' || view === 'desk';
+  const pickOrder = sort.replace(/^-/, '') === 'pick';
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-white/[0.05] bg-surface-1/60 px-3 py-2">
       <div className="relative">
@@ -105,8 +114,18 @@ export function Toolbar({
         className="ml-1 h-8 rounded-lg border border-white/[0.07] bg-black/30 px-2.5"
       />
 
+      {tabular && (
+        <Switch
+          checked={rounds}
+          onChange={setRounds}
+          label="Rounds"
+          title={pickOrder ? 'Band the board by round, with each round’s pick count and stars' : 'Round bands need the board in draft order'}
+          className={`h-8 rounded-lg border border-white/[0.07] bg-black/30 px-2.5 ${pickOrder ? '' : 'opacity-50'}`}
+        />
+      )}
+
       <span className="ml-auto flex items-center gap-2">
-        {view === 'table' && (
+        {tabular && (
           <Segmented<ColumnPreset>
             size="xs"
             label="Attribute columns"
@@ -127,8 +146,10 @@ export function Toolbar({
           onChange={setView}
           options={[
             { value: 'table', label: <Icon path={ICONS.table} className="h-3.5 w-3.5" />, title: 'Table' },
-            { value: 'cards', label: <Icon path={ICONS.grid} className="h-3.5 w-3.5" />, title: 'Cards' },
-            { value: 'board', label: <Icon path={ICONS.kanban} className="h-3.5 w-3.5" />, title: 'Draft board by round' },
+            { value: 'desk', label: <Icon path={ICONS.desk} className="h-3.5 w-3.5" />, title: 'Scout desk: the list with the editor docked beside it' },
+            { value: 'cards', label: <Icon path={ICONS.idCard} className="h-3.5 w-3.5" />, title: 'Cards' },
+            { value: 'wall', label: <Icon path={ICONS.wall} className="h-3.5 w-3.5" />, title: 'Big board: every pick as a tile, round by round' },
+            { value: 'board', label: <Icon path={ICONS.kanban} className="h-3.5 w-3.5" />, title: 'Round columns' },
           ]}
         />
         <span className="ml-1 text-[11px] tabular-nums text-muted">

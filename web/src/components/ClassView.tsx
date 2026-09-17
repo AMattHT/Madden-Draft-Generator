@@ -9,12 +9,13 @@ import { MetaStrip } from './MetaStrip';
 import { DraftOptions } from './DraftOptions';
 import { ExportMenu } from './ExportMenu';
 import type { EditTools, ExportActions } from './ExportMenu';
-import { Toolbar, type BoardView, type ColumnPreset } from './Toolbar';
+import { Toolbar, BOARD_VIEWS, type BoardView, type ColumnPreset } from './Toolbar';
 import { PlayerTable, ATTR_COLUMNS, SPOILER_SORTS } from './PlayerTable';
 import { PlayerCards } from './PlayerCards';
 import { DraftBoard } from './DraftBoard';
+import { WallBoard } from './WallBoard';
 import { ProfileModal } from './ProfileModal';
-import { Pill, Icon, ICONS, Button } from './ui';
+import { Pill, Icon, ICONS, Button, Kbd } from './ui';
 
 export type DisplayRow = PlayerRow & { edited?: boolean };
 
@@ -31,12 +32,14 @@ const ATTR_BY_ID: Record<string, string> = Object.fromEntries(
 
 const VIEW_KEY = 'board:view';
 const COLS_KEY = 'board:columns';
+const ROUNDS_KEY = 'board:rounds';
 const readPref = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {
   try {
     const v = localStorage.getItem(key);
     return v && (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
   } catch { return fallback; }
 };
+const writePref = (key: string, v: string) => { try { localStorage.setItem(key, v); } catch { /* private mode */ } };
 
 export function ClassView({
   data,
@@ -93,11 +96,13 @@ export function ClassView({
   // wAV and attributes masked, and you tick Spoilers to reveal them.
   const [spoilers, setSpoilers] = useState(false);
   const [showOpts, setShowOpts] = useState(false);
-  // View set and column preset are shell preferences, not per-class state.
-  const [view, setView] = useState<BoardView>(() => readPref(VIEW_KEY, ['table', 'cards', 'board'] as const, 'table'));
+  // View set, column preset and round banding are shell preferences, not per-class state.
+  const [view, setView] = useState<BoardView>(() => readPref(VIEW_KEY, BOARD_VIEWS, 'table'));
   const [columns, setColumns] = useState<ColumnPreset>(() => readPref(COLS_KEY, ['core', 'physical', 'position', 'all'] as const, 'core'));
-  useEffect(() => { try { localStorage.setItem(VIEW_KEY, view); } catch { /* private mode */ } }, [view]);
-  useEffect(() => { try { localStorage.setItem(COLS_KEY, columns); } catch { /* private mode */ } }, [columns]);
+  const [rounds, setRounds] = useState<boolean>(() => readPref(ROUNDS_KEY, ['0', '1'] as const, '0') === '1');
+  useEffect(() => writePref(VIEW_KEY, view), [view]);
+  useEffect(() => writePref(COLS_KEY, columns), [columns]);
+  useEffect(() => writePref(ROUNDS_KEY, rounds ? '1' : '0'), [rounds]);
   const allTime = data.league === 'all-time';
   const decade = /^\d{4}s$/.test(data.league || '') ? data.league : null; // e.g. "1990s"
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -136,7 +141,7 @@ export function ClassView({
     if (focusPlayer) {
       setPos('ALL');
       setSearch('');
-      setView('table');
+      setView((v) => (v === 'table' || v === 'desk' ? v : 'table'));
     }
   }, [focusPlayer]);
 
@@ -198,15 +203,18 @@ export function ClassView({
     [effRows]
   );
 
+  // The search filter alone, in draft order: what the big board shows (the
+  // position filter dims tiles there instead of removing them).
+  const searched = useMemo(() => {
+    if (!search.trim()) return effRows;
+    const q = search.toLowerCase();
+    return effRows.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
+  }, [effRows, search]);
+
   const rows = useMemo(() => {
-    let r = effRows;
     // `pos` may be an exact M26 label (from the dropdown) or a coarse group code
     // (from the composition strip) — match either.
-    if (pos !== 'ALL') r = r.filter((x) => x.position === pos || groupForId(x.positionId) === pos);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      r = r.filter((x) => `${x.firstName} ${x.lastName}`.toLowerCase().includes(q));
-    }
+    const r = pos !== 'ALL' ? searched.filter((x) => x.position === pos || groupForId(x.positionId) === pos) : searched;
     const sorted = [...r];
     const desc = sort.startsWith('-');
     const col = desc ? sort.slice(1) : sort;
@@ -228,9 +236,16 @@ export function ClassView({
       return cmp * dir || a.pick - b.pick;
     });
     return sorted;
-  }, [effRows, pos, search, sort]);
+  }, [searched, pos, sort]);
 
   const editedCount = Object.keys(edits).length;
+  const desk = view === 'desk';
+  // Leaving the desk drops its standing selection, or the modal would open at once.
+  const changeView = (v: BoardView) => { if (desk && v !== 'desk') setSelectedId(null); setView(v); };
+  // The scout desk always has a player on the pane: the first row until one is picked.
+  useEffect(() => {
+    if (desk && selectedId == null && rows.length) setSelectedId(rows[0].id);
+  }, [desk, selectedId, rows]);
   const selectedRow = selectedId != null ? data.rows.find((r) => r.id === selectedId) ?? null : null;
   // A hand-picked class exports by its saved player keys and name.
   const exportOpts = useMemo(() => {
@@ -241,7 +256,7 @@ export function ClassView({
     return { ...draftOpts, board: c?.board ?? [], name: data.name ?? c?.name ?? '' };
   }, [draftOpts, customClasses, data.name]);
 
-  // Prev/next player navigation inside the profile modal, walking the board in
+  // Prev/next player navigation inside the profile editor, walking the board in
   // its current filter+sort order (what you see is what you step through).
   const selectedIndex = selectedId != null ? rows.findIndex((r) => r.id === selectedId) : -1;
   const navigatePlayer = (delta: number) => {
@@ -267,6 +282,23 @@ export function ClassView({
   ) : (
     <><span className="text-neutral-50">{data.year}</span> <span className="text-neutral-400">{data.league === 'combined' ? 'AFL + NFL' : data.league} Draft</span></>
   );
+
+  const editorProps = selectedRow && {
+    row: selectedRow,
+    patch: edits[selectedRow.id] || {},
+    gearPatch: gearEdits[selectedRow.id] || {},
+    year: data.year,
+    archetypeOptions,
+    gameVersion: data.gameVersion ?? 'm26',
+    spoilers,
+    onEdit: (f: string, v: number | string) => onEdit(selectedRow.id, f, v),
+    onGearEdit: (slot: string, asset: string) => onGearEdit(selectedRow.id, slot, asset),
+    onReset: () => onResetPlayer(selectedRow.id),
+    onClose: () => setSelectedId(null),
+    onNavigate: navigatePlayer,
+    canPrev: selectedIndex > 0,
+    canNext: selectedIndex >= 0 && selectedIndex < rows.length - 1,
+  };
 
   return (
     <div key={filterKey} className="flex h-full animate-view flex-col">
@@ -364,38 +396,43 @@ export function ClassView({
             spoilers={spoilers}
             setSpoilers={setSpoilers}
             view={view}
-            setView={setView}
+            setView={changeView}
             columns={columns}
             setColumns={setColumns}
+            rounds={rounds}
+            setRounds={setRounds}
           />
           <div key={view} className="min-h-0 flex-1 animate-fade-in">
             {view === 'table' && (
-              <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} columns={columns} pos={pos} />
+              <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} columns={columns} pos={pos} groupRounds={rounds} />
+            )}
+            {desk && (
+              <div className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_minmax(440px,540px)]">
+                <div className="min-h-0 border-r border-white/[0.06]">
+                  <PlayerTable rows={rows} selectedId={selectedId} onRowClick={setSelectedId} focusName={focusPlayer} sort={sort} onSort={setSort} spoilers={spoilers} columns={columns} pos={pos} groupRounds={rounds} selectOnFocus />
+                </div>
+                <div className="min-h-0 overflow-hidden bg-surface-1/50">
+                  {editorProps ? (
+                    <ProfileModal key={selectedRow!.id} variant="pane" {...editorProps} />
+                  ) : (
+                    <div className="grid h-full place-items-center px-8 text-center text-sm text-muted">
+                      <div>
+                        <div className="font-semibold text-neutral-300">Pick a player to edit</div>
+                        <div className="mt-1">Click a row, or move the highlight with <Kbd>↑</Kbd> <Kbd>↓</Kbd>. Edits save as you type.</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
             {view === 'cards' && <PlayerCards rows={rows} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
+            {view === 'wall' && <WallBoard rows={searched} pos={pos} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
             {view === 'board' && <DraftBoard rows={rows} selectedId={selectedId} onOpen={setSelectedId} spoilers={spoilers} />}
           </div>
         </section>
       </div>
 
-      {selectedRow && (
-        <ProfileModal
-          row={selectedRow}
-          patch={edits[selectedRow.id] || {}}
-          gearPatch={gearEdits[selectedRow.id] || {}}
-          year={data.year}
-          archetypeOptions={archetypeOptions}
-          gameVersion={data.gameVersion ?? "m26"}
-          spoilers={spoilers}
-          onEdit={(f, v) => onEdit(selectedRow.id, f, v)}
-          onGearEdit={(slot, asset) => onGearEdit(selectedRow.id, slot, asset)}
-          onReset={() => onResetPlayer(selectedRow.id)}
-          onClose={() => setSelectedId(null)}
-          onNavigate={navigatePlayer}
-          canPrev={selectedIndex > 0}
-          canNext={selectedIndex >= 0 && selectedIndex < rows.length - 1}
-        />
-      )}
+      {editorProps && !desk && <ProfileModal {...editorProps} />}
     </div>
   );
 }

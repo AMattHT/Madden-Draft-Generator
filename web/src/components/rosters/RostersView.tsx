@@ -6,7 +6,7 @@ import { newRosterDoc } from '../../rosterDoc';
 import { RosterPicker } from './RosterPicker';
 import { RosterBuilder } from './RosterBuilder';
 
-interface Open { data: RosterData; doc: RosterDoc; readOnly: boolean; notice: string | null }
+interface Open { data: RosterData; doc: RosterDoc; readOnly: boolean; notice: string | null; initialTeam?: number }
 
 /**
  * Rosters: open a Madden 27 ROSTER save (or a roster saved here), move, cut and edit
@@ -23,7 +23,7 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
   const refreshSaved = useCallback(() => { cache.rosterList().then(setSaved).catch(() => {}); }, []);
   useEffect(refreshSaved, [refreshSaved]);
 
-  const openBase = (data: RosterData, fromSaves: boolean) => { setOpen({ data, doc: newRosterDoc(data, fromSaves), readOnly: false, notice: null }); setErr(null); };
+  const openBase = (data: RosterData, fromSaves: boolean, teamId?: number) => { setOpen({ data, doc: newRosterDoc(data, fromSaves), readOnly: false, notice: null, initialTeam: teamId }); setErr(null); };
   /** A roster from scratch: the game's own roster lends its container; the document starts empty. */
   const openFresh = async () => {
     setLoading('new'); setErr(null);
@@ -101,6 +101,7 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
       onSave={save}
       onClose={() => { setOpen(null); refreshSaved(); }}
       onRebase={() => setRebasing(true)}
+      initialTeam={open.initialTeam}
     />
   );
 }

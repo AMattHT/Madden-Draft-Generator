@@ -224,6 +224,7 @@ export function ProfileModal({
   spoilers = true,
   mode = 'draft',
   footer,
+  variant = 'modal',
 }: {
   row: PlayerRow;
   patch: Record<string, number | string>;
@@ -245,8 +246,11 @@ export function ProfileModal({
   mode?: 'draft' | 'roster';
   /** The line in the sticky footer; defaults to the draft editor's. */
   footer?: string;
+  /** 'pane': docked beside the board (the scout desk) - no backdrop, no close, no focus grab. */
+  variant?: 'modal' | 'pane';
 }) {
   const roster = mode === 'roster';
+  const pane = variant === 'pane';
   if (roster) spoilers = true;
   // Avatar source chain (photo, then in-game portrait): imgErr counts how many
   // sources have failed so a dead photo URL falls back instead of going blank.
@@ -301,7 +305,7 @@ export function ProfileModal({
       // Escape closes the innermost layer only: a nested editor (equipment /
       // appearance / persona picker) handles its own Escape; the profile stays.
       if (e.key === 'Escape') {
-        if (gearOpen || appearOpen) return;
+        if (pane || gearOpen || appearOpen) return;
         if ((e.target as HTMLElement | null)?.closest?.('[data-nested-editor]')) return;
         onClose();
         return;
@@ -316,7 +320,7 @@ export function ProfileModal({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, onNavigate, canPrev, canNext, gearOpen, appearOpen]);
+  }, [onClose, onNavigate, canPrev, canNext, gearOpen, appearOpen, pane]);
 
   const eff = (field: string): number =>
     Number(field in patch ? patch[field] : field === 'overall' ? row.overall : (row.ratings[field] ?? 0));
@@ -407,14 +411,14 @@ export function ProfileModal({
 
   return (
     <>
-    <div className="fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/65 backdrop-blur-[3px]" onClick={onClose}>
+    <div className={pane ? 'flex h-full min-h-0 w-full' : 'fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/65 backdrop-blur-[3px]'} onClick={pane ? undefined : onClose}>
       <div
-        role="dialog"
-        aria-modal="true"
+        role={pane ? 'region' : 'dialog'}
+        aria-modal={pane ? undefined : true}
         aria-label={`${row.firstName} ${row.lastName} profile`}
         tabIndex={-1}
-        ref={(el) => { if (el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
-        className="flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.08] bg-surface-1 shadow-[-24px_0_60px_rgba(0,0,0,0.6)] outline-none"
+        ref={(el) => { if (!pane && el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
+        className={pane ? 'flex h-full w-full animate-fade-in flex-col overflow-auto outline-none' : 'flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.08] bg-surface-1 shadow-[-24px_0_60px_rgba(0,0,0,0.6)] outline-none'}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1/90 backdrop-blur-md">
@@ -505,6 +509,7 @@ export function ProfileModal({
               </button>
             </div>
           )}
+          {!pane && (
           <button
             onClick={onClose}
             className="shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-white/[0.06] hover:text-neutral-200"
@@ -512,6 +517,7 @@ export function ProfileModal({
           >
             <Icon path={ICONS.close} className="h-5 w-5" />
           </button>
+          )}
           </div>
           {/* Section jump-nav — the profile is a long scroll. */}
           <div className="flex items-center gap-1 overflow-x-auto px-5 pb-2 pt-1">
