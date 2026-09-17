@@ -245,6 +245,13 @@ export interface RosterPlayer {
   portrait: string | null;
   ratings: Record<string, number>;
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
+  archetypeId: number;
+  collegeId: number;
+  homeState: number;
+  skinTone: number;
+  personaDNA: number[];
+  focus: number;
+  face: 'asset' | 'generic';
 }
 export interface RosterData {
   id: string;
@@ -281,6 +288,8 @@ export interface RosterDoc {
   moves: Record<number, number>;
   adds: AddedPlayer[];
   edits: Record<string, import('./api').PlayerFieldEdit>;
+  /** Built from scratch: the base file only lends its container; every base player is dropped on export. */
+  fresh?: boolean;
   createdAt: number;
   updatedAt: number;
 }

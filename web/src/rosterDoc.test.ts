@@ -8,6 +8,7 @@ const player = (id: number, teamId: number, position = 'QB', overall = 70): Rost
   overall, age: 25, heightInches: 72, weight: 200, jersey: id, yearsPro: 3, devTrait: 0, archetype: null, college: null, hometown: null,
   draftRound: null, draftPick: null, assetName: null, portrait: null, ratings: { speed: 80 },
   visuals: { bodyType: 'Standard', genericHead: 'gen_4_T_G_001', helmet: '', facemask: '' },
+  archetypeId: 0, collegeId: 1, homeState: 1, skinTone: 4, personaDNA: [1, 2], focus: 0, face: 'generic',
 });
 const data: RosterData = {
   id: 'abc', name: 'ROSTER-Official', gameVersion: 'm27', openedAt: 1, count: 3, teamCount: 1, freeAgentTeamId: 1009, crc: 7, sizeBytes: 6291530,
@@ -94,4 +95,15 @@ test('adds join the view with a negative id and follow moves, edits and removal'
   assert.equal(viewPlayers(doc, data, {}).some((x) => x.added), false, 'no preview yet, no row');
   doc = withoutAdd(doc, tempId);
   assert.equal(doc.adds.length, 0); assert.equal(doc.edits[tempId], undefined);
+});
+
+test('a roster from scratch shows only the adds and counts no moves', () => {
+  let doc = newRosterDoc(data, true, true);
+  assert.equal(doc.fresh, true);
+  assert.equal(viewPlayers(doc, data).length, 0, 'no base rows');
+  doc = withMove(doc, 10, 2, data);
+  assert.deepEqual(docCounts(doc, data), { moved: 0, cut: 0, edited: 0, added: 0 });
+  doc = withAdd(doc, payton.key, 1);
+  const v = viewPlayers(doc, data, { [payton.key]: payton });
+  assert.equal(v.length, 1); assert.equal(v[0].added, true); assert.equal(v[0].team, 'CHI');
 });

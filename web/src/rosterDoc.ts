@@ -16,11 +16,12 @@ export const POSITION_ORDER: string[] = POS_NAMES;
 
 const newId = () => (globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`);
 
-export function newRosterDoc(data: RosterData, fromSaves: boolean): RosterDoc {
+export function newRosterDoc(data: RosterData, fromSaves: boolean, fresh = false): RosterDoc {
   const now = Date.now();
   return {
     id: newId(),
     name: '',
+    fresh,
     base: { fileName: data.name, openedId: data.id, sizeBytes: data.sizeBytes, crc: data.crc, fromSaves },
     moves: {},
     adds: [],
@@ -123,12 +124,16 @@ export function playerFromPreview(g: GeneratedRosterPlayer, id: number, teamId: 
     draftRound: g.draftRound < 63 ? g.draftRound : null, draftPick: g.draftPick || null,
     assetName: g.assetName || null, portrait: g.portrait, ratings: { ...g.ratings },
     visuals: { bodyType: g.bodyType, genericHead: g.genericHead, helmet: g.gear.helmet ?? '', facemask: g.gear.facemask ?? '' },
+    archetypeId: g.archetypeId, collegeId: g.collegeId, homeState: g.homeStateId, skinTone: g.skinTone,
+    personaDNA: [...g.personaDNA], focus: g.focus, face: g.assetName ? 'asset' : 'generic',
   };
 }
 
 /** Every base player with moves and edits applied, then the adds that have a preview. */
 export function viewPlayers(doc: RosterDoc, data: RosterData, previews: Record<string, GeneratedRosterPlayer> = {}): ViewPlayer[] {
-  const out: ViewPlayer[] = data.players.map((p) => ({
+  // A roster from scratch shows only the adds; the base players exist just to lend the file its shape.
+  const basePlayers = doc.fresh === true ? [] : data.players;
+  const out: ViewPlayer[] = basePlayers.map((p) => ({
     ...overlay(p, doc.edits[p.id], teamOf(doc, p), data),
     edited: !!doc.edits[p.id],
     moved: doc.moves[p.id] != null,
@@ -145,7 +150,7 @@ export function viewPlayers(doc: RosterDoc, data: RosterData, previews: Record<s
 
 export function docCounts(doc: RosterDoc, data: RosterData): { moved: number; cut: number; edited: number; added: number } {
   let moved = 0, cut = 0;
-  for (const t of Object.values(doc.moves)) { if (t === data.freeAgentTeamId) cut++; else moved++; }
+  if (doc.fresh !== true) for (const t of Object.values(doc.moves)) { if (t === data.freeAgentTeamId) cut++; else moved++; }
   return { moved, cut, edited: Object.keys(doc.edits).length, added: doc.adds.length };
 }
 

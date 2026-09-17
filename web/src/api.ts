@@ -241,6 +241,10 @@ export interface PlayerFieldEdit {
   bodyType?: string;
   genericHead?: string;
   gear?: Record<string, string>; // slot -> asset (helmet/facemask/…)
+  // Roster-only fields (the Rosters view's profile card): see server/src/types/roster.ts.
+  firstName?: string; lastName?: string;
+  college?: number; heightInches?: number; weight?: number; archetype?: number;
+  personaDNA?: number[]; focus?: number; faceAsset?: string; skinTone?: number;
 }
 
 export interface RgbColor { r: number; g: number; b: number; }
@@ -428,7 +432,7 @@ export const api = {
   rosterOpenSaved: (name: string) => jsend<RosterData>('POST', '/api/roster/open', { name }),
   rosterOpenFile: (name: string, dataBase64: string) => jsend<RosterData>('POST', '/api/roster/open', { name, dataBase64 }),
   rosterGet: (id: string) => jget<RosterData>(`/api/roster/${encodeURIComponent(id)}`),
-  rosterBuild: (body: { baseName?: string; baseId?: string; name: string; moves: RosterDoc['moves']; edits: RosterDoc['edits']; adds: RosterDoc['adds'] }) =>
+  rosterBuild: (body: { baseName?: string; baseId?: string; name: string; moves: RosterDoc['moves']; edits: RosterDoc['edits']; adds: RosterDoc['adds']; fresh: boolean }) =>
     jsend<RosterBuildResult>('POST', '/api/roster/build', body),
   rosterPreviewAdd: (key: string) => jsend<GeneratedRosterPlayer>('POST', '/api/roster/preview-add', { key }),
   openSavesList: (gameVersion: GameVersion) => jget<{ gameVersion: GameVersion; dir: string; files: SaveFileInfo[] }>(`/api/open/saves?gameVersion=${gameVersion}`),
