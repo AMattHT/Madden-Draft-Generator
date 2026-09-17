@@ -1,9 +1,13 @@
-import { useMemo, useState } from 'react';
-import type { RosterData, RosterDoc } from '../../types';
-import { docCounts, isDocEmpty, viewPlayers, withMove, type ViewPlayer } from '../../rosterDoc';
-import { groupForId } from '../../constants';
+import { useEffect, useMemo, useState } from 'react';
+import { api, type PlayerFieldEdit } from '../../api';
+import type { GearOption, RosterBuildResult, RosterData, RosterDoc } from '../../types';
+import { docCounts, isDocEmpty, viewPlayers, withEdit, withMove, withoutEdits, type ViewPlayer } from '../../rosterDoc';
+import { groupForId, POS_NAMES } from '../../constants';
 import { DevBadge, Icon, ICONS, Portrait, RatingChip } from '../ui';
+import { PlayerEditPanel } from '../PlayerEditPanel';
 import { TeamPanel } from './TeamPanel';
+
+const DEV_LABELS = ['Normal', 'Star', 'Superstar', 'XFactor'];
 
 const GROUPS: [string, string][] = [
   ['ALL', 'All positions'], ['QB', 'QB'], ['RB', 'RB'], ['WR', 'WR'], ['TE', 'TE'], ['OL', 'OL'],
@@ -54,6 +58,22 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const players = useMemo(() => viewPlayers(doc, data), [doc, data]);
   const move = (pgid: number, teamId: number) => { if (!readOnly) onChange(withMove(doc, pgid, teamId, data)); };
   const dragStart = (pgid: number) => (e: React.DragEvent) => e.dataTransfer.setData('text/plain', String(pgid));
+
+  // The edit drawer: gear options and generic heads load once; edits merge into the document.
+  const [editing, setEditing] = useState<number | null>(null);
+  const [gearOpts, setGearOpts] = useState<Record<string, GearOption[]>>({});
+  const [heads, setHeads] = useState<Record<string, string[]>>({});
+  useEffect(() => {
+    api.equipmentOptions(2026, 'm27').then(setGearOpts).catch(() => {});
+    api.genericHeads('m27').then(setHeads).catch(() => {});
+  }, []);
+  const editingPlayer = editing != null ? players.find((p) => p.id === editing) ?? null : null;
+  const editingBase = editing != null ? data.players.find((p) => p.id === editing) ?? null : null;
+  const edit = (pgid: number, patch: PlayerFieldEdit) => { if (!readOnly) onChange(withEdit(doc, pgid, patch)); };
+
+  const [exporting, setExporting] = useState(false);
+  const [result, setResult] = useState<RosterBuildResult | null>(null);
+  const [exportErr, setExportErr] = useState<string | null>(null);
   const counts = docCounts(doc, data);
   const teams = useMemo(() => data.teams.filter((t) => t.id !== data.freeAgentTeamId).sort((a, b) => a.city.localeCompare(b.city)), [data]);
   const rows = useMemo(() => {
@@ -73,6 +93,21 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   const dirty = savedAt == null ? !isDocEmpty(doc) || !!doc.name : doc.updatedAt > savedAt;
   const save = async () => { await onSave(doc); setSavedAt(Date.now()); };
   const close = () => { if (dirty && !confirm('Close without saving? Unsaved moves and edits are lost.')) return; onClose(); };
+  /** Save, then have the server apply the document to the base and write ROSTER-<NAME>. A browsed
+   *  file is not in the saves folder, so it is built from the server's kept copy by id. */
+  const exportToMadden = async () => {
+    if (readOnly) return;
+    setExporting(true); setExportErr(null); setResult(null);
+    try {
+      await save();
+      const r = await api.rosterBuild({ baseName: doc.base.fromSaves ? doc.base.fileName : undefined, baseId: doc.base.openedId, name: doc.name, moves: doc.moves, edits: doc.edits });
+      setResult(r);
+    } catch (e) {
+      setExportErr((e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -90,10 +125,19 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
           ) : (
             <button onClick={save} disabled={!dirty} className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-light disabled:opacity-50">{dirty ? 'Save' : 'Saved'}</button>
           )}
+          <button onClick={exportToMadden} disabled={readOnly || exporting || !doc.name.trim()} title={doc.name.trim() ? '' : 'Name the roster first'}
+            className="rounded-md bg-gold px-3 py-1.5 text-xs font-semibold text-black hover:opacity-90 disabled:opacity-50">{exporting ? 'Writing…' : 'Export to Madden'}</button>
           <button onClick={close} className={btnCls}>Close</button>
         </div>
       </header>
       {notice && <div className="mx-6 mt-3 rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">{notice}</div>}
+      {exportErr && <div className="mx-6 mt-3 rounded-md border border-danger/40 bg-danger/10 px-3 py-2 text-xs text-red-200">{exportErr}</div>}
+      {result && (
+        <div className="mx-6 mt-3 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-xs text-green-100">
+          Wrote <code className="rounded bg-black/30 px-1">{result.output}</code> to the Madden 27 saves folder: {result.moved} moved, {result.cut} cut, {result.edited} edited. In Madden: Load and Save, then Load, then Roster.
+          {result.skipped.length > 0 && <div className="mt-1 text-gold">Skipped: {result.skipped.join('; ')}</div>}
+        </div>
+      )}
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 px-6 py-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-surface-1">
@@ -122,12 +166,47 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
             <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length}</span> of {data.count}</span>
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
-            {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
+            {rows.slice(0, 1500).map((p) => <PlayerRow key={p.id} p={p} onClick={() => setEditing(p.id)} onDragStart={readOnly ? undefined : dragStart(p.id)} />)}
             {rows.length > 1500 && <div className="px-3 py-3 text-center text-xs text-muted">Showing the first 1,500 of {rows.length}. Narrow by team or position.</div>}
           </div>
         </section>
-        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onEdit={() => {}} readOnly={readOnly} />
+        <TeamPanel data={data} players={players} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} onEdit={setEditing} readOnly={readOnly} />
       </div>
+
+      {editingPlayer && editingBase && (
+        <div className="fixed inset-0 z-40 flex justify-end bg-black/50" onClick={() => setEditing(null)}>
+          <aside className="flex h-full w-[28rem] max-w-full flex-col overflow-auto border-l border-border bg-surface-1 shadow-[0_0_48px_rgba(0,0,0,0.6)]" onClick={(e) => e.stopPropagation()}>
+            <PlayerEditPanel
+              title={`${editingPlayer.firstName} ${editingPlayer.lastName}`}
+              subtitle={`${editingPlayer.teamName ?? 'Free agent'} · ${editingPlayer.yearsPro} yrs pro${editingPlayer.college ? ` · ${editingPlayer.college}` : ''}`}
+              positions={POS_NAMES}
+              player={{
+                position: editingBase.position,
+                overall: editingBase.overall,
+                age: editingBase.age,
+                dev: DEV_LABELS[editingBase.devTrait] ?? 'Normal',
+                jersey: editingBase.jersey,
+                ratings: editingBase.ratings,
+                bodyType: editingBase.visuals.bodyType,
+                genericHead: editingBase.visuals.genericHead,
+                helmet: editingBase.visuals.helmet,
+                facemask: editingBase.visuals.facemask,
+              }}
+              edit={doc.edits[editingPlayer.id]}
+              onEdit={(patch) => edit(editingPlayer.id, patch)}
+              heads={heads}
+              gearOpts={gearOpts}
+              gameVersion="m27"
+              year={2026}
+              showJersey
+            />
+            <div className="mt-auto flex items-center justify-between gap-2 border-t border-border px-4 py-3">
+              <button onClick={() => { if (!readOnly) onChange(withoutEdits(doc, editingPlayer.id)); }} disabled={readOnly || !doc.edits[editingPlayer.id]} className={btnCls}>Reset edits</button>
+              <button onClick={() => setEditing(null)} className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-light">Done</button>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
