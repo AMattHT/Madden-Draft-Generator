@@ -24,12 +24,13 @@ export interface CatalogStatus { label: string; title?: string }
  */
 const ERAS = ['ALL', ...Array.from({ length: 10 }, (_, i) => String(1930 + i * 10))];
 
-export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange, compact = false, hidden }: {
+export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabled = false, toolbarExtra, onListChange, compact = false, hidden, addTeams }: {
   catalog: CatalogPlayer[] | null;
   error: string | null;
   onRetry: () => void;
   status: (key: string) => CatalogStatus | null;
-  onAdd: (key: string) => void;
+  /** Add a player; `teamId` is set when the row's Add to… picker chose the team. */
+  onAdd: (key: string, teamId?: number) => void;
   addDisabled?: boolean;
   toolbarExtra?: ReactNode;
   /** The filtered, sorted keys, for callers with a bulk action. */
@@ -38,6 +39,8 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   compact?: boolean;
   /** Rows to leave out entirely (players already on the roster being built). */
   hidden?: (key: string) => boolean;
+  /** Compact rows only: when set, Add is a team picker (the caller has no team selected). */
+  addTeams?: { id: number; label: string }[];
 }) {
   const [q, setQ] = useState('');
   const [grp, setGrp] = useState('ALL');
@@ -126,6 +129,12 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                 <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score">{p.cal}</span>
                 {st ? (
                   <span className="w-14 rounded-md border border-success/40 bg-success/10 px-1.5 py-0.5 text-center text-xs text-success" title={st.title}>{st.label}</span>
+                ) : addTeams ? (
+                  <select value="" disabled={addDisabled} onChange={(e) => { const v = Number(e.target.value); if (v) onAdd(p.key, v); }} title="Add to a team"
+                    className="w-20 rounded-md border border-primary/50 bg-primary/10 px-1 py-0.5 text-xs text-primary hover:bg-primary/20 focus:outline-none disabled:opacity-40">
+                    <option value="">Add to…</option>
+                    {addTeams.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                  </select>
                 ) : (
                   <button onClick={() => onAdd(p.key)} disabled={addDisabled} className="w-14 rounded-md border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-xs text-primary hover:bg-primary/20 disabled:opacity-40">Add</button>
                 )}

@@ -125,11 +125,18 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     else onChange(withMove(doc, pgid, teamId, data));
   };
   const remove = (tempId: string) => { if (!readOnly) onChange(withoutAdd(doc, tempId)); };
+  // With a team selected, Add places the player there; on All, each row's Add asks which team.
   const addTarget = selectedTeam === ALL_TEAMS ? null : selectedTeam;
-  const addFromPool = async (key: string) => {
-    if (readOnly || addTarget == null) return;
+  const addTeams = useMemo(() => {
+    if (addTarget != null) return undefined;
+    const fa = data.freeAgentTeamId;
+    return [...data.teams.filter((t) => t.id !== fa).sort((a, b) => a.abbr.localeCompare(b.abbr)).map((t) => ({ id: t.id, label: t.abbr })), { id: fa, label: 'Free agents' }];
+  }, [addTarget, data]);
+  const addFromPool = async (key: string, teamId?: number) => {
+    const target = teamId ?? addTarget;
+    if (readOnly || target == null) return;
     const g = previews[key] ?? (await fetchPreview(key));
-    if (g) onChange(withAdd(doc, key, addTarget));
+    if (g) onChange(withAdd(doc, key, target));
   };
   const poolStatus = (key: string) => (adding.has(key) ? { label: 'Rating…' } : null);
   const selectedName = selectedTeam === ALL_TEAMS ? 'every player' : selectedTeam === data.freeAgentTeamId ? 'free agency' : (() => { const t = data.teams.find((x) => x.id === selectedTeam); return t ? `${t.city} ${t.name}` : 'the selected team'; })();
@@ -253,13 +260,13 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
               <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{filtered.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>
           ) : (
-            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Pick a team above to add players to it.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
+            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Add to… picks the team for each player, rated by career; edit anything afterwards.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
           )}
         </div>
         {tab === 'roster' ? (
           <TeamPanel data={data} players={rows} truncated={filtered.length > rows.length} grouped={grouped} logos={logos} selectedTeam={selectedTeam} onMove={move} onRemove={remove} onEdit={setEditing} readOnly={readOnly} emptyText={emptyText} />
         ) : (
-          <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly || addTarget == null} />
+          <CatalogPanel compact catalog={catalog} error={catalogErr} onRetry={loadCatalog} status={poolStatus} hidden={isAdded} onAdd={addFromPool} addDisabled={readOnly} addTeams={addTeams} />
         )}
       </section>
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- On the pool with All selected, each row's Add to… picks the team the player joins.
+
 ## 1.4.1
 
 ### Features
