@@ -42,6 +42,7 @@ export function planLeagueHistory({ seasons, startSeason, currentSeasonYear, tea
     return t;
   };
 
+  if (!Number.isInteger(capacity.summary) || capacity.summary <= 0) throw new Error('capacity.summary must be a positive integer');
   const window = all.filter((s) => s.season < startSeason).slice(-capacity.summary);
   if (window.length < capacity.summary) warnings.push(`only ${window.length} seasons before ${startSeason} are available`);
   const wanted = new Set(window.map((s) => s.season));
@@ -72,6 +73,7 @@ export function planLeagueHistory({ seasons, startSeason, currentSeasonYear, tea
   }
   if (awards.length > capacity.awards) throw new Error(`${awards.length} award rows exceed the table's ${capacity.awards}`);
   if (arrays.length > capacity.arrays) throw new Error(`${arrays.length} award arrays exceed the table's ${capacity.arrays}`);
+  if (summaries.length > capacity.summary) throw new Error(`${summaries.length} season summaries exceed the table's ${capacity.summary}`);
   return { summaries, arrays, awards, firstSeason: summaries[0]?.season ?? null, lastSeason: summaries[summaries.length - 1]?.season ?? null, warnings };
 }
 

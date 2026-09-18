@@ -27,7 +27,21 @@ if (!staticDir || !fs.existsSync(path.join(staticDir, 'historical', 'LeaguePastH
 }
 const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const text = (html: string) => html.replace(/<[^>]+>/g, '').replace(/&#160;|&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-const clean = (s: string) => s.replace(/\[\d+\]|[*^†‡~]/g, '').trim();
+const clean = (s: string) => s.replace(/\[\d+\]|[*^†‡~]/g, '').replace(/\s*\(\d+\)\s*$/, '').trim();
+
+/** Sanitise the dump's firstName/lastName: join with a space, drop any double-quoted
+ *  nickname token (e.g. "Mean"), keep only the first co-winner before a "/" (the dump
+ *  writes co-winners as one string split across the two fields), then re-split into
+ *  first name (first token) and last name (the rest). */
+function sanitiseName(firstName: unknown, lastName: unknown): { first: string; last: string } {
+  let joined = `${String(firstName).trim()} ${String(lastName).trim()}`.trim();
+  if (joined.includes('/')) joined = joined.split('/')[0].trim();
+  const tokens = joined.split(/\s+/).filter((t) => t && !/^".*"$/.test(t));
+  // A lone token (e.g. the dump's "G.Allen" with no space) has nowhere to be a first name
+  // without leaving the required last name empty, so it becomes the last name instead.
+  if (tokens.length <= 1) return { first: '', last: tokens[0] ?? '' };
+  return { first: tokens[0], last: tokens.slice(1).join(' ') };
+}
 
 /** "Chicago Bears (3)" -> { key: 'CHI', city: 'Chicago' }; the nickname is the last word. */
 function sideOf(teamText: string): { key: string; city: string } {
@@ -78,7 +92,8 @@ function superBowlEra(): SeasonHistory[] {
     const a = awardByBinary.get(bin);
     if (!a || /^n\/a/i.test(String(a.firstName)) || /^n\/a/i.test(String(a.lastName))) return null;
     const pos = a.Position === 'HC_CFM' ? 'HC' : String(a.Position || 'Invalid_');
-    return { type, first: String(a.firstName).trim(), last: String(a.lastName).trim(), pos, franchise: keyByIdentity.get(a.teamIdentity) ?? '' };
+    const { first, last } = sanitiseName(a.firstName, a.lastName);
+    return { type, first, last, pos, franchise: keyByIdentity.get(a.teamIdentity) ?? '' };
   };
   const out: SeasonHistory[] = [];
   for (const r of rows) {

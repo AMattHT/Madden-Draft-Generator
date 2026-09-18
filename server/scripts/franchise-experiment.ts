@@ -537,9 +537,14 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
 // ---------------------------------------------------------------- history
 async function historyPreset(ctx: Ctx): Promise<void> {
   const sctx = await readSaveContext(ctx.file);
-  const startSeason = parseInt(opt('start', String(sctx.currentSeasonYear)), 10);
-  const n = parseInt(opt('seasons', '30'), 10);
-  const plan = planLeagueHistory({ seasons: loadLeagueHistory().seasons, startSeason, currentSeasonYear: sctx.currentSeasonYear, teams: sctx.teams, capacity: { summary: Math.min(30, n), awards: 217, arrays: 31 } });
+  const startSeasonRaw = opt('start', String(sctx.currentSeasonYear));
+  const startSeason = parseInt(startSeasonRaw, 10);
+  if (!Number.isInteger(startSeason) || startSeason <= 0 || String(startSeason) !== startSeasonRaw.trim()) throw new Error(`--start must be a positive integer, got "${startSeasonRaw}"`);
+  const seasonsRaw = opt('seasons', '30');
+  const n = parseInt(seasonsRaw, 10);
+  if (!Number.isInteger(n) || n <= 0 || String(n) !== seasonsRaw.trim()) throw new Error(`--seasons must be a positive integer, got "${seasonsRaw}"`);
+  if (n > 30) throw new Error(`--seasons must be at most 30, got ${n}`);
+  const plan = planLeagueHistory({ seasons: loadLeagueHistory().seasons, startSeason, currentSeasonYear: sctx.currentSeasonYear, teams: sctx.teams, capacity: { summary: n, awards: 217, arrays: 31 } });
   for (const s of plan.summaries) ctx.changes.push(`row ${s.row} season ${s.season} (PeriodIndex ${s.periodIndex}): AFC ${s.afc.city} ${s.afc.score} - NFC ${s.nfc.city} ${s.nfc.score}; sbMvp=${s.sbMvpRow ?? '-'}`);
   ctx.changes.push(`${plan.awards.length} award rows, ${plan.arrays.length} arrays${plan.warnings.length ? '; ' + plan.warnings.join('; ') : ''}`);
   if (dryRun) return;

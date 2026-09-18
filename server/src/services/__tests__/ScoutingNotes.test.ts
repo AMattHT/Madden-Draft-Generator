@@ -1,9 +1,39 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'fs';
+import path from 'path';
 import { SIGNATURE_ATTRS, loadPhrases, scoutingNotes } from '../ScoutingNotesService';
 import type { PosProfile } from '../CalibrationService';
 
 const GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'EDGE', 'IDL', 'LB', 'CB', 'S', 'K', 'P', 'LS'];
+
+// A direct `import ... from '../../../../web/src/constants'` runs fine under the server's
+// tsx/test setup (that module is plain TS, nothing browser-only in it), but it fails
+// `tsc --noEmit`: web/src/constants.ts sits outside the server tsconfig's rootDir ('src'),
+// so tsc refuses to include it ("File ... is not under 'rootDir'"). Reading the file as
+// text avoids that, at the cost of a small regex parse of the KEY_ATTRS table.
+function webKeyAttrsByGroup(): Record<string, string[]> {
+  const src = fs.readFileSync(path.join(__dirname, '../../../../web/src/constants.ts'), 'utf8');
+  const block = src.match(/const KEY_ATTRS: Record<string, \[string, string\]\[\]> = \{([\s\S]*?)\n\};/);
+  assert.ok(block, 'KEY_ATTRS block not found in web/src/constants.ts');
+  const byGroup: Record<string, string[]> = {};
+  for (const line of block![1].split('\n')) {
+    const row = line.match(/^\s*(\w+):\s*\[(.*)\],?\s*$/);
+    if (!row) continue;
+    const [, group, pairs] = row;
+    byGroup[group] = [...pairs.matchAll(/\[\s*'([^']+)'\s*,\s*'[^']*'\s*\]/g)].map((m) => m[1]);
+  }
+  return byGroup;
+}
+
+test('the server signature-attribute table matches the web KEY_ATTRS table exactly, per group', () => {
+  const webKeyAttrs = webKeyAttrsByGroup();
+  assert.deepEqual(Object.keys(SIGNATURE_ATTRS).sort(), GROUPS.slice().sort());
+  assert.deepEqual(Object.keys(webKeyAttrs).sort(), GROUPS.slice().sort());
+  for (const g of GROUPS) {
+    assert.deepEqual(SIGNATURE_ATTRS[g], webKeyAttrs[g], `${g} signature attrs vs web KEY_ATTRS`);
+  }
+});
 
 test('every group has signature attributes and a neutral line', () => {
   const phrases = loadPhrases();

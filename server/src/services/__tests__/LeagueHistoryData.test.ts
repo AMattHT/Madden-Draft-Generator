@@ -56,3 +56,16 @@ test('the committed league-history.json validates and has the fixed points', () 
   assert.equal(by(1975).champion.franchise, 'PIT'); assert.equal(by(1975).runnerUp.score, 17);
   assert.equal(by(2025).champion.franchise, 'SEA');
 });
+
+test('no award name carries a stray quote, slash, or repeat-winner "(n)" suffix; 1974 DPOY is Joe Greene', () => {
+  const f = loadLeagueHistory();
+  const bad = /["/]|\(\d+\)/;
+  for (const s of f.seasons) {
+    for (const a of s.awards) {
+      assert.ok(!bad.test(a.first), `season ${s.season} ${a.type} first "${a.first}"`);
+      assert.ok(!bad.test(a.last), `season ${s.season} ${a.type} last "${a.last}"`);
+    }
+  }
+  const dpoy1974 = f.seasons.find((s) => s.season === 1974)!.awards.find((a) => a.type === 'DPOY')!;
+  assert.equal(dpoy1974.first, 'Joe'); assert.equal(dpoy1974.last, 'Greene');
+});

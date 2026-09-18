@@ -92,6 +92,24 @@ test('an award with no franchise gets the null identity; a side with an unknown 
   assert.throws(() => planLeagueHistory({ seasons, startSeason: 1976, currentSeasonYear: 2026, teams }), /XXX/);
 });
 
+test('capacity.summary of 0 throws before the window is computed', () => {
+  assert.throws(
+    () => planLeagueHistory({ seasons: all(), startSeason: 2026, currentSeasonYear: 2026, teams, capacity: { summary: 0, awards: 217, arrays: 31 } }),
+    /capacity\.summary must be a positive integer/,
+  );
+});
+
+test('a duplicated season in the source array can push summaries past capacity even though the window looked fine', () => {
+  const seasons = all();
+  seasons.push({ ...seasons.find((s) => s.season === 1975)! }); // 1975 now appears twice
+  const p = planLeagueHistory({ seasons, startSeason: 1976, currentSeasonYear: 2026, teams });
+  assert.ok(p.summaries.length <= 30, `${p.summaries.length} summaries`);
+  assert.throws(
+    () => planLeagueHistory({ seasons, startSeason: 1976, currentSeasonYear: 2026, teams, capacity: { summary: 1, awards: 217, arrays: 31 } }),
+    /season summaries exceed the table's 1/,
+  );
+});
+
 test('a save that already has history is refused', () => {
   assert.doesNotThrow(() => assertNoHistory({ records: [{ isEmpty: true }, { isEmpty: true }] }));
   assert.throws(() => assertNoHistory({ records: [{ isEmpty: true }, { isEmpty: false }] }), /already has league history/);

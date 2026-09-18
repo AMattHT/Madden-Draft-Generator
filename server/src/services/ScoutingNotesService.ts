@@ -55,7 +55,8 @@ export function scoutingNotes({ id, positionId, ratings, profile }: ScoutingInpu
   const phrases = loadPhrases();
   const scored = keys.map((key) => {
     const mean = Number(profile.attrs?.[key]);
-    const std = Number(profile.attrStats?.[key]?.std) || FALLBACK_STD;
+    const spread = Number(profile.attrStats?.[key]?.std);
+    const std = spread > 0 ? spread : FALLBACK_STD; // a zero or missing spread (LS.longSnap is 0) would blow z up
     const value = Number(ratings[key]);
     const z = Number.isFinite(mean) && Number.isFinite(value) ? (value - mean) / std : 0;
     return { key, z, abs: Math.abs(z) };
