@@ -570,6 +570,20 @@ export function ProfileModal({
               )}
             </div>
           )}
+
+          {row.scouting && row.scouting.length > 0 && (
+            <div className="mt-3">
+              <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted">Scout's read</div>
+              <ul className="space-y-1 text-[13px] leading-snug text-neutral-200">
+                {row.scouting.map((line, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span aria-hidden className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-neutral-500" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {row.combine &&

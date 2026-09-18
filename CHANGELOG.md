@@ -5,6 +5,7 @@
 ### Features
 
 - About 5,400 more surnames get called by the broadcast: players whose name the game had audio for but our table never saw (6,200 of the 32,000-player pool) now carry their announcer id.
+- Scout's read: every player's card carries two to four lines of scouting prose drawn from his attributes ("Rifle arm that reaches any part of the field", "Loses receivers at the break"), so a blind class can be scouted without seeing a number.
 
 ## 1.4.2
 
