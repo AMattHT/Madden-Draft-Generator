@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { FRANCHISES, LOGO_TO_KEY, NICKNAME_TO_KEY, validateLeagueHistory, type LeagueHistoryFile } from '../LeagueHistoryData';
+import { FRANCHISES, LOGO_TO_KEY, NICKNAME_TO_KEY, loadLeagueHistory, validateLeagueHistory, type LeagueHistoryFile } from '../LeagueHistoryData';
 
 const ok = (): LeagueHistoryFile => ({
   _source: 't', _built: '2026-09-17',
@@ -44,4 +44,15 @@ test('a season with no awards array is reported, not thrown on', () => {
   const f = ok();
   delete (f.seasons[5] as Partial<LeagueHistoryFile['seasons'][number]>).awards;
   assert.doesNotThrow(() => validateLeagueHistory(f));
+});
+
+test('the committed league-history.json validates and has the fixed points', () => {
+  const f = loadLeagueHistory();
+  assert.deepEqual(validateLeagueHistory(f), []);
+  const by = (y: number) => f.seasons.find((s) => s.season === y)!;
+  assert.equal(by(1933).champion.franchise, 'CHI');
+  assert.equal(by(1958).champion.franchise, 'IND'); assert.equal(by(1958).champion.city, 'Baltimore');
+  assert.equal(by(1966).afcSide, 'runnerUp'); assert.equal(by(1966).awards.find((a) => a.type === 'SBMVP')?.last, 'Starr');
+  assert.equal(by(1975).champion.franchise, 'PIT'); assert.equal(by(1975).runnerUp.score, 17);
+  assert.equal(by(2025).champion.franchise, 'SEA');
 });
