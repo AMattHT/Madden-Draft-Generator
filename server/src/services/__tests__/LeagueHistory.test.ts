@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { planLeagueHistory, NULL_REF } from '../LeagueHistoryService';
+import { assertNoHistory } from '../LeagueHistoryService';
 import { FRANCHISES, type SeasonHistory } from '../LeagueHistoryData';
 
 const teams = Object.fromEntries(Object.keys(FRANCHISES).map((k, i) => [k, { logo: i, identity: `ID-${k}` }]));
@@ -89,4 +90,9 @@ test('an award with no franchise gets the null identity; a side with an unknown 
   assert.equal(p.awards.find((a) => a.last === 'B')!.identity, NULL_REF);
   seasons.find((s) => s.season === 1974)!.champion.franchise = 'XXX';
   assert.throws(() => planLeagueHistory({ seasons, startSeason: 1976, currentSeasonYear: 2026, teams }), /XXX/);
+});
+
+test('a save that already has history is refused', () => {
+  assert.doesNotThrow(() => assertNoHistory({ records: [{ isEmpty: true }, { isEmpty: true }] }));
+  assert.throws(() => assertNoHistory({ records: [{ isEmpty: true }, { isEmpty: false }] }), /already has league history/);
 });

@@ -104,9 +104,9 @@ export function savesDir(gameVersion: GameVersion = 'm26'): string {
 
 /** Open a franchise save and refuse one from the other game: the M27 contract
  *  model and enums differ, so a tool written against one must not touch the other. */
-export async function openSave(inputPath: string, gameVersion: GameVersion): Promise<any> {
+export async function openSave(inputPath: string, gameVersion: GameVersion, opts: { autoUnempty?: boolean } = {}): Promise<any> {
   const expected = gameVersion === 'm27' ? 27 : 26;
-  const file = await madden.create(inputPath, { autoParse: true });
+  const file = await madden.create(inputPath, { autoParse: true, ...(opts.autoUnempty ? { autoUnempty: true } : {}) });
   const year = Number(file.gameYear) || null;
   if (year && year !== expected) {
     throw new Error(`${path.basename(inputPath)} is a Madden ${year} franchise; switch the game version to Madden ${year} to edit it`);
