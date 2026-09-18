@@ -72,7 +72,7 @@ export function validateLeagueHistory(file: LeagueHistoryFile): string[] {
       if (a.franchise && !FRANCHISES[a.franchise]) problems.push(`season ${s.season} ${a.type}: unknown franchise ${a.franchise}`);
       if (!a.last) problems.push(`season ${s.season} ${a.type}: no last name`);
     }
-    if (s.awards.filter((a) => a.type === 'SBMVP').length > 1) problems.push(`season ${s.season}: more than one SBMVP`);
+    if ((s.awards ?? []).filter((a) => a.type === 'SBMVP').length > 1) problems.push(`season ${s.season}: more than one SBMVP`);
   }
   return problems;
 }

@@ -39,3 +39,9 @@ test('the validator names missing seasons, bad keys, bad positions, bad scores a
   assert.ok(problems.some((p) => p.includes('1935') && /score/.test(p)));
   assert.ok(problems.some((p) => p.includes('afcSide')));
 });
+
+test('a season with no awards array is reported, not thrown on', () => {
+  const f = ok();
+  delete (f.seasons[5] as Partial<LeagueHistoryFile['seasons'][number]>).awards;
+  assert.doesNotThrow(() => validateLeagueHistory(f));
+});
