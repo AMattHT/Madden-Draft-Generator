@@ -9,6 +9,7 @@ import { PortraitService } from './PortraitService';
 import { RATING_KEYS } from './AttributeModel';
 import { parseTdb2, serializeTdb2, intOf, strOf, type Tdb2File, type Tdb2Record } from './Tdb2Engine';
 import { splitContainer, buildContainer } from './RosterContainer';
+import { scoutingFor } from './ScoutingNotesService';
 
 /**
  * Madden 27 ROSTER saves (ROSTER-Official, community all-time rosters, ...).
@@ -56,6 +57,8 @@ export interface RosterPlayer {
   assetName: string | null;
   portrait: string | null; // /api/portrait/... when the face asset is in the catalog
   ratings: Record<string, number>;
+  /** Scout's read: two to four sentences from the hidden attributes, no numbers (ScoutingNotesService). */
+  scouting?: string[];
   /** From the player's visuals blob: body type (Standard…Lean), generic head, helmet and facemask assets; '' when absent. */
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
   archetypeId: number;
@@ -237,6 +240,7 @@ function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: num
     assetName: asset,
     portrait: portraitFor(asset),
     ratings,
+    scouting: scoutingFor(intOf(r, 'PGID'), positionId, ratings, 'm27'),
     visuals: visualsOf(blob),
     archetypeId: intOf(r, 'PLTY'),
     collegeId: intOf(r, 'PCOL'),
