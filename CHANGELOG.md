@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- About 5,400 more surnames get called by the broadcast: players whose name the game had audio for but our table never saw (6,200 of the 32,000-player pool) now carry their announcer id.
+
 ## 1.4.2
 
 ### Features
