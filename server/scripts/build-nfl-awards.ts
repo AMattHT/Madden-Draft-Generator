@@ -9,8 +9,9 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { LOOKUPS_DIR, CACHE_DIR } from '../src/config/paths';
+import { LOOKUPS_DIR } from '../src/config/paths';
 import { parseAwardTables, type AwardKind, type AwardRecord, type AwardsFile } from '../src/services/AwardsService';
+import { wikiPageHtml } from './lib/wikipedia';
 
 /** page -> the award each winners table on it represents, in page order. */
 const PAGES: Array<{ page: string; awards: AwardKind[] }> = [
@@ -19,25 +20,11 @@ const PAGES: Array<{ page: string; awards: AwardKind[] }> = [
   { page: 'AP_NFL_Defensive_Player_of_the_Year_Award', awards: ['DPOY'] },
   { page: 'Associated_Press_NFL_Rookie_of_the_Year_Award', awards: ['OROY', 'DROY'] },
 ];
-const UA = 'MaddenDraftClassGenerator/1.1 (personal modding tool)';
-
-async function pageHtml(page: string): Promise<string> {
-  const cached = path.join(CACHE_DIR, `wiki_award_${page}.html`);
-  if (fs.existsSync(cached) && Date.now() - fs.statSync(cached).mtimeMs < 24 * 3600e3) return fs.readFileSync(cached, 'utf8');
-  const url = `https://en.wikipedia.org/w/api.php?action=parse&page=${page}&prop=text&format=json&formatversion=2&redirects=1`;
-  const res = await fetch(url, { headers: { 'User-Agent': UA } });
-  if (!res.ok) throw new Error(`wikipedia ${page}: HTTP ${res.status}`);
-  const json = (await res.json()) as { parse?: { text?: string }; error?: { info?: string } };
-  if (json.error || !json.parse?.text) throw new Error(`wikipedia ${page}: ${json.error?.info ?? 'no text'}`);
-  fs.mkdirSync(CACHE_DIR, { recursive: true });
-  fs.writeFileSync(cached, json.parse.text);
-  return json.parse.text;
-}
 
 (async () => {
   const awards: AwardRecord[] = [];
   for (const { page, awards: kinds } of PAGES) {
-    const tables = parseAwardTables(await pageHtml(page));
+    const tables = parseAwardTables(await wikiPageHtml(page));
     if (tables.length < kinds.length) throw new Error(`${page}: expected ${kinds.length} winners tables, found ${tables.length}`);
     kinds.forEach((award, i) => {
       for (const r of tables[i]) awards.push({ award, ...r });

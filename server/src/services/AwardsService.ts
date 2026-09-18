@@ -18,6 +18,8 @@ export interface AwardRow {
   last: string;
   /** Position as the table words it ("Quarterback", "Defensive end"). */
   pos: string;
+  /** The Team column's text ("Baltimore Colts"), footnote marks removed; absent when the table has none. */
+  team?: string;
 }
 
 export interface AwardRecord extends AwardRow {
@@ -123,7 +125,10 @@ export function parseAwardTables(html: string): AwardRow[][] {
       const posCell = cells.find((c) => c !== playerCell && c !== cells[0] && !/\d/.test(c.text) && posOf(c) != null);
       const pos = posCell ? posOf(posCell)! : lastPos;
       if (posCell) lastPos = pos;
-      if (first && last) list.push({ season, first, last, pos });
+      const anchor = posCell ?? playerCell;
+      const teamCell = cells.find((c, i) => i > cells.indexOf(anchor) && /<a /.test(c.html) && /[A-Za-z]/.test(c.text) && !/^\[/.test(c.text));
+      const team = teamCell ? teamCell.text.replace(/[*^†‡~]|\[\d+\]/g, '').trim() : undefined;
+      if (first && last) list.push({ season, first, last, pos, ...(team ? { team } : {}) });
     }
     if (list.length) out.push(list);
   }
