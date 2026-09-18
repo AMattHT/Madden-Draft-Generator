@@ -545,6 +545,11 @@ async function historyPreset(ctx: Ctx): Promise<void> {
   if (!Number.isInteger(n) || n <= 0 || String(n) !== seasonsRaw.trim()) throw new Error(`--seasons must be a positive integer, got "${seasonsRaw}"`);
   if (n > 30) throw new Error(`--seasons must be at most 30, got ${n}`);
   const plan = planLeagueHistory({ seasons: loadLeagueHistory().seasons, startSeason, currentSeasonYear: sctx.currentSeasonYear, teams: sctx.teams, capacity: { summary: n, awards: 217, arrays: 31 } });
+  // Bisection knobs for the in-game gates: --no-awards drops every award row and link
+  // (array rows stay, all slots null); --period-shift N adds N to every PeriodIndex.
+  if (flag('no-awards')) { plan.awards = []; plan.arrays = plan.arrays.map((a) => ({ ...a, slots: a.slots.map(() => null) })); plan.summaries = plan.summaries.map((s) => ({ ...s, sbMvpRow: null })); }
+  const shift = parseInt(opt('period-shift', '0'), 10);
+  if (shift) plan.summaries = plan.summaries.map((s) => ({ ...s, periodIndex: s.periodIndex + shift }));
   for (const s of plan.summaries) ctx.changes.push(`row ${s.row} season ${s.season} (PeriodIndex ${s.periodIndex}): AFC ${s.afc.city} ${s.afc.score} - NFC ${s.nfc.city} ${s.nfc.score}; sbMvp=${s.sbMvpRow ?? '-'}`);
   ctx.changes.push(`${plan.awards.length} award rows, ${plan.arrays.length} arrays${plan.warnings.length ? '; ' + plan.warnings.join('; ') : ''}`);
   if (dryRun) return;
@@ -556,7 +561,7 @@ async function historyPreset(ctx: Ctx): Promise<void> {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
   const ctx = await load(saveName, { autoUnempty: preset === 'history' });
-  const suffix: Record<string, string> = { noop: 'EXP-NOOP', history: 'EXP-HISTORY', bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G${flag('keep-user') ? 'U' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const suffix: Record<string, string> = { noop: 'EXP-NOOP', history: `EXP-HISTORY${opt('tag', '')}`, bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G${flag('keep-user') ? 'U' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'noop': ctx.changes.push('no edits: open + save only (control)'); break;

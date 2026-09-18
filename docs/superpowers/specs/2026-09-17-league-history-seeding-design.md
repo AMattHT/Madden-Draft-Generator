@@ -172,4 +172,14 @@ Franchise tab -> new **League history** tool (`web/src/components/franchise/Leag
 
 ## Gate log
 
-_(empty)_
+- **2026-09-17 Gate 1 FAILED.** `CAREER-SEP06-05h30m23p-EXP-HISTORY` (2024 + 2025 rows, PeriodIndex
+  -2/-1, 14 award rows, 2 array rows) hung on a blank franchise hub. File-level checks were
+  clean: only the three history tables changed, empty-record chains and `nextRecordToUse`
+  consistent, array lengths 6/6, references encoded as the game encodes its own.
+  Evidence from MyFranchise's reader: it numbers Super Bowls by sorting its 60 built-in rows
+  (PeriodIndex -60..-1, held in game data, not the save) together with the save's rows, and
+  labels a save row as `CurrentSeasonYear + PeriodIndex`, so the game writes its own seasons
+  with PeriodIndex 0, 1, 2 and keeps Super Bowls I-LX outside the save. Hypothesis under test:
+  a negative PeriodIndex in the save hangs the hub. Bisection files written with the preset's
+  new `--no-awards`, `--period-shift`, `--tag` knobs: `EXP-HISTORYA` (one row, PeriodIndex -1,
+  no awards) and `EXP-HISTORYB` (one row, PeriodIndex 0, no awards).
