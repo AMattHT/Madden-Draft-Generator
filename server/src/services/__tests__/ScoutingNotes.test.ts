@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SIGNATURE_ATTRS, loadPhrases } from '../ScoutingNotesService';
+import { SIGNATURE_ATTRS, loadPhrases, scoutingNotes } from '../ScoutingNotesService';
+import type { PosProfile } from '../CalibrationService';
 
 const GROUPS = ['QB', 'RB', 'WR', 'TE', 'OL', 'EDGE', 'IDL', 'LB', 'CB', 'S', 'K', 'P', 'LS'];
 
@@ -29,4 +30,68 @@ test('every signature attribute has phrases for both directions and both tiers, 
     }
   }
   for (const s of Object.values(phrases.neutral)) assert.ok(!banned.test(s), s);
+});
+
+/** A flat profile: every signature attribute averages `mean` with spread `std`. */
+function profile(keys: string[], mean = 70, std = 10): PosProfile {
+  const attrs: Record<string, number> = {}, attrStats: PosProfile['attrStats'] = {};
+  for (const k of keys) { attrs[k] = mean; attrStats[k] = { slope: 1, std, residStd: std, min: 40, max: 99 }; }
+  return { ovrMean: mean, archetypeMode: 0, archetypeDist: {}, htMean: 72, htStd: 2, wtMean: 210, wtStd: 15, attrs, attrStats };
+}
+const QB = 0, HB = 1;
+const flat = (keys: string[], v = 70) => Object.fromEntries(keys.map((k) => [k, v]));
+
+test('mild and strong thresholds pick the right cell', () => {
+  const keys = SIGNATURE_ATTRS.QB, p = loadPhrases();
+  const mild = scoutingNotes({ id: 1, positionId: QB, ratings: { ...flat(keys), throwPower: 78, speed: 62 }, profile: profile(keys) });
+  assert.equal(mild.length, 2);
+  assert.ok(p.attrs.throwPower.strength.mild.includes(mild[0]), mild[0]);
+  assert.ok(p.attrs.speed.weakness.mild.includes(mild[1]), mild[1]);
+  const strong = scoutingNotes({ id: 1, positionId: QB, ratings: { ...flat(keys), throwPower: 86, speed: 54 }, profile: profile(keys) });
+  assert.ok(p.attrs.throwPower.strength.strong.includes(strong[0]), strong[0]);
+  assert.ok(p.attrs.speed.weakness.strong.includes(strong[1]), strong[1]);
+});
+
+test('within +/- 0.8 std nothing qualifies and the neutral line is returned', () => {
+  const keys = SIGNATURE_ATTRS.QB;
+  const notes = scoutingNotes({ id: 1, positionId: QB, ratings: { ...flat(keys), throwPower: 77, speed: 63 }, profile: profile(keys) });
+  assert.deepEqual(notes, [loadPhrases().neutral.QB]);
+});
+
+test('one qualifying line is not enough: neutral', () => {
+  const keys = SIGNATURE_ATTRS.QB;
+  const notes = scoutingNotes({ id: 1, positionId: QB, ratings: { ...flat(keys), throwPower: 90 }, profile: profile(keys) });
+  assert.deepEqual(notes, [loadPhrases().neutral.QB]);
+});
+
+test('cap at four lines, strengths first, each side ordered by magnitude', () => {
+  const keys = SIGNATURE_ATTRS.RB, p = loadPhrases();
+  // z: speed +2.5, acceleration +2.0, agility +1.5, breakTackle +1.0, carrying +0.9, ballCarrierVision -2.2, jukeMove -1.0
+  const ratings = { speed: 95, acceleration: 90, agility: 85, breakTackle: 80, carrying: 79, ballCarrierVision: 48, jukeMove: 60 };
+  const notes = scoutingNotes({ id: 7, positionId: HB, ratings, profile: profile(keys) });
+  assert.equal(notes.length, 4);
+  assert.ok(p.attrs.speed.strength.strong.includes(notes[0]));
+  assert.ok(p.attrs.acceleration.strength.strong.includes(notes[1]));
+  assert.ok(p.attrs.agility.strength.mild.includes(notes[2]));
+  assert.ok(p.attrs.ballCarrierVision.weakness.strong.includes(notes[3]));
+});
+
+test('missing spread falls back to a std of 8', () => {
+  const keys = SIGNATURE_ATTRS.QB, p = loadPhrases();
+  const prof = profile(keys); delete prof.attrStats;
+  // 70 + 0.8 * 8 = 76.4 -> 77 qualifies; 70 - 1.6 * 8 = 57.2 -> 57 is strong
+  const notes = scoutingNotes({ id: 1, positionId: QB, ratings: { ...flat(keys), throwPower: 77, speed: 57 }, profile: prof });
+  assert.ok(p.attrs.throwPower.strength.mild.includes(notes[0]));
+  assert.ok(p.attrs.speed.weakness.strong.includes(notes[1]));
+});
+
+test('deterministic by id, and different ids can pick different phrasings', () => {
+  const keys = SIGNATURE_ATTRS.QB;
+  const ratings = { ...flat(keys), throwPower: 90, speed: 50 };
+  const a = scoutingNotes({ id: 3, positionId: QB, ratings, profile: profile(keys) });
+  const b = scoutingNotes({ id: 3, positionId: QB, ratings, profile: profile(keys) });
+  assert.deepEqual(a, b);
+  const firsts = new Set<string>();
+  for (let id = 1; id <= 40; id++) firsts.add(scoutingNotes({ id, positionId: QB, ratings, profile: profile(keys) })[0]);
+  assert.ok(firsts.size >= 2, 'forty ids should spread over both phrasings');
 });
