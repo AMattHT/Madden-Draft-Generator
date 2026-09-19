@@ -21,7 +21,7 @@ function RailArt({ view, path, active }: { view: AppView; path: string; active: 
       src={ART[view]}
       alt=""
       onError={() => setNoArt(true)}
-      className={`h-8 w-8 object-contain transition-all duration-200 ${active ? 'opacity-100 drop-shadow-[0_0_10px_rgba(111,155,255,0.55)]' : 'opacity-75 group-hover:opacity-100'}`}
+      className={`h-7 w-7 object-contain transition-opacity duration-150 ${active ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}
     />
   );
 }
@@ -38,7 +38,7 @@ export function SideRail({ view, onSetView, franchiseEnabled }: { view: AppView;
   return (
     <nav
       aria-label="Areas"
-      className={`flex shrink-0 flex-col border-r border-white/[0.05] bg-surface-1/70 py-2 backdrop-blur-md transition-[width] duration-300 ${collapsed ? 'w-16' : 'w-16 lg:w-[92px]'}`}
+      className={`flex shrink-0 flex-col border-r border-white/[0.05] bg-surface-1/80 py-1.5 backdrop-blur-sm transition-[width] duration-200 ${collapsed ? 'w-14' : 'w-14 lg:w-[84px]'}`}
       style={{ transitionTimingFunction: 'var(--ease-out-expo)' }}
     >
       {entries.map((e) => {
@@ -49,12 +49,11 @@ export function SideRail({ view, onSetView, franchiseEnabled }: { view: AppView;
             onClick={() => onSetView(e.view)}
             aria-current={active ? 'page' : undefined}
             title={e.label}
-            className={`press group relative mx-2 my-0.5 flex flex-col items-center justify-center gap-1 rounded-xl px-1 text-[11px] font-semibold leading-tight transition-all duration-200 ${
-              collapsed ? 'h-12' : 'h-12 lg:h-[64px]'
-            } ${active ? 'bg-primary/12 text-primary-light' : 'text-neutral-500 hover:bg-white/[0.05] hover:text-neutral-100'}`}
+            className={`press group relative mx-1.5 my-0.5 flex flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-medium leading-tight transition-colors duration-150 ${
+              collapsed ? 'h-11' : 'h-11 lg:h-[56px]'
+            } ${active ? 'bg-primary/10 text-primary-light' : 'text-muted hover:bg-white/[0.04] hover:text-neutral-100'}`}
           >
-            {/* Lit edge on the active tile. */}
-            <span aria-hidden className={`absolute -left-2 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-primary-light shadow-[0_0_10px_rgba(111,155,255,0.9)] transition-opacity duration-200 ${active ? 'opacity-100' : 'opacity-0'}`} />
+            <span aria-hidden className={`absolute -left-1.5 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-r-full bg-primary-light transition-opacity duration-150 ${active ? 'opacity-100' : 'opacity-0'}`} />
             <RailArt view={e.view} path={e.icon} active={active} />
             <span className={`text-center ${collapsed ? 'hidden' : 'hidden lg:block'}`}>{e.view === 'draft' ? 'Classes' : e.label}</span>
           </button>

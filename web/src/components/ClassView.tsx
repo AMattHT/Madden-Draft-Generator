@@ -304,9 +304,9 @@ export function ClassView({
 
   return (
     <div key={filterKey} className="flex h-full animate-view flex-col">
-      <header className="flex shrink-0 items-center justify-between gap-4 px-5 pb-2 pt-3.5">
-        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-          <h1 className="font-display text-[26px] font-extrabold leading-none tracking-tight">{title}</h1>
+      <header className="flex shrink-0 items-center justify-between gap-3 px-4 pb-1.5 pt-2.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <h1 className="font-display text-[22px] font-bold leading-none tracking-tight">{title}</h1>
           <span className="flex flex-wrap items-center gap-1.5">
             {source === 'cache' ? <Pill tone="success" dot>Cached</Pill> : <Pill tone="primary" dot>Fresh</Pill>}
             {isFile ? (
@@ -376,7 +376,7 @@ export function ClassView({
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2.5 px-5 pb-4 pt-1">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-4 pb-3 pt-1">
         {showOpts && !isFile && (
           <div className="animate-rise">
             <DraftOptions opts={draftOpts} decades={decades} busy={busy} onApply={onApplyDraftOpts} customClasses={customClasses} onOpenBuilder={onOpenBuilder} />

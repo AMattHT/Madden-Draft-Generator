@@ -91,7 +91,7 @@ function PersonaSection({
   return (
     <>
       <div className="flex items-center justify-between gap-3">
-        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+        <div className="text-[11px] font-semibold tracking-wide text-muted">
           Mindset focus <span className="font-medium normal-case tracking-normal text-muted">· one of four · separate from the traits</span>
         </div>
         {focusEdited && generatedFocusId != null && (
@@ -118,7 +118,7 @@ function PersonaSection({
         })}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.05] pt-3">
-        <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+        <div className="text-[11px] font-semibold tracking-wide text-muted">
           Persona DNA <span className="font-medium normal-case tracking-normal text-muted">· {ids.length}/5 slots · written into the M27 export</span>
         </div>
         <div className="flex items-center gap-2">
@@ -414,19 +414,19 @@ export function ProfileModal({
 
   return (
     <>
-    <div className={pane ? 'flex h-full min-h-0 w-full' : 'fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/65 backdrop-blur-[3px]'} onClick={pane ? undefined : onClose}>
+    <div className={pane ? 'flex h-full min-h-0 w-full' : 'fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/55 backdrop-blur-[2px]'} onClick={pane ? undefined : onClose}>
       <div
         role={pane ? 'region' : 'dialog'}
         aria-modal={pane ? undefined : true}
         aria-label={`${row.firstName} ${row.lastName} profile`}
         tabIndex={-1}
         ref={(el) => { if (!pane && el && !el.contains(document.activeElement)) el.focus({ preventScroll: true }); }}
-        className={pane ? 'flex h-full w-full animate-fade-in flex-col overflow-auto outline-none' : 'flex h-full w-[540px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.08] bg-surface-1 shadow-[-24px_0_60px_rgba(0,0,0,0.6)] outline-none'}
+        className={pane ? 'flex h-full w-full animate-fade-in flex-col overflow-auto outline-none' : 'flex h-full w-[520px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.07] bg-surface-1 shadow-[-12px_0_36px_rgba(0,0,0,0.45)] outline-none'}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1/90 backdrop-blur-md">
-          <div className="relative flex items-start gap-4 px-5 pt-4"><span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-primary/[0.12] to-transparent" />
-          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/[0.1] bg-surface-2 shadow-[0_10px_28px_rgba(0,0,0,0.55)]">
+        <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1/92 backdrop-blur-sm">
+          <div className="relative flex items-start gap-3 px-4 pt-3"><span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-primary/[0.07] to-transparent" />
+          <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-surface-2 shadow-[0_6px_18px_rgba(0,0,0,0.4)]">
             {imgSrc ? (
               <img
                 key={imgSrc}
@@ -442,7 +442,7 @@ export function ProfileModal({
             )}
           </div>
           <div className="min-w-0 flex-1 pr-20">
-            <div className="relative font-display text-xl font-extrabold leading-tight">
+            <div className="relative font-display text-lg font-bold leading-tight">
               {effStr('firstName', row.firstName)} {effStr('lastName', row.lastName)}
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -599,7 +599,7 @@ export function ProfileModal({
             ];
             return (
               <div className="border-b border-white/[0.06] px-5 py-3">
-                <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+                <div className="mb-2 text-[11px] font-semibold tracking-wide text-muted">
                   NFL Combine <span className="text-muted">· drives speed / strength / jump / agility</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -675,7 +675,7 @@ export function ProfileModal({
         </div>
 
         <div ref={bioRef} className="space-y-3 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
-          <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Bio</div>
+          <div className="text-[11px] font-semibold tracking-wide text-muted">Bio</div>
           <div className="grid grid-cols-2 gap-3">
             <label className="text-xs text-neutral-400">
               First name
@@ -751,7 +751,7 @@ export function ProfileModal({
 
           <div ref={appearRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+            <div className="text-[11px] font-semibold tracking-wide text-muted">
               Appearance <span className="font-medium normal-case tracking-normal text-muted">· {gameVersion === 'm27' ? 'M27' : 'M26'} scans</span>
             </div>
             <span className="inline-flex items-center gap-2">
@@ -793,7 +793,7 @@ export function ProfileModal({
 
         <div ref={equipRef} className="space-y-2.5 scroll-mt-36 border-b border-white/[0.06] px-5 py-4">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Equipment</div>
+            <div className="text-[11px] font-semibold tracking-wide text-muted">Equipment</div>
             <button
               onClick={() => setGearOpen(true)}
               className="inline-flex items-center gap-1.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-2.5 py-1 text-xs font-medium text-neutral-200 transition-colors hover:border-white/[0.14] hover:bg-white/[0.06]"
@@ -830,7 +830,7 @@ export function ProfileModal({
         <div ref={attrsRef} className="space-y-5 scroll-mt-36 px-5 py-4">
           {ATTR_GROUPS.map((g) => (
             <div key={g.title}>
-              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{g.title}</div>
+              <div className="mb-2 text-[11px] font-semibold tracking-wide text-muted">{g.title}</div>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {g.keys.map((k) => (
                   <div key={k} className="flex items-center justify-between gap-2">
@@ -843,7 +843,7 @@ export function ProfileModal({
           ))}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-white/[0.06] bg-surface-1/95 px-5 py-3 backdrop-blur-sm">
+        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-white/[0.06] bg-surface-1/95 px-4 py-2.5 backdrop-blur-sm">
           <span className="text-[11px] text-muted">{footer ?? 'Edits save automatically & apply to the .mdc export.'}</span>
           <button
             onClick={() => {

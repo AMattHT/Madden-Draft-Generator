@@ -93,7 +93,7 @@ function Stat({ value, label, title, tone = 'neutral' }: { value: ReactNode; lab
   const v = tone === 'gold' ? 'text-gold' : tone === 'warning' ? 'text-warning' : 'text-neutral-50';
   return (
     <span className="flex items-baseline gap-1.5 text-[11px] text-muted" title={title}>
-      <b className={`font-display text-[15px] font-bold tabular-nums ${v}`}>{value}</b> {label}
+      <b className={`font-display text-[14px] font-semibold tabular-nums ${v}`}>{value}</b> {label}
     </span>
   );
 }
@@ -137,8 +137,8 @@ export function MetaStrip({
   const supplemental = data.rows.filter((r) => r.supplemental).length;
 
   return (
-    <div className="glass rounded-xl px-3.5 py-2">
-      <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2">
+    <div className="glass rounded-lg px-3 py-1.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <Stat value={<Counter value={data.count} />} label="prospects" />
       <Sep />
       {/* The class average and its dev-trait counts describe how strong the class
@@ -188,7 +188,7 @@ export function MetaStrip({
         </>
       )}
       </div>
-      <div className="mt-2 flex items-center gap-2 border-t border-white/[0.06] pt-2">
+      <div className="mt-1.5 flex items-center gap-2 border-t border-white/[0.05] pt-1.5">
         <PositionBreakdown rows={rows} active={pos} onPick={onPickPos} compact />
         <TierKey />
       </div>

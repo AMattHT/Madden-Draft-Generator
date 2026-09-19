@@ -31,18 +31,18 @@ function GameToggle({ gameVersion, pinned, onChangeGame }: { gameVersion: GameVe
 /** The product mark: the generated badge when it ships, else a drawn stand-in. */
 export function LogoMark({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const [noArt, setNoArt] = useState(false);
-  const dim = size === 'lg' ? 'h-16 w-16 rounded-2xl' : size === 'sm' ? 'h-7 w-7 rounded-lg' : 'h-9 w-9 rounded-xl';
+  const dim = size === 'lg' ? 'h-14 w-14 rounded-xl' : size === 'sm' ? 'h-6 w-6 rounded-md' : 'h-8 w-8 rounded-lg';
   if (!noArt)
     return (
       <img
         src="/art/logo.webp"
         alt=""
         onError={() => setNoArt(true)}
-        className={`${dim} shrink-0 object-cover shadow-[0_2px_14px_rgba(47,107,255,0.45)]`}
+        className={`${dim} shrink-0 object-cover shadow-[0_1px_8px_rgba(58,111,224,0.28)]`}
       />
     );
   return (
-    <span className={`relative grid ${dim} shrink-0 place-items-center bg-gradient-to-br from-primary to-primary-dark shadow-[0_2px_14px_rgba(47,107,255,0.45)]`}>
+    <span className={`relative grid ${dim} shrink-0 place-items-center bg-gradient-to-br from-primary to-primary-dark shadow-[0_1px_8px_rgba(58,111,224,0.28)]`}>
       <svg viewBox="0 0 24 24" className={size === 'lg' ? 'h-9 w-9' : 'h-5 w-5'} fill="none" stroke="#fff" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M5 8l7 4 7-4M5 13l7 4 7-4" />
       </svg>
@@ -115,13 +115,13 @@ export function TopBar({
   const draft = view === 'draft';
   return (
     <header className="relative z-30 shrink-0">
-      <div className="flex h-[58px] items-center justify-between gap-4 border-b border-white/[0.05] bg-surface-1/70 px-4 backdrop-blur-md">
+      <div className="flex h-12 items-center justify-between gap-3 border-b border-white/[0.05] bg-surface-1/80 px-3 backdrop-blur-sm">
         <div className="flex min-w-0 items-center gap-3">
-          <button onClick={onGoHome} title="Home" className="press flex items-center gap-3 rounded-xl pr-1 transition-opacity hover:opacity-85">
+          <button onClick={onGoHome} title="Home" className="press flex items-center gap-2.5 rounded-lg pr-1 transition-opacity hover:opacity-85">
             <LogoMark />
             <div className="hidden text-left leading-tight sm:block">
-              <div className="font-display text-[13px] font-bold text-neutral-50">{productTitle(pinnedGame ?? gameVersion)}</div>
-              <div className="text-[11px] font-medium tracking-wide text-muted">{franchiseEnabled ? TAGLINE : 'Draft classes · Rosters'}</div>
+              <div className="font-display text-[12px] font-semibold text-neutral-50">{productTitle(pinnedGame ?? gameVersion)}</div>
+              <div className="text-[10px] font-medium tracking-wide text-muted">{franchiseEnabled ? TAGLINE : 'Draft classes · Rosters'}</div>
             </div>
           </button>
           {draft && (
@@ -140,7 +140,7 @@ export function TopBar({
             </>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* The backend only gets a mention when it is missing. */}
           {!connected && (
             <span className="inline-flex h-8 items-center gap-2 rounded-lg border border-danger/40 bg-danger/10 px-3 text-[11px] font-semibold text-red-200" title="The local backend is not answering">

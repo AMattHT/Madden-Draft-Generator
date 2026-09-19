@@ -70,8 +70,8 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
 
   if (open && rebasing) {
     return (
-      <div className="h-full overflow-auto px-6 py-4">
-        <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">Pick the base file for "{open.doc.name || 'Untitled roster'}". Your moves and edits are kept.</div>
+      <div className="h-full overflow-auto px-4 py-3">
+        <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-gold/35 bg-gold/8 px-3 py-2 text-xs text-gold">Pick the base file for "{open.doc.name || 'Untitled roster'}". Your moves and edits are kept.</div>
         <RosterPicker savedDocs={[]} onOpenBase={(d, fromSaves) => { rebase(d, fromSaves); setRebasing(false); }} onOpenDoc={() => {}} onDeleteDoc={() => {}} />
         <div className="mx-auto mt-3 w-[960px] max-w-full"><button onClick={() => setRebasing(false)} className="text-xs text-muted hover:text-neutral-200">Cancel</button></div>
       </div>
@@ -80,9 +80,9 @@ export function RostersView({ gameVersion }: { gameVersion: GameVersion }) {
 
   if (!open) {
     return (
-      <div className="h-full overflow-auto px-6 py-4">
+      <div className="h-full overflow-auto px-4 py-3">
         {gameVersion !== 'm27' && (
-          <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-gold/40 bg-gold/10 px-3 py-2 text-xs text-gold">Rosters are Madden 27 files. Madden 26 rosters are not supported yet.</div>
+          <div className="mx-auto mt-2 w-[960px] max-w-full rounded-md border border-gold/35 bg-gold/8 px-3 py-2 text-xs text-gold">Rosters are Madden 27 files. Madden 26 rosters are not supported yet.</div>
         )}
         <RosterPicker savedDocs={saved} onOpenBase={openBase} onOpenDoc={openDoc} onDeleteDoc={del} onNew={openFresh} notice={err} opening={loading != null} />
       </div>

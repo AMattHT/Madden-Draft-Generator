@@ -12,9 +12,9 @@
   --color-border: #1f2229;
   --color-border-strong: #2c3039;
 
-  --color-primary: #2f6bff;
-  --color-primary-light: #6f9bff;
-  --color-primary-dark: #1c4fd6;
+  --color-primary: #3a6fe0;
+  --color-primary-light: #7a9eef;
+  --color-primary-dark: #2a55b8;
 
   --color-info: #34a9db;
   --color-success: #22c55e;
@@ -36,8 +36,8 @@
     -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   --shadow-pop: 0 20px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --shadow-glow: 0 0 0 1px rgba(47, 107, 255, 0.35), 0 8px 30px -8px rgba(47, 107, 255, 0.55);
-  --shadow-gold: 0 0 0 1px rgba(245, 197, 24, 0.35), 0 8px 30px -8px rgba(245, 197, 24, 0.45);
+  --shadow-glow: 0 0 0 1px rgba(58, 111, 224, 0.28), 0 6px 22px -10px rgba(58, 111, 224, 0.4);
+  --shadow-gold: 0 0 0 1px rgba(245, 197, 24, 0.28), 0 6px 22px -10px rgba(245, 197, 24, 0.35);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -58,8 +58,8 @@ body {
   /* Two soft light sources — a cool blue one top-left (the stadium lights) and a
      faint warm one bottom-right — over the base so the shell has depth. */
   background:
-    radial-gradient(90% 60% at 8% -10%, rgba(47, 107, 255, 0.16) 0%, rgba(47, 107, 255, 0) 60%),
-    radial-gradient(60% 50% at 100% 110%, rgba(245, 197, 24, 0.05) 0%, rgba(245, 197, 24, 0) 60%),
+    radial-gradient(90% 55% at 6% -8%, rgba(58, 111, 224, 0.1) 0%, rgba(58, 111, 224, 0) 58%),
+    radial-gradient(55% 45% at 100% 110%, rgba(245, 197, 24, 0.035) 0%, rgba(245, 197, 24, 0) 55%),
     var(--color-surface-0);
   background-attachment: fixed;
 }
@@ -116,19 +116,19 @@ button {
 @layer utilities {
   /* Frosted panel: translucent surface + blur, hairline edge lit from above. */
   .glass {
-    background: color-mix(in srgb, var(--color-surface-1) 78%, transparent);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: color-mix(in srgb, var(--color-surface-1) 88%, transparent);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.055);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 1px 2px rgba(0, 0, 0, 0.4);
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 1px 2px rgba(0, 0, 0, 0.35);
   }
   .glass-strong {
-    background: color-mix(in srgb, var(--color-surface-1) 92%, transparent);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--color-surface-1) 94%, transparent);
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow: var(--shadow-pop);
   }
   .hairline {
@@ -149,7 +149,7 @@ button {
     position: absolute;
     inset: 0 12% auto 12%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(111, 155, 255, 0.7), transparent);
+    background: linear-gradient(90deg, transparent, rgba(122, 158, 239, 0.45), transparent);
     pointer-events: none;
   }
   .glow-primary {
@@ -164,7 +164,7 @@ button {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.035;
+    opacity: 0.022;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     mix-blend-mode: overlay;
   }
@@ -204,19 +204,19 @@ button {
 /* ---------- Motion ---------- */
 @layer utilities {
   .animate-fade-in {
-    animation: fade-in 0.18s ease-out both;
+    animation: fade-in 0.16s ease-out both;
   }
   .animate-slide-in-right {
-    animation: slide-in-right 0.32s var(--ease-out-expo) both;
+    animation: slide-in-right 0.24s var(--ease-out-expo) both;
   }
   .animate-rise {
-    animation: rise 0.28s var(--ease-out-expo) both;
+    animation: rise 0.22s var(--ease-out-expo) both;
   }
   .animate-pop {
-    animation: pop 0.26s var(--ease-out-expo) both;
+    animation: pop 0.2s var(--ease-out-expo) both;
   }
   .animate-view {
-    animation: view-in 0.34s var(--ease-out-expo) both;
+    animation: view-in 0.24s var(--ease-out-expo) both;
   }
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -234,17 +234,17 @@ button {
   /* Stagger: children rise in sequence. Capped at 24 so a long list does not
      keep animating off-screen; rows past that appear at once. */
   .stagger > * {
-    animation: rise 0.36s var(--ease-out-expo) both;
-    animation-delay: calc(var(--i, 0) * 22ms);
+    animation: rise 0.26s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 16ms);
   }
   .hover-lift {
     transition:
-      transform 0.28s var(--ease-out-expo),
-      box-shadow 0.28s var(--ease-out-expo),
-      border-color 0.2s ease;
+      transform 0.2s var(--ease-out-expo),
+      box-shadow 0.2s var(--ease-out-expo),
+      border-color 0.15s ease;
   }
   .hover-lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
   .press:active {
     transform: translateY(0.5px) scale(0.985);
@@ -261,7 +261,7 @@ button {
 }
 @keyframes slide-in-right {
   from {
-    transform: translateX(28px);
+    transform: translateX(12px);
     opacity: 0;
   }
   to {
@@ -271,7 +271,7 @@ button {
 }
 @keyframes rise {
   from {
-    transform: translateY(8px);
+    transform: translateY(4px);
     opacity: 0;
   }
   to {

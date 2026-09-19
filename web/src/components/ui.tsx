@@ -10,7 +10,7 @@ type Size = 'xs' | 'sm' | 'md';
 
 const BTN_TONE: Record<Tone, string> = {
   primary:
-    'bg-primary text-white shadow-[0_2px_12px_rgba(47,107,255,0.35),inset_0_1px_0_rgba(255,255,255,0.18)] hover:bg-primary-light hover:shadow-[0_4px_18px_rgba(47,107,255,0.5),inset_0_1px_0_rgba(255,255,255,0.18)]',
+    'bg-primary text-white shadow-[0_1px_8px_rgba(58,111,224,0.28),inset_0_1px_0_rgba(255,255,255,0.12)] hover:bg-primary-light hover:shadow-[0_2px_12px_rgba(58,111,224,0.38),inset_0_1px_0_rgba(255,255,255,0.12)]',
   ghost:
     'border border-white/[0.08] bg-white/[0.03] text-neutral-200 hover:border-white/[0.14] hover:bg-white/[0.06] hover:text-white',
   subtle: 'text-neutral-400 hover:bg-white/[0.05] hover:text-neutral-100',

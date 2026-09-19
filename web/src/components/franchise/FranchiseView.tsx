@@ -83,9 +83,9 @@ export function FranchiseView(props: {
   return (
     <div className="flex h-full flex-col">
       {/* Shared save picker + tab nav */}
-      <div className="shrink-0 border-b border-white/[0.06] px-6 py-3">
+      <div className="shrink-0 border-b border-white/[0.06] px-4 py-2.5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">Save</span>
+          <span className="text-[11px] font-semibold text-muted">Save</span>
           <select value={selected} onChange={(e) => setSelected(e.target.value)} className={`${inputCls} min-w-[18rem]`}>
             {files.length === 0 && <option value="">No CAREER saves found</option>}
             <optgroup label="Your saves">
