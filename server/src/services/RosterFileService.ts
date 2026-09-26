@@ -4,11 +4,10 @@ import crypto from 'crypto';
 import { CACHE_DIR, M27_SAVES_DIR } from '../config/paths';
 import { PositionMapper } from './PositionMapper';
 import { LookupService } from './LookupService';
-import { LikenessService } from './LikenessService';
-import { PortraitService } from './PortraitService';
 import { RATING_KEYS } from './AttributeModel';
 import { parseTdb2, serializeTdb2, intOf, strOf, type Tdb2File, type Tdb2Record } from './Tdb2Engine';
 import { splitContainer, buildContainer } from './RosterContainer';
+import { scoutingFor } from './ScoutingNotesService';
 
 /**
  * Madden 27 ROSTER saves (ROSTER-Official, community all-time rosters, ...).
@@ -54,8 +53,10 @@ export interface RosterPlayer {
   draftRound: number | null;
   draftPick: number | null;
   assetName: string | null;
-  portrait: string | null; // /api/portrait/... when the face asset is in the catalog
+  portrait: string | null; // /api/portrait/pid/... from the saved PSXP menu-portrait ID
   ratings: Record<string, number>;
+  /** Scout's read: two to four sentences from the hidden attributes, no numbers (ScoutingNotesService). */
+  scouting?: string[];
   /** From the player's visuals blob: body type (Standard…Lean), generic head, helmet and facemask assets; '' when absent. */
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
   archetypeId: number;
@@ -151,23 +152,6 @@ export function payloadOffset(buf: Buffer): number {
   return -1;
 }
 
-let portraitByAsset: Map<string, string | null> | null = null;
-function portraitFor(asset: string | null): string | null {
-  if (!asset) return null;
-  if (!portraitByAsset) {
-    portraitByAsset = new Map();
-    try {
-      for (const s of LikenessService.faceScans('m27')) {
-        const plpo = s.portraitPid ? PortraitService.plpoForPid(s.portraitPid) : null;
-        portraitByAsset.set(s.asset.toLowerCase(), plpo ? `/api/portrait/plpo/${plpo}` : (s.image ?? null));
-      }
-    } catch {
-      // no catalog: no portraits
-    }
-  }
-  return portraitByAsset.get(asset.toLowerCase()) ?? null;
-}
-
 function buildTeams(file: Tdb2File): RosterTeam[] {
   return file.TEAM.records
     .map((r) => ({ id: intOf(r, 'TGID'), name: strOf(r, 'TASN'), city: strOf(r, 'TLNA'), abbr: strOf(r, 'TSNA') }))
@@ -235,8 +219,9 @@ function buildPlayer(r: Tdb2Record, teamById: Map<number, RosterTeam>, faId: num
     draftRound: round > 0 && round < 63 ? round : null,
     draftPick: r.fields.PDPI && pick < 300 ? pick : null,
     assetName: asset,
-    portrait: portraitFor(asset),
+    portrait: intOf(r, 'PSXP') > 0 ? `/api/portrait/pid/${intOf(r, 'PSXP')}` : null,
     ratings,
+    scouting: scoutingFor(intOf(r, 'PGID'), positionId, ratings, 'm27'),
     visuals: visualsOf(blob),
     archetypeId: intOf(r, 'PLTY'),
     collegeId: intOf(r, 'PCOL'),

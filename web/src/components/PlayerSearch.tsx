@@ -80,7 +80,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-lg border border-border-strong bg-surface-2 py-1.5 pl-2.5 pr-3 text-neutral-400 transition-colors hover:bg-surface-3 hover:text-neutral-200"
+        className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] py-1.5 pl-2.5 pr-3 text-neutral-400 transition-colors hover:bg-white/[0.07] hover:text-neutral-200"
         title="Find a player across all draft classes (Ctrl+K)"
       >
         <Icon path={ICONS.search} className="h-4 w-4" />
@@ -88,8 +88,8 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-[26rem] max-w-[90vw] overflow-hidden rounded-xl border border-border-strong bg-surface-1 shadow-[0_16px_48px_rgba(0,0,0,0.55)]">
-          <div className="border-b border-border p-3">
+        <div className="absolute left-0 top-full z-50 mt-2 w-[26rem] max-w-[90vw] overflow-hidden glass-strong animate-pop rounded-xl">
+          <div className="border-b border-white/[0.06] p-3">
             <div className="relative">
               <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted">
                 <Icon path={ICONS.search} className="h-4 w-4" />
@@ -114,7 +114,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
                 role="combobox"
                 aria-expanded={results.length > 0}
                 aria-activedescendant={results.length ? `ps-${activeIdx}` : undefined}
-                className="w-full rounded-md border border-border bg-surface-0 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
+                className="w-full rounded-md border border-white/[0.07] bg-black/30 py-1.5 pl-8 pr-7 text-sm text-neutral-200 placeholder:text-muted focus:border-primary focus:outline-none"
               />
               {query && (
                 <button
@@ -147,7 +147,7 @@ export function PlayerSearch({ onSelect }: { onSelect: (year: number, focusName:
                 onMouseEnter={() => setActiveIdx(i)}
                 onClick={() => choose(p)}
                 className={`flex w-full items-center justify-between gap-3 px-4 py-2 text-left transition-colors ${
-                  i === activeIdx ? 'bg-surface-2' : 'hover:bg-surface-2'
+                  i === activeIdx ? 'bg-surface-2' : 'hover:bg-white/[0.06]'
                 }`}
               >
                 <span className="min-w-0">

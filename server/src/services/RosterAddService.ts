@@ -4,7 +4,7 @@ import { PositionMapper } from './PositionMapper';
 import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
 import { LikenessService } from './LikenessService';
-import { commentaryIdFor, focusFor } from './M27Fields';
+import { commentaryIdFor, focusFor, genericHeadPid } from './M27Fields';
 import { PoolCatalogService } from './PoolCatalogService';
 import type { GeneratedRosterPlayer } from '../types/roster';
 
@@ -44,6 +44,9 @@ export const RosterAddService = {
     const ratings: Record<string, number> = {};
     for (const k of RATING_KEYS) ratings[k] = Math.max(0, Math.min(99, Math.round(num(p[k]))));
     const draftAge = num(player.age, num(p.age, 22));
+    // buildProspects has not run assignM27Fields: ordinary generic heads still
+    // have PID 0 here. Keep any real/legend portrait, otherwise use the head's.
+    const portraitPid = num(p.PID) || genericHeadPid(generic.peps);
     const out: GeneratedRosterPlayer = {
       key,
       firstName: str(p.firstName) || player.firstName,
@@ -65,7 +68,8 @@ export const RosterAddService = {
       personaDNA: PersonaService.dnaFor(seed, PositionMapper.groupFromId(positionId), overall, devTrait).slice(0, 5),
       focus: focusFor(`${seed}|0`),
       commentaryId: commentaryIdFor(player.lastName),
-      portrait: num(p.PID) ? `/api/portrait/pid/${num(p.PID)}` : null,
+      portraitPid,
+      portrait: portraitPid ? `/api/portrait/pid/${portraitPid}` : null,
     };
     if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value as string);
     cache.set(key, out);

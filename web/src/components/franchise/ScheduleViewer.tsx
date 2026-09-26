@@ -39,10 +39,10 @@ export function ScheduleViewer({ save }: { save: string }) {
               {schedule.weeks.map((wk) => {
                 const isCurrent = wk.stage === schedule.currentStage && wk.seasonWeek === schedule.currentWeek;
                 return (
-                  <div key={`${wk.stage}-${wk.seasonWeek}`} className={`rounded-md border p-3 ${isCurrent ? 'border-primary/60 bg-primary/5' : 'border-border/60 bg-surface-0'}`}>
+                  <div key={`${wk.stage}-${wk.seasonWeek}`} className={`rounded-md border p-3 ${isCurrent ? 'border-primary/60 bg-primary/5' : 'border-white/[0.05] bg-surface-0'}`}>
                     <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-100">
                       {wk.label}
-                      {isCurrent && <span className="rounded bg-primary/20 px-1.5 py-0.5 text-[10px] uppercase text-primary">Current</span>}
+                      {isCurrent && <span className="rounded bg-primary/20 px-1.5 py-0.5 text-[11px] uppercase text-primary">Current</span>}
                       <span className="text-[11px] font-normal text-muted">{wk.games.length} games</span>
                     </div>
                     <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">

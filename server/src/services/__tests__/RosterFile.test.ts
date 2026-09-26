@@ -5,6 +5,7 @@ import path from 'path';
 import { M27_SAVES_DIR } from '../../config/paths';
 import { RosterFileService, decodeSmall, payloadOffset } from '../RosterFileService';
 import { RATING_KEYS } from '../AttributeModel';
+import { rosterFixture } from './fixtures/rosterFixture';
 
 const OFFICIAL = path.join(M27_SAVES_DIR, 'ROSTER-Official');
 const skipWithoutRoster = { skip: fs.existsSync(OFFICIAL) ? false : 'no Madden 27 ROSTER-Official in the Saves folder' };
@@ -86,9 +87,9 @@ test('openBase exposes the parsed file, the free-agent team and an output name',
   assert.equal(RosterFileService.outputNameFor('a'.repeat(40)), 'ROSTER-' + 'A'.repeat(16));
 });
 
-test('the read model carries the base checksum, size and each player visuals', skipWithoutRoster, async () => {
-  const buf = fs.readFileSync(OFFICIAL);
-  const data = await RosterFileService.parse(buf, 'ROSTER-Official');
+test('the read model carries the base checksum, size and each player visuals', async () => {
+  const buf = rosterFixture();
+  const data = await RosterFileService.parse(buf, 'ROSTER-Fixture');
   assert.equal(data.sizeBytes, buf.length);
   assert.equal(data.crc, buf.readUInt32LE(0x1a));
   const geno = data.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
@@ -97,6 +98,9 @@ test('the read model carries the base checksum, size and each player visuals', s
   assert.equal(geno.visuals.helmet, 'GearHelmet_Speed_Flex');
   assert.equal(geno.visuals.facemask, 'GearFaceMask_SpeedFlex808');
   assert.ok(data.players.every((p) => ['Standard', 'Thin', 'Muscular', 'Heavy', 'Lean', ''].includes(p.visuals.bodyType)));
+  assert.deepEqual(data.players.find((p) => p.id === 113)!.visuals, {
+    bodyType: '', genericHead: 'gen_2_H_GM_004', helmet: '', facemask: '',
+  });
 });
 
 test('an opened roster can be reopened as a base by id', skipWithoutRoster, async () => {
@@ -107,13 +111,23 @@ test('an opened roster can be reopened as a base by id', skipWithoutRoster, asyn
   await assert.rejects(RosterFileService.openOpened('0123456789abcdef'), /gone/);
 });
 
-test('the read model carries archetype and college ids, skin tone, persona and the face kind', skipWithoutRoster, async () => {
-  const data = await RosterFileService.parse(fs.readFileSync(OFFICIAL), 'ROSTER-Official');
+test('the read model carries archetype and college ids, skin tone, persona and the face kind', async () => {
+  const data = await RosterFileService.parse(rosterFixture(), 'ROSTER-Fixture');
   const geno = data.players.find((p) => p.firstName === 'Geno' && p.lastName === 'Smith')!;
   assert.equal(geno.face, 'asset');
   assert.equal(geno.skinTone, 6);
   assert.deepEqual(geno.personaDNA, [45, 51, 17, 25, 32, 30]);
   assert.equal(geno.focus, 0);
-  assert.ok(geno.collegeId > 0 && geno.archetypeId >= 0);
-  assert.ok(data.players.every((p) => p.face === 'asset' || p.face === 'generic'));
+  assert.equal(geno.collegeId, 1);
+  assert.equal(geno.archetypeId, 1);
+  assert.equal(geno.overall, 72);
+  assert.equal(geno.ratings.speed, 84);
+  assert.equal(geno.position, 'QB', 'omitted position defaults to QB');
+  assert.equal(geno.team, 'DAL');
+  assert.equal(geno.weight, 221);
+  const rookie = data.players.find((p) => p.id === 113)!;
+  assert.equal(rookie.face, 'generic');
+  assert.equal(rookie.skinTone, 2);
+  assert.equal(rookie.team, null, 'free agency has no team abbreviation');
+  assert.deepEqual(rookie.personaDNA, []);
 });

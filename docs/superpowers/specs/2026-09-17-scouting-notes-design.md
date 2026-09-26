@@ -2,6 +2,7 @@
 
 **Date:** 2026-09-17
 **Status:** approved
+**Branch:** ui-lift
 
 ## Goal
 
@@ -78,14 +79,17 @@ cells; a test loads the file and checks completeness and the no-digit rule.
 
 ## Display
 
-`web/src/components/ProfileModal.tsx`, Scouting section:
+`web/src/components/ProfileModal.tsx`, Scouting section (ui-lift layout):
 
-- Spoilers off: the dashed "hidden" box is replaced by a "Scout's read" heading and the
-  notes as a short bulleted list. If `scouting` is missing or empty, the current hidden box
-  stays.
+- Spoilers off: the 72px blind strip (eye-off icon, "Signature ... ratings are hidden while
+  you scout blind", Reveal button) stays as it is. Beneath it a "Scout's read" heading and
+  the notes as a short bulleted list. If `scouting` is missing or empty, only the strip
+  shows, as today.
 - Spoilers on: the radar chart stays and the same list renders beneath it.
 - Roster players (spoilers forced on) get the list under the chart.
-- No change to `PlayerTable` or the meta strip.
+- The docked scout-desk mode (`mode='pane'`) renders the section the same way; nothing in
+  the notes depends on the modal chrome.
+- No change to `PlayerTable`, `WallBoard` or the meta strip.
 
 ## Testing
 

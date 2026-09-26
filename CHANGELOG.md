@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased
+
+## 1.5.0
+
+### UI update
+
+- Refreshed the app layout with updated icons, typography, colors, navigation and more compact toolbars.
+- Switch between Table, Scout desk, Big board, Cards, Wall and Round columns views. Table views offer Core, Physical, Position and All 54 attribute-column presets.
+- Scout desk keeps the player editor beside the list, so you can inspect prospects without covering the board.
+- Big board ranks prospects by value with tier bands, position ranks and steal/reach indicators when spoilers are enabled; with spoilers off, it follows draft order by round.
+- Redesigned Class Studio, the roster picker and team-selection layout, with updated player cards and development-trait badges.
+
+### Features
+
+- About 5,400 more surnames get called by the broadcast: players whose name the game had audio for but our table never saw (6,200 of the 32,000-player pool) now carry their announcer id.
+- Scout's read: every player's card carries two to four lines of scouting prose drawn from his attributes ("Rifle arm that reaches any part of the field", "Loses receivers at the break"), so a blind class can be scouted without seeing a number.
+
+### Bug fixes
+
+- Filtering a scrolled Big board down to a short list no longer crashes the view.
+- Player, appearance and equipment editors now open above the app toolbar and cover the full window, including when opened from an animated board or the scout desk.
+- Removed backdrop blur from menus, panels and editor overlays to reduce the rendering artifacts and flickering reported when switching tabs or scrolling.
+- Madden 27 roster additions now write their own menu-portrait IDs instead of inheriting another player's photo from the template. Players use their available game or legend portrait, with a matching generic-head portrait when needed. Re-export a saved roster project to apply this correction to its added players.
+- Changing a roster player's face updates the menu portrait too. Reopened rosters display the portrait saved in the file, so the app no longer hides a mismatch by choosing a photo from the 3D face instead.
+- Full portrait-pack builds scan image folders once instead of checking every possible filename, avoiding long stalls on Windows.
+
 ## 1.4.2
 
 ### Features

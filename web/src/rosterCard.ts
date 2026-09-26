@@ -51,6 +51,7 @@ export function rowFor(p: RosterPlayer, ctx: CardCtx, draftYearHint?: number): P
     focus: ctx.focus.find((f) => f.id === p.focus)?.name,
     gear,
     ratings: p.ratings,
+    scouting: p.scouting,
   };
 }
 

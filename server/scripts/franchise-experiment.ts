@@ -12,6 +12,7 @@
  *   npx tsx scripts/franchise-experiment.ts bracket        --teams 8|10|12 [--parked] [--ghost-from worst|parked]
  *   npx tsx scripts/franchise-experiment.ts bisect         --part force|teams|reset|flags   (one kind of edit)
  *   npx tsx scripts/franchise-experiment.ts noop           (control: open + save, no edits)
+ *   npx tsx scripts/franchise-experiment.ts history        [--start 2026] [--seasons 30]   (league history rows)
  *
  * Every writing preset saves `CAREER-<base>-EXP-<PRESET>` into the Madden 27 Saves folder
  * (or prints what it would change with --dry-run). Default input: the newest CAREER-* save.
@@ -36,11 +37,17 @@
  *                  ghost game ForceWin'd to the real club, so the wild-card week resolves
  *                  itself and the divisional round is the era's real first round. Emptying
  *                  rows instead (first attempt) left the save unable to load.
+ *   history        Writes the real seasons before --start (default: the save's season year)
+ *                  into YearSummary / LeagueHistoryAward[] / LeagueHistoryAward. --seasons
+ *                  caps the count (Gate 1 uses 2). Opened with autoUnempty so the empty rows
+ *                  go live. Check the hub's League History and awards screens.
  */
 import fs from 'fs';
 import path from 'path';
 import { M27_SAVES_DIR } from '../src/config/paths';
 import { openSave, writeField, outputNameFor, TEAM_TABLE_UID, PLAYER_TABLE_UID, SEASONGAME_TABLE_UID, SEASONINFO_TABLE_UID } from '../src/services/FranchiseService';
+import { applyPlan, planLeagueHistory, readSaveContext } from '../src/services/LeagueHistoryService';
+import { loadLeagueHistory } from '../src/services/LeagueHistoryData';
 
 const args = process.argv.slice(2);
 const preset = args[0] || 'inspect';
@@ -76,8 +83,8 @@ const val = (r: any, k: string) => { try { return r[k]; } catch { return undefin
 
 interface Ctx { file: any; teams: any; teamRows: Map<string, number>; teamByRow: string[]; changes: string[] }
 
-async function load(saveName: string): Promise<Ctx> {
-  const file = await openSave(path.join(M27_SAVES_DIR, saveName), 'm27');
+async function load(saveName: string, open: { autoUnempty?: boolean } = {}): Promise<Ctx> {
+  const file = await openSave(path.join(M27_SAVES_DIR, saveName), 'm27', open);
   const teams = file.getTableByUniqueId(TEAM_TABLE_UID);
   await teams.readRecords();
   const teamRows = new Map<string, number>();
@@ -527,15 +534,38 @@ async function bisectPreset(ctx: Ctx): Promise<void> {
   } else throw new Error(`unknown --part ${part}`);
 }
 
+// ---------------------------------------------------------------- history
+async function historyPreset(ctx: Ctx): Promise<void> {
+  const sctx = await readSaveContext(ctx.file);
+  const startSeasonRaw = opt('start', String(sctx.currentSeasonYear));
+  const startSeason = parseInt(startSeasonRaw, 10);
+  if (!Number.isInteger(startSeason) || startSeason <= 0 || String(startSeason) !== startSeasonRaw.trim()) throw new Error(`--start must be a positive integer, got "${startSeasonRaw}"`);
+  const seasonsRaw = opt('seasons', '30');
+  const n = parseInt(seasonsRaw, 10);
+  if (!Number.isInteger(n) || n <= 0 || String(n) !== seasonsRaw.trim()) throw new Error(`--seasons must be a positive integer, got "${seasonsRaw}"`);
+  if (n > 30) throw new Error(`--seasons must be at most 30, got ${n}`);
+  const plan = planLeagueHistory({ seasons: loadLeagueHistory().seasons, startSeason, currentSeasonYear: sctx.currentSeasonYear, teams: sctx.teams, capacity: { summary: n, awards: 217, arrays: 31 } });
+  // Bisection knobs for the in-game gates: --no-awards drops every award row and link
+  // (array rows stay, all slots null); --period-shift N adds N to every PeriodIndex.
+  if (flag('no-awards')) { plan.awards = []; plan.arrays = plan.arrays.map((a) => ({ ...a, slots: a.slots.map(() => null) })); plan.summaries = plan.summaries.map((s) => ({ ...s, sbMvpRow: null })); }
+  const shift = parseInt(opt('period-shift', '0'), 10);
+  if (shift) plan.summaries = plan.summaries.map((s) => ({ ...s, periodIndex: s.periodIndex + shift }));
+  for (const s of plan.summaries) ctx.changes.push(`row ${s.row} season ${s.season} (PeriodIndex ${s.periodIndex}): AFC ${s.afc.city} ${s.afc.score} - NFC ${s.nfc.city} ${s.nfc.score}; sbMvp=${s.sbMvpRow ?? '-'}`);
+  ctx.changes.push(`${plan.awards.length} award rows, ${plan.arrays.length} arrays${plan.warnings.length ? '; ' + plan.warnings.join('; ') : ''}`);
+  if (dryRun) return;
+  await applyPlan(ctx.file, plan);
+}
+
 // ---------------------------------------------------------------- main
 (async () => {
   const saveName = opt('save', '') || newestSave();
   log(`input: ${saveName}${dryRun ? ' (dry run)' : ''}`);
-  const ctx = await load(saveName);
-  const suffix: Record<string, string> = { noop: 'EXP-NOOP', bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G${flag('keep-user') ? 'U' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
+  const ctx = await load(saveName, { autoUnempty: preset === 'history' });
+  const suffix: Record<string, string> = { noop: 'EXP-NOOP', history: `EXP-HISTORY${opt('tag', '')}`, bisect: `EXP-${opt('part', 'force').toUpperCase()}`, bracket: `EXP-BRACKET${opt('teams', '8')}G${flag('keep-user') ? 'U' : ''}`, field: 'EXP-FIELD', divisions: flag('park') ? 'EXP-DIVPARK' : 'EXP-DIV', season14: 'EXP-SEASON14', 'schedule-week1': 'EXP-SCHED', 'swap-players': 'EXP-SWAP', 'all-1975': 'EXP-1975' };
   switch (preset) {
     case 'inspect': await inspect(ctx); return;
     case 'noop': ctx.changes.push('no edits: open + save only (control)'); break;
+    case 'history': await historyPreset(ctx); break;
     case 'bisect': await bisectPreset(ctx); break;
     case 'bracket': await bracketPreset(ctx); break;
     case 'field': await fieldPreset(ctx); break;

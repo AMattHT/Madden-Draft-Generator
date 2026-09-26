@@ -56,9 +56,9 @@ export function TeamPicker({ teams, onPick, onCancel, placeholder = 'Add to…',
             <li key={t.id} role="option" aria-selected={i === active}
               onMouseDown={(e) => { e.preventDefault(); pick(t); }} onMouseEnter={() => setActive(i)}
               className={`flex cursor-pointer items-center gap-2 px-2 py-1 text-xs ${i === active ? 'bg-primary/20 text-neutral-100' : 'text-neutral-200'}`}>
-              {t.logo ? <TeamLogo team={t.logo} size="sm" /> : <span className="inline-block w-5 text-center text-[10px] font-bold text-neutral-400">{t.abbr}</span>}
+              {t.logo ? <TeamLogo team={t.logo} size="sm" /> : <span className="inline-block w-5 text-center text-[11px] font-bold text-neutral-400">{t.abbr}</span>}
               <span className="truncate">{t.name}</span>
-              <span className="ml-auto text-[10px] text-muted">{t.abbr}</span>
+              <span className="ml-auto text-[11px] text-muted">{t.abbr}</span>
             </li>
           ))}
         </ul>,

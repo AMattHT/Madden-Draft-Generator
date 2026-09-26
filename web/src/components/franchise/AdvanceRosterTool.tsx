@@ -58,8 +58,8 @@ export function AdvanceRosterTool({ save, onWrote }: { save: string; onWrote?: (
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
             {[['Avg age', result.avgAgeBefore, result.avgAgeAfter], ['Avg overall', result.avgOvrBefore, result.avgOvrAfter], ['Aged', '', result.aged], ['Retired', '', result.retired]].map(([l, b, a]) => (
-              <div key={String(l)} className="rounded-md border border-border/60 bg-surface-0 px-2 py-1.5">
-                <div className="text-[10px] uppercase tracking-wide text-muted">{l}</div>
+              <div key={String(l)} className="rounded-md border border-white/[0.05] bg-surface-0 px-2 py-1.5">
+                <div className="text-[11px] uppercase tracking-wide text-muted">{l}</div>
                 <div className="tabular-nums">{b !== '' ? <><span className="text-muted">{b}</span><span className="text-neutral-600"> → </span></> : null}<span className="text-green-300">{a}</span></div>
               </div>
             ))}
@@ -67,12 +67,12 @@ export function AdvanceRosterTool({ save, onWrote }: { save: string; onWrote?: (
           {result.retirements.length > 0 && (
             <div className="mt-3 max-h-56 overflow-auto rounded-md border border-border bg-surface-1">
               <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-surface-2 text-[10px] uppercase tracking-wide text-neutral-400">
+                <thead className="sticky top-0 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400">
                   <tr><th className="px-2 py-1.5 text-left font-semibold">Retiring</th><th className="px-2 py-1.5 text-left font-semibold">Pos</th><th className="px-2 py-1.5 text-right font-semibold">Age</th><th className="px-2 py-1.5 text-right font-semibold">OVR</th></tr>
                 </thead>
                 <tbody>
                   {result.retirements.map((p, i) => (
-                    <tr key={i} className="border-t border-border/50"><td className="px-2 py-1 text-neutral-100">{p.name} <span className="text-muted">· {p.team}</span></td><td className="px-2 py-1 text-neutral-300">{p.position}</td><td className="px-2 py-1 text-right tabular-nums">{p.age}</td><td className="px-2 py-1 text-right tabular-nums">{p.overall}</td></tr>
+                    <tr key={i} className="border-t border-white/[0.05]"><td className="px-2 py-1 text-neutral-100">{p.name} <span className="text-muted">· {p.team}</span></td><td className="px-2 py-1 text-neutral-300">{p.position}</td><td className="px-2 py-1 text-right tabular-nums">{p.age}</td><td className="px-2 py-1 text-right tabular-nums">{p.overall}</td></tr>
                   ))}
                 </tbody>
               </table>
@@ -81,12 +81,12 @@ export function AdvanceRosterTool({ save, onWrote }: { save: string; onWrote?: (
           {result.declines.length > 0 && (
             <div className="mt-2 max-h-56 overflow-auto rounded-md border border-border bg-surface-1">
               <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-surface-2 text-[10px] uppercase tracking-wide text-neutral-400">
+                <thead className="sticky top-0 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400">
                   <tr><th className="px-2 py-1.5 text-left font-semibold">Biggest declines</th><th className="px-2 py-1.5 text-left font-semibold">Pos</th><th className="px-2 py-1.5 text-right font-semibold">Age</th><th className="px-2 py-1.5 text-right font-semibold">OVR</th></tr>
                 </thead>
                 <tbody>
                   {result.declines.map((p, i) => (
-                    <tr key={i} className="border-t border-border/50"><td className="px-2 py-1 text-neutral-100">{p.name} <span className="text-muted">· {p.team}</span></td><td className="px-2 py-1 text-neutral-300">{p.position}</td><td className="px-2 py-1 text-right tabular-nums">{p.age}</td><td className="px-2 py-1 text-right tabular-nums"><span className="text-muted">{p.from}</span> → <span className="text-green-300">{p.to}</span></td></tr>
+                    <tr key={i} className="border-t border-white/[0.05]"><td className="px-2 py-1 text-neutral-100">{p.name} <span className="text-muted">· {p.team}</span></td><td className="px-2 py-1 text-neutral-300">{p.position}</td><td className="px-2 py-1 text-right tabular-nums">{p.age}</td><td className="px-2 py-1 text-right tabular-nums"><span className="text-muted">{p.from}</span> → <span className="text-green-300">{p.to}</span></td></tr>
                   ))}
                 </tbody>
               </table>

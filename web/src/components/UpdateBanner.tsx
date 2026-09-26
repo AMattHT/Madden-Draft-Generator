@@ -73,7 +73,7 @@ export function UpdateBanner() {
               onClick={() => setDismissed(state.version ?? 'unknown')}
               aria-label="Dismiss"
               title={state.phase === 'ready' ? 'Install on next launch instead' : 'Dismiss'}
-              className="-mr-1 -mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded text-neutral-500 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+              className="-mr-1 -mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded text-neutral-500 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
             >
               ×
             </button>
@@ -88,7 +88,7 @@ export function UpdateBanner() {
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 onClick={() => setDismissed(state.version ?? 'unknown')}
-                className="rounded-md px-2.5 py-1.5 text-xs text-neutral-400 transition-colors hover:bg-surface-2 hover:text-neutral-100"
+                className="rounded-md px-2.5 py-1.5 text-xs text-neutral-400 transition-colors hover:bg-white/[0.06] hover:text-neutral-100"
               >
                 Later
               </button>

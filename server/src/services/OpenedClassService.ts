@@ -20,6 +20,7 @@ import {
   type PreviewRow,
   type PreviewResult,
 } from './DraftClassBuilder';
+import { scoutingFor } from './ScoutingNotesService';
 
 /**
  * A draft class opened from a file: a CAREERDRAFT-* the user exported earlier, one
@@ -138,6 +139,7 @@ function rowsFor(e: Entry): PreviewResult {
       focus: e.gameVersion === 'm27' && Number.isFinite(Number(p.focus)) ? PersonaService.focusName(Number(p.focus)) : undefined,
       gear: gearSlots(p),
       ratings,
+      scouting: scoutingFor(i + 1, posId, ratings, e.gameVersion),
     } as PreviewRow;
   });
   return { rows, likeness: { asset, generic, withPortrait, customPortrait: 0 }, count: rows.length, dropped: [], included: [], launchCount: 0 } as PreviewResult;

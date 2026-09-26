@@ -120,14 +120,27 @@ function isGenericOrBlank(pid: number): boolean {
 const fileStem = (first: string, last: string) => `${normalizeName(first)}_${normalizeName(last)}`;
 export const expectedFileName = (p: { firstName: string; lastName: string; draftYear: number }) => `${p.draftYear}_${fileStem(p.firstName, p.lastName)}.png`;
 
+/** Snapshot bulk source folders once per build. Probing every possible name
+ *  individually is especially expensive for absent files on Windows. */
+function inventoryFiles(dirs: string[]): (file: string) => boolean {
+  const key = (file: string) => process.platform === 'win32' ? file.toLowerCase() : file;
+  const files = new Set<string>();
+  for (const dir of dirs) {
+    try {
+      for (const name of fs.readdirSync(dir)) files.add(key(path.join(dir, name)));
+    } catch { /* a missing or unreadable source folder supplies no pictures */ }
+  }
+  return (file) => files.has(key(file));
+}
+
 /** A picture the user dropped in, or null. Year-prefixed names win, so two men
  *  of one name in different drafts can each have their own. */
-function overrideFor(first: string, last: string, year: number | null, plpo: string | null): string | null {
+function overrideFor(first: string, last: string, year: number | null, plpo: string | null, exists: (file: string) => boolean = fs.existsSync): string | null {
   const stem = fileStem(first, last);
   const names = [...(year ? [`${year}_${stem}`] : []), stem, ...(plpo ? [plpo] : [])];
   for (const n of names) for (const ext of ['png', 'jpg', 'jpeg']) {
     const f = path.join(overrideDir, `${n}.${ext}`);
-    if (fs.existsSync(f)) return f;
+    if (exists(f)) return f;
   }
   return null;
 }
@@ -147,13 +160,13 @@ const cdnCachePath = (p: { firstName: string; lastName: string; draftYear: numbe
 
 /** A picture for a player with no portrait id: dropped file, disc headshot, or
  *  (asked for) the NFL/ESPN headshot url; null when there is none. */
-function customSource(p: BaselinePlayer, opts: PackOptions): { kind: PackKind; source: string } | null {
-  const file = overrideFor(p.firstName, p.lastName, p.draftYear, null);
+function customSource(p: BaselinePlayer, opts: PackOptions, exists: (file: string) => boolean = fs.existsSync): { kind: PackKind; source: string } | null {
+  const file = overrideFor(p.firstName, p.lastName, p.draftYear, null, exists);
   if (file) return { kind: 'file', source: file };
   const retro = RetroHeadshotService.filePath(p.firstName, p.lastName, p.position, p.draftYear);
   if (retro) return { kind: 'retro', source: retro };
   const cached = cdnCachePath(p);
-  if (fs.existsSync(cached)) return { kind: 'cdn', source: cached };
+  if (exists(cached)) return { kind: 'cdn', source: cached };
   if (opts.cdn) {
     const url = NflverseCareerService.get(p.firstName, p.lastName, p.draftYear, nflversePick(p))?.headshotUrl;
     if (url && /^https:\/\/(a\.espncdn\.com|static\.www\.nfl\.com)\//.test(url)) return { kind: 'cdn', source: url };
@@ -293,25 +306,28 @@ export const PortraitPackService = {
    *  dropped files; CDN downloads only when a class asked for them). */
   fullPackEntries(): Array<{ pid: number; plpo: string; kind: PackKind; name: string; source: string }> {
     const out: Array<{ pid: number; plpo: string; kind: PackKind; name: string; source: string }> = [];
+    // Rebuild the inventory each time so pictures dropped in between builds
+    // take effect immediately, without hundreds of thousands of filesystem calls.
+    const exists = inventoryFiles([overrideDir, path.join(overrideDir, 'cdn'), PACK_ART_DIR]);
     for (const r of parseCsvFile<Record<string, string>>(MAPPING_FILE)) {
       const pid = parseInt(r['PID'], 10);
       const plpo = (r['Portrait'] || '').trim();
       if (!pid || !plpo || (r['Type'] || '').trim() === 'generic') continue;
       const name = (r['Player Name'] || '').trim();
       const [first, ...rest] = name.split(' ');
-      const dropped = overrideFor(first || '', rest.join(' '), null, plpo);
+      const dropped = overrideFor(first || '', rest.join(' '), null, plpo, exists);
       // An id the game ships is only written when a better picture was dropped in
       // (it then replaces the game's own image); otherwise the pack art stands in
       // for the ids the game dropped.
       if (shippedPids().has(pid)) { if (dropped) out.push({ pid, plpo, kind: 'file', name, source: dropped }); continue; }
       const packFile = path.join(PACK_ART_DIR, `${plpo}.jpg`);
-      const source = dropped ?? (fs.existsSync(packFile) ? packFile : null);
+      const source = dropped ?? (exists(packFile) ? packFile : null);
       if (source) out.push({ pid, plpo, kind: dropped ? 'file' : 'own', name, source });
     }
     for (const year of PlayerLookupService.years()) {
       for (const p of PlayerLookupService.byYear(year)) {
         if (p.photoId || p.source === 'generated') continue;
-        const custom = customSource(p, {});
+        const custom = customSource(p, {}, exists);
         if (!custom) continue;
         const pid = CustomPortraitIdService.idFor(p, { allocate: true })!;
         out.push({ pid, plpo: 'custom', kind: custom.kind, name: `${p.firstName} ${p.lastName}`, source: custom.source });

@@ -46,3 +46,13 @@ test('the baked file knows the 2023 rookies of the year and keeps a namesake out
   assert.deepEqual(AwardsService.awardsFor('Jared', 'Verse', 2024, 'QB'), []);
   assert.ok(AwardsService.awardsFor('Josh', 'Allen', 2018, 'QB').includes('MVP'));
 });
+
+test('the winners table keeps the team column', () => {
+  const html = `<table class="wikitable"><tr><th>Season</th><th>Player</th><th>Position</th><th>Team</th><th>Ref.</th></tr>
+<tr><td>1963</td><th scope="row"><span data-sort-value="Tittle, Y. A."><span class="fn"><a href="/wiki/Y._A._Tittle">Y. A. Tittle</a></span></span></th><td><a href="/wiki/Quarterback" title="Quarterback">QB</a></td><td><a href="/wiki/1963_New_York_Giants_season">New York Giants</a>*</td><td>[1]</td></tr>
+</table>`;
+  const [rows] = parseAwardTables(html);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].last, 'Tittle');
+  assert.equal(rows[0].team, 'New York Giants');
+});

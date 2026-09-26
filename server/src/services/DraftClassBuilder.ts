@@ -28,6 +28,7 @@ import { AwardsService } from './AwardsService';
 import { youngDev, YOUNG_SEASONS, YoungInput } from './DevTraitService';
 import { BaselinePlayer, CombineMeasurements, ToneSource, nflversePick } from '../types/player';
 import { SupplementalDraftService } from './SupplementalDraftService';
+import { scoutingFor } from './ScoutingNotesService';
 import { TeamInfo } from './TeamService';
 import { PortraitService } from './PortraitService';
 import { GEAR_SLOT_TYPES, slotOfElement, waistConflict } from './GearOptionsService';
@@ -553,6 +554,8 @@ export interface PreviewRow {
    *  so the UI can show what "Auto" means before the class is in the game. */
   gear?: Record<string, string>;
   ratings: Record<string, number>;
+  /** Scout's read: two to four sentences from the hidden attributes, no numbers (ScoutingNotesService). */
+  scouting?: string[];
 }
 
 /** Flatten a prospect's PlayerOnField loadout into editor slots (helmet, gloveLeft, ...). */
@@ -1034,6 +1037,7 @@ export const DraftClassBuilder = {
           : null,
         gear: gearSlots(p),
         ratings,
+        scouting: scoutingFor(i + 1, Number(p.position), ratings, gameVersion),
       };
     });
     return { rows, likeness, count: rows.length, dropped, included, launchCount: launched.size };

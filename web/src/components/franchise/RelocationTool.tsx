@@ -171,21 +171,21 @@ export function RelocationTool({ save, onWrote }: { save: string; onWrote?: () =
 
             <div className="mt-4 flex flex-wrap items-end gap-5">
               <Field label="Primary">
-                <input type="color" value={primary} onChange={(e) => setPrimary(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-border bg-surface-0" />
+                <input type="color" value={primary} onChange={(e) => setPrimary(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-white/[0.07] bg-black/30" />
               </Field>
               <Field label="Secondary">
-                <input type="color" value={secondary} onChange={(e) => setSecondary(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-border bg-surface-0" />
+                <input type="color" value={secondary} onChange={(e) => setSecondary(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-white/[0.07] bg-black/30" />
               </Field>
               <Field label="Hub / menu">
-                <input type="color" value={hub} onChange={(e) => setHub(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-border bg-surface-0" />
+                <input type="color" value={hub} onChange={(e) => setHub(e.target.value)} className="h-9 w-16 cursor-pointer rounded border border-white/[0.07] bg-black/30" />
               </Field>
               <Field label="Logo ID" hint="0–31 = stock team logos">
                 <input type="number" min={0} max={2047} value={logo} onChange={(e) => setLogo(Number(e.target.value))} className={`${inputCls} max-w-[7rem]`} />
               </Field>
             </div>
 
-            <div className="mt-4 flex items-center gap-3 rounded-md border border-border/60 bg-surface-0 p-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded text-[10px] font-bold" style={{ backgroundColor: primary, color: secondary }}>
+            <div className="mt-4 flex items-center gap-3 rounded-md border border-white/[0.05] bg-surface-0 p-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded text-[11px] font-bold" style={{ backgroundColor: primary, color: secondary }}>
                 {abbr || '—'}
               </span>
               <div className="text-sm">

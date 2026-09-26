@@ -78,7 +78,14 @@ test('a Madden-disc headshot is a source on its own', () => {
   assert.ok(a[0].pid >= CUSTOM_PID_BASE);
 });
 
-test('a dropped-in picture for a portrait the game ships goes into the full pack under the game id', async () => {
+test('a dropped-in picture for a portrait the game ships goes into the full pack under the game id', async (t) => {
+  const exists = fs.existsSync;
+  t.mock.method(fs, 'existsSync', (candidate: fs.PathLike) => {
+    // A full catalog has hundreds of thousands of possible source names. On
+    // Windows, probing every absent file blocks the event loop for minutes.
+    assert.ok(!String(candidate).startsWith(path.join(tmp, 'sources') + path.sep), 'full pack must inventory source files instead of probing every candidate');
+    return exists(candidate);
+  });
   const file = path.join(tmp, 'sources', 'plpo_legends_JoeMontana_Profile.png'); // Montana's shipped legend portrait, id 5628
   assert.ok(!PortraitPackService.fullPackEntries().some((e) => e.pid === 5628));
   fs.writeFileSync(file, await sharp({ create: { width: 64, height: 64, channels: 3, background: '#a33' } }).png().toBuffer());

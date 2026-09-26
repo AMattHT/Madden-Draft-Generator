@@ -5,7 +5,7 @@ import { tierColor } from '../constants';
 import { PlayerEditPanel } from './PlayerEditPanel';
 
 const POSITIONS = ['QB', 'HB', 'FB', 'WR', 'TE', 'LT', 'LG', 'C', 'RG', 'RT', 'LE', 'RE', 'DT', 'LOLB', 'MLB', 'ROLB', 'CB', 'FS', 'SS', 'K', 'P', 'LS'];
-const inputCls = 'rounded-md border border-border bg-surface-0 px-2 py-1 text-sm text-neutral-200 focus:border-primary focus:outline-none';
+const inputCls = 'rounded-md border border-white/[0.07] bg-black/30 px-2 py-1 text-sm text-neutral-200 focus:border-primary focus:outline-none';
 
 /** Per-player franchise roster editor. Uses the save chosen in the shared FranchiseView
  *  header (`save` prop); loading the full player list is explicit (it's a big read). */
@@ -136,7 +136,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
       ) : (
         <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_26rem]">
           {/* player list */}
-          <div className="min-h-0 overflow-auto rounded-lg border border-border bg-surface-1">
+          <div className="min-h-0 overflow-auto glass rounded-xl">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-surface-2 text-[11px] uppercase tracking-wide text-neutral-400">
                 <tr>
@@ -153,7 +153,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
                   const ov = ed?.overall ?? p.overall;
                   return (
                     <tr key={p.id} onClick={() => setSelectedId(p.id)}
-                      className={`cursor-pointer border-t border-border/50 ${p.id === selectedId ? 'bg-primary/10' : 'hover:bg-surface-2/70'}`}>
+                      className={`cursor-pointer border-t border-white/[0.05] ${p.id === selectedId ? 'bg-primary/10' : 'hover:bg-white/[0.035]'}`}>
                       <td className="px-3 py-1.5 font-medium text-neutral-100">
                         {ed && <span className="mr-1 text-gold" title="edited">●</span>}{p.firstName} {p.lastName}
                       </td>
@@ -169,7 +169,7 @@ export function RosterEditor({ save, onWrote }: { save: string; onWrote?: () => 
           </div>
 
           {/* editor */}
-          <div className="min-h-0 overflow-auto rounded-lg border border-border bg-surface-1">
+          <div className="min-h-0 overflow-auto glass rounded-xl">
             {!sel ? (
               <div className="flex h-full items-center justify-center p-4 text-sm text-muted">Select a player to edit</div>
             ) : (

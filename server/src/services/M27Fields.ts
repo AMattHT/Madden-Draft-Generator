@@ -50,6 +50,19 @@ function load(): FieldStats {
   return stats!;
 }
 
+let supplement: Record<string, number> | null = null;
+/** Announcer ids for surnames the generated table lacks (data/lookups/m27-commentary-supplement.json,
+ *  built by scripts/build-commentary-supplement.ts from MyFranchise's map). Missing file -> empty. */
+function loadSupplement(): Record<string, number> {
+  if (supplement) return supplement;
+  try {
+    supplement = JSON.parse(fs.readFileSync(path.join(LOOKUPS_DIR, 'm27-commentary-supplement.json'), 'utf8')).surnameCommentary ?? {};
+  } catch {
+    supplement = {};
+  }
+  return supplement!;
+}
+
 const surnameKey = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z]/g, '');
 
 /** Weighted pick from a { value: count } histogram. */
@@ -75,9 +88,11 @@ function gauss(rand: () => number): number {
 const CLASS_MEAN_OVR = 66;
 
 /** Announcer id for a surname (both games share the id space), or 0 when the game
- *  has no audio for it (the game's own classes write 0 too). */
+ *  has no audio for it (the game's own classes write 0 too). Our verified table first,
+ *  then the MyFranchise-derived supplement. */
 export function commentaryIdFor(lastName: string): number {
-  return load().surnameCommentary[surnameKey(lastName)] ?? 0;
+  const key = surnameKey(lastName);
+  return load().surnameCommentary[key] ?? loadSupplement()[key] ?? 0;
 }
 
 /** Menu-portrait PID for a generic head name. The M27 classes showed 196 heads

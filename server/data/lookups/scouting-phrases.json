@@ -1,0 +1,160 @@
+{
+  "_source": "Written for the blind-scouting card, 2026-09-17. Keep every sentence free of digits and Madden tier words.",
+  "neutral": {
+    "QB": "Even profile for a quarterback: no standout trait, no glaring hole.",
+    "RB": "Even profile for a back: no standout trait, no glaring hole.",
+    "WR": "Even profile for a receiver: no standout trait, no glaring hole.",
+    "TE": "Even profile for a tight end: no standout trait, no glaring hole.",
+    "OL": "Even profile for a lineman: no standout trait, no glaring hole.",
+    "EDGE": "Even profile for an edge: no standout trait, no glaring hole.",
+    "IDL": "Even profile for an interior lineman: no standout trait, no glaring hole.",
+    "LB": "Even profile for a linebacker: no standout trait, no glaring hole.",
+    "CB": "Even profile for a corner: no standout trait, no glaring hole.",
+    "S": "Even profile for a safety: no standout trait, no glaring hole.",
+    "K": "Even profile for a kicker: nothing that separates him from the pack.",
+    "P": "Even profile for a punter: nothing that separates him from the pack.",
+    "LS": "Even profile for a long snapper: does the job, nothing more to say."
+  },
+  "attrs": {
+    "throwPower": {
+      "strength": { "strong": ["Rifle arm that reaches any part of the field", "Drives the deep out on a line, effortlessly"], "mild": ["Arm strength is a plus", "Enough arm for every throw in the book"] },
+      "weakness": { "strong": ["Ball dies on deep outs and go routes", "Arm will not stretch a defense"], "mild": ["Arm is ordinary", "Needs a clean pocket to push the ball downfield"] }
+    },
+    "throwAccuracyShort": {
+      "strength": { "strong": ["Surgical in the short game, every ball on the hands", "Puts quick throws exactly where the catch is easy"], "mild": ["Accurate on the short stuff", "Rarely misses an open man underneath"] },
+      "weakness": { "strong": ["Sprays the easy throws, drives and stalls", "Short accuracy is a real problem"], "mild": ["Ball placement underneath comes and goes", "Leaves some completions on the field"] }
+    },
+    "throwAccuracyDeep": {
+      "strength": { "strong": ["Drops the deep ball in a bucket", "Deep throws land in stride, play after play"], "mild": ["Can hit a receiver deep when the shot is there", "Deep accuracy is a strength"] },
+      "weakness": { "strong": ["Deep ball sails or dies, rarely on target", "Cannot be trusted to throw it long"], "mild": ["Deep accuracy is hit and miss", "Overthrows the long ones more than you would like"] }
+    },
+    "throwOnTheRun": {
+      "strength": { "strong": ["Throws as well moving as standing still", "Escapes and delivers on the move without losing a thing"], "mild": ["Comfortable throwing outside the pocket", "Keeps his mechanics on the move"] },
+      "weakness": { "strong": ["Falls apart the moment he has to move", "Accuracy vanishes when the pocket breaks"], "mild": ["Better with his feet set", "Throws off platform are an adventure"] }
+    },
+    "awareness": {
+      "strength": { "strong": ["Sees the whole field, always a step ahead", "Football intelligence jumps off the tape"], "mild": ["Smart player who rarely gets fooled", "Processes the game quickly"] },
+      "weakness": { "strong": ["Reads are slow and often wrong", "Gets lost when the picture changes"], "mild": ["Still learning to read the game", "A beat late to react at times"] }
+    },
+    "speed": {
+      "strength": { "strong": ["Speed jumps off the tape, pulls away from everyone", "Game-breaking speed"], "mild": ["Faster than most at his spot", "Has the speed to threaten"] },
+      "weakness": { "strong": ["Gets caught from behind; a real speed deficit", "Straight-line speed is well below the line"], "mild": ["Not a burner", "Speed is a limitation"] }
+    },
+    "acceleration": {
+      "strength": { "strong": ["Reaches top gear in two steps", "Explodes out of his stance"], "mild": ["Quick to get going", "Good first-step burst"] },
+      "weakness": { "strong": ["Slow to build speed, a lumbering start", "No burst to speak of"], "mild": ["Takes a while to get up to speed", "First step is ordinary"] }
+    },
+    "agility": {
+      "strength": { "strong": ["Changes direction without slowing, hips like a dancer", "Makes defenders miss in a phone booth"], "mild": ["Moves well laterally", "Fluid in tight spaces"] },
+      "weakness": { "strong": ["Stiff and upright, turns like a truck", "Cannot change direction under control"], "mild": ["A little stiff in the hips", "Lateral movement is average at best"] }
+    },
+    "breakTackle": {
+      "strength": { "strong": ["Runs through arm tackles like they are not there", "Needs a crowd to bring him down"], "mild": ["Breaks his share of tackles", "Hard to get to the ground with one man"] },
+      "weakness": { "strong": ["Goes down at first contact", "No power through contact at all"], "mild": ["Does not break many tackles", "Contact usually ends the run"] }
+    },
+    "carrying": {
+      "strength": { "strong": ["Ball security is never a question", "Keeps the ball high and tight through every hit"], "mild": ["Takes care of the football", "Fumbles are rare"] },
+      "weakness": { "strong": ["Puts the ball on the ground far too often", "Ball security is a real worry"], "mild": ["Loose with the ball at times", "Has had fumbling trouble"] }
+    },
+    "ballCarrierVision": {
+      "strength": { "strong": ["Sees the cutback before the hole opens", "Patience and vision of a veteran"], "mild": ["Finds the right lane more often than not", "Good feel for where the run is going"] },
+      "weakness": { "strong": ["Runs into the back of his own linemen", "No feel for the hole"], "mild": ["Vision is still developing", "Misses a cutback here and there"] }
+    },
+    "jukeMove": {
+      "strength": { "strong": ["Juke leaves tacklers grabbing air", "Shifty enough to embarrass a defender"], "mild": ["Has a move in the open field", "Can make one man miss"] },
+      "weakness": { "strong": ["No wiggle, runs straight into tacklers", "Cannot make anyone miss"], "mild": ["Not much of an open-field move", "More north-south than shifty"] }
+    },
+    "catching": {
+      "strength": { "strong": ["Hands like glue, plucks everything", "Never lets the ball into his body"], "mild": ["Reliable hands", "Catches what he should"] },
+      "weakness": { "strong": ["Drops are a real issue, fights the ball", "Cannot be trusted to hold on"], "mild": ["Hands are inconsistent", "Drops a few he should have"] }
+    },
+    "shortRouteRunning": {
+      "strength": { "strong": ["Snaps off short routes and is open every time", "Creates separation underneath at will"], "mild": ["Runs clean short routes", "Gets open on quick stuff"] },
+      "weakness": { "strong": ["Rounds off every short route, never open", "Short routes are sloppy"], "mild": ["Short routes need work", "Struggles to separate underneath"] }
+    },
+    "deepRouteRunning": {
+      "strength": { "strong": ["Stacks corners and tracks the deep ball like a center fielder", "A true vertical threat"], "mild": ["Wins downfield more often than not", "Good on the deep routes"] },
+      "weakness": { "strong": ["Cannot get behind a defense", "Deep routes go nowhere"], "mild": ["Not much of a deep threat", "Downfield routes are a weakness"] }
+    },
+    "release": {
+      "strength": { "strong": ["Beats press off the line with ease", "Cannot be jammed"], "mild": ["Handles press coverage", "Gets off the line cleanly"] },
+      "weakness": { "strong": ["Gets stuck at the line against press", "A jam takes him out of the play"], "mild": ["Press coverage bothers him", "Release is slow"] }
+    },
+    "catchInTraffic": {
+      "strength": { "strong": ["Catches through contact like it is nothing", "Fearless over the middle"], "mild": ["Holds on when hit", "Willing to work the middle"] },
+      "weakness": { "strong": ["Alligator arms in traffic", "Hears footsteps over the middle"], "mild": ["Struggles to hold on through contact", "Not comfortable in traffic"] }
+    },
+    "runBlock": {
+      "strength": { "strong": ["Moves people in the run game, a mauler", "Drive blocks finish in the second level"], "mild": ["Solid run blocker", "Gets movement at the point"] },
+      "weakness": { "strong": ["Gets no push at all", "Run blocking is a liability"], "mild": ["Run blocking is average", "Struggles to sustain run blocks"] }
+    },
+    "strength": {
+      "strength": { "strong": ["Raw power that shows on every snap", "Overpowers whoever lines up across from him"], "mild": ["Plenty strong for the position", "Wins with power when he needs to"] },
+      "weakness": { "strong": ["Gets pushed around, needs a lot of weight room time", "Plays weak"], "mild": ["Strength is a concern", "Could stand to get stronger"] }
+    },
+    "passBlock": {
+      "strength": { "strong": ["A wall in pass protection", "Nobody gets past him"], "mild": ["Reliable in pass protection", "Holds up one on one"] },
+      "weakness": { "strong": ["Pass protection is a disaster", "Gets beaten inside and out"], "mild": ["Pass protection needs work", "Loses some reps in protection"] }
+    },
+    "impactBlocking": {
+      "strength": { "strong": ["Blocks that knock defenders flat", "Finishes with a thud"], "mild": ["Delivers a punch as a blocker", "Blocks with attitude"] },
+      "weakness": { "strong": ["Blocks without any pop", "Catches defenders instead of hitting them"], "mild": ["Not a physical blocker", "Blocks are more position than punishment"] }
+    },
+    "runBlockPower": {
+      "strength": { "strong": ["Power run blocks that bury people", "A bulldozer in the run game"], "mild": ["Wins run blocks with power", "Good drive block"] },
+      "weakness": { "strong": ["No power in his run blocks at all", "Gets stood up on drive blocks"], "mild": ["Power blocking is not his strength", "Drive block lacks pop"] }
+    },
+    "powerMoves": {
+      "strength": { "strong": ["Bull rush collapses the pocket", "Walks blockers back into the quarterback"], "mild": ["Has a power rush to lean on", "Bull rush is effective"] },
+      "weakness": { "strong": ["Power rush goes nowhere", "Gets swallowed by bigger blockers"], "mild": ["Power moves are a work in progress", "Not much of a bull rush"] }
+    },
+    "finesseMoves": {
+      "strength": { "strong": ["Spin and swim moves that leave blockers grasping", "Rush repertoire of a veteran"], "mild": ["Has a couple of pass-rush moves", "Can win with quickness and hands"] },
+      "weakness": { "strong": ["No pass-rush moves at all", "Runs straight into blockers"], "mild": ["Pass-rush moves are raw", "Hands need work"] }
+    },
+    "blockShedding": {
+      "strength": { "strong": ["Sheds blocks like he is brushing off dust", "Blockers cannot stay on him"], "mild": ["Gets off blocks well", "Works free of blockers"] },
+      "weakness": { "strong": ["Stays blocked all day", "Cannot get off a block"], "mild": ["Slow to shed blocks", "Blockers stick to him"] }
+    },
+    "pursuit": {
+      "strength": { "strong": ["Chases everything down, sideline to sideline", "Relentless in pursuit"], "mild": ["Good pursuit angles", "Runs to the ball"] },
+      "weakness": { "strong": ["Takes himself out of plays with bad angles", "Pursuit effort is missing"], "mild": ["Pursuit angles could be tighter", "Not always around the ball"] }
+    },
+    "tackle": {
+      "strength": { "strong": ["Sure tackler, nobody slips through", "Wraps up and finishes every time"], "mild": ["Dependable tackler", "Rarely misses in the open field"] },
+      "weakness": { "strong": ["Misses far too many tackles", "Tackling is a real problem"], "mild": ["Misses some tackles he should make", "Tackling technique needs work"] }
+    },
+    "playRecognition": {
+      "strength": { "strong": ["Diagnoses the play before the snap is over", "Reads keys like a coach"], "mild": ["Reads plays well", "Rarely fooled by misdirection"] },
+      "weakness": { "strong": ["Bites on everything", "Slow to diagnose, often out of position"], "mild": ["Play recognition is still developing", "Can be fooled by play action"] }
+    },
+    "hitPower": {
+      "strength": { "strong": ["Hits that change games, ball carriers feel him", "A thumper"], "mild": ["Brings a pop when he arrives", "Physical tackler"] },
+      "weakness": { "strong": ["Tackles without any force", "Drag-down tackler, no punch"], "mild": ["Not a big hitter", "Tackles are more grab than hit"] }
+    },
+    "zoneCoverage": {
+      "strength": { "strong": ["Owns his zone, quarterbacks look elsewhere", "Instincts in zone are exceptional"], "mild": ["Comfortable in zone", "Good feel for his drop"] },
+      "weakness": { "strong": ["Lost in zone, receivers run free behind him", "Zone coverage is a liability"], "mild": ["Zone instincts need sharpening", "Drifts in zone"] }
+    },
+    "manCoverage": {
+      "strength": { "strong": ["Blankets receivers in man, a true shutdown player", "Sticks to his man like glue"], "mild": ["Holds up in man coverage", "Can be trusted on an island"] },
+      "weakness": { "strong": ["Gets beaten badly in man", "Cannot be left alone with a receiver"], "mild": ["Man coverage is a weakness", "Loses receivers at the break"] }
+    },
+    "pressCoverage": {
+      "strength": { "strong": ["Jams receivers off the line and wrecks the route", "Press technique is textbook"], "mild": ["Can press at the line", "Gets hands on receivers early"] },
+      "weakness": { "strong": ["Whiffs at the line, receivers run right past", "Press coverage is a mess"], "mild": ["Press technique needs work", "Not much of a jam"] }
+    },
+    "kickPower": {
+      "strength": { "strong": ["Leg that reaches from anywhere past midfield", "Booming leg"], "mild": ["Strong leg", "Range is a plus"] },
+      "weakness": { "strong": ["Leg falls well short of the pack", "Cannot reach from long range"], "mild": ["Leg strength is ordinary", "Range is limited"] }
+    },
+    "kickAccuracy": {
+      "strength": { "strong": ["Splits the uprights every time", "Money when it matters"], "mild": ["Accurate kicker", "Rarely misses the makeable ones"] },
+      "weakness": { "strong": ["Sprays kicks all over the place", "Accuracy is a real worry"], "mild": ["Accuracy is inconsistent", "Misses more than he should"] }
+    },
+    "longSnap": {
+      "strength": { "strong": ["Snaps are laser-guided, never a bad one", "As reliable a snapper as you will find"], "mild": ["Consistent snapper", "Snaps arrive on time and on target"] },
+      "weakness": { "strong": ["Snaps wander, a real problem on kicks", "Cannot be trusted to snap it clean"], "mild": ["Snap consistency is shaky", "An occasional high snap"] }
+    }
+  }
+}
