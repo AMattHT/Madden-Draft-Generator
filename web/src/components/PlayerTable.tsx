@@ -422,7 +422,7 @@ export function PlayerTable({
     <div ref={scrollRef} onScroll={onScroll} className="h-full min-h-0 overflow-auto">
       <table className="w-full border-separate border-spacing-0 text-sm" style={{ minWidth }}>
         <thead className="sticky top-0 z-10 text-neutral-500">
-          <tr className="bg-surface-1/95 shadow-[0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+          <tr className="bg-surface-1 shadow-[0_1px_0_rgba(255,255,255,0.06)]">
             <th className="w-[3px] p-0" aria-hidden />
             <SortTh id="pick" sort={sort} onSort={onSort} className={`${th} w-12 text-right`}>#</SortTh>
             <SortTh id="team" sort={sort} onSort={onSort} className={`${th} w-12 text-center`}>Team</SortTh>

@@ -379,6 +379,13 @@ export const LikenessService = {
     return { portraitPid: 0, portraitKind: 'none' };
   },
 
+  /** A manually selected scan's own verified menu portrait, never the old player's. */
+  portraitPidForAsset(asset: string, version: 'm26' | 'm27'): number {
+    const head = catalogFor(version).assets.get(asset.toLowerCase());
+    if (!head) return 0;
+    return this.portraitFor({ firstName: head.first ?? '', lastName: head.last ?? '', photoId: head.portraitPid }, head, version).portraitPid;
+  },
+
   /** The head asset only (see realFace for the portrait). */
   resolveHead(player: Pick<BaselinePlayer, 'firstName' | 'lastName' | 'draftYear' | 'playerAssetsId' | 'photoId'>, version: 'm26' | 'm27'): RealFace | null {
     const cat = catalogFor(version);

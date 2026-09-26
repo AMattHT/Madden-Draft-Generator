@@ -5,6 +5,7 @@ import path from 'path';
 import zlib from 'zlib';
 import { M27_SAVES_DIR } from '../../config/paths';
 import { parseTdb2, serializeTdb2, makeIntField, makeStringField, makeRecord, intOf, strOf, setInt, setStr, cloneRecord } from '../Tdb2Engine';
+import { rosterFixturePayload } from './fixtures/rosterFixture';
 
 const OFFICIAL = path.join(M27_SAVES_DIR, 'ROSTER-Official');
 const skipWithoutRoster = { skip: fs.existsSync(OFFICIAL) ? false : 'no Madden 27 ROSTER-Official in the Saves folder' };
@@ -28,8 +29,8 @@ test('int and string fields round-trip through the engine encoding', () => {
   assert.equal(intOf(rec, 'PAGE', 21), 21, 'missing int falls back');
 });
 
-test('the shipped roster parses into the known tables and reads Geno Smith', skipWithoutRoster, async () => {
-  const file = await parseTdb2(payloadOf(OFFICIAL));
+test('a fixed roster parses into the known tables and reads encoded player values', async () => {
+  const file = await parseTdb2(rosterFixturePayload());
   assert.deepEqual(file.tables.map((t) => t.name), ['BLOB', 'DCHT', 'DFTP', 'INJY', 'PLAY', 'PLCT', 'PRSN', 'TEAM']);
   assert.equal(file.PLAY.records.length, file.PLAY.numEntries);
   const geno = file.PLAY.records.find((r) => strOf(r, 'PFNA') === 'Geno' && strOf(r, 'PLNA') === 'Smith');
@@ -43,15 +44,32 @@ test('the shipped roster parses into the known tables and reads Geno Smith', ski
   assert.ok(blob.records.some((r: { index: number }) => r.index === 112), 'blob keyed by PGID');
 });
 
-test('serialize then parse gives back the same records', skipWithoutRoster, async () => {
-  const a = await parseTdb2(payloadOf(OFFICIAL));
+test('serialize then parse gives back the same records', async () => {
+  const payload = rosterFixturePayload();
+  const a = await parseTdb2(payload);
   const out = serializeTdb2(a);
+  assert.deepEqual(out, payload, 'all fixed payload bytes, including compressed visuals, round-trip');
   const b = await parseTdb2(out);
   assert.equal(b.PLAY.records.length, a.PLAY.records.length);
-  for (let i = 0; i < a.PLAY.records.length; i += 97) {
+  for (let i = 0; i < a.PLAY.records.length; i++) {
     const ra = a.PLAY.records[i], rb = b.PLAY.records[i];
     for (const k of Object.keys(ra.fields)) {
       if (ra.fields[k].type === 0 || ra.fields[k].type === 1) assert.equal(rb.fields[k]?.value, ra.fields[k].value, `PLAY[${i}].${k}`);
+    }
+  }
+  assert.equal(b.TEAM.records.length, 2);
+  assert.equal(b.BLOB.records[0].fields.BLBM.value.records.length, a.BLOB.records[0].fields.BLBM.value.records.length);
+});
+
+test('the installed roster round-trips sampled player fields and table counts', skipWithoutRoster, async () => {
+  const a = await parseTdb2(payloadOf(OFFICIAL));
+  const b = await parseTdb2(serializeTdb2(a));
+  assert.equal(b.PLAY.records.length, a.PLAY.records.length);
+  for (let i = 0; i < a.PLAY.records.length; i += 97) {
+    for (const [key, field] of Object.entries(a.PLAY.records[i].fields)) {
+      if (field.type === 0 || field.type === 1) {
+        assert.equal(b.PLAY.records[i].fields[key]?.value, field.value, `PLAY[${i}].${key}`);
+      }
     }
   }
   assert.equal(b.TEAM.records.length, 33);
@@ -79,8 +97,8 @@ test('an unedited roster writes back with the tables after the blob byte-identic
   assert.ok(growth < 0.005, `payload size within 0.5% (was ${(growth * 100).toFixed(2)}%)`);
 });
 
-test('cloneRecord copies fields and subtables so edits to the clone leave the source alone', skipWithoutRoster, async () => {
-  const file = await parseTdb2(payloadOf(OFFICIAL));
+test('cloneRecord copies fields and subtables so edits to the clone leave the source alone', async () => {
+  const file = await parseTdb2(rosterFixturePayload());
   const src = file.PLAY.records[0];
   const copy = cloneRecord(src);
   assert.notEqual(copy, src);

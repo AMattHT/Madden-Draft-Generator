@@ -6,6 +6,8 @@ import { PositionMapper } from './PositionMapper';
 import { RATING_KEYS } from './AttributeModel';
 import { GEAR_SLOT_TYPES, waistConflict } from './GearOptionsService';
 import { RosterAddService } from './RosterAddService';
+import { genericHeadPid } from './M27Fields';
+import { LikenessService } from './LikenessService';
 import type { RosterBuildDoc, PlayerFieldEdit, ApplyCounts, RosterBuildResult, AddedPlayer, GeneratedRosterPlayer } from '../types/roster';
 
 /** Loadout slotType (the app's names, as in the CharacterVisuals JSON) -> roster blob SLOT id.
@@ -97,6 +99,9 @@ function addPlayer(base: BaseRoster, add: AddedPlayer, g: GeneratedRosterPlayer,
   setInt(row, 'PCOL', g.collegeId); setStr(row, 'PHTN', g.hometown); setInt(row, 'PHSN', g.homeStateId);
   setInt(row, 'PDRO', g.draftRound); setInt(row, 'PDPI', g.draftPick); setInt(row, 'PLDT', 0);
   setStr(row, 'PEPS', g.assetName || g.genericHead);
+  // PSXP selects the menu photo; PEPS/ASNM select the separate 3D head.
+  // Always replace the cloned player's portrait, including an explicit zero.
+  setInt(row, 'PSXP', g.portraitPid);
   setInt(row, 'PCMT', g.commentaryId);
   setInt(row, 'PCSA', salary); setInt(row, 'PTSA', salary); setInt(row, 'PVTS', salary);
   for (const k of RATING_KEYS) setInt(row, PLAY_RATING_KEY[k], g.ratings[k] ?? 0);
@@ -197,11 +202,19 @@ function applyEdit(base: BaseRoster, pgid: number, e: PlayerFieldEdit, skipped: 
   // PEPS as well as GENR, and no scan asset in the blob. A face scan (applied after, so it
   // wins when both are present) sets PEPS and ASNM and leaves the generic head as a fallback.
   if (e.genericHead) {
-    if (/^gen_\d/i.test(e.genericHead) && blob) { setStr(blob, 'GENR', e.genericHead); setStr(row, 'PEPS', e.genericHead); setStr(blob, 'ASNM', ''); touched = true; }
+    if (/^gen_\d/i.test(e.genericHead) && blob) {
+      setStr(blob, 'GENR', e.genericHead); setStr(row, 'PEPS', e.genericHead); setStr(blob, 'ASNM', '');
+      setInt(row, 'PSXP', genericHeadPid(e.genericHead));
+      touched = true;
+    }
     else skipped.push(`edit: bad generic head ${e.genericHead} for ${pgid}`);
   }
   if (e.faceAsset) {
-    if (!/^gen_/i.test(e.faceAsset) && blob) { setStr(row, 'PEPS', e.faceAsset); setStr(blob, 'ASNM', e.faceAsset); touched = true; }
+    if (!/^gen_/i.test(e.faceAsset) && blob) {
+      setStr(row, 'PEPS', e.faceAsset); setStr(blob, 'ASNM', e.faceAsset);
+      setInt(row, 'PSXP', LikenessService.portraitPidForAsset(e.faceAsset, 'm27') || genericHeadPid(strOf(blob, 'GENR')));
+      touched = true;
+    }
     else skipped.push(`edit: bad face asset ${e.faceAsset} for ${pgid}`);
   }
   if (e.personaDNA || e.focus != null) {

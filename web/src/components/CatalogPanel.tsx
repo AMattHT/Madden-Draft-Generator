@@ -7,8 +7,8 @@ import { VirtualList } from './VirtualList';
 import { TeamPicker } from './TeamPicker';
 import type { PickTeam } from '../teamMatch';
 
-/** Compact row height (h-10), shared with the windowed list. */
-const ROW_H = 40;
+/** Compact / studio row height (shared with VirtualList). */
+const ROW_H = 48;
 
 type SortKey = 'year' | 'name' | 'pos' | 'pick' | 'wav' | 'cal' | 'pb' | 'team';
 
@@ -93,32 +93,45 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
   const maxWav = useMemo(() => Math.max(1, ...(catalog ?? []).map((p) => p.wav ?? 0)), [catalog]);
 
   if (compact) {
+    const compactSel = 'h-9 rounded-lg border border-white/[0.07] bg-black/30 px-3 text-sm text-neutral-200 transition-colors hover:border-white/[0.14] focus:border-primary focus:outline-none';
     return (
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-3 py-2">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${sel} w-44`} />
-          <select value={grp} onChange={(e) => setGrp(e.target.value)} className={sel} title="Madden position">
+        <div className="flex flex-wrap items-center gap-2.5 border-b border-white/[0.06] px-4 py-2.5">
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or college…" className={`${compactSel} w-56 xl:w-72`} />
+          <select value={grp} onChange={(e) => setGrp(e.target.value)} className={compactSel} title="Madden position">
             <option value="ALL">All positions</option>
             {POS_NAMES.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
-          <select value={era} onChange={(e) => setEra(e.target.value)} className={sel} title="Draft decade">
+          <select value={era} onChange={(e) => setEra(e.target.value)} className={compactSel} title="Draft decade">
             {ERAS.map((e) => <option key={e} value={e}>{e === 'ALL' ? 'All eras' : `${e}s`}</option>)}
           </select>
-          <select value={club} onChange={(e) => setClub(e.target.value)} className={`${sel} max-w-40`} title="Drafted by">
+          <select value={club} onChange={(e) => setClub(e.target.value)} className={`${compactSel} max-w-48`} title="Drafted by">
             <option value="ALL">All clubs</option>
             {clubs.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <label className="flex items-center gap-1.5 text-xs text-neutral-300">
-            <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="accent-primary" />HOF
+          <label className="flex items-center gap-2 text-sm text-neutral-300">
+            <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="h-4 w-4 accent-primary" />HOF
           </label>
-          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={sel}>
+          <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={compactSel}>
             <option value="cal">Sort: Overall</option>
             <option value="name">Sort: Name</option>
             <option value="pos">Sort: Position</option>
             <option value="team">Sort: Team</option>
             <option value="year">Sort: Year</option>
+            <option value="wav">Sort: wAV</option>
           </select>
-          <span className="ml-auto text-xs tabular-nums text-muted">{list.length.toLocaleString()} match</span>
+          <span className="ml-auto text-sm tabular-nums text-muted"><span className="font-semibold text-neutral-300">{list.length.toLocaleString()}</span> match</span>
+        </div>
+        {/* Column header so wide screens read as a board, not a stretched name→Add gap. */}
+        <div className="hidden h-9 shrink-0 items-center gap-3 border-b border-white/[0.06] bg-surface-0/80 px-4 text-[11px] font-semibold uppercase tracking-wide text-muted xl:flex">
+          <span className="w-9" />
+          <span className="w-[min(18rem,28%)] shrink-0">Player</span>
+          <span className="min-w-0 flex-1">College</span>
+          <span className="w-14 text-center">Pos</span>
+          <span className="w-[9.75rem] text-right">Drafted</span>
+          <span className="hidden w-28 2xl:block">wAV</span>
+          <span className="w-11 text-center">OVR</span>
+          <span className="w-16" />
         </div>
         <VirtualList items={catalog ? list : []} rowHeight={ROW_H} keyOf={(p) => p.key}
           before={<>
@@ -132,23 +145,38 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           after={catalog && list.length === 0 ? <div className="px-3 py-6 text-center text-sm text-neutral-500">Nobody matches.</div> : null}
           render={(p) => {
             const st = status(p.key);
+            const wavPct = Math.round(((p.wav ?? 0) / maxWav) * 100);
             return (
-              <div className={`flex h-10 items-center gap-2.5 border-b border-white/[0.05] px-3 text-sm ${st ? 'bg-success/5' : 'hover:bg-white/[0.035]'}`}>
-                <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="xs" />
-                <span className="min-w-0 flex-1 truncate font-medium text-neutral-100">
+              <div className={`flex h-12 items-center gap-3 border-b border-white/[0.05] px-4 text-sm ${st ? 'bg-success/5' : 'hover:bg-white/[0.035]'}`}>
+                <Portrait src={headshot(p)} fallback={headshotFallback(p)} size="sm" />
+                <span className="w-[min(18rem,28%)] shrink-0 truncate text-[15px] font-semibold text-neutral-50">
                   {p.first} {p.last}
-                  {p.hof && <span className="ml-1 rounded bg-gold/15 px-1 text-[11px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
+                  {p.hof && <span className="ml-1.5 rounded bg-gold/15 px-1.5 py-0.5 text-[11px] font-semibold text-gold" title="Hall of Fame">HOF</span>}
                 </span>
-                <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-xs font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.mpos}</span>
-                <span className="inline-flex w-6 justify-center" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>{p.team && <TeamLogo team={p.team} size="sm" />}</span>
-                <span className="w-20 text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
-                <span className="w-8 rounded bg-surface-2 px-1 py-0.5 text-center text-xs font-semibold tabular-nums text-neutral-200" title="Career score: his overall when added">{p.cal}</span>
+                <span className="hidden min-w-0 flex-1 truncate text-sm text-muted xl:block" title={p.college || undefined}>{p.college || '—'}</span>
+                <span className="w-14 shrink-0 rounded bg-white/[0.06] px-1.5 py-0.5 text-center text-xs font-semibold text-neutral-200 ring-1 ring-white/[0.06]">{p.mpos}</span>
+                <span className="inline-flex w-[9.75rem] shrink-0 items-center justify-end gap-2" title={p.team ? `Drafted by the ${p.team.name}` : undefined}>
+                  {p.team ? (
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white/[0.1] ring-1 ring-white/[0.08]">
+                      <TeamLogo team={p.team} size="md" />
+                    </span>
+                  ) : (
+                    <span className="h-8 w-8 shrink-0" aria-hidden />
+                  )}
+                  <span className="min-w-[4.5rem] text-right text-xs tabular-nums text-neutral-400">{p.year}{p.round != null ? ` · Rd ${p.round}` : ''}</span>
+                </span>
+                <span className="hidden w-28 shrink-0 2xl:block" title={p.wav != null ? `Career wAV ${p.wav}` : 'No wAV'}>
+                  <span className="flex h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                    <span className="rounded-full bg-primary/70" style={{ width: `${wavPct}%` }} />
+                  </span>
+                </span>
+                <span className="w-11 shrink-0 rounded bg-surface-2 px-1 py-1 text-center text-sm font-bold tabular-nums text-neutral-100" title="Career score: his overall when added">{p.cal}</span>
                 {st ? (
-                  <span className="w-14 rounded-md border border-success/40 bg-success/10 px-1.5 py-0.5 text-center text-xs text-success" title={st.title}>{st.label}</span>
+                  <span className="w-16 shrink-0 rounded-md border border-success/40 bg-success/10 px-2 py-1 text-center text-xs font-medium text-success" title={st.title}>{st.label}</span>
                 ) : addTeams ? (
-                  addDisabled ? <span className="w-24 text-center text-xs text-muted">Add to…</span> : <TeamPicker teams={addTeams} onPick={(id) => onAdd(p.key, id)} />
+                  addDisabled ? <span className="w-28 shrink-0 text-center text-xs text-muted">Add to…</span> : <span className="w-28 shrink-0"><TeamPicker teams={addTeams} onPick={(id) => onAdd(p.key, id)} /></span>
                 ) : (
-                  <button onClick={() => onAdd(p.key)} disabled={addDisabled} className="w-14 rounded-md border border-primary/50 bg-primary/10 px-1.5 py-0.5 text-xs text-primary hover:bg-primary/20 disabled:opacity-40">Add</button>
+                  <button onClick={() => onAdd(p.key)} disabled={addDisabled} className="w-16 shrink-0 rounded-md border border-primary/50 bg-primary/10 px-2 py-1 text-xs font-semibold text-primary-light hover:bg-primary/20 disabled:opacity-40">Add</button>
                 )}
               </div>
             );
@@ -203,7 +231,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
         {col('name', 'Player', 'flex-1')}
         {col('pos', 'Pos', 'w-14')}
         {col('year', 'Year', 'w-16')}
-        {col('pick', 'Drafted', 'w-24')}
+        {col('pick', 'Drafted', 'w-28')}
         {col(null, 'College', 'hidden w-36 2xl:block')}
         {col('wav', 'wAV', 'w-28 text-right')}
         {col('pb', 'PB', 'hidden w-10 text-right 2xl:block')}
@@ -232,8 +260,12 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
               </span>
               <span className="w-14"><span className="inline-flex h-5 items-center rounded bg-white/[0.05] px-1.5 text-[11px] font-semibold text-neutral-300 ring-1 ring-white/[0.06]">{p.mpos}</span></span>
               <span className="w-16 text-[11px] tabular-nums text-neutral-300">{p.year}{p.league !== 'NFL' ? <span className="ml-1 text-neutral-500">{p.league}</span> : null}</span>
-              <span className="flex w-24 items-center gap-1.5 text-[11px] tabular-nums text-neutral-300">
-                {p.team && <TeamLogo team={p.team} size="sm" />}
+              <span className="flex w-28 items-center gap-2 text-[11px] tabular-nums text-neutral-300">
+                {p.team ? (
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/[0.1] ring-1 ring-white/[0.08]">
+                    <TeamLogo team={p.team} size="sm" />
+                  </span>
+                ) : null}
                 {p.round != null ? `Rd ${p.round}${p.pick != null ? ` · #${p.pick}` : ''}` : 'UDFA'}
               </span>
               <span className="hidden w-36 truncate text-[11px] text-neutral-400 2xl:block">{p.college}</span>

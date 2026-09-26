@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FaceScan, ToneFromPhoto } from '../types';
 import { Icon, ICONS } from './ui';
@@ -169,8 +170,8 @@ export function AppearanceEditor({
   const usingScan = !!(currentAsset && !/^gen_/i.test(currentAsset));
   const scanLabel = gameVersion === 'm27' ? 'M27 face scans' : 'M26 face scans';
 
-  return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -434,6 +435,7 @@ export function AppearanceEditor({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

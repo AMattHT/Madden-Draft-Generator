@@ -131,7 +131,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
   return (
     <div className="fixed inset-0 z-50 flex animate-fade-in flex-col bg-surface-0" role="dialog" aria-modal="true" aria-label="Class Studio">
       {/* ---- Header: close, the class's name as its title, saved classes, actions. ---- */}
-      <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.06] bg-surface-1/70 px-4 py-2.5 backdrop-blur-md">
+      <header className="flex shrink-0 items-center gap-3 border-b border-white/[0.06] bg-surface-1 px-4 py-2.5">
         <IconButton label="Close the studio" onClick={onClose}>
           <Icon path={ICONS.chevronLeft} className="h-4 w-4" />
         </IconButton>
@@ -259,7 +259,7 @@ export function ClassStudio({ initial, onClose, onGenerate }: {
               const filled = Math.max(0, Math.min(end, draft.board.length) - start);
               return (
                 <div key={r} className="mb-3">
-                  <div className="sticky top-0 z-10 flex items-center gap-3 bg-surface-1/95 px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light backdrop-blur-md">
+                  <div className="sticky top-0 z-10 flex items-center gap-3 bg-surface-1 px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary-light">
                     <span>Round {r + 1}</span>
                     <span className="font-semibold normal-case tracking-normal text-neutral-500">{filled} of {end - start}</span>
                     <span className="h-px flex-1 bg-white/[0.06]" />
@@ -393,7 +393,7 @@ function CustomPlayerDrawer({ player, isNew, archetypes, colleges, onCancel, onS
   const feet = Math.floor(p.heightInches / 12), inches = p.heightInches % 12;
 
   return (
-    <div className="absolute inset-0 z-20 flex animate-fade-in flex-col bg-surface-1/92 backdrop-blur-md" role="dialog" aria-label="Custom player">
+    <div className="absolute inset-0 z-20 flex animate-fade-in flex-col bg-surface-1" role="dialog" aria-label="Custom player">
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-3">
         <IconButton label="Back to the pool" onClick={onCancel}>
           <Icon path={ICONS.chevronLeft} className="h-4 w-4" />

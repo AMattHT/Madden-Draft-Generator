@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
 import type { PlayerRow, GearOption, FrontSevenInfo } from '../types';
 import { api, displayPortraitChain, type ArchetypeOption, type PersonaTrait, type PersonaFocusOption } from '../api';
@@ -412,9 +413,9 @@ export function ProfileModal({
     );
   };
 
-  return (
+  const content = (
     <>
-    <div className={pane ? 'flex h-full min-h-0 w-full' : 'fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/55 backdrop-blur-[2px]'} onClick={pane ? undefined : onClose}>
+    <div className={pane ? 'flex h-full min-h-0 w-full' : 'fixed inset-0 z-40 flex animate-fade-in justify-end bg-black/55'} onClick={pane ? undefined : onClose}>
       <div
         role={pane ? 'region' : 'dialog'}
         aria-modal={pane ? undefined : true}
@@ -424,7 +425,7 @@ export function ProfileModal({
         className={pane ? 'flex h-full w-full animate-fade-in flex-col overflow-auto outline-none' : 'flex h-full w-[520px] max-w-full animate-slide-in-right flex-col overflow-auto border-l border-white/[0.07] bg-surface-1 shadow-[-12px_0_36px_rgba(0,0,0,0.45)] outline-none'}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1/92 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 border-b border-white/[0.06] bg-surface-1">
           <div className="relative flex items-start gap-3 px-4 pt-3"><span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-primary/[0.07] to-transparent" />
           <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-surface-2 shadow-[0_6px_18px_rgba(0,0,0,0.4)]">
             {imgSrc ? (
@@ -843,7 +844,7 @@ export function ProfileModal({
           ))}
         </div>
 
-        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-white/[0.06] bg-surface-1/95 px-4 py-2.5 backdrop-blur-sm">
+        <div className="sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-white/[0.06] bg-surface-1 px-4 py-2.5">
           <span className="text-[11px] text-muted">{footer ?? 'Edits save automatically & apply to the .mdc export.'}</span>
           <button
             onClick={() => {
@@ -901,4 +902,7 @@ export function ProfileModal({
     )}
     </>
   );
+  // Fullscreen overlays must escape animated/contained board ancestors.
+  // The scout desk remains in its grid; its nested editors portal separately.
+  return pane ? content : createPortal(content, document.body);
 }

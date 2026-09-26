@@ -41,6 +41,8 @@ export interface GeneratedRosterPlayer {
   gear: Record<string, string>;
   personaDNA: number[]; focus: number;
   commentaryId: number;
+  /** Madden 27 menu-portrait ID, written to PLAY.PSXP (independent of the 3D head). */
+  portraitPid: number;
   /** For the UI: the same portrait URL the class table would show, or null. */
   portrait: string | null;
 }

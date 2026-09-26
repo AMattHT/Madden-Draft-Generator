@@ -200,7 +200,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-3">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-3 xl:px-8 xl:py-3.5">
         <div className="flex min-w-0 items-center gap-3">
           <input value={doc.name} onChange={(e) => onChange({ ...doc, name: e.target.value, updatedAt: Date.now() })} placeholder="Roster name" disabled={readOnly}
             className="w-64 rounded-md border border-white/[0.07] bg-black/30 px-3 py-1.5 text-sm font-semibold text-neutral-100 placeholder:font-normal placeholder:text-muted focus:border-primary focus:outline-none disabled:opacity-60" />
@@ -233,7 +233,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
 
       <TeamStrip data={data} players={players} logos={logos} selectedTeam={selectedTeam} onSelectTeam={setSelectedTeam} onMove={move} readOnly={readOnly} />
 
-      <section className="mx-6 my-3 flex min-h-0 flex-1 flex-col overflow-hidden glass rounded-xl">
+      <section className="mx-6 my-3 flex min-h-0 flex-1 flex-col overflow-hidden glass rounded-xl xl:mx-8">
         <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.06] px-3 py-2">
           <div className="flex items-center gap-0.5 rounded-lg border border-border-strong bg-surface-0 p-0.5">
             <button onClick={() => setTab('roster')} aria-pressed={tab === 'roster'} className={tabCls(tab === 'roster')}>Roster</button>

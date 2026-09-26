@@ -115,7 +115,7 @@ export function TopBar({
   const draft = view === 'draft';
   return (
     <header className="relative z-30 shrink-0">
-      <div className="flex h-12 items-center justify-between gap-3 border-b border-white/[0.05] bg-surface-1/80 px-3 backdrop-blur-sm">
+      <div className="flex h-12 items-center justify-between gap-3 border-b border-white/[0.05] bg-surface-1 px-3">
         <div className="flex min-w-0 items-center gap-3">
           <button onClick={onGoHome} title="Home" className="press flex items-center gap-2.5 rounded-lg pr-1 transition-opacity hover:opacity-85">
             <LogoMark />

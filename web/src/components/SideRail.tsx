@@ -38,7 +38,7 @@ export function SideRail({ view, onSetView, franchiseEnabled }: { view: AppView;
   return (
     <nav
       aria-label="Areas"
-      className={`flex shrink-0 flex-col border-r border-white/[0.05] bg-surface-1/80 py-1.5 backdrop-blur-sm transition-[width] duration-200 ${collapsed ? 'w-14' : 'w-14 lg:w-[84px]'}`}
+      className={`flex shrink-0 flex-col border-r border-white/[0.05] bg-surface-1 py-1.5 transition-[width] duration-200 ${collapsed ? 'w-14' : 'w-14 lg:w-[84px]'}`}
       style={{ transitionTimingFunction: 'var(--ease-out-expo)' }}
     >
       {entries.map((e) => {

@@ -34,7 +34,7 @@ export function GamePicker({ current, onPick, onDismiss }: {
 }) {
   const [remember, setRemember] = useState(true);
   return (
-    <div className="fixed inset-0 z-[60] flex animate-fade-in items-center justify-center bg-surface-0/90 p-6 backdrop-blur-md" role="dialog" aria-modal="true" aria-label="Choose your game">
+    <div className="fixed inset-0 z-[60] flex animate-fade-in items-center justify-center bg-surface-0/90 p-6" role="dialog" aria-modal="true" aria-label="Choose your game">
       <div className="glass-strong w-full max-w-4xl animate-pop rounded-2xl p-8">
         <div className="flex items-start gap-4">
           <LogoMark size="lg" />

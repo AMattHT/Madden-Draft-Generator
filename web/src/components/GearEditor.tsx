@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GearOption } from '../types';
 import { api, type RealGearPlayer, type RealGearPlayerSummary } from '../api';
@@ -415,8 +416,8 @@ export function GearEditor({
 
   const compatLabel = helmetCompat ? helmetCompat.replace(/([a-z])([A-Z0-9])/g, '$1 $2').toUpperCase() : null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex animate-fade-in items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -631,6 +632,7 @@ export function GearEditor({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

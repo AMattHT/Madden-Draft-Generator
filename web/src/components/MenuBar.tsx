@@ -136,7 +136,7 @@ export function MenuBar({
   ];
 
   return (
-    <div ref={rootRef} className="relative z-40 flex h-6 shrink-0 select-none items-stretch bg-surface-1/70 px-2 text-[11px] text-neutral-400 backdrop-blur-md">
+    <div ref={rootRef} className="relative z-40 flex h-6 shrink-0 select-none items-stretch bg-surface-1 px-2 text-[11px] text-neutral-400">
       {menus.map((m) => (
         <div key={m.id} className="relative flex">
           <button
