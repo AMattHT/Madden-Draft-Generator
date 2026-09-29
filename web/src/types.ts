@@ -224,6 +224,9 @@ export interface DroppedPlayer {
 /** A Madden 27 ROSTER save as the server reads it. */
 export interface RosterTeam { id: number; name: string; city: string; abbr: string }
 export interface RosterPlayer {
+  wav?: number | null;
+  wavSource?: 'actual' | 'predicted';
+  draftYear?: number;
   id: number;
   firstName: string;
   lastName: string;
@@ -275,6 +278,9 @@ export interface AddedPlayer { tempId: string; key: string; teamId: number; jers
 
 /** A pool player rated for a roster (the server's GeneratedRosterPlayer). */
 export interface GeneratedRosterPlayer {
+  degraded?: boolean;
+  wav?: number | null;
+  wavSource?: 'actual' | 'predicted';
   key: string; firstName: string; lastName: string; positionId: number; position: string;
   archetypeId: number; archetype: string | null; collegeId: number; college: string | null;
   hometown: string; homeStateId: number; age: number; yearsPro: number; heightInches: number; weight: number; jersey: number;
@@ -285,6 +291,7 @@ export interface GeneratedRosterPlayer {
 
 /** A roster the user is building: deltas against a base ROSTER file. */
 export interface RosterDoc {
+  mode?: 'retro' | 'madden';
   id: string;
   name: string;
   /** fromSaves: the base was picked from the saves folder (export can name it); false for a browsed file (export uses openedId). */

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { newRosterDoc, teamOf, viewPlayers, docCounts, withMove, withEdit, withoutEdits, railEntries, groupByPosition, withAdd, withoutAdd, withAddMove, addId, addedKeys } from './rosterDoc';
+import { newRosterDoc, teamOf, viewPlayers, docCounts, withMove, withEdit, withoutEdits, railEntries, groupByPosition, withAdd, withoutAdd, withAddMove, addId, addedKeys, withRosterMode } from './rosterDoc';
 import type { RosterData, RosterPlayer, GeneratedRosterPlayer } from './types';
 
 const player = (id: number, teamId: number, position = 'QB', overall = 70): RosterPlayer => ({
@@ -75,6 +75,33 @@ const payton: GeneratedRosterPlayer = {
   overall: 96, devTrait: 3, draftYear: 1975, draftRound: 1, draftPick: 4, ratings: { speed: 92 }, assetName: '', genericHead: 'gen_6_T_G_005', skinTone: 6,
   bodyType: 'Muscular', gear: { helmet: 'GearHelmet_Speed_Flex' }, personaDNA: [1, 2], focus: 1, commentaryId: 0, portrait: null,
 };
+
+test('changing lenses updates all pool additions while retaining manual edits, moves and base players', () => {
+  let doc = withAdd(newRosterDoc(data, true), payton.key, 2);
+  doc = withAdd(doc, 'second', 1);
+  doc = withEdit(doc, doc.adds[0].tempId, { position: 'FB', jersey: 42, ratings: { speed: 99 }, gear: { helmet: 'custom' } });
+  doc = withEdit(doc, doc.adds[1].tempId, { overall: 91 });
+  doc = withMove(doc, 10, 2, data);
+  const changed = withRosterMode(doc, 'madden');
+  assert.equal(JSON.parse(JSON.stringify(changed)).mode, 'madden');
+  assert.deepEqual(changed.edits, doc.edits);
+  assert.deepEqual(changed.adds, doc.adds);
+  const rookie = { ...payton, overall: 78, devTrait: 1, ratings: { speed: 85, agility: 81 } };
+  const rows = viewPlayers(changed, data, { [payton.key]: rookie, second: { ...rookie, key: 'second' } });
+  const first = rows.find(p => p.tempId === doc.adds[0].tempId)!;
+  assert.equal(first.overall, 78);
+  assert.equal(first.devTrait, 1);
+  assert.equal(first.ratings.speed, 99);
+  assert.equal(first.ratings.agility, 81);
+  assert.equal(first.position, 'FB');
+  assert.equal(first.jersey, 42);
+  assert.equal(first.visuals.helmet, 'custom');
+  assert.equal(first.teamId, 2);
+  assert.equal(rows.find(p => p.tempId === doc.adds[1].tempId)!.overall, 91);
+  assert.equal(rows.find(p => p.id === 10)!.overall, data.players[0].overall);
+  assert.equal(rows.find(p => p.id === 10)!.teamId, 2);
+  assert.equal(withRosterMode(changed, 'retro').mode, 'retro');
+});
 
 test('adds join the view with a negative id and follow moves, edits and removal', () => {
   let doc = withAdd(newRosterDoc(data, true), payton.key, 1);

@@ -188,6 +188,31 @@ const normKey = (k: string) => stripSuffix(k.toLowerCase()).replace(/[^a-z ]/g, 
  *  same era guard as the exact key. */
 const m27KeyTight = (first: string, last: string) => stripSuffix(`${first} ${last}`.toLowerCase()).replace(/[^a-z]/g, '');
 
+/** Individually verified pool-name -> catalog-asset matches, scoped to entry
+ *  year. These are not general nickname substitutions: another Michael or
+ *  Gregory must not inherit a current player's head. The target game's catalog
+ *  must still contain the asset. Sources: docs/likeness/ decade batch ledgers. */
+const REVIEWED_HEAD_ALIASES: Record<string, string> = {
+  'gregoryrousseau|2021': 'rousseaugreg_21517',
+  'michaeldanna|2020': 'dannamike_21231',
+  'delmarglaze|2024': 'glazedj_14731',
+  'dariusslay|2013': 'slayjrdarius_1426',
+  'goldentate|2010': 'tateiiigolden_9755',
+  'toddgurley|2015': 'gurleyiitodd_2399',
+  'mattjudon|2016': 'judonmatthew_17728',
+  'johnelway|1983': 'elwayjohn_11420',
+};
+
+/** Named scan bundles whose portrait metadata was missing from the catalog.
+ *  PIDs come from PID_Portrait_Mapping.csv; each portrait must also exist in
+ *  the target game's inventory. A head bundle alone does not prove that its
+ *  retired player's menu portrait still ships (Tate/Gurley on M27). */
+const REVIEWED_BUNDLE_PORTRAITS: Record<string, { key: string; pid: number }> = {
+  slayjrdarius_1426: { key: 'slayjrdarius', pid: 6273 },
+  tateiiigolden_9755: { key: 'tateiiigolden', pid: 2909 },
+  gurleyiitodd_2399: { key: 'gurleyiitodd', pid: 7155 },
+};
+
 /** nflverse draft year by the same name key as the M27 face map. */
 let draftYearByKey: Map<string, number> | null = null;
 function loadDraftYears(): Map<string, number> {
@@ -366,7 +391,10 @@ export const LikenessService = {
     const l = player.lastName.toLowerCase().replace(/[^a-z]/g, '');
     const legend = legendPidFor(cat, player.firstName, player.lastName);
     const roster = /roster/.test(head.source) ? head.portraitPid : 0;
-    const regular = cat.playerPortraits.has(l + f) || cat.playerPortraits.has(f + l) ? (player.photoId || head.portraitPid || 0) : 0;
+    const reviewed = REVIEWED_BUNDLE_PORTRAITS[head.assetName.toLowerCase()];
+    const regular = reviewed
+      ? (cat.playerPortraits.has(reviewed.key) ? reviewed.pid : 0)
+      : (cat.playerPortraits.has(l + f) || cat.playerPortraits.has(f + l) ? (player.photoId || head.portraitPid || 0) : 0);
     if (version === 'm26') {
       if (regular) return { portraitPid: regular, portraitKind: 'player' };
       if (roster) return { portraitPid: roster, portraitKind: 'roster' };
@@ -431,6 +459,9 @@ export const LikenessService = {
         : this.sameEra(key, player.draftYear);
       if (face && same && (ACCEPT_PRESET_HEADS || !/preset/.test(face.source))) return face;
     }
+    const reviewedAsset = REVIEWED_HEAD_ALIASES[`${m27KeyTight(player.firstName, player.lastName)}|${player.draftYear}`];
+    const reviewedHead = reviewedAsset ? cat.assets.get(reviewedAsset) : undefined;
+    if (reviewedHead && (ACCEPT_PRESET_HEADS || !/preset/.test(reviewedHead.source))) return reviewedHead;
     if (hasAsset) {
       const own = { assetName: asset, portraitPid: player.photoId || 0, genericHead: null, first: player.firstName, last: player.lastName };
       // MUT legends added since the cranium pipeline have no scan bundle, only a

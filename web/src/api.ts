@@ -432,9 +432,9 @@ export const api = {
   rosterOpenSaved: (name: string) => jsend<RosterData>('POST', '/api/roster/open', { name }),
   rosterOpenFile: (name: string, dataBase64: string) => jsend<RosterData>('POST', '/api/roster/open', { name, dataBase64 }),
   rosterGet: (id: string) => jget<RosterData>(`/api/roster/${encodeURIComponent(id)}`),
-  rosterBuild: (body: { baseName?: string; baseId?: string; name: string; moves: RosterDoc['moves']; edits: RosterDoc['edits']; adds: RosterDoc['adds']; fresh: boolean }) =>
+  rosterBuild: (body: { baseName?: string; baseId?: string; name: string; moves: RosterDoc['moves']; edits: RosterDoc['edits']; adds: RosterDoc['adds']; fresh: boolean; mode?: RosterDoc['mode'] }) =>
     jsend<RosterBuildResult>('POST', '/api/roster/build', body),
-  rosterPreviewAdd: (key: string) => jsend<GeneratedRosterPlayer>('POST', '/api/roster/preview-add', { key }),
+  rosterPreviewAdd: (key: string, mode: RosterDoc['mode'] = 'retro') => jsend<GeneratedRosterPlayer>('POST', '/api/roster/preview-add', { key, mode }),
   openSavesList: (gameVersion: GameVersion) => jget<{ gameVersion: GameVersion; dir: string; files: SaveFileInfo[] }>(`/api/open/saves?gameVersion=${gameVersion}`),
   openFromSaves: (gameVersion: GameVersion, name: string) => jsend<GeneratedClass>('POST', '/api/open/saves', { gameVersion, name }),
   openFile: (name: string, dataBase64: string) => jsend<GeneratedClass>('POST', '/api/open/file', { name, dataBase64 }),
@@ -450,10 +450,13 @@ export const api = {
     jsend<ToneFromPhoto>('POST', '/api/likeness/tone-from-photo', body),
 
   async catalog(): Promise<CatalogPlayer[]> {
-    if (catalogCache) return catalogCache;
-    const r = await jget<{ players: CatalogPlayer[] }>('/api/players/catalog');
-    catalogCache = r.players;
-    return catalogCache;
+    return (await api.catalogSnapshot()).players;
+  },
+  async catalogSnapshot(): Promise<{ players: CatalogPlayer[]; degraded: boolean }> {
+    if (catalogCache) return { players: catalogCache, degraded: false };
+    const r = await jget<{ players: CatalogPlayer[]; degraded?: boolean }>('/api/players/catalog');
+    if (!r.degraded) catalogCache = r.players;
+    return { players: r.players, degraded: !!r.degraded };
   },
 
   playerSearch: (query: string, limit = 40) =>

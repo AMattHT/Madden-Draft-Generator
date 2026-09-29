@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
+import os from 'node:os';
 import { M27_SAVES_DIR } from '../../config/paths';
 import { RosterFileService } from '../RosterFileService';
 import { RosterBuildService, SLOT_ID, ROSTER_POSITIONS, DEV_ID } from '../RosterBuildService';
@@ -11,6 +12,35 @@ import { RosterAddService } from '../RosterAddService';
 
 const OFFICIAL = path.join(M27_SAVES_DIR, 'ROSTER-Official');
 const skipWithoutRoster = { skip: fs.existsSync(OFFICIAL) ? false : 'no Madden 27 ROSTER-Official in the Saves folder' };
+
+test('both roster lenses export their preview values and preserve manual edits', skipWithoutRoster, async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'roster-lens-test-'));
+  const originalSavePath = RosterFileService.savePath.bind(RosterFileService);
+  t.mock.method(RosterFileService, 'savePath', (name: string) => name.toUpperCase() === 'ROSTER-PARITY' ? path.join(dir, 'ROSTER-Parity') : originalSavePath(name));
+  try {
+    const base = await RosterFileService.openBase('ROSTER-Official');
+    const team = base.teams.find(p => p.abbr === 'CHI')!;
+    const maxId = Math.max(...base.players.map(p => p.id));
+    const key = '2003|NFL|troy|polamalu|16';
+    for (const mode of ['retro', 'madden'] as const) {
+      const expected = await RosterAddService.generate(key, mode);
+      const result = await RosterBuildService.build({ baseName: 'ROSTER-Official', name: 'Parity', mode,
+        adds: [{ tempId: 'troy', key, teamId: team.id }], edits: { troy: { jersey: 42, ratings: { speed: 91 } } } });
+      assert.equal(result.added, 1); assert.deepEqual(result.skipped, []);
+      const file = await parseTdb2(splitContainer(fs.readFileSync(result.outputPath)).payload);
+      const row = file.PLAY.records.find(r => intOf(r, 'PGID') === maxId + 1)!;
+      assert.equal(intOf(row, 'POVR'), expected.overall);
+      assert.equal(intOf(row, 'PPOS'), expected.positionId);
+      assert.equal(intOf(row, 'PJEN'), 42);
+      assert.equal(intOf(row, 'PSPD'), 91);
+      assert.equal(intOf(row, 'PACC'), expected.ratings.acceleration);
+    }
+  } finally {
+    fs.rmSync(path.join(dir, 'ROSTER-Parity'), { force: true });
+    fs.rmSync(path.join(dir, 'ROSTER-Parity.tmp'), { force: true });
+    fs.rmdirSync(dir);
+  }
+});
 
 test('static maps', () => {
   assert.equal(SLOT_ID.HeadWear, 106);

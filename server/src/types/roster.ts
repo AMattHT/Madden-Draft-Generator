@@ -23,8 +23,13 @@ export interface PlayerFieldEdit {
 export interface AddedPlayer { tempId: string; key: string; teamId: number; jersey?: number }
 
 /** A pool player rated for a roster: everything the build needs to clone him in, and the UI needs to show him. */
+export type RosterMode = 'retro' | 'madden';
+
 export interface GeneratedRosterPlayer {
+  degraded?: boolean; // provisional positions while initial depth-chart data loads
   key: string;
+  wav?: number | null;
+  wavSource?: 'actual' | 'predicted';
   firstName: string; lastName: string;
   positionId: number; position: string;
   archetypeId: number; archetype: string | null;
@@ -49,6 +54,7 @@ export interface GeneratedRosterPlayer {
 
 /** A roster document the server can apply: deltas against a base file. */
 export interface RosterBuildDoc {
+  mode?: RosterMode;                 // absent in older documents: Career
   baseName?: string;                 // ROSTER-* file in the Madden 27 saves folder, or
   baseId?: string;                   // an opened roster id (a browsed file kept by the server)
   name: string;                      // roster name; the output is ROSTER-<NAME>

@@ -113,7 +113,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
             <input type="checkbox" checked={hof} onChange={(e) => setHof(e.target.checked)} className="h-4 w-4 accent-primary" />HOF
           </label>
           <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={compactSel}>
-            <option value="cal">Sort: Overall</option>
+            <option value="cal">Sort: Career strength</option>
             <option value="name">Sort: Name</option>
             <option value="pos">Sort: Position</option>
             <option value="team">Sort: Team</option>
@@ -130,7 +130,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
           <span className="w-14 text-center">Pos</span>
           <span className="w-[9.75rem] text-right">Drafted</span>
           <span className="hidden w-28 2xl:block">wAV</span>
-          <span className="w-11 text-center">OVR</span>
+          <span className="w-11 text-center" title="Career strength; Realistic rookie OVR is shown after adding">Career</span>
           <span className="w-16" />
         </div>
         <VirtualList items={catalog ? list : []} rowHeight={ROW_H} keyOf={(p) => p.key}
@@ -170,7 +170,7 @@ export function CatalogPanel({ catalog, error, onRetry, status, onAdd, addDisabl
                     <span className="rounded-full bg-primary/70" style={{ width: `${wavPct}%` }} />
                   </span>
                 </span>
-                <span className="w-11 shrink-0 rounded bg-surface-2 px-1 py-1 text-center text-sm font-bold tabular-nums text-neutral-100" title="Career score: his overall when added">{p.cal}</span>
+                <span className="w-11 shrink-0 rounded bg-surface-2 px-1 py-1 text-center text-sm font-bold tabular-nums text-neutral-100" title="Career strength score; the selected roster lens determines his added overall">{p.cal}</span>
                 {st ? (
                   <span className="w-16 shrink-0 rounded-md border border-success/40 bg-success/10 px-2 py-1 text-center text-xs font-medium text-success" title={st.title}>{st.label}</span>
                 ) : addTeams ? (

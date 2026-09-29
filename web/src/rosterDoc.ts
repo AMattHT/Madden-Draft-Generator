@@ -22,6 +22,7 @@ export function newRosterDoc(data: RosterData, fromSaves: boolean, fresh = false
     id: newId(),
     name: '',
     fresh,
+    mode: 'retro',
     base: { fileName: data.name, openedId: data.id, sizeBytes: data.sizeBytes, crc: data.crc, fromSaves },
     moves: {},
     adds: [],
@@ -29,6 +30,11 @@ export function newRosterDoc(data: RosterData, fromSaves: boolean, fresh = false
     createdAt: now,
     updatedAt: now,
   };
+}
+
+/** The lens changes generated values only; edits remain separate and take precedence. */
+export function withRosterMode(doc: RosterDoc, mode: 'retro' | 'madden'): RosterDoc {
+  return { ...doc, mode, updatedAt: Date.now() };
 }
 
 /** The team a player is on once the document's moves apply. */
@@ -118,6 +124,7 @@ function overlay(p: RosterPlayer, e: PlayerFieldEdit | undefined, teamId: number
 export function playerFromPreview(g: GeneratedRosterPlayer, id: number, teamId: number, jersey?: number): RosterPlayer {
   return {
     id, firstName: g.firstName, lastName: g.lastName, position: g.position, positionId: g.positionId,
+    wav: g.wav, wavSource: g.wavSource, draftYear: g.draftYear,
     teamId, team: null, teamName: null,
     overall: g.overall, age: g.age, heightInches: g.heightInches, weight: g.weight, jersey: jersey ?? g.jersey,
     yearsPro: g.yearsPro, devTrait: g.devTrait, archetype: g.archetype, college: g.college, hometown: g.hometown,
