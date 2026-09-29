@@ -55,7 +55,7 @@ export interface RosterPlayer {
   assetName: string | null;
   portrait: string | null; // /api/portrait/pid/... from the saved PSXP menu-portrait ID
   ratings: Record<string, number>;
-  /** Scout's read: two to four sentences from the hidden attributes, no numbers (ScoutingNotesService). */
+  /** Scout's read: Madden's draft notes for this position (ScoutingNotesService). */
   scouting?: string[];
   /** From the player's visuals blob: body type (Standard…Lean), generic head, helmet and facemask assets; '' when absent. */
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };

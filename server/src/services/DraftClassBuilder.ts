@@ -554,7 +554,7 @@ export interface PreviewRow {
    *  so the UI can show what "Auto" means before the class is in the game. */
   gear?: Record<string, string>;
   ratings: Record<string, number>;
-  /** Scout's read: two to four sentences from the hidden attributes, no numbers (ScoutingNotesService). */
+  /** Scout's read: Madden's draft notes for this position (ScoutingNotesService). */
   scouting?: string[];
 }
 
