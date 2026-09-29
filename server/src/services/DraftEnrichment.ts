@@ -1,10 +1,8 @@
 import { PlayerLookupService } from './PlayerLookupService';
 import { TeamService, PickEnrichment } from './TeamService';
-import { CuratedDbPositions } from './CuratedDbPositions';
 import { GenericFillerService, FULL_CLASS_SIZE } from './GenericFillerService';
 import { CombineService } from './CombineService';
 import { PositionMapper } from './PositionMapper';
-import { FrontSevenService } from './FrontSevenService';
 import { SkinToneService } from './SkinToneService';
 import { DerivedSkinToneService } from './DerivedSkinToneService';
 import { WikiSkinToneService } from './WikiSkinToneService';
@@ -19,22 +17,10 @@ import type { ToneSource } from '../types/player';
 import { BaselinePlayer, nflversePick } from '../types/player';
 import { SupplementalDraftService } from './SupplementalDraftService';
 import { positionLabelFor } from './PositionLabel';
+import { DbPositionService } from './DbPositionService';
 
-// The generic "LB" bucket in ALL_PLAYER_LOOKUP that nflverse can reclassify.
-const LB_BUCKET = /^(LB|MLB|ILB|OLB|LOLB|ROLB)$/i;
-
-/**
- * Baseline players for a draft year with DB positions corrected BEFORE generation
- * (curated pre-2001 list > nflverse depth-chart/roster), plus the per-pick team
- * enrichment map. Shared by the preview (/generated) and export (/mdc) routes so
- * the exported .mdc matches exactly what the UI shows. Overridden players are
- * cloned so the shared lookup cache isn't mutated.
- */
-/** Enrich one baseline player (position fix, combine, height/weight/age, skin tone).
- *  `e` is the per-pick team enrichment when available (year classes); omitted for
- *  cross-year sources like All-Time Greats. Returns the original object unchanged if
- *  nothing was added, so the shared lookup cache is never mutated. */
-async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<BaselinePlayer> {
+/** Rating and position inputs shared by every catalog, draft and roster path. */
+export async function enrichRatingInputs(p: BaselinePlayer, e?: PickEnrichment): Promise<BaselinePlayer> {
   // The position steps shared with the pool listing (PositionLabel.ts): curated DB
   // entry, front-seven classifier, pre-2001 corner/safety split, heavy-end sack rule.
   // Combine (2000+): official measured height/weight + testing numbers for ratings.
@@ -50,67 +36,7 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   const height = c?.heightInches ?? e?.heightInches ?? nv?.heightInches ?? null;
   const weight = c?.weight ?? e?.weight ?? nv?.weight ?? null;
   const age = e?.age ?? nv?.age ?? null;
-  // Skin tone for generic faces (and the generic portrait of a scan with no
-  // portrait left): calibrated portrait evidence weighed against the position/era
-  // prior — SkinToneClassify.toneFromEvidence. A legends portrait (vintage photo,
-  // Namath reads as dark) is tempered; a Wikipedia tone and an explicit CSV race
-  // are weak extra evidence. No more "ignore a light reading at a dark position"
-  // (that made Keith Brooking tone 7).
-  const prior = SkinToneService.toneDistribution(label ?? p.position, p.draftYear);
-  const portrait = DerivedSkinToneService.itaForPid(p.photoId);
-  // A player with no in-game portrait has only his Wikipedia photo to go on, and
-  // the prior does the rest -- which made the 1991 WR Mike Pritchard tone 2 off a
-  // wiki reading of 3. His Madden disc headshot reads ITA -37.5 (tone 7). Those
-  // headshots are studio crops framed like the portraits the ITA model was built
-  // on, so when we have one it is the better skin sample; the in-game portrait
-  // still wins when it exists.
-  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, p.position, p.draftYear) : null;
-  // The wiki tone was read from the row's Wikipedia photo; if that photo was
-  // sanitized away (icon, or another same-named player's picture) the tone goes too.
-  // Two men of one name in one draft (2005: Alex Smith QB/Utah and Alex Smith TE/Stanford)
-  // share every name-keyed reading, so neither the wiki tone nor the CSV race can say
-  // which man it describes: both go quiet and the portrait + prior decide.
-  const ambiguous = PlayerLookupService.namesakes(p.firstName, p.lastName, p.draftYear) > 1;
-  const wiki = !ambiguous && p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
-  const trusted = !ambiguous && p.race != null && p.race !== 7 ? p.race : null;
-  // A recorded tone wins outright. It exists for players the evidence cannot
-  // reach or reads wrong, and inference has nothing to add to a known answer.
-  const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear, p.college);
-  // The NFL was segregated from 1934 to 1945, and no black player was drafted
-  // until 1949. For a player drafted in that window a dark tone is not an
-  // unlikely guess, it is an impossible one -- so this overrides the portrait
-  // too, which is where all eight of the current cases come from: a dim vintage
-  // photograph measuring dark exactly as Paul Krause's does. 1945 rather than
-  // 1948 because Marion Motley signed in 1946 and the lookup carries him as a
-  // 1946 draftee.
-  const segregationEra = p.draftYear <= 1945 ? 2 : null;
-  // The user's own fix beats everything: he looked at the man and said so.
-  const fix = p.source === 'custom' || p.source === 'generated' ? null : LikenessOverrideService.get(p.firstName, p.lastName, p.draftYear);
-  const fixTone = fix?.skinTone ?? null;
-  const race = fixTone ?? curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
-  const toneSource: ToneSource = fixTone != null ? 'override'
-    : curatedTone != null ? 'curated'
-    : segregationEra != null ? 'era'
-    : portrait?.ita != null || portrait?.greyL != null ? 'portrait'
-    : retroIta != null ? 'headshot'
-    : wiki != null ? 'wiki'
-    : trusted != null ? 'csv'
-    : 'prior';
-
-  if (!label && !c && height == null && weight == null && age == null && race == null && !nv && !f7?.frontSeven) {
-    // Cache only: a class must never wait on Wikipedia. An unseen name is
-    // queued and answered in the background, so it is ready next time.
-    const { url: photo, unknown } = PhotoLookService.cachedPhoto(p);
-    if (unknown) PhotoLookService.warmLater({ name: [p.firstName, p.lastName] });
-    if (!photo) return { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
-    const out: BaselinePlayer = { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
-    if (!out.headshotUrl && !out.pfrImageUrl && !out.wikiImageUrl) out.wikiImageUrl = photo;
-    const gear = PhotoLookService.cachedGear(photo);
-    if (gear) out.observedGear = gear;
-    else PhotoLookService.warmLater({ url: photo });
-    return out;
-  }
-  const out: BaselinePlayer = { ...p, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
+  const out: BaselinePlayer = { ...p };
   if (label) out.position = label;
   if (positionLocked) out.positionLocked = true;
   if (f7?.frontSeven) out.frontSeven = f7.frontSeven;
@@ -118,7 +44,6 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
   if (height != null) out.heightInches = height;
   if (weight != null) out.weight = weight;
   if (age != null) out.age = age;
-  if (race != null) out.race = race;
   if (nv) {
     // A current-year rookie's nflverse w_av is one season (or a 0 placeholder):
     // not a career signal. Leave those on the draft-slot estimate.
@@ -155,6 +80,60 @@ async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<Baselin
       if (!out.headshotUrl && ud.headshotUrl) out.headshotUrl = ud.headshotUrl;
     }
   }
+  return out;
+}
+
+async function enrichOne(p: BaselinePlayer, e?: PickEnrichment): Promise<BaselinePlayer> {
+  const sourcePosition = p.position;
+  p = await enrichRatingInputs(p, e);
+  // Skin tone for generic faces (and the generic portrait of a scan with no
+  // portrait left): calibrated portrait evidence weighed against the position/era
+  // prior — SkinToneClassify.toneFromEvidence. A legends portrait (vintage photo,
+  // Namath reads as dark) is tempered; a Wikipedia tone and an explicit CSV race
+  // are weak extra evidence. No more "ignore a light reading at a dark position"
+  // (that made Keith Brooking tone 7).
+  const prior = SkinToneService.toneDistribution(p.position, p.draftYear);
+  const portrait = DerivedSkinToneService.itaForPid(p.photoId);
+  // A player with no in-game portrait has only his Wikipedia photo to go on, and
+  // the prior does the rest -- which made the 1991 WR Mike Pritchard tone 2 off a
+  // wiki reading of 3. His Madden disc headshot reads ITA -37.5 (tone 7). Those
+  // headshots are studio crops framed like the portraits the ITA model was built
+  // on, so when we have one it is the better skin sample; the in-game portrait
+  // still wins when it exists.
+  const retroIta = portrait?.ita == null ? RetroItaService.itaFor(p.firstName, p.lastName, sourcePosition, p.draftYear) : null;
+  // The wiki tone was read from the row's Wikipedia photo; if that photo was
+  // sanitized away (icon, or another same-named player's picture) the tone goes too.
+  // Two men of one name in one draft (2005: Alex Smith QB/Utah and Alex Smith TE/Stanford)
+  // share every name-keyed reading, so neither the wiki tone nor the CSV race can say
+  // which man it describes: both go quiet and the portrait + prior decide.
+  const ambiguous = PlayerLookupService.namesakes(p.firstName, p.lastName, p.draftYear) > 1;
+  const wiki = !ambiguous && p.wikiImageUrl ? WikiSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear) : null;
+  const trusted = !ambiguous && p.race != null && p.race !== 7 ? p.race : null;
+  // A recorded tone wins outright. It exists for players the evidence cannot
+  // reach or reads wrong, and inference has nothing to add to a known answer.
+  const curatedTone = CuratedSkinToneService.toneFor(p.firstName, p.lastName, p.draftYear, p.college);
+  // The NFL was segregated from 1934 to 1945, and no black player was drafted
+  // until 1949. For a player drafted in that window a dark tone is not an
+  // unlikely guess, it is an impossible one -- so this overrides the portrait
+  // too, which is where all eight of the current cases come from: a dim vintage
+  // photograph measuring dark exactly as Paul Krause's does. 1945 rather than
+  // 1948 because Marion Motley signed in 1946 and the lookup carries him as a
+  // 1946 draftee.
+  const segregationEra = p.draftYear <= 1945 ? 2 : null;
+  // The user's own fix beats everything: he looked at the man and said so.
+  const fix = p.source === 'custom' || p.source === 'generated' ? null : LikenessOverrideService.get(p.firstName, p.lastName, p.draftYear);
+  const fixTone = fix?.skinTone ?? null;
+  const race = fixTone ?? curatedTone ?? segregationEra ?? toneFromEvidence({ ita: portrait?.ita ?? retroIta, greyL: portrait?.greyL ?? null, legendPortrait: portrait?.legend, wikiTone: wiki, trustedCsv: trusted, prior });
+  const toneSource: ToneSource = fixTone != null ? 'override'
+    : curatedTone != null ? 'curated'
+    : segregationEra != null ? 'era'
+    : portrait?.ita != null || portrait?.greyL != null ? 'portrait'
+    : retroIta != null ? 'headshot'
+    : wiki != null ? 'wiki'
+    : trusted != null ? 'csv'
+    : 'prior';
+
+  const out: BaselinePlayer = { ...p, race, toneSource, likenessFixed: !!fix, likenessFix: fix ? { faceAsset: fix.faceAsset, bodyType: fix.bodyType } : null };
   // Same rule here: read what is known, queue what is not. Observing gear means
   // downloading the photograph itself, which is the second half of the wait.
   const { url: photo, unknown } = PhotoLookService.cachedPhoto(out);
@@ -180,15 +159,16 @@ export async function enrichedClass(
   year: number,
   league: string,
   opts: { fill?: boolean } = {}
-): Promise<{ players: BaselinePlayer[]; enrich: Map<number, PickEnrichment>; generatedCount: number }> {
+): Promise<{ players: BaselinePlayer[]; enrich: Map<number, PickEnrichment>; generatedCount: number; positionsReady: boolean }> {
   const baseline = PlayerLookupService.byYear(year, league);
   const enrich = await TeamService.byYear(year);
+  const positionsReady = DbPositionService.isReady();
   const real = await Promise.all(
     baseline.map((p) => enrichOne(p, enrich.size && p.draftPick != null ? enrich.get(p.draftPick) : supplementalEnrichment(p)))
   );
   // Pad to a full Madden-sized class with generated undrafted generics.
   const fillers = opts.fill ? GenericFillerService.build(year, real) : [];
-  return { players: [...real, ...fillers], enrich, generatedCount: fillers.length };
+  return { players: [...real, ...fillers], enrich, generatedCount: fillers.length, positionsReady };
 }
 
 /** A "greats" class: the best players in history (by career greatness), enriched the
@@ -205,10 +185,10 @@ export async function allTimeGreatsClass(range?: { from: number; to: number }): 
  * DB positions (Polamalu is a strong safety, not a corner), the drafting team's
  * scheme for linebackers, and measured height/weight. One lookup per year.
  */
-async function enrichAcrossYears(players: BaselinePlayer[]): Promise<BaselinePlayer[]> {
+export async function enrichAcrossYears(players: BaselinePlayer[], ratingsOnly = false): Promise<BaselinePlayer[]> {
   const years = [...new Set(players.map((p) => p.draftYear))];
   const byYear = new Map(await Promise.all(years.map(async (y) => [y, await TeamService.byYear(y)] as const)));
-  return Promise.all(players.map((p) => enrichOne(p, p.draftPick != null ? byYear.get(p.draftYear)?.get(p.draftPick) : supplementalEnrichment(p))));
+  return Promise.all(players.map((p) => (ratingsOnly ? enrichRatingInputs : enrichOne)(p, p.draftPick != null ? byYear.get(p.draftYear)?.get(p.draftPick) : supplementalEnrichment(p))));
 }
 
 /** A supplemental pick has no overall pick to join the team table on; his club

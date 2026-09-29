@@ -1,12 +1,13 @@
-import { boardClass } from './DraftEnrichment';
-import { DraftClassBuilder, gearSlots, RATING_KEYS } from './DraftClassBuilder';
+import { gearSlots, RATING_KEYS } from './DraftClassBuilder';
+import { ReferenceDraftService } from './ReferenceDraftService';
+import { RatingService } from './RatingService';
+import { DbPositionService } from './DbPositionService';
 import { PositionMapper } from './PositionMapper';
 import { PersonaService } from './PersonaService';
 import { LookupService } from './LookupService';
 import { LikenessService } from './LikenessService';
 import { commentaryIdFor, focusFor, genericHeadPid } from './M27Fields';
-import { PoolCatalogService } from './PoolCatalogService';
-import type { GeneratedRosterPlayer } from '../types/roster';
+import type { GeneratedRosterPlayer, RosterMode } from '../types/roster';
 
 const CACHE_MAX = 200;
 const cache = new Map<string, GeneratedRosterPlayer>();
@@ -15,19 +16,15 @@ const cache = new Map<string, GeneratedRosterPlayer>();
 const num = (v: unknown, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 
-/** Rate one pool player for a roster: the draft-class pipeline under the Career lens
+/** Rate one pool player for a roster: the entry-year draft-class pipeline under the selected lens
  *  for Madden 27, then the roster-only extras (age as a veteran, persona, announcer id). */
 export const RosterAddService = {
-  async generate(key: string): Promise<GeneratedRosterPlayer> {
-    const hit = cache.get(key);
+  async generate(key: string, mode: RosterMode = 'retro'): Promise<GeneratedRosterPlayer> {
+    const cacheKey = `${key}|${mode}|${DbPositionService.isReady()}`;
+    const hit = cache.get(cacheKey);
     if (hit) return hit;
-    const { players } = await boardClass([{ key }], { fill: false });
-    const player = players[0];
-    if (!player) throw new Error(`player ${key} is not in the pool`);
-    // A one-player class cannot balance its cohorts, so the pool's slot is pinned.
-    const pinned = await PoolCatalogService.positionId(key);
-    const { prospects } = DraftClassBuilder.buildProspects([player], 'retro', pinned != null ? { pinPositions: new Map([[key, pinned]]) } : {}, 'm27');
-    const p = prospects[0] as Record<string, unknown>;
+    const { player, prospect, degraded } = await ReferenceDraftService.player(key, mode);
+    const p = prospect as Record<string, unknown>;
     const positionId = num(p.position);
     const position = PositionMapper.name(positionId);
     const overall = num(p.overall);
@@ -49,6 +46,9 @@ export const RosterAddService = {
     const portraitPid = num(p.PID) || genericHeadPid(generic.peps);
     const out: GeneratedRosterPlayer = {
       key,
+      degraded,
+      wav: player.wavSource === 'predicted' ? RatingService.predictedWav(player) : player.wav,
+      wavSource: player.wavSource,
       firstName: str(p.firstName) || player.firstName,
       lastName: str(p.lastName) || player.lastName,
       positionId, position,
@@ -72,9 +72,9 @@ export const RosterAddService = {
       portrait: portraitPid ? `/api/portrait/pid/${portraitPid}` : null,
     };
     if (cache.size >= CACHE_MAX) cache.delete(cache.keys().next().value as string);
-    cache.set(key, out);
+    cache.set(`${key}|${mode}|${!degraded}`, out);
     return out;
   },
 
-  _reset(): void { cache.clear(); },
+  _reset(): void { cache.clear(); ReferenceDraftService._reset(); },
 };

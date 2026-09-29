@@ -315,7 +315,7 @@ export const RosterBuildService = {
     const generated = new Map<string, GeneratedRosterPlayer>();
     for (const add of doc.adds ?? []) {
       if (generated.has(add.key)) continue;
-      try { generated.set(add.key, await RosterAddService.generate(add.key)); } catch { /* reported by apply as skipped */ }
+      try { generated.set(add.key, await RosterAddService.generate(add.key, doc.mode)); } catch { /* reported by apply as skipped */ }
     }
     const counts = RosterBuildService.apply(base, doc, generated);
     const buf = RosterFileService.write(base.tdb2, base.header);

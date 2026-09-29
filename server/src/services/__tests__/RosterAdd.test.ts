@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { RosterAddService } from '../RosterAddService';
 import { RATING_KEYS } from '../AttributeModel';
+import { DbPositionService } from '../DbPositionService';
 
 test('a pool player is rated for a roster with bio, ratings, face, gear and persona', async () => {
   const p = await RosterAddService.generate('1975|NFL|walter|payton|4');
@@ -27,4 +28,20 @@ test('generation is cached per key and unknown keys are refused', async () => {
   const b = await RosterAddService.generate('1989|NFL|barry|sanders|3');
   assert.equal(a, b, 'same object from the cache');
   await assert.rejects(RosterAddService.generate('1900|NFL|nobody|here|1'), /not in the pool/);
+});
+
+test('provisional previews are replaced when depth-chart positions become ready', async t => {
+  RosterAddService._reset();
+  let ready = false;
+  t.mock.method(DbPositionService, 'isReady', () => ready);
+  const key = '2003|NFL|troy|polamalu|16';
+  const provisional = await RosterAddService.generate(key);
+  assert.equal(provisional.degraded, true);
+  assert.equal(provisional.position, 'SS', 'curated safety works offline too');
+  ready = true;
+  const final = await RosterAddService.generate(key);
+  assert.equal(final.degraded, false);
+  assert.notEqual(final, provisional);
+  assert.equal(await RosterAddService.generate(key), final);
+  RosterAddService._reset();
 });

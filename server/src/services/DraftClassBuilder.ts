@@ -646,6 +646,24 @@ function fitToCapacity(players: BaselinePlayer[], include: number[] = []): { kep
   return { kept, keptIdx, dropped, included };
 }
 
+/** Canonical capped draft positions, also used by the historical pool. */
+export function draftPositions(players: BaselinePlayer[], opts: GenOptions = {}) {
+  const { kept: capped, keptIdx, dropped, included } = fitToCapacity(players, opts.include ?? []);
+    // Resolve each player's M26 position, then even out the two cohorts the source
+    // data badly over-concentrates: edges (nearly all labeled "LE" -> LEDG, ~85/15)
+    // and off-ball LBs (nearly all "MLB" -> MIKE, ~80-98%). Side/role is cosmetic
+    // within each cohort (LEDG/REDG share the EDGE group; SAM/MIKE/WILL share LB),
+    // so round-robin each to an even split — deterministic, so preview == export.
+    // Offensive-line sides and safeties: the source lumps tackles as "T"/"OT" (-> LT)
+    // and guards as "G" (-> LG), and pre-2001 safeties are split by build. Balance
+    // toward Madden's own mix (LT 20 / RT 16, LG 13 / RG 13, FS 16 / SS 16 per
+    // class) around the players whose slot came from real data (PositionMapper.balanceBoard).
+    const pins = opts.pinPositions;
+    const resolved = capped.map((p) => (p.key ? pins?.get(p.key) : undefined) ?? PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
+    const posIds = PositionMapper.balanceBoard(resolved, capped, capped.map((p) => !!p.key && !!pins?.has(p.key)));
+  return { capped, keptIdx, dropped, included, posIds };
+}
+
 /** Valid Madden 26 body types (from the shipped template's visuals JSON). */
 export const BODY_TYPES = ['Standard', 'Thin', 'Lean', 'Muscular', 'Heavy'];
 
@@ -796,6 +814,7 @@ export const DraftClassBuilder = {
     gameVersion: 'm26' | 'm27' = 'm26'
   ): {
     prospects: MdcProspect[];
+    sourceIndices: number[];
     truncated: boolean;
     dropped: DroppedPlayer[];
     included: number[];
@@ -803,21 +822,9 @@ export const DraftClassBuilder = {
     /** Prospect indexes rated from EA's launch roster (Launch Day lens only). */
     launchIdx: number[];
   } {
-    const { kept: capped, dropped, included } = fitToCapacity(players, opts.include ?? []);
+    const { capped, keptIdx, dropped, included, posIds } = draftPositions(players, opts);
     const portraitMap = gameVersion === 'm27' ? new Map<number, number>() : PortraitSlotService.pidMap(capped);
 
-    // Resolve each player's M26 position, then even out the two cohorts the source
-    // data badly over-concentrates: edges (nearly all labeled "LE" -> LEDG, ~85/15)
-    // and off-ball LBs (nearly all "MLB" -> MIKE, ~80-98%). Side/role is cosmetic
-    // within each cohort (LEDG/REDG share the EDGE group; SAM/MIKE/WILL share LB),
-    // so round-robin each to an even split — deterministic, so preview == export.
-    // Offensive-line sides and safeties: the source lumps tackles as "T"/"OT" (-> LT)
-    // and guards as "G" (-> LG), and pre-2001 safeties are split by build. Balance
-    // toward Madden's own mix (LT 20 / RT 16, LG 13 / RG 13, FS 16 / SS 16 per
-    // class) around the players whose slot came from real data (PositionMapper.balanceBoard).
-    const pins = opts.pinPositions;
-    const resolved = capped.map((p) => (p.key ? pins?.get(p.key) : undefined) ?? PositionMapper.resolve(p.firstName, p.lastName, p.position, p.weight));
-    const posIds = PositionMapper.balanceBoard(resolved, capped, capped.map((p) => !!p.key && !!pins?.has(p.key)));
     const items: RankedItem[] = capped.map((player, index) => {
       const posId = posIds[index];
       return { player, index, posId, caliber: RatingService.caliber(player, posId), overall: 0, devTrait: 0 };
@@ -934,7 +941,7 @@ export const DraftClassBuilder = {
       withPortrait: capped.filter((p) => p.photoId != null).length,
       customPortrait: portraitMap.size,
     };
-    return { prospects: built.map((b) => b.prospect), truncated: dropped.length > 0, dropped, included, likeness, launchIdx };
+    return { prospects: built.map((b) => b.prospect), sourceIndices: keptIdx, truncated: dropped.length > 0, dropped, included, likeness, launchIdx };
   },
 
   /** Full JSON preview of the generated class for the UI: per-player bio, photo,

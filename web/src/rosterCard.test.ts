@@ -28,6 +28,13 @@ test('a roster player becomes a card row with named persona, focus and gear', ()
   assert.equal(row.wav, null); assert.equal(row.round, 2);
 });
 
+test('pool player cards keep their actual entry year and career wAV across roster lenses', () => {
+  const row = rowFor({ ...geno, firstName: 'Tony', lastName: 'Romo', draftYear: 2003, wav: 95, wavSource: 'actual', yearsPro: 4 }, ctx);
+  assert.equal(row.draftYear, 2003);
+  assert.equal(row.wav, 95);
+  assert.equal(row.wavSource, 'actual');
+});
+
 test('a roster edit becomes the card patch in the draft vocabulary', () => {
   const patch = patchFor({ overall: 90, ratings: { speed: 95 }, position: 'FS', dev: 'Superstar', jersey: 12, age: 30, heightInches: 78, weight: 240, firstName: 'Eugene', lastName: 'S', college: 7, archetype: 2, bodyType: 'Thin', genericHead: 'gen_2_T_G_001', faceAsset: 'X_1', skinTone: 2, personaDNA: [3, 4], focus: 2 }, geno);
   assert.deepEqual(patch, { overall: 90, speed: 95, position: 17, devTrait: 2, jerseyNum: 12, age: 30, heightInches: 78, weight: 240, firstName: 'Eugene', lastName: 'S', college: 7, archetype: 2, bodyType: 'Thin', genericHeadName: 'gen_2_T_G_001', faceAsset: 'X_1', skinTone: 2, personaDNA: '3,4', focus: '2' });

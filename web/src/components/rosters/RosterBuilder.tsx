@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api, type ArchetypeOption, type PlayerFieldEdit } from '../../api';
 import type { CatalogPlayer, GeneratedRosterPlayer, RosterBuildResult, RosterData, RosterDoc, RosterPlayer, TeamInfo } from '../../types';
-import { addId, docCounts, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, type ViewPlayer } from '../../rosterDoc';
+import { addId, docCounts, isDocEmpty, playerFromPreview, viewPlayers, withAdd, withAddMove, withEdit, withMove, withoutAdd, withoutEdits, withRosterMode, type ViewPlayer } from '../../rosterDoc';
 import { rowFor, patchFor, editFromCard, type CardCtx } from '../../rosterCard';
 import { teamInfoMap } from '../../rosterTeams';
 import { POS_NAMES } from '../../constants';
@@ -55,6 +55,9 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   initialTeam?: number;
 }) {
   const fresh = doc.fresh === true;
+  const mode = doc.mode ?? 'retro';
+  const latestDoc = useRef(doc);
+  latestDoc.current = doc;
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [tab, setTab] = useState<'roster' | 'pool'>(fresh ? 'pool' : 'roster');
   const [pos, setPos] = useState('ALL');
@@ -67,30 +70,52 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
   // once (a preview) and that preview is what the list and the card show.
   const [catalog, setCatalog] = useState<CatalogPlayer[] | null>(null);
   const [catalogErr, setCatalogErr] = useState<string | null>(null);
-  const [previews, setPreviews] = useState<Record<string, GeneratedRosterPlayer>>({});
-  const [previewErr, setPreviewErr] = useState<Record<string, string>>({});
-  const [adding, setAdding] = useState<Set<string>>(new Set());
-  const loadCatalog = useCallback(() => { setCatalogErr(null); api.catalog().then(setCatalog).catch((e) => setCatalogErr((e as Error).message)); }, []);
+  const [catalogProvisional, setCatalogProvisional] = useState(false);
+  // Partition results and in-flight work by lens: a late Career response cannot replace Realistic.
+  const [previewCache, setPreviewCache] = useState<Record<string, Record<string, GeneratedRosterPlayer>>>({});
+  const [errorCache, setErrorCache] = useState<Record<string, Record<string, string>>>({});
+  const [pending, setPending] = useState<Set<string>>(new Set());
+  const inFlight = useRef(new Map<string, Promise<GeneratedRosterPlayer | null>>());
+  const previews = useMemo(() => previewCache[mode] ?? {}, [previewCache, mode]);
+  const previewErr = useMemo(() => errorCache[mode] ?? {}, [errorCache, mode]);
+  const adding = useMemo(() => new Set([...pending].filter(k => k.startsWith(`${mode}:`)).map(k => k.slice(mode.length + 1))), [pending, mode]);
+  const loadCatalog = useCallback(() => { setCatalogErr(null); api.catalogSnapshot().then(result => { setCatalog(result.players); setCatalogProvisional(result.degraded); }).catch((e) => setCatalogErr((e as Error).message)); }, []);
   useEffect(() => { if (tab === 'pool' && !catalog && !catalogErr) loadCatalog(); }, [tab, catalog, catalogErr, loadCatalog]);
-  const fetchPreview = useCallback(async (key: string): Promise<GeneratedRosterPlayer | null> => {
-    setAdding((s) => new Set(s).add(key));
-    try {
-      const g = await api.rosterPreviewAdd(key);
-      setPreviews((p) => ({ ...p, [key]: g }));
-      setPreviewErr((e) => { const n = { ...e }; delete n[key]; return n; });
+  const fetchPreview = useCallback((key: string): Promise<GeneratedRosterPlayer | null> => {
+    const id = `${mode}:${key}`;
+    const existing = inFlight.current.get(id);
+    if (existing) return existing;
+    setPending(s => new Set(s).add(id));
+    const request = api.rosterPreviewAdd(key, mode).then(g => {
+      setPreviewCache(p => ({ ...p, [mode]: { ...p[mode], [key]: g } }));
+      setErrorCache(e => { const n = { ...e[mode] }; delete n[key]; return { ...e, [mode]: n }; });
       return g;
-    } catch (e) {
-      setPreviewErr((m) => ({ ...m, [key]: (e as Error).message }));
+    }).catch(e => {
+      setErrorCache(m => ({ ...m, [mode]: { ...m[mode], [key]: (e as Error).message } }));
       return null;
-    } finally {
-      setAdding((s) => { const n = new Set(s); n.delete(key); return n; });
-    }
-  }, []);
-  // A saved roster reopened: rate its adds again (the server caches them).
+    }).finally(() => {
+      inFlight.current.delete(id);
+      setPending(s => { const n = new Set(s); n.delete(id); return n; });
+    });
+    inFlight.current.set(id, request);
+    return request;
+  }, [mode]);
+  // Reopened documents and lens changes re-rate every addition; edits overlay those values.
   useEffect(() => {
     for (const a of doc.adds) if (!previews[a.key] && !adding.has(a.key) && !previewErr[a.key]) fetchPreview(a.key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doc.adds]);
+  }, [doc.adds, mode, previews, adding, previewErr, fetchPreview]);
+
+  // First-install data arrives in the background. Refresh provisional results so
+  // what the user sees continues to match what the server will export.
+  useEffect(() => {
+    const provisional = Object.values(previews).filter(p => p.degraded);
+    if (!catalogProvisional && !provisional.length) return;
+    const timer = window.setInterval(() => {
+      if (catalogProvisional) loadCatalog();
+      for (const p of provisional) void fetchPreview(p.key);
+    }, 10000);
+    return () => window.clearInterval(timer);
+  }, [previews, catalogProvisional, loadCatalog, fetchPreview]);
 
   const players = useMemo(() => viewPlayers(doc, data, previews), [doc, data, previews]);
   const counts = docCounts(doc, data);
@@ -134,7 +159,10 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     const target = teamId ?? addTarget;
     if (readOnly || target == null) return;
     const g = previews[key] ?? (await fetchPreview(key));
-    if (g) onChange(withAdd(doc, key, target));
+    if (g && latestDoc.current.id === doc.id) {
+      latestDoc.current = withAdd(latestDoc.current, key, target);
+      onChange(latestDoc.current);
+    }
   };
   const poolStatus = (key: string) => (adding.has(key) ? { label: 'Rating…' } : null);
   const selectedName = selectedTeam === ALL_TEAMS ? 'every player' : selectedTeam === data.freeAgentTeamId ? 'free agency' : (() => { const t = data.teams.find((x) => x.id === selectedTeam); return t ? `${t.city} ${t.name}` : 'the selected team'; })();
@@ -180,7 +208,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
     setExporting(true); setExportErr(null); setResult(null);
     try {
       await save();
-      const r = await api.rosterBuild({ baseName: doc.base.fromSaves ? doc.base.fileName : undefined, baseId: doc.base.openedId, name: doc.name, moves: doc.moves, edits: doc.edits, adds: doc.adds, fresh });
+      const r = await api.rosterBuild({ baseName: doc.base.fromSaves ? doc.base.fileName : undefined, baseId: doc.base.openedId, name: doc.name, moves: doc.moves, edits: doc.edits, adds: doc.adds, fresh, mode });
       setResult(r);
     } catch (e) {
       setExportErr((e as Error).message);
@@ -211,6 +239,14 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-xs text-neutral-400" title="Updates all historical pool additions. Your manual edits are preserved; base-file players keep their ratings.">
+            Lens
+            <select aria-label="Roster rating lens" value={mode} disabled={readOnly || exporting}
+              onChange={e => { onChange(withRosterMode(doc, e.target.value as 'retro' | 'madden')); setResult(null); }} className={selectCls}>
+              <option value="retro">Career</option>
+              <option value="madden">Realistic (rookie)</option>
+            </select>
+          </label>
           {readOnly ? (
             <button onClick={onRebase} className={btnCls}>Pick the base file again</button>
           ) : (
@@ -259,7 +295,7 @@ export function RosterBuilder({ data, doc, readOnly, notice, onChange, onSave, o
               <span className="ml-auto text-xs tabular-nums text-muted"><span className="font-semibold text-neutral-300">{rows.length.toLocaleString()}</span> {selectedTeam === ALL_TEAMS ? `of ${players.length.toLocaleString()}` : `on ${selectedName}`}</span>
             </>
           ) : (
-            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Type a team in Add to… on each row (a city, nickname or abbreviation); rated by career, edit anything afterwards.' : `Add places a player on ${selectedName}, rated by career; edit anything afterwards.`}</span>
+            <span className="ml-auto text-[11px] text-muted">{addTarget == null ? 'Choose a team in Add to….' : `Adds go to ${selectedName}.`} {mode === 'retro' ? 'Career' : 'Realistic rookie'} ratings apply to all pool additions; manual edits stay. Pool scores show career strength.</span>
           )}
         </div>
         {tab === 'roster' ? (

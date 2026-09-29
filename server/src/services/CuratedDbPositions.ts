@@ -27,6 +27,7 @@ const OVERRIDES: Record<string, DbPos> = {
   'mertonhanks|1991': 'FS',
   'rickvolk|1967': 'FS',
   // Strong safeties
+  'troypolamalu|2003': 'SS', // Pro Football Hall of Fame; also correct before depth-chart downloads finish.
   'kennyeasley|1981': 'SS',
   'steveatwater|1989': 'SS',
   'kenhouston|1967': 'SS',

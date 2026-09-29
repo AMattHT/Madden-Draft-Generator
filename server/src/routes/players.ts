@@ -15,7 +15,7 @@ r.get('/players/search', (req, res) => {
  *  each with the club that drafted him when a source records it. */
 r.get('/players/catalog', async (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json({ players: await PoolCatalogService.balanced() });
+  res.json(await PoolCatalogService.snapshot());
 });
 
 export default r;
