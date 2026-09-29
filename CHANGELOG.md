@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.2
+
+- Scout's read shows Madden's own draft notes. An earlier 1.5.1 install was still showing the old generated sentences; opening a class rebuilds them.
+
 ## 1.5.1
 
 - Scout's read now uses Madden's own draft notes for every position. A rating at or above Madden's cutoff shows one of the good sentences for that attribute; below the cutoff, one of the bad ones. Left and right ends use the game's LE and RE notes, and SAM, MIKE and WILL use LOLB, MLB and ROLB.

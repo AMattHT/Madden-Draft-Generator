@@ -14,7 +14,7 @@ export interface TableFilters {
 // year (or reloading the page) is instant and offline-friendly.
 // Bump CACHE_VERSION whenever the backend rating/position logic changes so stale
 // cached classes are treated as a miss and re-pulled automatically.
-const CACHE_VERSION = 46; // v46: front-seven classifier (3-4 OLBs -> edge, pinned SAM/MIKE/WILL)
+const CACHE_VERSION = 47; // v47: Scout's read is Madden's draft notes, not the generated phrases
 /** Backend generator fingerprint (from /api/health). A cached class built by a
  *  different generator is treated as stale, so rating/likeness changes show up
  *  without a manual CACHE_VERSION bump. */

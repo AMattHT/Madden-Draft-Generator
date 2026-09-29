@@ -108,13 +108,29 @@ export default function App() {
   const [customClasses, setCustomClasses] = useState<CustomClass[]>([]);
   const [builder, setBuilder] = useState<{ open: boolean; initial: CustomClass | null }>({ open: false, initial: null });
   const editKeyRef = useRef<{ year: number; league: string } | null>(null);
+  const dataRef = useRef<GeneratedClass | null>(null);
+  const selectedRef = useRef<number | null>(null);
   // Backend liveness: poll /api/health every 15 s (the dot used to mirror the
   // last request's error state, which said "connected" with the server down).
   const [connected, setConnected] = useState(true);
+  const selectRef = useRef<((year: number, force?: boolean) => void) | null>(null);
   useEffect(() => {
     let alive = true;
     const ping = () => fetch('/api/health', { cache: 'no-store' })
-      .then(async (r) => { if (!alive) return; setConnected(r.ok); if (r.ok) { const j = await r.json().catch(() => null); if (j?.generator) setGeneratorFingerprint(j.generator); } })
+      .then(async (r) => {
+        if (!alive) return;
+        setConnected(r.ok);
+        if (!r.ok) return;
+        const j = await r.json().catch(() => null);
+        const gen = j?.generator as string | undefined;
+        if (!gen) return;
+        setGeneratorFingerprint(gen);
+        // A class opened before this fingerprint arrived can still be the old
+        // generated sentences. Rebuild it once the generator is known.
+        const shown = dataRef.current;
+        const year = selectedRef.current;
+        if (shown?._gen && shown._gen !== gen && year != null) selectRef.current?.(year, true);
+      })
       .catch(() => alive && setConnected(false));
     ping();
     const t = setInterval(ping, 15000);
@@ -244,6 +260,9 @@ export default function App() {
     },
     [mode, effLeague, draftOpts, gameVersion]
   );
+  dataRef.current = data;
+  selectedRef.current = selected;
+  selectRef.current = select;
 
   /** Force a player the 402-slot class cut back in (or out again). Persisted per
    *  class; the server swaps him into the weakest keeper's slot so other picks hold. */
@@ -559,6 +578,16 @@ export default function App() {
         if (cfg.franchise) setView('home');
       } catch { /* older server: defaults stand */ }
       setCfgLoaded(true);
+      // The fingerprint decides whether a cached class is still the one this
+      // server would build. Read it before the first class, or a saved board
+      // keeps the old Scout's read.
+      try {
+        const health = await fetch('/api/health', { cache: 'no-store' });
+        if (health.ok) {
+          const body = await health.json().catch(() => null);
+          if (body?.generator) setGeneratorFingerprint(body.generator);
+        }
+      } catch { /* an offline cache is still better than an empty board */ }
       const ys = await api.years();
       setYears(ys);
       const def = ys.includes(2003) ? 2003 : ys[ys.length - 1];
