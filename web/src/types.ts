@@ -43,7 +43,7 @@ export interface PlayerRow {
   frontSeven?: FrontSevenInfo | null;
   gear?: Record<string, string>; // era-default equipment (editor slot -> asset) the export writes
   ratings: Record<string, number>; // full editable attribute set
-  scouting?: string[]; // scout's read (server-generated, no numbers)
+  scouting?: string[]; // Madden's own draft notes for this position
 }
 
 export interface FrontSevenInfo {
@@ -247,7 +247,7 @@ export interface RosterPlayer {
   assetName: string | null;
   portrait: string | null;
   ratings: Record<string, number>;
-  scouting?: string[]; // scout's read (server-generated, no numbers)
+  scouting?: string[]; // Madden's own draft notes for this position
   visuals: { bodyType: string; genericHead: string; helmet: string; facemask: string };
   archetypeId: number;
   collegeId: number;

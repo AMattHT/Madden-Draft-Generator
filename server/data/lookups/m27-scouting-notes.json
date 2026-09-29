@@ -1,0 +1,2549 @@
+{
+  "_source": "Madden 27 franchise-tuning-binary (Frosty Legacy Explorer export). DraftAttributeBullet, DraftPlayerAttributeBullets, ScoutingTraitInfo, SRC_AttributeBulletPointInfo.",
+  "attributeBullets": [
+    {
+      "index": 0,
+      "attribute": "AWR",
+      "threshold": 50,
+      "good": [
+        "[PLACEHOLDER] DraftAttributeBullet_Awareness_GoodDescription1"
+      ],
+      "bad": [
+        "DraftAttributeBullet__Awareness_BadDescription1"
+      ]
+    },
+    {
+      "index": 1,
+      "attribute": "AWR",
+      "threshold": 76,
+      "good": [
+        "Shows Advanced Knowledge of Defense Pressure Concepts",
+        "Easily Deciphers Incoming Threats",
+        "Highly Intelligent Blocker",
+        "Extensive Understanding of Blocking Schemes",
+        "High IQ Blocker",
+        "Incredible at Identifying Targets Pre-Snap",
+        "Above Average Processing Puts Him in Advantageous Positions"
+      ],
+      "bad": [
+        "Gets Caught Blocking Air at Times",
+        "Needs to Improve Awareness",
+        "Football IQ is Stil Improving",
+        "Mental Lapses are Too Frequent"
+      ]
+    },
+    {
+      "index": 2,
+      "attribute": "AWR",
+      "threshold": 76,
+      "good": [
+        "Shows Advanced Knowledge of Defense Pressure Concepts",
+        "Easily Deciphers Incoming Threats",
+        "Highly Intelligent Blocker",
+        "Extensive Understanding of Blocking Schemes",
+        "High IQ Blocker",
+        "Incredible at Identifying Targets Pre-Snap",
+        "Processes Blitzes Quickly and Effectively",
+        "Plus Instincts Help Easily Locate Incoming Pressure",
+        "Above Average Processing Puts Him in Advantageous Positions",
+        "Routinely Calls Out Blitzers Pre-Snap"
+      ],
+      "bad": [
+        "Sometimes Fooled by Pressure Schemes",
+        "Gets Caught Blocking Air at Times",
+        "Needs to Improve Awareness",
+        "Football IQ is Stil Improving",
+        "Mental Lapses are Too Frequent"
+      ]
+    },
+    {
+      "index": 3,
+      "attribute": "AWR",
+      "threshold": 75,
+      "good": [
+        "Can Make Multiple Reads",
+        "High Level Processor",
+        "Progresses Well Through Reads",
+        "Quick Processing",
+        "Processes the Defense Quickly"
+      ],
+      "bad": [
+        "Needs More Time to Develop Football IQ",
+        "Misses Open Receivers",
+        "Slow Processing Leads to Mistakes",
+        "Easily Fooled by Coverages and Blitzes",
+        "Can Struggle to Get Protection Set Properly"
+      ]
+    },
+    {
+      "index": 4,
+      "attribute": "BSH",
+      "threshold": 70,
+      "good": [
+        "Hand Fighting Prowess Allows Him to Shed Blocks Easily",
+        "Sheds Blocks with Ease",
+        "Uses Power and Technique to Shed Blocks",
+        "Able to Easily Disengage Blocks in Run Game",
+        "Ability to Shed Blocks Makes him Force in the Run Game",
+        "Effective at Shedding Blocks in the Run Game",
+        "Wreaks Havoc when Able to Disengage from Run Blocks",
+        "Shows Excellent Technique to Shed Blockers",
+        "Able to Easily Disengage in 1-on-1 Blocks",
+        "Uses Active Hands to Easily Shed Blocks"
+      ],
+      "bad": [
+        "Struggles to Disengage from Blocks",
+        "Struggles to Break Free When Engaged",
+        "Can Be Invisible in Run Game at Times",
+        "Hand Fighting Skills are a Work in Progress",
+        "Struggles to Get Off Blocks in the Run Game"
+      ]
+    },
+    {
+      "index": 5,
+      "attribute": "BTK",
+      "threshold": 72,
+      "good": [
+        "Shows Good Balance to Run Through Tackles",
+        "Consistently Breaks Tackles",
+        "Shows Great Contact Balance to Break Tackles",
+        "Drops his Pads and Plows through Early Arm Tacklers",
+        "Displayed Ability to Stay Up and Drag Tacklers"
+      ],
+      "bad": [
+        "Often Went Down on First Contact",
+        "Doesn't Break Many Tackles",
+        "Contact Balance is Decent",
+        "Will Break Tackles Here and There",
+        "Average Tackle Breaking Ability"
+      ]
+    },
+    {
+      "index": 6,
+      "attribute": "CAR",
+      "threshold": 82,
+      "good": [
+        "Rarely Fumbles",
+        "Carries High and Tight, Limiting Fumbles",
+        "Limits Fumbles",
+        "Holds Ball Tight to Body Limiting Fumbles",
+        "Works Hard to Protect Football"
+      ],
+      "bad": [
+        "Major Ball Security Concerns",
+        "Ball Security Could Be Concern",
+        "Fumbles may be Issue at NFL Level",
+        "Carries Ball Away from Body Leading to Fumbles",
+        "Fumbles Too Much"
+      ]
+    },
+    {
+      "index": 7,
+      "attribute": "CTH",
+      "threshold": 70,
+      "good": [
+        "Shows Soft Hands Out of Backfield",
+        "Receiver Hands",
+        "Receiving Threat",
+        "Soft, Reliable Hands",
+        "Looks Comfortable as Receiver"
+      ],
+      "bad": [
+        "Inconsistent Hands out of Backfield",
+        "Not Viewed as Receiving Threat",
+        "Receiving Skills Leave Plenty to be Desired",
+        "Needs to Improve Hands",
+        "Viable Receiving Threat"
+      ]
+    },
+    {
+      "index": 8,
+      "attribute": "CTH",
+      "threshold": 76,
+      "good": [
+        "Soft Hands",
+        "Looks the Ball Into His Hands",
+        "Sudden Hands Make Catches Look Easy",
+        "Quiet, Soft Hands that Catch Everything",
+        "Didn't Drop a Pass at the Combine",
+        "Reliable Pass Catcher",
+        "Very Reliable Hands",
+        "Hands Made of Glue",
+        "NFL-Ready Pass Catcher",
+        "Soft, Reliable Hands"
+      ],
+      "bad": [
+        "Inconsistent Hands",
+        "Drops Easy Catches",
+        "Average Hands at Best",
+        "Needs to Work on Catching",
+        "Serviceable Hands"
+      ]
+    },
+    {
+      "index": 9,
+      "attribute": "CIT",
+      "threshold": 75,
+      "good": [
+        "Makes 50/50 Balls Look Like 80/20 Balls",
+        "Strong Hands Make Contested Catches Look Easy",
+        "All-Star Contested Catch Ability",
+        "Unbothered by Defenders When Catching Passes",
+        "Shows Great Concentration Catching in Traffic",
+        "No Issues Catching Through Traffic",
+        "Strong, Reliable Hands to Make Contested Catches",
+        "Secure Hands with Defenders in Vicinity",
+        "Tracks and Secures Ball with Defenders Closing In",
+        "Strong Hands to Make Catches Through Contact"
+      ],
+      "bad": [
+        "Struggles to Make Catches in Traffic",
+        "Inconsistent Contested Catch Success",
+        "Tends to Struggle with Contested Catches",
+        "Contact Often Results in No Catch",
+        "Average Contested Catch Ability"
+      ]
+    },
+    {
+      "index": 10,
+      "attribute": "DAC",
+      "threshold": 77,
+      "good": [
+        "Beautiful Deep Ball",
+        "Excellent Deep Accuracy",
+        "Excels at Throwing Downfield",
+        "Makes tough throws look easy"
+      ],
+      "bad": [
+        "Deep Ball Accuracy Needs Work",
+        "Struggles with Deep Throws",
+        "Downfield Throws are Hit or Miss",
+        "Needs to Improve Deep Ball Accuracy at Next Level",
+        "Shaky Downfield Passer"
+      ]
+    },
+    {
+      "index": 11,
+      "attribute": "DRR",
+      "threshold": 74,
+      "good": [
+        "Can Stretch the Field Deep",
+        "Will Keep Defenses Honest with Ability to Stretch the Field",
+        "Shows Great Deep Route Running Technique",
+        "High Level Deep Route Running Ability",
+        "Excels Running Post, Corner and other Deep Routes",
+        "Good Technique Creates Separation on Deeper Routes",
+        "Excellent at Running Deep Routes",
+        "Understands How to Create Separation at Second Level",
+        "Excelled in College at Running Deep Routes",
+        "Creates Separation when Stretching the Field"
+      ],
+      "bad": [
+        "Deep Routes Lack Refinement",
+        "Deep Routes are Far from Crisp",
+        "Needs to Spend Time Refining Deep Routes",
+        "Fails to Create Separation on Deep Routes",
+        "Deep Route Quality is Average at Best"
+      ]
+    },
+    {
+      "index": 12,
+      "attribute": "FMV",
+      "threshold": 73,
+      "good": [
+        "Speed Moves will Stress Offensive Linemen",
+        "Arsenal of Quick Moves to Create Pass Rush Wins",
+        "Most Pass Rush Wins Come From Finesse Moves",
+        "Competent Speed Rusher",
+        "Thrives by Winning with Speed and Finesse Moves",
+        "Sudden Hands can Create Quick Pass Rush Wins",
+        "Too Quick for some Pass Protectors",
+        "Well-Planned Rush Approach with Arsenal of Finesse Moves",
+        "Pass Rush Plan Involves More Quickness than Power",
+        "Utilizes Finesse Moves to Create Most Pass Rush Wins"
+      ],
+      "bad": [
+        "Finesse Moves Often Stall Out",
+        "Needs to Work on Developing his Speed Move Arsenal",
+        "Finesse Moves Need Work",
+        "Gets Overwhelmed When Using Finesse Moves",
+        "Ineffective Speed Rusher"
+      ]
+    },
+    {
+      "index": 13,
+      "attribute": "MOR",
+      "threshold": 0,
+      "good": [
+        "[PLACEHOLDER] DraftAttributeBullet_Speed_GoodDescription1"
+      ],
+      "bad": [
+        "DraftAttributeBullet__SPeed_BadDescription1"
+      ]
+    },
+    {
+      "index": 14,
+      "attribute": "POW",
+      "threshold": 82,
+      "good": [
+        "Hit Stick Connoisseur",
+        "Hit Power will Strike Fear into Ball Carriers",
+        "Lays the Wood",
+        "Brings the Thunder",
+        "Forceful Tackler",
+        "Film is Filled with Massive Hits",
+        "Big Hitter",
+        "Here Comes the Boom",
+        "Big Hits Galore",
+        "Highlight Reel Hitter"
+      ],
+      "bad": [
+        "Hits Lack Power",
+        "Often Bounces Off when Attempting Big Hit",
+        "Won't Deliver Bone Crushing Hits",
+        "Soft Tackler"
+      ]
+    },
+    {
+      "index": 15,
+      "attribute": "JKM",
+      "threshold": 82,
+      "good": [
+        "Slippery Juke Move",
+        "Dangerous Open Field Juke Moves",
+        "Ankle Breaking Juke Moves",
+        "Shifty with Great Juke Move",
+        "Slick Feet and Explosive Juke Move"
+      ],
+      "bad": [
+        "Average Wiggle to Evade Defenders",
+        "Juke Move Won't Fool Many Defenders",
+        "Decent Juke That Could Use Improvement",
+        "Average Juke Move",
+        "Straight Line Runner with Average Juke Move"
+      ]
+    },
+    {
+      "index": 16,
+      "attribute": "JMP",
+      "threshold": 94,
+      "good": [
+        "Exceptional Leaping Ability",
+        "Fantastic Leaping Ability",
+        "Will Sky Over Defenders with Leaping Ability",
+        "One of the Highest Jumpers in the Draft",
+        "First Dunk was in the 6th Grade"
+      ],
+      "bad": [
+        "Average Leaping Ability",
+        "Decent Jumping Ability",
+        "Leaping Ability Won't Wow Anyone",
+        "Average Jumper",
+        "Not the Best Vertical, Not the Worst"
+      ]
+    },
+    {
+      "index": 17,
+      "attribute": "KAC",
+      "threshold": 78,
+      "good": [
+        "Very Accurate",
+        "Accuracy Shouldn't Be An Issue",
+        "Highly Accurate in College",
+        "Consistent Accuracy",
+        "Consistently Accurate",
+        "Made 91.3 percent of Kicks in College",
+        "Made 92.7 percent of Kicks in College",
+        "Made 94.5 percent of Kicks in College",
+        "Made 91.7 percent of Kicks in College",
+        "Made 97.8 percent of Kicks in College",
+        "Made 90.4 percent of Kicks in College",
+        "Made 93.7 percent of Kicks in College",
+        "Made 94.8 percent of Kicks in College",
+        "Made 95.6 percent of Kicks in College",
+        "Made 96.2 percent of Kicks in College"
+      ],
+      "bad": [
+        "Struggled with Accuracy in College",
+        "Inconsistent on Extra Points and Field Goals",
+        "Shaky Accuracy",
+        "Accuracy will Need to Improve in NFL",
+        "Needs to Improve Accuracy"
+      ]
+    },
+    {
+      "index": 18,
+      "attribute": "KAC",
+      "threshold": 75,
+      "good": [
+        "Good Directional Punter",
+        "Shows Knack for Dropping Punts Inside the 20",
+        "Displays Good Touch to Pin Punts Deep",
+        "Coffin Corner Specialist",
+        "Crafy Punt Placement",
+        "Consistently Drops Punts Inside the 20",
+        "Excels with Directional Punting",
+        "Premium Punt Accuracy",
+        "Executes Directional Punts Well",
+        "Punts Have Great Touch"
+      ],
+      "bad": [
+        "Lacks Accuracy on Punts",
+        "Needs to Develop Better Touch on Punts",
+        "Struggles Pinning Teams Inside the 20",
+        "Directional Punting is Not His Strength",
+        "Average Directional Punting Ability"
+      ]
+    },
+    {
+      "index": 19,
+      "attribute": "KPW",
+      "threshold": 93,
+      "good": [
+        "Leg Strength Should Translate Well to NFL",
+        "Deep Field Goal Range",
+        "NFL Leg Strength",
+        "Massive Leg Whip to Boom Kicks",
+        "Drives the Ball with Ease"
+      ],
+      "bad": [
+        "Not a Booming Leg",
+        "Decent Leg Power",
+        "Power is a Question Mark",
+        "Needs to Develop Stronger Leg",
+        "Good Leg"
+      ]
+    },
+    {
+      "index": 20,
+      "attribute": "KPW",
+      "threshold": 90,
+      "good": [
+        "Consistenly Booms Punts",
+        "Huge Leg",
+        "Outstanding Leg to Boom Punts",
+        "Consistently Dug Team Out of Bad Situations with Long Punts",
+        "Tremendous Leg"
+      ],
+      "bad": [
+        "Won't Boom Punts but has Decent Power",
+        "Improved Mechanics Could Help Improve Power",
+        "Leg Power has Room to Improve",
+        "Punt Average is Decent",
+        "Won't Ever Outkick His Coverage"
+      ]
+    },
+    {
+      "index": 21,
+      "attribute": "RET",
+      "threshold": 84,
+      "good": [
+        "Talented Kick Returner",
+        "Special Teams Weapon",
+        "Can Be Major Threat in Return Game",
+        "Dangerous Return Man",
+        "Do Not Kick to Him",
+        "Electric Returner",
+        "Electric Return Man"
+      ],
+      "bad": [
+        "Can Return Kicks or Punts in a Pinch",
+        "Potential Return Threat",
+        "Returned Kicks Sparingly",
+        "Some Return Experience",
+        "Average Kick/Punt Returner"
+      ]
+    },
+    {
+      "index": 22,
+      "attribute": "LBK",
+      "threshold": 76,
+      "good": [
+        "Clears Lanes for the Halfback",
+        "Wrecking Ball when Blocking Downhill",
+        "Shows Drive and Push in Run Blocking",
+        "Explodes into Blocks",
+        "Prototypical Lead Blocker"
+      ],
+      "bad": [
+        "Gets Stood Up by Defenders Too Often",
+        "Sometimes Clogs Holes Instead of Clearing Them",
+        "Lacks Push when Lead Blocking",
+        "Has Issues Targeting Threats when Blocking Downhill",
+        "Needs to be Coached Up to Improve Lead Blocking"
+      ]
+    },
+    {
+      "index": 23,
+      "attribute": "LSP",
+      "threshold": 76,
+      "good": [
+        "Reliable snapping on special teams"
+      ],
+      "bad": [
+        "Could make some errors on the snap"
+      ]
+    },
+    {
+      "index": 24,
+      "attribute": "MCV",
+      "threshold": 76,
+      "good": [
+        "Sticky in Man Coverage",
+        "Constantly in Receiver's Hip Pocket",
+        "Good Balance to Remain in Phase in Man Coverage",
+        "Sticks with Receivers Well in Man Coverage",
+        "Great Footwork to Mirror Routes in Man Coverage",
+        "Great Balance and Quiet Feet in Man Coverage",
+        "Shows Good Body Control to Stay in Phase in Man Coverage",
+        "Sticky Man Cover Corner",
+        "Leverages Great Technique in Man Coverage",
+        "Plenty of Good Man Coverage Film"
+      ],
+      "bad": [
+        "Needs to Improve Man Coverage Technique",
+        "Sometimes Loses Receivers in Man Coverage",
+        "Allows Receivers Too Much Separation in Man Coverage",
+        "Decent Man Coverage Skills",
+        "Raw Man Coverage Defender"
+      ]
+    },
+    {
+      "index": 25,
+      "attribute": "MAC",
+      "threshold": 78,
+      "good": [
+        "Pinpoint accurate on intermediate throws",
+        "Excels on intermediate throws",
+        "Shows great touch on intermediate throws",
+        "Excels at mid-range throws",
+        "Elite intermediate accuracy"
+      ],
+      "bad": [
+        "Struggles with Intermediate Accuracy",
+        "Average Intermediate Accuracy",
+        "Inconsistent Intermediate Accuracy",
+        "Shows Flashes on Intermediate Throws",
+        "Decent Intermediate Accuracy"
+      ]
+    },
+    {
+      "index": 26,
+      "attribute": "MRR",
+      "threshold": 76,
+      "good": [
+        "Excellent Intermediate Route Runner",
+        "Excels at Running Intermediate Routes",
+        "Crisp, Fluid Route Runner",
+        "Runs Crisp Intermediate Routes",
+        "Runs Intermediate Routes with Threatening Pace",
+        "Rhythmic Route Runner at Intermediate Level",
+        "Understands Leverage and Creates Separation on Medium Routes",
+        "Excels at Running the Intermediate Route Tree",
+        "Quick, Clean Router Runner at Intermediate Levels",
+        "Runs Medium Routes with Leverage and Smooth Cuts"
+      ],
+      "bad": [
+        "Lacks Technique on Intermediate Routes",
+        "Intermediate Route Running is Sloppy",
+        "Intermediate Route Running is Inconsistent",
+        "Needs to Refine Intermediate Route Running",
+        "Shows Promise Running Intermediate Routes"
+      ]
+    },
+    {
+      "index": 27,
+      "attribute": "PBK",
+      "threshold": 75,
+      "good": [
+        "Maintains Balance and Wins Often in Pass Protection",
+        "Shows Good Vision for Incoming Threats in Pass Protection",
+        "Envelops Rushers Not Allowing Them to Disengage",
+        "Looks Comfortable in Pass Protection",
+        "Doesn't Panic in Pass Protection",
+        "Polished Pass Protector",
+        "Great Pass Blocker",
+        "Solid in Pass Protection",
+        "Shows Good Pass Protection Technique",
+        "Quick Feet and Strong Hands in Pass Protection"
+      ],
+      "bad": [
+        "Improving as a Pass Blocker",
+        "Raw Pass Blocker",
+        "Sometimes Struggles in Pass Protection",
+        "Shows Flashes of Being a Competent Pass Protector",
+        "Pass Protection Needs Coaching"
+      ]
+    },
+    {
+      "index": 28,
+      "attribute": "PBF",
+      "threshold": 76,
+      "good": [
+        "Quick Hands and Feet to Thwart Speed Rushes",
+        "Shows Quickness when Defending Speed Rushes",
+        "Fast and Agile Enough to Handle Speed Rushers",
+        "Shows Good Technique when Attacked by Speed Rushes",
+        "Quick Hands and Feet Pose Problems for Speed Rushers",
+        "Handles Finesse Moves with Ease",
+        "Shows Ability to Thwart Speed Moves",
+        "Frustrates Speed Rushers with his Quickness",
+        "Bullied Finesse Rushers in College",
+        "Rarely Beaten by Speed Rushes"
+      ],
+      "bad": [
+        "Needs Better Plan for Speed Rushers",
+        "Can Be Overwhelmed by Speed",
+        "Struggled with Finesse Moves in College",
+        "Panics when Dealing with Speed Rushers",
+        "Speed Rushers Could Pose Him Problems"
+      ]
+    },
+    {
+      "index": 29,
+      "attribute": "PBP",
+      "threshold": 72,
+      "good": [
+        "Firm Base Helps Defend Power Moves",
+        "Won't Be Overwhelmed by Power",
+        "Uses Strength and Technique to Thwart Power Rushes",
+        "Creates Solid Foundation to Slow Power Rushes",
+        "Rarely Pushed Backwards by Power Moves",
+        "Stands Ground when Dealing with Power Moves",
+        "Anchors Well when Defending Power Moves",
+        "Understands Leverage when Defending Power Moves",
+        "Solid Base and Good Bend Help Combat Power Rushes",
+        "Solid Base to Stall Power Rush Momentum"
+      ],
+      "bad": [
+        "Can Be Bullied by Power Moves",
+        "Sometimes Overwhelmed with Power",
+        "Doesn't Always Handle Power Well",
+        "Too Much Film of Him Being Pushed Back",
+        "Weak Anchor Leads to Power Move Struggles"
+      ]
+    },
+    {
+      "index": 30,
+      "attribute": "PRC",
+      "threshold": 71,
+      "good": [
+        "High Football IQ Stands Out on Film",
+        "Able to Quickly Diagnose Plays",
+        "Good Awareness and Reaction as a Defender",
+        "Good Instincts to Read and Diagnose Plays",
+        "Plays with Good Football IQ and Recognition",
+        "Good Football IQ",
+        "High Football IQ",
+        "Consistently Shows High-Level Instincts",
+        "High Football IQ Routinely on Display",
+        "Smart, Heady Defender"
+      ],
+      "bad": [
+        "Slow to React to Developing Plays",
+        "Needs More Time in Film Room",
+        "Average Recognition Skills",
+        "Shows Good Instincts",
+        "Average Recognition Leads to Inconsistent Play"
+      ]
+    },
+    {
+      "index": 31,
+      "attribute": "PMV",
+      "threshold": 72,
+      "good": [
+        "Posseses Devastating Bull Rush to Create Interior Pressure",
+        "Utilizes Bull Rush with Great Effectiveness",
+        "Moves QB Off his Spot by Pushing Linemen into the Pocket",
+        "Consistenly Utilizes Power Moves to Win Pass Rush Reps",
+        "Good Arsenal of Power Rush Moves",
+        "Pass Rush Plan Starts with Power and Ends with More Power",
+        "Ability to Win Using Power Moves is Impressive",
+        "Routinely Converts Leverage into Power when Rushing the Passer",
+        "Possesses Menacing Bull Rush",
+        "Generates Consistent Pocket Push with his Bull Rush"
+      ],
+      "bad": [
+        "Power Moves Need Better Technique",
+        "Shows Potential with Power Moves",
+        "Power Moves are Often Thwarted",
+        "Doesn't Possess Threatening Power Moves",
+        "Won't Scare Linemen with His Power Moves"
+      ]
+    },
+    {
+      "index": 32,
+      "attribute": "PRS",
+      "threshold": 75,
+      "good": [
+        "Quick, Strong Hands Lead to Strong Press Ability",
+        "Physical Press Gives Receivers Fits",
+        "Press Ability Frustrates Receivers at Line",
+        "Good Punch in Press Coverage to Disrupt Routes",
+        "Confident in Press Coverage"
+      ],
+      "bad": [
+        "Average Press Technique",
+        "Has Some Success Pressing Receivers",
+        "Press Results are Hit and Miss",
+        "Will Have Hard Time Pressing NFL Receivers",
+        "Liability When Playing Press"
+      ]
+    },
+    {
+      "index": 33,
+      "attribute": "PUR",
+      "threshold": 76,
+      "good": [
+        "Rangy Linebacker who will Track Down Ball Carrier",
+        "Shows Great Range and Pursuit",
+        "Takes Good Angles in Pursuit",
+        "Sideline-to-Sideline Pursuit",
+        "Shows Great Range in Chasing Down Ball Carriers"
+      ],
+      "bad": [
+        "Lacks Range",
+        "Pursuit Angles can be Questionable",
+        "Not a Sideline-to-Sideline Linebacker",
+        "Less than Ideal Range for Linebacker",
+        "Shows Good Range on Film"
+      ]
+    },
+    {
+      "index": 34,
+      "attribute": "RBK",
+      "threshold": 72,
+      "good": [
+        "Competent Run Blocker",
+        "Shows Good Technique when Run Blocking",
+        "Knowledgable and Proficient in Run Blocking Schemes",
+        "Proficient Run Blocker",
+        "Excels in the Run Game",
+        "Very Capable Run Blocker",
+        "Excellent Run Blocker",
+        "High Ceiling as a Run Blocker",
+        "Shows Good Technique and IQ in the Run Game",
+        "Good Run Blocker"
+      ],
+      "bad": [
+        "Adequate Run Blocker",
+        "Average Run Blocker",
+        "Inconsistent Run Blocker",
+        "Room to be Coached Up as a Run Blocker",
+        "Needs to Improve as a Run Blocker"
+      ]
+    },
+    {
+      "index": 35,
+      "attribute": "RBF",
+      "threshold": 72,
+      "good": [
+        "Excels in Zone Run Scheme Concepts",
+        "Shows Good Technique on Down and Reach Blocks",
+        "At His Best on Zone Run Concepts",
+        "Quickness Shines on Zone Run Concepts",
+        "Fits Best in a Zone Run Offense",
+        "Works Smoothly from One Block to the Next",
+        "Smart Run Blocker; Will Best Fit a Zone Run Scheme",
+        "Well-Versed in Zone Run Blocking Schemes",
+        "Shines Brightest on Inside and Outside Zone Runs",
+        "Perfect Fit for Zone Blocking Scheme"
+      ],
+      "bad": [
+        "Struggles on Zone Run Concepts",
+        "Can Be Disengaged Easily by Speed in the Run Game",
+        "Quick Moves Gave Him Fits in the Run Game",
+        "Shows Competence in Zone Run Concepts",
+        "Needs Work on Improving his Run Blocking in Zone Run Concepts"
+      ]
+    },
+    {
+      "index": 36,
+      "attribute": "RBK",
+      "threshold": 60,
+      "good": [
+        "Good Run Blocker",
+        "Great Run Blocker",
+        "Run Block Specialist",
+        "Effective Run Blocker",
+        "Excellent Run Blocker"
+      ],
+      "bad": [
+        "Most Teams Will Expect Better Run Blocking from a Fullback",
+        "Must Improve Run Blocking Technique",
+        "Doesn't Flash Run Blocking Skill on Tape",
+        "Average Run Blocker",
+        "Decent Run Blocker"
+      ]
+    },
+    {
+      "index": 37,
+      "attribute": "RBK",
+      "threshold": 67,
+      "good": [
+        "Enjoys Run Blocking and it Shows",
+        "Very Capable Blocker in the Run Game",
+        "Shows Good Technique as a Run Blocker",
+        "Uses Inside Hands and Good Posture when Run Blocking",
+        "Willing Run Blocker with Competitive Spirit"
+      ],
+      "bad": [
+        "Not a Run Blocking Tight End",
+        "Wasn't Used as a Run Blocker in College",
+        "Willing Run Blocker",
+        "Shows Good Effort when Run Blocking",
+        "Will Need to Improve Run Blocking to be Full-Time Tight End"
+      ]
+    },
+    {
+      "index": 38,
+      "attribute": "RBP",
+      "threshold": 70,
+      "good": [
+        "Power in Run Game Jumps Out on Film",
+        "Uses Power to Drive Defenders Back in Run Game",
+        "Very Strong and will Bully Defenders in the Run Game",
+        "Strong Hands and Drive Evident in Power Run Concepts",
+        "Understands Leverage and Uses it to Create More Power when Run Blocking",
+        "Displays Explosive Power in Run Game",
+        "Good Power in Run Game",
+        "Powerful Run Blocker",
+        "Very Powerful Run Blocker",
+        "Run Block Power Shined on Film"
+      ],
+      "bad": [
+        "Powerful Defenders Overwhelm Him in the Running Game",
+        "Doesn't Handle Power Well in Run Game",
+        "Can Be Overpowered in Run Game",
+        "Not the Most Adept at Power Run Concepts",
+        "Room to Improve on Power Run Concepts"
+      ]
+    },
+    {
+      "index": 39,
+      "attribute": "SAC",
+      "threshold": 78,
+      "good": [
+        "Makes Easy Throws Look Automatic",
+        "Perfect Placement on Screens and Checkdowns",
+        "Makes All the Easy Throws ",
+        "Excels on Quick Throws",
+        "Great Touch and Accuracy on Short Throws"
+      ],
+      "bad": [
+        "Sometimes Erratic on Short Throws",
+        "Needs to Work on Ball Placement for Screens and Slants",
+        "Short Accuracy Needs to Be Better",
+        "Sloppy Feet Results in Short Accuracy Woes",
+        "Sails Checkdowns Frequently"
+      ]
+    },
+    {
+      "index": 40,
+      "attribute": "SRR",
+      "threshold": 75,
+      "good": [
+        "Quick Burst Creates Separation on Short Routes",
+        "Creates Early Separation on Short Routes",
+        "Crisp Route Running on Shorter Routes",
+        "Easily Separates on Short Routes",
+        "Runs Crisp, Smooth Short Routes",
+        "Excels at Drags, Slants and other Short Routes",
+        "Shows Refined Technique on Short Routes",
+        "Runs Fundamentally Sound Short Routes",
+        "Smooth, Refined Short Route Runner",
+        "Excellent Technique when Running Short Routes"
+      ],
+      "bad": [
+        "Needs to Learn Short Route Nuances",
+        "Average Short Route Runner",
+        "Has Ability to Create Separation on Short Routes",
+        "Has Tools to be Skilled in the Quick Game",
+        "Ran Almost Exclusively Deep Routes in College"
+      ]
+    },
+    {
+      "index": 41,
+      "attribute": "SPC",
+      "threshold": 84,
+      "good": [
+        "Highlight Reel Catches are the Norm",
+        "Catches will Regularly Make Top-10 Highlight Reels",
+        "Several Wow Catches on Film",
+        "Consistently Bailed out QB's with Spectacular Catches",
+        "Comes Down with the Toughest Catches"
+      ],
+      "bad": [
+        "Rarely Comes Down with the Spectacular Catches",
+        "Will Make a Highlight Reel Catch Here and There",
+        "Not Many Highlight Reel Catches on Tape",
+        "Has Difficulty Finishing Tough Catches",
+        "Has Shown Flashes of the Highlight Reel Grab"
+      ]
+    },
+    {
+      "index": 42,
+      "attribute": "SPD",
+      "threshold": 60,
+      "good": [
+        "[PLACEHOLDER] DraftAttributeBullet_Speed_GoodDescription1"
+      ],
+      "bad": [
+        "DraftAttributeBullet__SPeed_BadDescription1"
+      ]
+    },
+    {
+      "index": 43,
+      "attribute": "SPD",
+      "threshold": 76,
+      "good": [
+        "Good Speed for a FB",
+        "Fast for a Fullback",
+        "College Halfback",
+        "Excellent Speed for a Fullback",
+        "Shows Good Speed for a Fullback"
+      ],
+      "bad": []
+    },
+    {
+      "index": 44,
+      "attribute": "SPD",
+      "threshold": 85,
+      "good": [
+        "Quick Enough to Stay with Most Tight Ends and Halfbacks",
+        "Shows Good Speed for a Linebacker",
+        "Possesses Good Speed for a Linebacker",
+        "More than Enough Speed to Play LB in NFL",
+        "Great Speed to Cover and Track Down Tackles"
+      ],
+      "bad": [
+        "Slow Linebacker in Today's Game",
+        "Decent Speed",
+        "Instincts Will Need to Make Up for Lack of Speed",
+        "Will Have Trouble Keeping up with Tight Ends and Running Backs",
+        "Average Speed for a Linebacker"
+      ]
+    },
+    {
+      "index": 45,
+      "attribute": "SPD",
+      "threshold": 90,
+      "good": [
+        "Premium Athlete at QB",
+        "Extends Plays",
+        "Additional Threat in Run-Game",
+        "Two 1,000 Yard Rushing Seasons in College",
+        "Wide Receiver Speed at QB"
+      ],
+      "bad": [
+        "DraftAttributeBullet__SPeed_BadDescription1"
+      ]
+    },
+    {
+      "index": 46,
+      "attribute": "SPD",
+      "threshold": 94,
+      "good": [
+        "Speed Burner",
+        "Elite Speed",
+        "Track Speed",
+        "Elite Top End Speed",
+        "Speed, Speed, Speed"
+      ],
+      "bad": [
+        "Not a Burner but Decent Speed",
+        "Does He Have NFL Speed?",
+        "Faster on Tape",
+        "Fast Enough",
+        "Concerns About His Speed"
+      ]
+    },
+    {
+      "index": 47,
+      "attribute": "SPD",
+      "threshold": 83,
+      "good": [
+        "Good Speed for a Tight End",
+        "Former High-School Wide Receiver",
+        "Receiver Speed at Tight End",
+        "Too Fast for Linebackers",
+        "Excellent Speed for a Tight End"
+      ],
+      "bad": []
+    },
+    {
+      "index": 48,
+      "attribute": "SPM",
+      "threshold": 76,
+      "good": [
+        "Shifty in the Open Field",
+        "Will Utilize Spin to Avoid Defenders",
+        "Possesses Devastating Spin Move",
+        "Possesses Elusive Spin Move",
+        "Spin Move Creates Problems for Defenders"
+      ],
+      "bad": [
+        "Spin Move Works on Occassion",
+        "Needs to Abandon His Spin Move",
+        "Deceptive Spin Move",
+        "Spin Move Won't Make Highlight Reels"
+      ]
+    },
+    {
+      "index": 49,
+      "attribute": "STR",
+      "threshold": 86,
+      "good": [
+        "Powerful Frame",
+        "Shows Good Strength at Point of Attack",
+        "Muscular Frame with Explosive Power",
+        "Holds Strong at Point of Attack",
+        "Good Strength to Avoid Being Pushed Around",
+        "Shows Good Anchor and Strong Push on Film",
+        "Set State Record for Bench Press Reps in High School",
+        "Strong Core and Base",
+        "Rarely will be Overpowered by Strength",
+        "Possesses NFL-Ready Strength"
+      ],
+      "bad": [
+        "Needs to Improve Strength",
+        "Must Become Stronger in NFL",
+        "Will Strength Translate to NFL?",
+        "Getting Stronger is a Must",
+        "Will Need to Hit the Weight Room"
+      ]
+    },
+    {
+      "index": 50,
+      "attribute": "STR",
+      "threshold": 94,
+      "good": [
+        "Powerful Strength",
+        "Uses Strength to Create Firm Base",
+        "Bullied Defensive Linemen with His Strength",
+        "People Mover with Exceptional Strength",
+        "Exceptionally Strong",
+        "Strong Arms, Strong Legs, Strong Everything",
+        "Weight Room Monster",
+        "Can Rely on Exceptional Strength",
+        "Extremely Powerful",
+        "Very Strong"
+      ],
+      "bad": [
+        "Strength Coach will be his Best Friend",
+        "Needs to Become NFL Strong",
+        "Is He Strong Enough?",
+        "Looks Strong on Tape",
+        "Room to Become Stronger and Fill Out his Frame"
+      ]
+    },
+    {
+      "index": 51,
+      "attribute": "TAK",
+      "threshold": 67,
+      "good": [
+        "Sure Tackler",
+        "Rarely Misses Tackles",
+        "Consistent Tackler",
+        "Shows Good Technique on Wrap Up Tackles",
+        "Wrap Up and Drag Down Tackler",
+        "Dependable Tackler",
+        "Can Be Trusted to Make Tackles in Open Field",
+        "Shows Knack for Getting Ball Carrier to the Ground",
+        "Willing, Dependable Tackler",
+        "Willing Tackler that Rarely Misses"
+      ],
+      "bad": [
+        "Reliable Tackler",
+        "Tackling Must Get Better",
+        "Tackling Issues",
+        "Misses Too Many Tackles",
+        "Bad Technique Leads to Many Missed Tackles"
+      ]
+    },
+    {
+      "index": 52,
+      "attribute": "TAK",
+      "threshold": 79,
+      "good": [
+        "Sure Tackler",
+        "Rarely Misses Tackles",
+        "Consistent Tackler",
+        "Shows Good Technique on Wrap Up Tackles",
+        "Wrap Up and Drag Down Tackler",
+        "Dependable Tackler",
+        "Can Be Trusted to Make Tackles in Open Field",
+        "Shows Knack for Getting Ball Carrier to the Ground",
+        "Willing, Dependable Tackler",
+        "Willing Tackler that Rarely Misses"
+      ],
+      "bad": [
+        "Will Need to Squash Tackling Concerns",
+        "Pedestrian Tackler",
+        "Tackling Needs Improvement",
+        "Acceptable Tackler but Must Improve",
+        "Too Many Missed Tackles in College"
+      ]
+    },
+    {
+      "index": 53,
+      "attribute": "RUN",
+      "threshold": 76,
+      "good": [
+        "Dynamic Playmaker",
+        "Dynamic Playmaker Outside of the Pocket",
+        "Excels when Throwing on the Move",
+        "Maintains Accuracy when Throwing on the Run",
+        "Turns Scrambles into Back-Breaking Plays"
+      ],
+      "bad": [
+        "Accuracy Suffers on Run",
+        "Erratic When Throwing on the Move",
+        "Will Occasionally Make Plays on the Move",
+        "Has Trouble Throwing on the Run",
+        "Mixed Bag when Throwing on the Run"
+      ]
+    },
+    {
+      "index": 54,
+      "attribute": "THP",
+      "threshold": 95,
+      "good": [
+        "Rocket Arm",
+        "Cannon Arm",
+        "High School Pitcher",
+        "1.94 ERA in College",
+        "Threw No-Hitter in College",
+        "Can make every throw"
+      ],
+      "bad": [
+        "Not a Cannon but Shows Zip on Throws",
+        "Lacks NFL-Level Arm Strength",
+        "Can He Make All the Throws?",
+        "Shows Good Velocity on his Throws",
+        "Questions About his Arm Strength",
+        "Lacks Zip to Fit Passes into Tight Windows",
+        "Velocity Concerns",
+        "Good, Not Great Arm Strength"
+      ]
+    },
+    {
+      "index": 55,
+      "attribute": "TUP",
+      "threshold": 74,
+      "good": [
+        "Unfazed by Pressure",
+        "Feels Pressure and Delivers Under Fire",
+        "Stays Calm when Throwing Under Pressure",
+        "Will Stand In and Deliver Under Pressure",
+        "Maintains Mechanics and Accuracy when Under Pressure"
+      ],
+      "bad": [
+        "Crumbles Under Pressure",
+        "Panics and Accuracy Suffers Under Pressure",
+        "Hit and Miss When Pressured",
+        "Shows Poise, Not Accuracy Under Pressure",
+        "Flustered Easily"
+      ]
+    },
+    {
+      "index": 56,
+      "attribute": "TRK",
+      "threshold": 76,
+      "good": [
+        "Loves Running Over Defenders",
+        "Runs Through Tackles",
+        "Hardnosed Runner",
+        "Will Drop Pads and Plow Through Arm Tackles",
+        "Not Afraid of Contact"
+      ],
+      "bad": [
+        "Won't Run Through Many Tacklers",
+        "Doesn't Run with Much Power",
+        "Running Over Defenders Not Part of His Game"
+      ]
+    },
+    {
+      "index": 57,
+      "attribute": "ZCV",
+      "threshold": 70,
+      "good": [
+        "Instinctive Zone Defender",
+        "Smart, Reliable Zone Defender",
+        "Quick to Digest and Respond in Zone Coverage",
+        "Good Feel and IQ in Zone Coverage",
+        "Rangy and Effective in Zone Coverage",
+        "Can Be Trusted with a Variety of Zone Coverage Concepts",
+        "Understands and Executes Zone Assignments",
+        "Displays Good Knowledge of Zone Concepts",
+        "Most Effective in Zone Coverage",
+        "Will Make Plays in Zone Coverage"
+      ],
+      "bad": [
+        "Looks Lost at times in Zone Coverage",
+        "Will Drift in Zone Coverage Leaving Open Holes",
+        "Lacks Awareness of Threats Around Him in Zone",
+        "Serviceable in Zone Coverage",
+        "Understands Assignments in Zone Coverage"
+      ]
+    },
+    {
+      "index": 58,
+      "attribute": "ZCV",
+      "threshold": 67,
+      "good": [
+        "Can Be Trusted to Drop Into Zone Coverage",
+        "Gets Good Depth when Dropping Into Zone",
+        "Shows Solid Spacial Awareness when Dropping into Zone",
+        "Good Awareness and Reaction as Zone Defender",
+        "Above Average Coverage Skills as Zone Defender",
+        "Shows Good IQ when Dropping into Zone",
+        "Displays Solid Awareness and Coverage in Zone",
+        "High Level Understanding of Zone Depths and Responsibities",
+        "Looks Comfortable when Dropping into Zone Coverage",
+        "Smart, Rangy Zone Defender"
+      ],
+      "bad": [
+        "Tends to Drift Too Much in Zone Coverage",
+        "Easily Manipulated in Zone Coverage",
+        "Plays Solid in Zone Coverage",
+        "Displays Decent Knowledge of Zone Assignments",
+        "Solid Zone Coverage Skillset"
+      ]
+    }
+  ],
+  "byPosition": {
+    "C": [
+      2,
+      50,
+      27,
+      29,
+      28,
+      34,
+      35,
+      38
+    ],
+    "CB": [
+      46,
+      30,
+      24,
+      57,
+      32,
+      51
+    ],
+    "DT": [
+      49,
+      4,
+      12,
+      31,
+      30
+    ],
+    "FB": [
+      36,
+      22,
+      7,
+      43
+    ],
+    "FS": [
+      46,
+      14,
+      57,
+      30,
+      51
+    ],
+    "HB": [
+      46,
+      15,
+      48,
+      7,
+      5,
+      6,
+      56,
+      21
+    ],
+    "K": [
+      19,
+      17
+    ],
+    "LE": [
+      49,
+      4,
+      12,
+      31,
+      30
+    ],
+    "LG": [
+      2,
+      50,
+      27,
+      29,
+      28,
+      34,
+      35,
+      38
+    ],
+    "LOLB": [
+      44,
+      30,
+      31,
+      12,
+      52,
+      58
+    ],
+    "LS": [
+      23,
+      50,
+      1
+    ],
+    "LT": [
+      2,
+      50,
+      27,
+      29,
+      28,
+      34,
+      35,
+      38
+    ],
+    "MLB": [
+      44,
+      30,
+      52,
+      14,
+      58,
+      33
+    ],
+    "P": [
+      20,
+      18
+    ],
+    "QB": [
+      54,
+      25,
+      3,
+      10,
+      55,
+      45,
+      53,
+      39
+    ],
+    "RE": [
+      49,
+      4,
+      12,
+      31,
+      30
+    ],
+    "RG": [
+      2,
+      50,
+      27,
+      29,
+      28,
+      34,
+      35,
+      38
+    ],
+    "ROLB": [
+      44,
+      30,
+      31,
+      12,
+      52,
+      58
+    ],
+    "RT": [
+      2,
+      50,
+      27,
+      29,
+      28,
+      34,
+      35,
+      38
+    ],
+    "SS": [
+      46,
+      30,
+      14,
+      57,
+      51
+    ],
+    "TE": [
+      8,
+      47,
+      26,
+      9,
+      11,
+      40,
+      37
+    ],
+    "WR": [
+      46,
+      8,
+      9,
+      41,
+      40,
+      26,
+      11,
+      16
+    ]
+  },
+  "traits": [
+    {
+      "trait": "BigHitter",
+      "cost": 100,
+      "notes": [
+        "- Physical player who delivers bone-crushing hits"
+      ]
+    },
+    {
+      "trait": "Clutch",
+      "cost": 500,
+      "notes": [
+        "- Rises to the occasion in big moments"
+      ]
+    },
+    {
+      "trait": "CoverBall",
+      "cost": 50,
+      "notes": [
+        "- Gets careless with the ball which leads to fumbles",
+        "- Physical runner who protects the ball through heavy contact",
+        "- Shows good ball security at times, but needs to improve in that area",
+        "- Shows decent awareness to protect the ball when getting hit",
+        "- Covets ball security over everything else when carrying"
+      ]
+    },
+    {
+      "trait": "Development",
+      "cost": 500,
+      "notes": [
+        "Development - Normal trait note",
+        "Development - Star trait note",
+        "Development - Superstar trait note",
+        "Development - XFactor trait note",
+        "Development - Hidden trait note"
+      ]
+    },
+    {
+      "trait": "DLSpin",
+      "cost": 500,
+      "notes": [
+        "- Loves to utilize a spin as a counter-move"
+      ]
+    },
+    {
+      "trait": "DLSwim",
+      "cost": 500,
+      "notes": [
+        "- Has a swift arm-over move in his arsenal"
+      ]
+    },
+    {
+      "trait": "DLBullRush",
+      "cost": 500,
+      "notes": [
+        "- Will utilize power and leverage to bull through pass protectors"
+      ]
+    },
+    {
+      "trait": "DropOpenPass",
+      "cost": 500,
+      "notes": [
+        "- Needs to work on simple concentration drops"
+      ]
+    },
+    {
+      "trait": "FeetInBounds",
+      "cost": 500,
+      "notes": [
+        "- Exceptional body control on the sidelines"
+      ]
+    },
+    {
+      "trait": "FightForYards",
+      "cost": 500,
+      "notes": [
+        "- Fights for every single inch as a runner"
+      ]
+    },
+    {
+      "trait": "HighPointCatch",
+      "cost": 50,
+      "notes": [
+        "- No issues climbing the ladder to make catches"
+      ]
+    },
+    {
+      "trait": "HighMotor",
+      "cost": 50,
+      "notes": [
+        "- Has a motor that runs through the whistle"
+      ]
+    },
+    {
+      "trait": "Penalty",
+      "cost": 25,
+      "notes": [
+        "- Lacks discipline resulting in avoidable penalties",
+        "- Shows good discipline and won't get flagged much",
+        "- Disciplined player who rarely gets flagged"
+      ]
+    },
+    {
+      "trait": "PlayBall",
+      "cost": 10,
+      "notes": [
+        "- Struggles to find the ball in the air",
+        "- Savvy defender with the ball in the air",
+        "- Aggressive ball hawk, for better and worse"
+      ]
+    },
+    {
+      "trait": "PossessionCatch",
+      "cost": 50,
+      "notes": [
+        "- Avoids big hits following catches"
+      ]
+    },
+    {
+      "trait": "Predictable",
+      "cost": 25,
+      "notes": [
+        "Predictable trait note"
+      ]
+    },
+    {
+      "trait": "StripBall",
+      "cost": 50,
+      "notes": [
+        "- Often looks to rip the ball from runners"
+      ]
+    },
+    {
+      "trait": "TightSpiral",
+      "cost": 10,
+      "notes": [
+        "- Beautiful spiral on all his passes"
+      ]
+    },
+    {
+      "trait": "YACCatch",
+      "cost": 50,
+      "notes": [
+        "- Excels at creating yards after the catch"
+      ]
+    },
+    {
+      "trait": "CoverBall",
+      "cost": 100,
+      "notes": [
+        "- Gets careless with the ball which leads to fumbles",
+        "- Physical runner who protects the ball through heavy contact",
+        "- Shows good ball security at times, but needs to improve in that area",
+        "- Shows decent awareness to protect the ball when getting hit",
+        "- Covets ball security over everything else when carrying"
+      ]
+    },
+    {
+      "trait": "LBStyle",
+      "cost": 0,
+      "notes": [
+        "LB Style - PassRush trait note",
+        "LB Style - Balanced trait note",
+        "LB Style - CoverLB trait note"
+      ]
+    },
+    {
+      "trait": "DecisionMaker",
+      "cost": 100,
+      "notes": [
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "trait": "QBStyle",
+      "cost": 0,
+      "notes": [
+        "- Vast majority of his success comes while in the pocket",
+        "- Plays well within and outside of the pocket",
+        "- Loves to run and play outside of structure"
+      ]
+    },
+    {
+      "trait": "SensePressure",
+      "cost": 500,
+      "notes": [
+        "- Gets happy feet and feels non-existent pressure",
+        "- Gets rid of the ball at the first sign of pressure",
+        "- Stands tall in the pocket and always aware of pressure",
+        "- Could use some improvement at recognizing pressure",
+        "- Pressure doesn't phase him because he doesn't know it's there"
+      ]
+    },
+    {
+      "trait": "ThrowAway",
+      "cost": 100,
+      "notes": [
+        "- Does well to avoid sacks by throwing the ball away"
+      ]
+    }
+  ],
+  "namedBullets": [
+    {
+      "name": "Radar Detector",
+      "description": "85+ Awareness Rating",
+      "attribute": "Awareness",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "VIsionary",
+      "description": "70+ Awareness",
+      "attribute": "Awareness",
+      "position": "C",
+      "threshold": 70
+    },
+    {
+      "name": "Gridlocked",
+      "description": "85+ Pass Block Finesse",
+      "attribute": "Awareness",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Stonewall",
+      "description": "85+ Pass Block Power Rating",
+      "attribute": "PassBlockPower",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Pass Guardian",
+      "description": "85+ Pass Blocking Rating",
+      "attribute": "PassBlock",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Lane Paver",
+      "description": "85+ Run Block Finesse Rating",
+      "attribute": "RunBlockFinesse",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Trench Warden",
+      "description": "85+ Run Block Power",
+      "attribute": "ThrowAccuracyMid",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Grinder",
+      "description": "85+ Run Blocking",
+      "attribute": "Awareness",
+      "position": "C",
+      "threshold": 85
+    },
+    {
+      "name": "Smooth Hips",
+      "description": "90+ Agility Rating",
+      "attribute": "Agility",
+      "position": "CB",
+      "threshold": 90
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "CB",
+      "threshold": 85
+    },
+    {
+      "name": "Locked Up",
+      "description": "90+ Man Coverage Rating",
+      "attribute": "ManCoverage",
+      "position": "CB",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "CB",
+      "threshold": 85
+    },
+    {
+      "name": "Burner",
+      "description": "95+ Speed Rating",
+      "attribute": "Speed",
+      "position": "CB",
+      "threshold": 95
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "CB",
+      "threshold": 80
+    },
+    {
+      "name": "Zone Patrol",
+      "description": "85+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "CB",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "DT",
+      "threshold": 85
+    },
+    {
+      "name": "Bouncer",
+      "description": "90+ Block Shedding",
+      "attribute": "BlockShedding",
+      "position": "DT",
+      "threshold": 90
+    },
+    {
+      "name": "Menace",
+      "description": "90+ Finesse Moves Rating",
+      "attribute": "FinesseMoves",
+      "position": "DT",
+      "threshold": 90
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "DT",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "DT",
+      "threshold": 85
+    },
+    {
+      "name": "Bully",
+      "description": "90+ Power Moves Rating",
+      "attribute": "PowerMoves",
+      "position": "DT",
+      "threshold": 90
+    },
+    {
+      "name": "Bodybuilder",
+      "description": "90+ Strength",
+      "attribute": "Strength",
+      "position": "DT",
+      "threshold": 90
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "80+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "DT",
+      "threshold": 80
+    },
+    {
+      "name": "Smooth Hips",
+      "description": "85+ Agility Rating",
+      "attribute": "Agility",
+      "position": "FS",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "FS",
+      "threshold": 85
+    },
+    {
+      "name": "Locked Up",
+      "description": "80+ Man Coverage Rating",
+      "attribute": "ManCoverage",
+      "position": "FS",
+      "threshold": 80
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "FS",
+      "threshold": 85
+    },
+    {
+      "name": "Burner",
+      "description": "95+ Speed Rating",
+      "attribute": "Speed",
+      "position": "FS",
+      "threshold": 95
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "FS",
+      "threshold": 80
+    },
+    {
+      "name": "Zone Patrol",
+      "description": "85+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "FS",
+      "threshold": 85
+    },
+    {
+      "name": "Pinball",
+      "description": "90+ Break Tackle Rating",
+      "attribute": "BreakTackle",
+      "position": "HB",
+      "threshold": 90
+    },
+    {
+      "name": "High & Tight",
+      "description": "90+ Carry Rating",
+      "attribute": "Carrying",
+      "position": "HB",
+      "threshold": 90
+    },
+    {
+      "name": "Every Down Back",
+      "description": "70+ Catching Rating",
+      "attribute": "Catching",
+      "position": "HB",
+      "threshold": 70
+    },
+    {
+      "name": "Ankle Breaker",
+      "description": "90+ Juke Move Rating",
+      "attribute": "JukeMove",
+      "position": "HB",
+      "threshold": 90
+    },
+    {
+      "name": "Burner",
+      "description": "95+ Speed Rating",
+      "attribute": "Speed",
+      "position": "HB",
+      "threshold": 95
+    },
+    {
+      "name": "Twister",
+      "description": "90+ Spin Move Rating",
+      "attribute": "SpinMove",
+      "position": "HB",
+      "threshold": 90
+    },
+    {
+      "name": "Bulldozer",
+      "description": "90+ Trucking Rating",
+      "attribute": "Trucking",
+      "position": "HB",
+      "threshold": 90
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "LE",
+      "threshold": 85
+    },
+    {
+      "name": "Bouncer",
+      "description": "90+ Block Shedding",
+      "attribute": "BlockShedding",
+      "position": "LE",
+      "threshold": 90
+    },
+    {
+      "name": "Menace",
+      "description": "90+ Finesse Moves Rating",
+      "attribute": "FinesseMoves",
+      "position": "LE",
+      "threshold": 90
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "LE",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "LE",
+      "threshold": 85
+    },
+    {
+      "name": "Bully",
+      "description": "90+ Power Moves Rating",
+      "attribute": "PowerMoves",
+      "position": "LE",
+      "threshold": 90
+    },
+    {
+      "name": "Bodybuilder",
+      "description": "90+ Strength",
+      "attribute": "Strength",
+      "position": "LE",
+      "threshold": 90
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "80+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "LE",
+      "threshold": 80
+    },
+    {
+      "name": "Radar Detector",
+      "description": "85+ Awareness Rating",
+      "attribute": "Awareness",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "VIsionary",
+      "description": "70+ Awareness",
+      "attribute": "Awareness",
+      "position": "LG",
+      "threshold": 70
+    },
+    {
+      "name": "Gridlocked",
+      "description": "85+ Pass Block Finesse",
+      "attribute": "Awareness",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Stonewall",
+      "description": "85+ Pass Block Power Rating",
+      "attribute": "PassBlockPower",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Pass Guardian",
+      "description": "85+ Pass Blocking Rating",
+      "attribute": "PassBlock",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Lane Paver",
+      "description": "85+ Run Block Finesse Rating",
+      "attribute": "RunBlockFinesse",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Trench Warden",
+      "description": "85+ Run Block Power",
+      "attribute": "ThrowAccuracyMid",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Grinder",
+      "description": "85+ Run Blocking",
+      "attribute": "Awareness",
+      "position": "LG",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "LOLB",
+      "threshold": 85
+    },
+    {
+      "name": "Excuse Me",
+      "description": "85+ Block Shedding Rating",
+      "attribute": "BlockShedding",
+      "position": "LOLB",
+      "threshold": 85
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "LOLB",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "LOLB",
+      "threshold": 85
+    },
+    {
+      "name": "Five-O",
+      "description": "90+ Pursuit",
+      "attribute": "Pursuit",
+      "position": "LOLB",
+      "threshold": 90
+    },
+    {
+      "name": "User Me",
+      "description": "85+ Speed Rating",
+      "attribute": "Speed",
+      "position": "LOLB",
+      "threshold": 85
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "LOLB",
+      "threshold": 80
+    },
+    {
+      "name": "Check Mate",
+      "description": "75+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "LOLB",
+      "threshold": 75
+    },
+    {
+      "name": "Radar Detector",
+      "description": "85+ Awareness Rating",
+      "attribute": "Awareness",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "VIsionary",
+      "description": "70+ Awareness",
+      "attribute": "Awareness",
+      "position": "LT",
+      "threshold": 70
+    },
+    {
+      "name": "Gridlocked",
+      "description": "85+ Pass Block Finesse",
+      "attribute": "Awareness",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Stonewall",
+      "description": "85+ Pass Block Power Rating",
+      "attribute": "PassBlockPower",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Pass Guardian",
+      "description": "85+ Pass Blocking Rating",
+      "attribute": "PassBlock",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Lane Paver",
+      "description": "85+ Run Block Finesse Rating",
+      "attribute": "RunBlockFinesse",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Trench Warden",
+      "description": "85+ Run Block Power",
+      "attribute": "ThrowAccuracyMid",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Grinder",
+      "description": "85+ Run Blocking",
+      "attribute": "Awareness",
+      "position": "LT",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "MLB",
+      "threshold": 85
+    },
+    {
+      "name": "Excuse Me",
+      "description": "85+ Block Shedding Rating",
+      "attribute": "BlockShedding",
+      "position": "MLB",
+      "threshold": 85
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "MLB",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "MLB",
+      "threshold": 85
+    },
+    {
+      "name": "Five-O",
+      "description": "90+ Pursuit",
+      "attribute": "Pursuit",
+      "position": "MLB",
+      "threshold": 90
+    },
+    {
+      "name": "User Me",
+      "description": "85+ Speed Rating",
+      "attribute": "Speed",
+      "position": "MLB",
+      "threshold": 85
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "MLB",
+      "threshold": 80
+    },
+    {
+      "name": "Check Mate",
+      "description": "75+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "MLB",
+      "threshold": 75
+    },
+    {
+      "name": "Launcher",
+      "description": "90+ Deep Accuracy Rating",
+      "attribute": "ThrowAccuracyDeep",
+      "position": "QB",
+      "threshold": 90
+    },
+    {
+      "name": "Dotted",
+      "description": "90+ Mid Accuracy Rating",
+      "attribute": "ThrowAccuracyMid",
+      "position": "QB",
+      "threshold": 90
+    },
+    {
+      "name": "EZ PZ",
+      "description": "90+ Short Accuracy Rating",
+      "attribute": "ThrowAccuracyShort",
+      "position": "QB",
+      "threshold": 90
+    },
+    {
+      "name": "Scrambler",
+      "description": "85+ Speed Rating",
+      "attribute": "Speed",
+      "position": "QB",
+      "threshold": 85
+    },
+    {
+      "name": "Cannon",
+      "description": "95+ Throw Power Rating",
+      "attribute": "ThrowPower",
+      "position": "QB",
+      "threshold": 95
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "RE",
+      "threshold": 85
+    },
+    {
+      "name": "Bouncer",
+      "description": "90+ Block Shedding",
+      "attribute": "BlockShedding",
+      "position": "RE",
+      "threshold": 90
+    },
+    {
+      "name": "Menace",
+      "description": "90+ Finesse Moves Rating",
+      "attribute": "FinesseMoves",
+      "position": "RE",
+      "threshold": 90
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "RE",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "RE",
+      "threshold": 85
+    },
+    {
+      "name": "Bully",
+      "description": "90+ Power Moves Rating",
+      "attribute": "PowerMoves",
+      "position": "RE",
+      "threshold": 90
+    },
+    {
+      "name": "Bodybuilder",
+      "description": "90+ Strength",
+      "attribute": "Strength",
+      "position": "RE",
+      "threshold": 90
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "80+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "RE",
+      "threshold": 80
+    },
+    {
+      "name": "Radar Detector",
+      "description": "85+ Awareness Rating",
+      "attribute": "Awareness",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "VIsionary",
+      "description": "70+ Awareness",
+      "attribute": "Awareness",
+      "position": "RG",
+      "threshold": 70
+    },
+    {
+      "name": "Gridlocked",
+      "description": "85+ Pass Block Finesse",
+      "attribute": "Awareness",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Stonewall",
+      "description": "85+ Pass Block Power Rating",
+      "attribute": "PassBlockPower",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Pass Guardian",
+      "description": "85+ Pass Blocking Rating",
+      "attribute": "PassBlock",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Lane Paver",
+      "description": "85+ Run Block Finesse Rating",
+      "attribute": "RunBlockFinesse",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Trench Warden",
+      "description": "85+ Run Block Power",
+      "attribute": "ThrowAccuracyMid",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Grinder",
+      "description": "85+ Run Blocking",
+      "attribute": "Awareness",
+      "position": "RG",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "ROLB",
+      "threshold": 85
+    },
+    {
+      "name": "Excuse Me",
+      "description": "85+ Block Shedding Rating",
+      "attribute": "BlockShedding",
+      "position": "ROLB",
+      "threshold": 85
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "ROLB",
+      "threshold": 90
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "ROLB",
+      "threshold": 85
+    },
+    {
+      "name": "Five-O",
+      "description": "90+ Pursuit",
+      "attribute": "Pursuit",
+      "position": "ROLB",
+      "threshold": 90
+    },
+    {
+      "name": "User Me",
+      "description": "85+ Speed Rating",
+      "attribute": "Speed",
+      "position": "ROLB",
+      "threshold": 85
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "ROLB",
+      "threshold": 80
+    },
+    {
+      "name": "Check Mate",
+      "description": "75+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "ROLB",
+      "threshold": 75
+    },
+    {
+      "name": "Radar Detector",
+      "description": "85+ Awareness Rating",
+      "attribute": "Awareness",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "VIsionary",
+      "description": "70+ Awareness",
+      "attribute": "Awareness",
+      "position": "RT",
+      "threshold": 70
+    },
+    {
+      "name": "Gridlocked",
+      "description": "85+ Pass Block Finesse",
+      "attribute": "Awareness",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Stonewall",
+      "description": "85+ Pass Block Power Rating",
+      "attribute": "PassBlockPower",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Pass Guardian",
+      "description": "85+ Pass Blocking Rating",
+      "attribute": "PassBlock",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Lane Paver",
+      "description": "85+ Run Block Finesse Rating",
+      "attribute": "RunBlockFinesse",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Trench Warden",
+      "description": "85+ Run Block Power",
+      "attribute": "ThrowAccuracyMid",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Grinder",
+      "description": "85+ Run Blocking",
+      "attribute": "Awareness",
+      "position": "RT",
+      "threshold": 85
+    },
+    {
+      "name": "Smooth Hips",
+      "description": "85+ Agility Rating",
+      "attribute": "Agility",
+      "position": "SS",
+      "threshold": 85
+    },
+    {
+      "name": "Book Worm",
+      "description": "85+ Awareness",
+      "attribute": "Awareness",
+      "position": "SS",
+      "threshold": 85
+    },
+    {
+      "name": "Jacked Up",
+      "description": "90+ Hit Power",
+      "attribute": "HitPower",
+      "position": "SS",
+      "threshold": 90
+    },
+    {
+      "name": "Locked Up",
+      "description": "80+ Man Coverage Rating",
+      "attribute": "ManCoverage",
+      "position": "SS",
+      "threshold": 80
+    },
+    {
+      "name": "Mind Reader",
+      "description": "85+ Play Recognition Rating",
+      "attribute": "PlayRecognition",
+      "position": "SS",
+      "threshold": 85
+    },
+    {
+      "name": "Burner",
+      "description": "95+ Speed Rating",
+      "attribute": "Speed",
+      "position": "SS",
+      "threshold": 95
+    },
+    {
+      "name": "Sure Tackler",
+      "description": "90+ Tackle Rating",
+      "attribute": "Tackle",
+      "position": "SS",
+      "threshold": 80
+    },
+    {
+      "name": "Zone Patrol",
+      "description": "85+ Zone Coverage Rating",
+      "attribute": "ZoneCoverage",
+      "position": "SS",
+      "threshold": 85
+    },
+    {
+      "name": "Unbothered",
+      "description": "90+ Catch in Traffic Rating",
+      "attribute": "Awareness",
+      "position": "TE",
+      "threshold": 90
+    },
+    {
+      "name": "Soft Hands",
+      "description": "90+ Catch Rating",
+      "attribute": "Catching",
+      "position": "TE",
+      "threshold": 90
+    },
+    {
+      "name": "Not So Mid",
+      "description": "90+ Medium Route Running Rating",
+      "attribute": "MediumRouteRunning",
+      "position": "TE",
+      "threshold": 90
+    },
+    {
+      "name": "Extra Lineman",
+      "description": "70+ Run Block Rating",
+      "attribute": "RunBlock",
+      "position": "TE",
+      "threshold": 70
+    },
+    {
+      "name": "Quick Feet",
+      "description": "90+ Short Route Running Rating",
+      "attribute": "ShortRouteRunning",
+      "position": "TE",
+      "threshold": 70
+    },
+    {
+      "name": "Mismatch",
+      "description": "80+ Speed Rating",
+      "attribute": "Speed",
+      "position": "TE",
+      "threshold": 80
+    },
+    {
+      "name": "Unbothered",
+      "description": "90+ Catch in Traffic Rating",
+      "attribute": "CatchInTraffic",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Soft Hands",
+      "description": "90+ Catching",
+      "attribute": "Catching",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Deep Threat",
+      "description": "90+ Deep Route Running Rating",
+      "attribute": "DeepRouteRunning",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Technichian",
+      "description": "90+ Medium Route Running Rating",
+      "attribute": "MediumRouteRunning",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Unpressable",
+      "description": "90+ Release",
+      "attribute": "Release",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Quick Feet",
+      "description": "90+ Short Route Running Rating",
+      "attribute": "ShortRouteRunning",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Highlight Reel",
+      "description": "90+ Spectacular Catch Rating",
+      "attribute": "SpectacularCatch",
+      "position": "WR",
+      "threshold": 90
+    },
+    {
+      "name": "Burner",
+      "description": "95+ Speed Rating",
+      "attribute": "Speed",
+      "position": "WR",
+      "threshold": 95
+    }
+  ]
+}
